@@ -1,0 +1,359 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--favicon-->
+
+    <title>Prakash - Login</title>
+    <link rel="icon" type="image/x-icon" href="~/Layout/assets/images/login-images/favicon-1.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+    <link href="~/Content/appcss/LoginOTPCss.css" rel="stylesheet" />
+    @Styles.Render("~/bundles/commoncss")
+</head>
+
+<body>
+    <!--wrapper-->
+    <div class="wrapper">
+        <div class="authentication-header"></div>
+        <div class="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0">
+            <div class="container">
+                <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+                    <div class="col mx-auto">
+                        <div class="mb-4 text-center">
+                            <img src="~/Layout/assets/images/logo-img.png" width="180" alt="" />
+                        </div>
+                        <div class="card rounded-4">
+                            <div class="card-body">
+                                <div class="p-4 rounded">
+                                    <div class="text-center">
+                                        <img src="~/Layout/assets/images/login-images/logo-2.jfif" width="250px" height="150px" />
+                                    </div>
+                                    <div class="form-body">
+                                        <form class="row g-3">
+                                            <div class="col-12">
+                                                <label for="inputEmailAddress" class="form-label">Email ID</label>
+                                                <input type="email" class="form-control" id="email" placeholder="Email Address">
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="inputChoosePassword" class="form-label">Password</label>
+                                                <div class="input-group" id="show_hide_password">
+                                                    <input type="password" class="form-control border-end-0" id="pass" value="" placeholder="Enter Password"> <a href="javascript:;" class="input-group-text bg-transparent"><i class='bx bx-hide'></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+
+                                            </div>
+                                            <div class="col-md-12" align="right">
+                                                <a href="/Account/ForgotPassword">Forgot Password?</a>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="d-grid">
+                                                    <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                                    <input id="hfAdminContactNo" value="" style="display:none" />
+                                                    <button id="btnLogin" type="button" class="btn btn-primary"><i class="bx bxs-lock-open"></i>Login</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end row-->
+            </div>
+        </div>
+    </div>
+    <!--end wrapper-->
+    <div class='loader' id='divImage' style="display:none">
+        <!-- MODAL CONTENT -->
+        <div class='loader-content'>
+            <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+        </div>
+    </div>
+
+    <div class="modal" id="OTPmodal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">One Time Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Please enter the one-time password sent to your device</h6><br />
+                    <div class="otpcontainer">
+                        <header>
+                            <i class="bx bxs-check-shield"></i>
+                        </header>
+                        <h4>Enter OTP Code</h4>
+                        <form action="#">
+                            <div class="input-field">
+                                <input id="otpdigit1" type="number" />
+                                <input id="otpdigit2" type="number" disabled />
+                                <input id="otpdigit3" type="number" disabled />
+                                <input id="otpdigit4" type="number" disabled />
+                            </div>
+                        </form>
+                        <h5 id="InvalidOTPMsg" style="color:red;display:none">Invalid OTP</h5>
+                    </div>
+                    <input id="hfSPNo" style="display:none" />
+                    <input id="hfOTP" style="display:none" />
+                    <input id="hfUserContactNo" style="display:none" />
+                </div>
+                <div class="modal-footer">
+                    <button id="btnStop" style="display:none">Stop Timer</button>
+                    <table id="tblTimer">
+                        <tr>
+                            <td><label id="lblMinutes" style="color:red;font-weight:bold">01</label><label style="color:red;font-weight:bold">:</label><label id="lblSeconds" style="color:red;font-weight:bold">60</label></td>
+                        </tr>
+                    </table>
+
+
+
+                    <label id="lblOTPExpiredMsg" style="color:red;font-weight:bold;display:none">OTP Expired</label>
+
+                    <h6 id="OTPSentMsg" style="color:green;display:none">OTP Sent</h6>
+                    &nbsp;
+                    <button id="btnLoginSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="visually-hidden">Loading...</span>
+                    </button>
+                    &nbsp;
+                    <button id="btnResendOTP" type="button" class="btn btn-primary" style="display:none">Resend OTP</button>
+                    <button id="btnVerify" type="button" class="btn btn-primary">Verify</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/commonjs")
+    <script src="~/Scripts/appjs/LoginOTP.js"></script>
+    <!--Password show & hide js -->
+    <script>
+        $(document).ready(function () {
+
+            //GetAdminContact();
+            var intervalID;
+            var seconds = parseInt($("#lblSeconds").text());
+            var minutes = parseInt($("#lblMinutes").text());
+
+            // Function to call repeatedly
+            function Timer() {
+
+                if (minutes > 0) {
+                    seconds = seconds - 1;
+                    if (seconds == 0) {
+                        seconds = parseInt("60");
+                        minutes = minutes - 1;
+                        $("#lblSeconds").text("");
+                        $("#lblSeconds").text("60");
+                        $("#lblMinutes").text("0" + minutes);
+                    }
+
+                    $("#lblSeconds").text("");
+                    if (seconds < 10) {
+                        $("#lblSeconds").text("0" + seconds);
+                    }
+                    else {
+                        $("#lblSeconds").text(seconds);
+                    }
+
+                }
+                else {
+
+                    $('#btnStop').click();
+                    $.post(
+                        '/Account/UpdateOTPBlank?SPNo=' + $('#hfSPNo').val() + '&ContactNo=' + $('#hfUserContactNo').val(),
+                        function (data) {
+
+                        }
+                    );
+
+                }
+
+            }
+
+            // Function to start setInterval call
+            function startTimer() {
+                intervalID = setInterval(Timer, 1000);
+            }
+
+            // Function to stop setInterval call
+            function stopTimer() {
+
+                clearInterval(intervalID);
+                $('#tblTimer').css("display", "none");
+                $('#OTPSentMsg').css('display', 'none');
+                $('#lblOTPExpiredMsg').css("display", "block");
+                $('#btnResendOTP').css('display', 'block');
+                $('#btnVerify').css('display', 'none');
+                
+            }
+
+            document.getElementById("btnStop").addEventListener("click", stopTimer);
+
+			$("#show_hide_password a").on('click', function (event) {
+				event.preventDefault();
+				if ($('#show_hide_password input').attr("type") == "text") {
+					$('#show_hide_password input').attr('type', 'password');
+					$('#show_hide_password i').addClass("bx-hide");
+					$('#show_hide_password i').removeClass("bx-show");
+				} else if ($('#show_hide_password input').attr("type") == "password") {
+					$('#show_hide_password input').attr('type', 'text');
+					$('#show_hide_password i').removeClass("bx-hide");
+					$('#show_hide_password i').addClass("bx-show");
+				}
+            });
+
+            $('#pass').keypress(function (e) {
+                if (e.which == 13) {
+                    $('#btnLogin').click();
+                    return false;
+                }
+            });
+
+            $('#btnLogin').click(function () {
+
+                $('#divImage').show();
+
+                //OTP functionality on Login Start
+
+                if ($('#email').val() != "" || $('#pass').val() != "") {
+
+                    //var pass = encodeURIComponent($('#pass').val());
+
+                    $.get("/Account/CheckLoginAndSendOTP?email=" + $('#email').val() + "&pass=" + $('#pass').val() + " &adminContactNo=" + $('#hfAdminContactNo').val(), function (data) {
+
+                        if (data.No != null) {
+
+                            if (data.PCPL_Enable_OTP_On_Login)
+                            {
+                                //$('#hfUserContactNo').val(data);
+                                $('#divImage').hide();
+                                $('#OTPmodal').css('display', 'block');
+                                $('#hfSPNo').val(data.No);
+                                $('#hfUserContactNo').val(data.Phone_No_2);
+                                startTimer();
+                            }
+                            else {
+                                $('#divImage').hide();
+                                window.location.replace('@Url.Action("Index", "SPDashboard")');
+                            }
+                        }
+                        else {
+
+                            $('#divImage').hide();
+                            var msg = "Please Enter Correct Email ID and Password.";
+                            ShowErrorMsg(msg);
+
+                        }
+
+                    });
+
+                }
+                else {
+
+                    $('#divImage').hide();
+                    var msg = "Please Enter Email ID and Password.";
+                    ShowErrorMsg(msg);
+
+                }
+
+            });
+
+            $('#btnVerify').click(function () {
+
+                //$('#divImage').show();
+                $('#btnLoginSpinner').show();
+
+                var OTPInput = $('#otpdigit1').val() + $('#otpdigit2').val() + $('#otpdigit3').val() + $('#otpdigit4').val();
+
+                $.get('/Account/CheckLogin?SPNo=' + $('#hfSPNo').val() + '&OTP=' + OTPInput + '&ContactNo=' + $('#hfUserContactNo').val(), function (data) {
+                    if (data != "") {
+                        //$('#divImage').hide();
+                        $('#btnLoginSpinner').hide();
+                        window.location.replace('@Url.Action("Index", "SPDashboard")');
+                        //remove below comments for OTP functionality
+                    }
+                    else {
+                        $('#divImage').hide();
+
+                        $('#InvalidOTPMsg').css('display', 'block');
+                        $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').val("");
+                        $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').removeAttr("value");
+                        $('#otpdigit1').focus();
+                    }
+                });
+                });
+
+                $('#btnResendOTP').click(function () {
+
+                    $('#btnLoginSpinner').show();
+
+                    $.get('/Account/ResendOTP?email=' + $('#email').val() + '&pass=' + $('#pass').val() +
+                        '&adminContactNo=' + $('#hfAdminContactNo').val(), function (data) {
+                        if (data)
+                        {
+                            $('#btnLoginSpinner').hide();
+                            $('#btnResendOTP').css('display', 'none');
+                            $('#btnVerify').css('display', 'block');
+                            $('#InvalidOTPMsg').css('display', 'none');
+                            $('#lblOTPExpiredMsg').css('display', 'none');
+                            $('#OTPSentMsg').css('display', 'block');
+                            $('#tblTimer').css('display', 'block');
+                            $('#lblMinutes').text("01");
+                            minutes = 1;
+                            seconds = 60;
+                            startTimer();
+                        }
+                        else {
+                            //$('#divImage').hide();
+                            $('#btnLoginSpinner').hide();
+
+                        }
+                    });
+
+                });
+            //OTP functionality on Login End*/
+        });
+
+        function GetAdminContact() {
+
+            var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
+
+            $.get(apiUrl + 'GetAdminContactNo', function (data) {
+
+                if (data != "") {
+                    
+                    $('#hfAdminContactNo').val(data);
+                }
+
+            });
+
+        }
+
+        function ShowErrorMsg(errMsg) {
+
+            Lobibox.notify('error', {
+                pauseDelayOnHover: true,
+                size: 'mini',
+                rounded: true,
+                delayIndicator: false,
+                icon: 'bx bx-x-circle',
+                continueDelayOnInactiveTab: false,
+                position: 'top right',
+                msg: errMsg
+            });
+        }
+    </script>
+
+</body>
+</html>

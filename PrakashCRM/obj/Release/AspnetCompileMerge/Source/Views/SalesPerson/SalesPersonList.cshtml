@@ -1,0 +1,276 @@
+﻿
+@{
+    ViewBag.Title = "Sales Person List";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .ViewChangePassCls:hover {
+        cursor: pointer;
+    }
+</style>
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">User List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <button id="btnNew" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <select id="ddlStatus" class="form-select">
+                                        <option value="Active" selected>Active</option>
+                                        <option value="Inactive">In Active</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="No">No</option>
+                                        <option value="PCPL_Employee_Code">EMP Code</option>
+                                        <option value="First_Name">First Name</option>
+                                        <option value="Last_Name">Last Name</option>
+                                        <option value="Company_E_Mail">Email</option>
+                                        <option value="Job_Title">Job Title</option>
+                                        <option value="Address">Address</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <div class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <!---->
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                                <!---->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- -->
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Change<br />Password</th>
+                            <th>No</th>
+                            <th>EMP Code</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Job Title</th>
+                            <th>Address</th>
+                            <th>OTP Enabled<br />On Login</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Change<br />Password</th>
+                            <th>No</th>
+                            <th>EMP Code</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                            <th>Job Title</th>
+                            <th>Address</th>
+                            <th>OTP Enabled<br />On Login</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnSPCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalPassword" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hfSPNo" />
+                <input type="hidden" id="hfSPEmail" />
+
+
+                <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-2">
+                    <div class="col d-flex">
+                        <div class="card radius-10 p-0 w-100 bg-transparent shadow-none">
+                            <div class="card radius-10">
+                                <div class="card-body" style="position: relative;">
+                                    <div class="row g-3">
+                                        <div class="col-md-12">
+                                            <div class="row mb-3">
+                                                <label class="col-sm-3 col-form-label">New Password : </label>
+                                                <div class="col-sm-9">
+                                                    <input id="txtNewPassword" type="password" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-12">
+                                            <div class="row mb-3">
+                                                <label class="col-sm-3 col-form-label">Confirm Password : </label>
+                                                <div class="col-sm-9">
+                                                    <input id="txtConfirmPassword" type="password" class="form-control" />
+                                                    @*<label id="lblMsg" class="col-form-label" style="color:green;"></label>*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-10">
+                                            <label id="lblMsg" class="col-form-label" style="color:red;"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="toolbar">
+                                        <div class=" text-end g-3">
+                                            <button id="btnUpdatePassSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                <span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button id="btnUpdatePassword" type="button" class="btn btn-primary">Update</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col d-flex">
+                        <div class="card radius-10">
+                            <div class="card-body" style="position: relative;">
+                                <h3 data-start="82" data-end="109">🔒 Password Policy Note</h3>
+                                <p data-start="111" data-end="162">Your password must meet the following requirements:</p>
+                                <ul data-start="164" data-end="387">
+                                    <li data-start="164" data-end="207">
+                                        <p data-start="166" data-end="207">✅ At least <strong data-start="177" data-end="199">1 uppercase letter</strong> (A–Z)</p>
+                                    </li>
+                                    <li data-start="208" data-end="251">
+                                        <p data-start="210" data-end="251">✅ At least <strong data-start="221" data-end="243">1 lowercase letter</strong> (a–z)</p>
+                                    </li>
+                                    <li data-start="252" data-end="284">
+                                        <p data-start="254" data-end="284">✅ At least <strong data-start="265" data-end="276">1 digit</strong> (0–9)</p>
+                                    </li>
+                                    <li data-start="285" data-end="348">
+                                        <p data-start="287" data-end="348">✅ At least <strong data-start="298" data-end="321">1 special character</strong> from: !, @@, $, _</p>
+                                    </li>
+                                    <li data-start="349" data-end="387">
+                                        <p data-start="351" data-end="387">✅ Minimum length of <strong data-start="371" data-end="387">8 characters</strong></p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SalesPersonList.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#btnNew').click(function () {
+            window.location.replace('@Url.Action("SalesPersonCard", "SalesPerson")');
+        });
+    });
+</script>
+
+

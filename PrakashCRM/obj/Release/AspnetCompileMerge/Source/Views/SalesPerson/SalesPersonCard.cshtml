@@ -1,0 +1,492 @@
+﻿@model PrakashCRM.Data.Models.SPProfilePost
+@{ bool isEdit = HttpContext.Current.Request.QueryString["No"] != null; }
+@{
+    ViewBag.Title = "SalesPersonCard";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-home-alt"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SalesPerson/SalesPersonList"> User List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        User Card
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <ul class="nav nav-tabs nav-primary" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a id="profile-tab" class="nav-link active" data-bs-toggle="tab" href="#profile" role="tab" aria-selected="false">
+                        <div class="d-flex align-items-center">
+                            <div class="tab-icon">
+                                <i class='bx bxs-user-pin font-18 me-1'></i>
+                            </div>
+                            <div class="tab-title">Profile</div>
+                        </div>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a id="uploaddoc-tab" class="nav-link" data-bs-toggle="tab" href="#uploaddoc" role="tab" aria-selected="false">
+                        <div class="d-flex align-items-center">
+                            <div class="tab-icon">
+                                <i class='bx bxs-cloud-upload font-18 me-2'></i>
+                            </div>
+                            <div class="tab-title">Upload Docs</div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content py-3">
+                <div class="tab-pane fade show active" id="profile" role="tabpanel">
+
+                    @using (Html.BeginForm("SalesPersonCard", "SalesPerson", FormMethod.Post))
+                    {
+                        @Html.ValidationSummary(true)
+                        <div class="row">
+                            <div>
+                               
+                                <h6 class="mb-0 font-weight-bold">General</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">First Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.First_Name, new { @id = "txtFName", @class = "form-control" })
+                                                @*@Html.ValidationMessageFor(model => model.First_Name, null, new { style = "color:red" })*@
+                                                <label id="lblFNameMsg" style="color:red;display:none"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Last Name<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.Last_Name, new { @id = "txtLName", @class = "form-control" })
+                                                @*@Html.ValidationMessageFor(model => model.Last_Name, null, new { style = "color:red" })*@
+                                                <label id="lblLNameMsg" style="color:red;display:none"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Gender<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div id="gender" class="col-sm-9">
+                                                Male
+                                                @if (Model.Gender == "Male")
+                                                {
+                                                    @Html.RadioButtonFor(model => model.Gender, "Male", new { @id = "rbtnMale", @checked = "checked" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.RadioButtonFor(model => model.Gender, "Male", new { @id = "rbtnMale" })
+                                                }
+
+                                                Female
+                                                @if (Model.Gender == "Female")
+                                                {
+                                                    @Html.RadioButtonFor(model => model.Gender, "Female", new { @id = "rbtnFemale", @checked = "checked" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.RadioButtonFor(model => model.Gender, "Female", new { @id = "rbtnFemale" })
+                                                }
+                                                <label id="lblGenderMsg" style="color:red;display:none"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Company Email<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.Company_E_Mail, new { @class = "form-control", @id = "CompanyEmail" })
+                                                @*@Html.ValidationMessageFor(model => model.Company_E_Mail, null, new { style = "color:red" })*@
+                                                <label id="lblCompanyEmailMsg" style="color:red;display:none"></label>
+                                                @*<label id="lblDomainErrMsg" style="color:red;display:none">Email ID must be with prakashchemicals.com domain</label>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Company Phone<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.Phone_No, new { @id = "txtCompanyPhone", @class = "form-control" })
+                                                <label id="lblCompanyPhoneMsg" style="color:red;display:none"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Job Title<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.Job_Title, new { @id = "txtJobTitle", @class = "form-control" })
+                                                @*@Html.ValidationMessageFor(model => model.Job_Title, null, new { style = "color:red" })*@
+                                                <label id="lblJobTitleMsg" style="color:red;display:none"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Employee Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.PCPL_Employee_Code, new { @class = "form-control", @id = "txtEmpCode" })
+                                                @*@Html.ValidationMessageFor(model => model.PCPL_Employee_Code, null, new { style = "color:red" })*@
+                                                <label id="lblEmpCodeMsg" style="color:red;display:none"></label>
+                                                @*<label id="lblEmpCodeErrMsg" style="color:red;display:none">
+                                                    User with this Employee Code already exist,<br />Please change
+                                                    Employee Code
+                                                </label>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-0 font-weight-bold">Address & Contact</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.Address, new { @id = "txtAddress", @class = "form-control" })
+                                                @*@Html.ValidationMessageFor(model => model.Address, null, new { style = "color:red" })*@
+                                                <label id="lblAddressMsg" style="color:red;display:none">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">City</label>
+                                            <div class="col-sm-9">
+                                                @*<input type="hidden" id="hfPostCode" value="@ViewBag.Post_Code" />
+                                                @Html.DropDownListFor(model => model.Post_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCity", @class = "form-select" })*@
+                                                <input type="text" class="form-control" id="txtCity" disabled />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address2</label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.Address_2, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @*@Html.TextBoxFor(model => model.Alt_Address_Code, new { @class = "form-control" })*@
+                                                @Html.TextBoxFor(model => model.Post_Code, new { @id = "txtPostCode", @class = "form-control" })
+                                                @*@Html.ValidationMessageFor(model => model.Post_Code, null, new { style = "color:red" })*@
+                                                <label id="lblPostCodeMsg" style="color:red;display:none">
+                                                @*<input type="text" class="form-control" id="txtPostCode" />*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Country/Region Code</label>
+                                            <div class="col-sm-9">
+                                                @*<input type="hidden" id="hfCountryRegionCode" value="@ViewBag.Country_Region_Code" />
+                                                @Html.DropDownListFor(model => model.Country_Region_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCountry", @class = "form-select" })*@
+                                                <input type="text" class="form-control" id="txtCountry" disabled />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-0 font-weight-bold">Personal</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Birth Date</label>
+                                            <div class="col-sm-9">
+                                                @*@Html.TextBoxFor(model => model.Birth_Date, String.Format("{0:d}", Model.Birth_Date.ToShortDateString()), new { @class = "form-control", type = "date" })*@
+                                                @if ((isEdit || Convert.ToBoolean(Session["isSalespersonEdit"])) && Model.Birth_Date != DateTime.MinValue.ToString())
+                                                {
+                                                    @Html.TextBoxFor(x => x.Birth_Date, new { Value = Model.Birth_Date, @type = "date", @class = "form-control", autocomplete = "off", @alt = "Date Of Birth" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBoxFor(x => x.Birth_Date, new { Value = "", @type = "date", @class = "form-control", autocomplete = "off", @alt = "Date Of Birth" })
+                                                }
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label> @*Private Phone No*@
+                                        <div class="col-sm-9">
+                                            @Html.TextBoxFor(model => model.Mobile_Phone_No, new { @id = "txtMobileNo", @class = "form-control" })
+                                            @*@Html.ValidationMessageFor(model => model.Mobile_Phone_No, null, new { style = "color:red" })*@
+                                            <label id="lblMobileNoMsg" style="color:red;display:none">
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Private Email</label>
+                                            <div class="col-sm-9">
+                                                @Html.TextBoxFor(model => model.E_Mail, new { @id = "txtPrivateEmail", @class = "form-control" })
+                                                @*@Html.ValidationMessageFor(model => model.E_Mail, null, new { style = "color:red" })*@
+                                                <label id="lblPrivateEmailMsg" style="color:red;display:none">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Date of Joining</label>
+                                            <div class="col-sm-9">
+                                                @*@Html.TextBoxFor(model => model.Employment_Date, String.Format("{0:d}", Model.Employment_Date.ToShortDateString()), new { @class = "form-control", type = "date" })*@
+                                                @if ((isEdit || Convert.ToBoolean(Session["isSalespersonEdit"])) && Model.Employment_Date != DateTime.MinValue.ToString())
+                                                {
+                                                    @Html.TextBoxFor(x => x.Employment_Date, new { Value = Model.Employment_Date, @type = "date", @class = "form-control", autocomplete = "off", @alt = "Date Of Employment" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.TextBoxFor(x => x.Employment_Date, new { Value = "", @type = "date", @class = "form-control", autocomplete = "off", @alt = "Date Of Employment" })
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-0 font-weight-bold">Administration</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Branch</label>
+                                            <div class="col-sm-9">
+                                                <input type="hidden" id="hfBranchCode" value="@ViewBag.Global_Dimension_1_Code" />
+                                                @Html.DropDownListFor(model => model.Global_Dimension_1_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlBranch", @class = "form-select" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Role</label>
+                                            <div class="col-sm-9">
+                                                <input type="hidden" id="hfRoleNo" value="@ViewBag.Role_No" />
+                                                @Html.DropDownListFor(model => model.Role_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlRole", @class = "form-select" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">View Transaction</label>
+                                            <div class="col-sm-9">
+                                                <input type="hidden" id="hfViewTransactionNo" value="@ViewBag.View_Transaction_No" />
+                                                @Html.DropDownListFor(model => model.View_Transaction_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlViewTransaction", @class = "form-select" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Salesperson</label>
+                                            <div class="col-sm-9">
+                                                <input type="hidden" id="hfSalespersonCode" value="@ViewBag.SalespersonCode" />
+                                                @if (ViewBag.SalespersonCode == "" || ViewBag.SalespersonCode == null)
+                                                {
+                                                    @Html.DropDownListFor(model => model.Salespers_Purch_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSalesperson", @class = "form-select", disabled = "disabled" })
+                                                }
+                                                else
+                                                {
+                                                    @Html.HiddenFor(model => model.Role_No, new { Value = @ViewBag.Role_No })
+                                                    @Html.HiddenFor(model => model.Salespers_Purch_Code, new { Value = @ViewBag.SalespersonCode })
+                                                    <table>
+                                                        <tr>
+                                                            <td><label id="lblSPCode" class="form-label" style="display:none">@ViewBag.SalespersonCode</label></td>
+                                                            <td>&nbsp;</td>
+                                                            <td>
+                                                                @Html.DropDownListFor(model => model.Salespers_Purch_Code, Enumerable.Empty<SelectListItem>(), new { Value = @ViewBag.SalespersonCode, @id = "ddlSalesperson", @class = "form-select" })
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                }
+
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+
+                                            <label class="col-sm-3 col-form-label">Reporting Person</label>
+                                            <div class="col-sm-9">
+                                                <input type="hidden" id="hfReportingPersonNo" value="@ViewBag.Reporting_Person_No" />
+                                                @Html.DropDownListFor(model => model.Reporting_Person_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlReportingPerson", @class = "form-select" })
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Status</label>
+                                            <div class="col-sm-9">
+                                                <input type="hidden" id="hfStatus" value="@ViewBag.Status" />
+                                                @Html.DropDownListFor(model => model.Status, Enumerable.Empty<SelectListItem>(), new { @id = "ddlStatus", @class = "form-select" })
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+
+                                            <label class="col-sm-3 col-form-label">Is Reporting Person</label>
+                                            <div class="col-sm-9">
+                                                @Html.CheckBoxFor(model => model.Is_Reporting_Person, new { @id = "chkIsReportingPerson" })
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
+                                            <div class="col-sm-9">
+                                                @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin" })
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="toolbar">
+                            <div class=" text-end g-3">
+                                @Html.HiddenFor(model => model.Address_2)
+                                <input type="hidden" id="hfIsSalespersonEdit" value="@Session["isSalespersonEdit"].ToString()" />
+                                <input type="hidden" id="hdnSalespersonAction" value="@Session["SalespersonAction"]" />
+                                <input type="hidden" id="hdnSalespersonActionErr" value="@Session["SalespersonActionErr"]" />
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Loading...</span>
+                                </button>
+                                &nbsp;
+                                <button id="btnSave" class="btn btn-success" onclick="return CheckSPCardValues()" type="submit"><i class="bx bxs-save"></i> Save</button>
+                                &nbsp;
+                                <a href="/SalesPerson/SalesPersonList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                <div class="tab-pane fade" id="uploaddoc" role="tabpanel">
+                    <div class="row">
+                        <div>
+                            <h6 class="mb-0 font-weight-bold">Upload Documents</h6>
+                            <hr />
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Upload Type</label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlDocType" class="form-select">
+                                                <option>Pan Card</option>
+                                                <option>Aadhar Card</option>
+                                                <option>Education Certificate</option>
+                                                <option>Profile Image</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Upload Document</label>
+                                        <div class="col-sm-9">
+                                            <input id="docFile" name="docFile" type="file" />
+                                            <button id="btnUpload" class="btn btn-primary" type="button"><i class="bx bxs-cloud-upload"></i> Upload</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<div class='loader' id='divImage' style="display:none">-->
+    <!-- MODAL CONTENT -->
+    <!--<div class='loader-content'>
+        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+    </div>
+</div>-->
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+
+<script src="~/Scripts/appjs/SalesPersonCard.js"></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>
+<script src="~/Layout/vendors/raphael/raphael.min.js"></script>
+<script src="~/Layout/vendors/morris.js/morris.min.js"></script>

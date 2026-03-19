@@ -1,0 +1,233 @@
+﻿
+@{
+    ViewBag.Title = "ItemPriceChange";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    #tblProdDetails tr.row-saving {
+        background-color: #fff3cd;
+    }
+
+    #tblProdDetails tr.row-saved {
+        background-color: #d1e7dd;
+    }
+
+    #tblProdDetails tr.row-error {
+        background-color: #f8d7da;
+    }
+
+    .readonly-check {
+        pointer-events: none;
+        opacity: 1;
+    }
+
+    .table {
+        margin-top: 2px !important;
+    }
+
+    /* Center and fix width for the Item Price Change checkbox column */
+    thead th:last-child {
+        text-align: center;
+        width: 80px;
+    }
+
+    #tblProdDetails td.checkbox-cell {
+        text-align: center;
+        width: 80px;
+        background-color: inherit;
+    }
+
+        #tblProdDetails td.checkbox-cell input[type="checkbox"] {
+            display: inline-block;
+            margin: 0 auto;
+        }
+    /* Match Bootstrap striped backgrounds */
+    .table-striped > tbody > tr:nth-of-type(odd) > td.checkbox-cell {
+        background-color: var(--bs-table-striped-bg) !important;
+    }
+    /* Match custom row state backgrounds */
+    #tblProdDetails tr.row-saving > td.checkbox-cell {
+        background-color: #fff3cd !important;
+    }
+
+    #tblProdDetails tr.row-saved > td.checkbox-cell {
+        background-color: #d1e7dd !important;
+    }
+
+    #tblProdDetails tr.row-error > td.checkbox-cell {
+        background-color: #f8d7da !important;
+    }
+
+    /* Typeahead dropdown anchored under the input (match input width only) */
+    .typeahead-inputwrap {
+        position: relative;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .typeahead-dropdown {
+        position: absolute;
+        top: calc(100% + 2px);
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        max-height: 260px;
+        overflow: auto;
+    }
+</style>
+
+<div class="page-content">
+    <div id="divImage" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(255,255,255,.65);">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);" class="text-center">
+            <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+            <div class="mt-2">Saving...</div>
+        </div>
+    </div>
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Item Price Change
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <!-- Filter Section (kept IDs/behavior same; only layout split) -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <!-- Item Name -->
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="ItemName" class="fw-bold mb-0 text-nowrap" style="min-width:90px;">
+                            Item Name
+                        </label>
+                        <div class="typeahead-inputwrap">
+                            <input type="text" id="ItemName" class="form-control"
+                                   placeholder="Search Item Name" aria-label="Item Name" />
+                            <div class="typeahead-dropdown dropdown-menu" id="ItemNameMenu"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Packing Style -->
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="PackingStyleDescription" class="fw-bold mb-0 text-nowrap" style="min-width:120px;">
+                            Packing Style
+                        </label>
+                        <div class="typeahead-inputwrap">
+                            <input type="text" id="PackingStyleDescription" class="form-control"
+                                   placeholder="Search Packing Style Description" />
+                            <div class="typeahead-dropdown dropdown-menu" id="PackingStyleDescriptionMenu"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item Category -->
+                <div class="col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="ItemCategory" class="fw-bold mb-0 text-nowrap" style="min-width:110px;">
+                            Item Category
+                        </label>
+                        <div class="typeahead-inputwrap">
+                            <input type="text" id="ItemCategory" class="form-control"
+                                   placeholder="Search Item Category Code" />
+                            <div class="typeahead-dropdown dropdown-menu" id="ItemCategoryMenu"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-3 d-flex align-items-center justify-content-end gap-2">
+                    <button type="button" id="SearchBtn" class="btn btn-primary">Search</button>
+                    <button type="button" id="btnClearFilter" class="btn btn-secondary">
+                        <i class="bx bx-rotate-right"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header/Table Section (kept IDs/behavior same; only layout split) -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <div class="col-sm-12">
+                <table class="table table-striped mt-1">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Packing Style Description</th>
+                            <th>Packing UOM</th>
+                            <th>Item Category Code</th>
+                            <th>Purchase Days</th>
+                            <th>New Price</th>
+                            <th>Discount</th>
+                            <th>Current Price</th>
+                            <th>Previous Price</th>
+                            <th>Item Price Change</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblProdDetails">
+                    </tbody>
+
+                </table>
+                <!-- Pagination + Actions Row -->
+                <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+                    <!-- LEFT SIDE -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span><b>Per Page Records:</b></span>
+                            <select id="perPageSelect" class="form-select form-select-sm" style="width:auto;">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <nav><ul class="pagination mb-0" id="pagination"></ul></nav>
+                    </div>
+
+                    <!-- RIGHT SIDE BUTTONS -->
+                    <div class="d-flex gap-2">
+                        <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </button>
+                        <button id="btnSave" type="button" class="btn btn-primary"><i class="bx bxs-save"></i> Save Product</button>
+                        <button id="btnResetProdDetails" type="button" class="btn btn-danger"><i class="lni lni-close"></i> Back</button>
+                    </div>
+                </div>
+                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+            </div>
+        </div>
+    </div>
+    <!-- Modal for discount -> previous price confirmation -->
+    <div class="modal fade" id="discountConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">Do you want to change the Previous Price?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-no" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary btn-yes">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/ItemPriceChange.js"></script>

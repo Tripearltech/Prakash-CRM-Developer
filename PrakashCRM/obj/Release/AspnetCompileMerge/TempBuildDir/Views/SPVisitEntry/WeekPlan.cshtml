@@ -1,0 +1,578 @@
+﻿@model PrakashCRM.Data.Models.SPVEWeekSalesPlanDetails
+@{
+    ViewBag.Title = "WeekPlan";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPVisitEntry/WeekPlanList"> Week Plan List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Week Plan
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <input id="hfContactCompanyNo" name="hfContactCompanyNo" value="" style="display:none" />
+                            <input id="hfContactPersonNo" name="hfContactPersonNo" value="" style="display:none" />
+                            <input id="hfContactDetails" name="hfContactDetails" value="" style="display:none" />
+                            <input id="hfEventNo" name="hfEventNo" value="" style="display:none" />
+                            <input id="hfType" name="hfType" value="" style="display:none" />
+                            <input id="hfSubType" name="hfSubType" value="" style="display:none" />
+                            <input id="hfProdLineNo" name="hfProdLineNo" value="" style="display:none" />
+                            <input id="hfProdNo" name="hfProdNo" value="" style="display:none" />
+                            <input id="hfProdNoEdit" name="hfProdNoEdit" value="" style="display:none" />
+                            <input id="hfWeekPlanEdit" name="hfWeekPlanEdit" value="false" style="display:none" />
+                            <input id="hfNo" name="hfNo" value="" style="display:none" />
+                            <input id="hfWeekNo" name="hfWeekNo" value="" style="display:none" />
+                            <input id="hfFinancialYear" name="hfFinancialYear" value="" style="display:none" />
+                            <input id="hfCompetitor" name="hfCompetitor" value="" style="display:none" />
+                            <input id="hfAvailableCompetitors" name="hfAvailableCompetitors" value="" style="display:none" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12" align="right">
+                            <table>
+                                <tr>
+                                    <td><b>Financial Year</b></td>
+                                    <td>&nbsp;</td>
+                                    <td><label id="lblFinancialYear"></label></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <!--<label class="col-sm-3 col-form-label">Financial Year<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">-->
+                                                            @*<input type="text" class="form-control" />*@
+                                                            @*@Html.TextBoxFor(model => model.Week_Date, new { Value = Model.Week_Date, @id = "txtDate", @class = "form-control datepicker" })*@
+                                                            @*@Html.DropDownListFor(model => model.Week, Enumerable.Empty<SelectListItem>(), new { Value = Model.Week, @id = "ddlWeekNo", @class = "form-select" })*@
+                                                            <!--<select id="ddlFinancialYear" class="form-select"></select>
+                                    <label id="lblFinancialYearMsg" style="color:red;display:none"></label>
+                                </div>-->
+
+                                <label class="col-sm-3 col-form-label">Week<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    @*<input type="text" class="form-control" />*@
+                                    @*@Html.TextBoxFor(model => model.Week_Date, new { Value = Model.Week_Date, @id = "txtDate", @class = "form-control datepicker" })*@
+                                    @*@Html.DropDownListFor(model => model.Week, Enumerable.Empty<SelectListItem>(), new { Value = Model.Week, @id = "ddlWeekNo", @class = "form-select" })*@
+                                    <select id="ddlWeekNo" class="form-select"></select>
+                                    <label id="lblWeekNoMsg" style="color:red;display:none"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Date<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    @*<input type="text" class="form-control" />*@
+                                    @*@Html.TextBoxFor(model => model.Week_Date, new { Value = Model.Week_Date, @id = "txtWeekDate", @type = "date", @class = "form-control datepicker" })*@
+                                    <input type="date" id="txtWeekDate" class="form-control" />
+                                    <label id="lblWeekDateMsg" style="color:red;display:none"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- -->
+
+                    <h6 class="mb-0 text-uppercase">Type - SubType</h6>
+                    <hr />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Type<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlType" class="form-select"></select>
+                                    <label id="lblTypeMsg" style="color:red;display:none"></label>
+                                    @*@Html.DropDownListFor(model => model.Task_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlType", @class = "form-select" })*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Sub Type<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlSubType" class="form-select"></select>
+                                    <label id="lblSubTypeMsg" style="color:red;display:none"></label>
+                                    @*@Html.DropDownListFor(model => model.Sub_Task_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSubType", @class = "form-select" })*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<br />*@
+                    <div id="dvEventTopic" style="display:none">
+                        <br />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Event Name<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @*<input type="text" id="txtEventName" class="form-control" />*@
+                                        <select id="ddlEventName" class="form-select"></select>
+                                        <label id="lblEventNameMsg" style="color:red;display:none"></label>
+                                        @*@Html.TextBoxFor(model => model.Event_Name, new { @id = "txtEventName", @class = "form-control" })*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Topic Name<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" id="txtTopicName" class="form-control" />
+                                        <label id="lblTopicNameMsg" style="color:red;display:none"></label>
+                                        @*@Html.TextBoxFor(model => model.Topic_Name, new { @id = "txtTopicName", @class = "form-control" })*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="dvCustomerContact" style="display:none">
+                        <br />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Customer Name<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        <select id="ddlCustomerName" class="form-select"></select>
+                                        <label id="lblCustomerNameMsg" style="color:red;display:none"></label>
+                                        @*@Html.DropDownListFor(model => model.Contact_Company_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCustomerName", @class = "form-select" })*@
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button id="btnCustAdd" class="btn btn-primary bx bx-plus" title="Add New Contact Company"></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Contact Person<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        <select id="ddlContactPerson" class="form-select"></select>
+                                        <label id="lblContactPersonMsg" style="color:red;display:none"></label>
+                                        @*@Html.DropDownListFor(model => model.Contact_Person_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlContactPerson", @class = "form-select" })*@
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button id="btnCPersonAdd" class="btn btn-primary bx bx-plus" title="Add New Contact Person" disabled></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        @*<div class="row g-3">
+                <div class="col-md-6">
+                    <button id="btnCustAdd" class="btn btn-primary">+</button>
+                </div>
+                <div class="col-md-6">
+                    <button id="btnCPersonAdd" class="btn btn-primary">+</button>
+                </div>
+            </div>*@
+                    </div>
+                    <br />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Mode Of Visit<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlVisitMode" class="form-select"></select>
+                                    <label id="lblVisitModeMsg" style="color:red;display:none"></label>
+                                    @*@Html.DropDownListFor(model => model.Mode_of_Visit, Enumerable.Empty<SelectListItem>(), new { @id = "ddlVisitMode", @class = "form-select" })*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br /><br />
+                          <div id="dvProdDetails" style="display:none">
+                              <h6 class="mb-0 text-uppercase">Product Details</h6>
+                              <hr />
+                              <div class="row g-3">
+                                  <div class="col-md-4">
+                                      <label class="form-label">Product Name<span class="required" style="color: red; margin-left: 2px">*</span>&nbsp;&nbsp;<input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All</label>
+                                      <select id="ddlProductName" class="form-select">
+                                      </select>
+                                      <br />
+                                      <label id="lblProdMsg" class="form-label" style="color:red;display:none"></label>
+                                      @*@Html.DropDownListFor(model => model.Product_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlProductName", @class = "form-select" })*@
+                                  </div>
+                                  <div class="col-md-4">
+                                      <label class="form-label">Qty<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                      <input type="text" id="txtProdQty" class="form-control" />
+                                      <label id="lblProdQtyMsg" class="form-label" style="color:red"></label>
+                                      @*@Html.TextBoxFor(model => model.Quantity, new { @id = "txtProdQty", @class = "form-control" })*@
+                                  </div>
+                                  <div class="col-md-4">
+                                      <label class="form-label">UOM</label>
+                                      <input type="text" id="txtUOM" class="form-control" />
+                                      @*@Html.TextBoxFor(model => model.Unit_of_Measure, new { @id = "txtUOM", @class = "form-control" })*@
+                                  </div>
+                              </div>
+                              @*<div class="row g-3">
+                                    <div class="col-md-4">
+                                        <input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All Products
+                                    </div>
+                                    <div class="col-md-4">
+                                    </div>
+                                    <div class="col-md-4">
+                                    </div>
+                                </div>
+                                <br />*@
+                              <div class="row g-3">
+                                  <div class="col-md-12">
+                                      <label class="form-label">Competitor Name</label>
+                                      <select class="form-select" id="ddlCompetitors" data-placeholder="---Select---" multiple>
+                                      </select>
+                                      @*@Html.DropDownListFor(model => model.Competitor_Name, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCompetitor", @class = "form-control" })*@
+                                  </div>
+                              </div>
+                              <div class="row g-3">
+                                  <div class="col-md-12" align="right">
+                                      <br />
+                                      <button type="button" id="btnSaveProd" class="btn btn-primary">Save Product</button>
+                                  </div>
+                              </div>
+                              <br />
+                              <!-- -->
+
+                              <div class="row g-3">
+                                  <div class="col-md-12">
+                                      <div class="row mb-3">
+                                          <div class="col-sm-12" align="center">
+                                              <table id="tblProdList" class="table mb-0 table-striped" style="display:none">
+                                                  <thead>
+                                                      <tr>
+                                                          <th></th>
+                                                          <th hidden></th>
+                                                          <th scope="col" width="60%">Product Name</th>
+                                                          <th scope="col">Qty</th>
+                                                          <th scope="col">UOM</th>
+                                                          <th scope="col">Competitors</th>
+                                                          <th hidden></th>
+                                                      </tr>
+                                                  </thead>
+                                                  <tbody id="tblProducts">
+                                                      @*<tr>
+                                    <td>Product1</td>
+                                    <td>15</td>
+                                    <td>MTS</td>
+                                </tr>
+                                <tr>
+                                    <td>Product2</td>
+                                    <td>18</td>
+                                    <td>MTS</td>
+                                </tr>
+                                <tr>
+                                    <td>Product3</td>
+                                    <td>20</td>
+                                    <td>MTS</td>
+                                </tr>*@
+                                                  </tbody>
+                                              </table>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+
+                              <!-- -->
+                          </div>
+
+                    <!-- -->
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Purpose of visit<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    @*@Html.TextAreaFor(model => model.Pur_Visit, new { @id = "txtVisitPurpose", @class = "form-control" })*@
+                                    @*<input type="text" id="txtVisitPurpose" class="form-control" />*@
+                                    <textarea id="txtVisitPurpose" class="form-control"></textarea>
+                                    <label id="lblVisitPurposeMsg" style="color:red;display:none"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Remarks</label>
+                                <div class="col-sm-9">
+                                    @*@Html.TextAreaFor(model => model.Remarks, new { @id = "txtRemarks", @class = "form-control" })*@
+                                    <textarea id="txtRemarks" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12" align="right">
+                                    <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                                    <input type="hidden" id="hdnWeekPlanAction" value="@Session["WeekPlanAction"]" />
+                                    <input type="hidden" id="hfWeekPlanActionErr" value="@Session["WeekPlanActionErr"]" />
+                                    <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                    <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Loading...</span>
+                                    </button>
+                                    &nbsp;
+                                    <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
+                                    &nbsp;
+                                    <button id="btnCancel" type="button" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalAddNewCPerson" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog  modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Contact Person<br />In Selected Company</h5>
+                <button id="btnCloseAddNewCPerson" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtCPersonName" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtCPersonMobile" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            @*<label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>*@
+                            <label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtCPersonEmail" class="form-control" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Department<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                @*<input type="hidden" id="hfDepartmentCode" value="@ViewBag.PCPL_Department_Code" />*@
+                                <select id="ddlDepartment" class="form-select"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtJobResponsibility" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Allow Login</label>
+                            <div class="col-sm-9">
+                                <input type="checkbox" id="chkAllowLogin" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
+                            <div class="col-sm-9">
+                                <input type="checkbox" id="chkEnableOTPOnLogin" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Is Primary</label>
+                            <div class="col-sm-9">
+                                <input type="checkbox" id="chkIsPrimary" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label id="lblAddMsg" style="display:none" class="form-label"></label>
+                &nbsp;
+                <button id="btnAddSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading...</span>
+                </button>
+                &nbsp;
+                <button id="btnConfirmAddCPerson" class="btn btn-primary" type="button">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+@*@Scripts.Render("~/bundles/jquery")*@
+<script src="~/Layout/assets/js/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="~/Scripts/appjs/WeekPlan.js"></script>
+@*<script src="~/Layout/assets/plugins/select2/js/select2-custom.js"></script>*@
+@*<script src="~/Layout/assets/plugins/select2/js/select2-custom.js"></script>*@
+<script>
+
+    $('#ddlCompetitors').select2({
+        theme: "bootstrap-5",
+        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+        placeholder: $(this).data('placeholder'),
+        closeOnSelect: false,
+        tags: true
+    });
+
+    $(document).ready(function () {
+
+        $('#btnCustAdd').click(function () {
+
+            window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")');
+        });
+
+        $('#btnSave').click(function () {
+
+            var flag = CheckWeekPlanValues();
+
+            if (flag) {
+
+                var weekplan = {};
+                var productDetails_ = new Array();
+
+                const weekPlanDetails = $('#ddlWeekNo').val().split('_');
+                const subTypeDetails = $('#ddlSubType').val().split('_');
+
+                weekplan.IsWeekPlanEdit = $('#hfWeekPlanEdit').val();
+                weekplan.No = $('#hfNo').val();
+                //weekplan.Financial_Year = $('#ddlFinancialYear').val();
+                weekplan.Financial_Year = $('#lblFinancialYear').text();
+                weekplan.Week_No = weekPlanDetails[0];
+                weekplan.Week_Start_Date = weekPlanDetails[1];
+                weekplan.Week_End_Date = weekPlanDetails[2];
+                weekplan.Week_Plan_Date = $('#txtWeekDate').val();
+                weekplan.Visit_Type = $('#ddlType').val();
+                weekplan.Visit_Sub_Type = subTypeDetails[0];
+
+                const CompanyDetails_ = $('#ddlCustomerName').val().split('_');
+                var CompanyNo = CompanyDetails_[0];
+
+                weekplan.Contact_Company_No = CompanyNo;
+                weekplan.Contact_Person_No = $('#ddlContactPerson').val();
+                weekplan.Event_No = $('#ddlEventName').val();
+                weekplan.Topic_Name = $('#txtTopicName').val();
+                weekplan.Mode_Of_Visit = $('#ddlVisitMode').val();
+                weekplan.Pur_Visit = $('#txtVisitPurpose').val();
+                weekplan.Remarks = $('#txtRemarks').val();
+
+                $("#tblProducts TR").each(function () {
+                    var productDetails = {};
+                    productDetails.Product_No = $(this).find("TD").eq(1).html();
+                    productDetails.Quantity = $(this).find("TD").eq(3).html();
+                    productDetails.Competitor = $(this).find("TD").eq(5).html();
+                    productDetails.No = $(this).find("TD").eq(6).html();
+
+                    productDetails_.push(productDetails);
+                });
+
+                weekplan.Products = productDetails_;
+
+                (async () => {
+                    const rawResponse = await fetch('/SPVisitEntry/PostWeekPlan', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(weekplan)
+                    });
+                    const res = await rawResponse.ok;
+                    //if (res) {
+                        $('#divImage').hide();
+                        window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")');
+                        $('#hfWeekPlanEdit').val("false");
+                    //}
+
+                })();
+
+
+            }
+
+        });
+
+        $('#btnCancel').click(function () {
+            window.location.replace('@Url.Action("WeekPlanList", "SPVisitEntry")');
+        });
+
+    });
+
+</script>

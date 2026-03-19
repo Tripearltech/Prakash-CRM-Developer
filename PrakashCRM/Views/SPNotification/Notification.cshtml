@@ -1,0 +1,145 @@
+﻿@model PrakashCRM.Data.Models.SPNotification
+@{
+    ViewBag.Title = "Notification";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-home-alt"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPNotification/NotificationSetupList"> Notification Setup List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Notification Setup
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            @using (Html.BeginForm("Notification", "SPNotification", FormMethod.Post))
+            {
+                @Html.ValidationSummary(true)
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label class="form-label">Type<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <input type="hidden" id="hfType" value="@ViewBag.Type" />
+                                @Html.DropDownListFor(model => model.Type, Enumerable.Empty<SelectListItem>(), new { @id = "ddlType", @class = "form-select" })
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">From Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                @Html.TextBoxFor(model => model.From_Code, new { @class = "form-control", @id = "hdnFromCode", style = "display:none" })
+                                @Html.TextBoxFor(model => model.Employee_No, new { @class = "form-control", @id = "txtEmpNo", style = "display:none" })
+                                <input type="hidden" id="hfEmployee_No" value="@ViewBag.Employee_No" />
+                                <select id="ddlFromCode" class="form-select">
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">From Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                @Html.TextBoxFor(model => model.From_Name, new { @class = "form-control", @id = "txtFromName", @readonly="readonly" })
+                                @Html.ValidationMessageFor(model => model.From_Name, null, new { style = "color:red" })
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">From Email<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                @Html.TextBoxFor(model => model.From_E_mail, new { @class = "form-control", @id = "txtFromEmail", @readonly = "readonly" })
+                                @Html.ValidationMessageFor(model => model.From_E_mail, null, new { style = "color:red" })
+                                
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">From Mobile No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                @Html.TextBoxFor(model => model.From_Mobile_No, new { @class = "form-control", @id = "txtFromMobile", @readonly = "readonly" })
+                                @Html.ValidationMessageFor(model => model.From_Mobile_No, null, new { style = "color:red" })
+                                
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">To Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                @Html.TextBoxFor(model => model.To_Name, new { @class = "form-control", @id = "txtToName", @disabled = "disabled" })
+                                @Html.ValidationMessageFor(model => model.To_Name, null, new { style = "color:red" })
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">To Email<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                @Html.TextAreaFor(model => model.To_E_mail, new { @class = "form-control", @id = "txtToEmail", @rows = 3, cols = 35, @readonly = "readonly" })
+                                @Html.ValidationMessageFor(model => model.To_E_mail, null, new { style = "color:red" })
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">To Mobile No</label>
+                                @Html.TextAreaFor(model => model.To_Mobile_No, new { @class = "form-control", @id = "txtToMobile", @rows = 3, cols = 35, @readonly = "readonly" })
+                                
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Cc Name</label>
+                                @Html.TextBoxFor(model => model.CC_Name, new { @class = "form-control", @id = "txtCcName", @disabled = "disabled" })
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Cc Email</label>
+                                @Html.TextAreaFor(model => model.CC_E_mail, new { @class = "form-control", @id = "txtCcEmail", @rows = 3, cols = 35, @readonly = "readonly" })
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Cc Mobile No</label>
+                                @Html.TextAreaFor(model => model.CC_Mobile_No, new { @class = "form-control", @id = "txtCcMobile", @rows = 3, cols = 35, @readonly = "readonly" })
+                                
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Bcc Name</label>
+                                @Html.TextBoxFor(model => model.BCC_Name, new { @class = "form-control", @id = "txtBccName", @disabled = "disabled" })
+                                
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Bcc Email</label>
+                                @Html.TextAreaFor(model => model.BCC_E_mail, new { @class = "form-control", @id = "txtBccEmail", @rows = 3, cols = 35, @readonly = "readonly" })
+                               
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Bcc Mobile No</label>
+                                @Html.TextAreaFor(model => model.BCC_Mobile_No, new { @class = "form-control", @id = "txtBccMobile", @rows = 3, cols = 35, @readonly = "readonly" })
+                                
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" }) Active
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="toolbar">
+                    <div class=" text-end g-3">
+                        <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                        <input type="hidden" id="hdnNotificationAction" value="@Session["NotificationAction"]" />
+                        <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
+                        &nbsp;
+                        <a href="/SPNotification/NotificationSetupList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/Notification.js"></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>

@@ -1,0 +1,154 @@
+﻿
+@{
+    ViewBag.Title = "OutstandingPaymentList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Outstanding Payment List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Posting_Date">Posting Date</option>
+                                        <option value="Document_No">Document No</option>
+                                        <option value="Customer_Name">Customer Name</option>
+                                        <option value="Description">Description</option>
+                                        <option value="Amount_LCY">Amount (LCY)</option>
+                                        <option value="Remaining_Amt_LCY">Remaining Amount (LCY)</option>
+                                        <option value="Due_Date">Due Date</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtFromDate" type="date" class="form-control" style="display:none">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                        <option value="Less Than">Less Than</option>
+                                        <option value="Greater Than">Greater Than</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtToDate" type="date" class="form-control" style="display:none">
+                                    <div id="dvtxtSearch" class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Posting Date</th>
+                            <th>Document No</th>
+                            <th>Customer Name</th>
+                            <th>Description</th>
+                            <th>Amount (LCY)</th>
+                            <th>Remaining Amount (LCY)</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>Posting Date</th>
+                            <th>Document No</th>
+                            <th>Customer Name</th>
+                            <th>Description</th>
+                            <th>Amount (LCY)</th>
+                            <th>Remaining Amount (LCY)</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
+                <input id="hdnSPOSPayCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/OSPaymentList.js"></script>

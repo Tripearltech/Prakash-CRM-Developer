@@ -1,0 +1,124 @@
+﻿
+@{
+    ViewBag.Title = "CustomerSatisfaction";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+</style>
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<link href="~/Layout/assets/css/highcharts.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Customer Satisfaction</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <label class="col-form-label">From Date :</label>
+                                </div>
+                                <div class="col">
+                                    <input id="txtFromDate" type="date" class="form-control">
+                                </div>
+                                <div class="col">
+                                    <label class="col-form-label">To Date :</label>
+                                </div>
+                                <div class="col">
+                                    <input id="txtToDate" type="date" class="form-control">
+                                </div>
+                                <div class="col">
+                                    <input type="hidden" id="hfSalespersonCode" />
+                                    <select id="ddlSalesPerson" class="form-select"></select>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div id="dvCustSatisfaction"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalCustomerList" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvCustomerList" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Customer</th>
+                                                <th scope="col">Comments</th>
+                                                <th scope="col">Submit On</th>
+                                                <th scope="col">Sales Person</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbCustomerList">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Layout/assets/js/highcharts.js"></script>
+<script src="~/Scripts/appjs/SPCustomerSatisfaction.js"></script>

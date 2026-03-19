@@ -1,0 +1,375 @@
+﻿@model IEnumerable<PrakashCRM.Data.Models.SPActivities>
+@{
+    ViewBag.Title = "Activities";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Activities</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body p-4">
+
+            <button id="btnTask" class="btn btn-primary px-4" type="button"><i class="bx bx-task"></i>Task</button>
+            &nbsp;
+            <button id="btnPhoneCall" class="btn btn-info px-4" type="button"><i class="bx bx-phone-call"></i>Phone Call</button>
+            &nbsp;
+            <button id="btnMeeting" class="btn btn-secondary px-4" type="button"><i class="lni lni-users"></i> Meeting</button>
+
+            <hr />
+            <div class="table-responsive">
+                <table id="tblList" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Subject</th>
+                            <th>To</th>
+                            <th>Remarks</th>
+                            <th>Regarding</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Created On</th>
+                            <th>Sales Person</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <i class="bx bx-phone-call"></i>
+                            </td>
+                            <td>
+                                Follow up Meeting
+                            </td>
+                            <td>
+                                CPWD
+                            </td>
+                            <td>
+                                doing solar project under akash yo...
+                            </td>
+                            <td>
+                                Lead
+                            </td>
+                            <td>
+                                Approval
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">Open</div>
+                            </td>
+                            <td>
+                                10-10-2024
+                            </td>
+                            <td>
+                                Vinita Desai
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bx bx-phone-call"></i>
+                            </td>
+                            <td>
+                                Follow up Meeting
+                            </td>
+                            <td>
+                                CPWD
+                            </td>
+                            <td>
+                                Thermal project consultant doing...
+                            </td>
+                            <td>
+                                Customer
+                            </td>
+                            <td>
+                                Approval
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">Open</div>
+                            </td>
+                            <td>
+                                03-09-2024
+                            </td>
+                            <td>
+                                Manish Purohit
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bx bx-phone-call"></i>
+                            </td>
+                            <td>
+                                Approval
+                            </td>
+                            <td>
+                                CPWD
+                            </td>
+                            <td>
+                                received enquiry for conductors
+                            </td>
+                            <td>
+                                Opportunity
+                            </td>
+                            <td>
+                                Approval
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-info bg-light-info p-2 text-uppercase px-3">Close</div>
+                            </td>
+                            <td>
+                                02-11-2024
+                            </td>
+                            <td>
+                                Swati Soneji
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bx bx-task"></i>
+                            </td>
+                            <td>
+                                Approval
+                            </td>
+                            <td>
+                                Tata
+                            </td>
+                            <td>
+                                doing Adani projects...
+                            </td>
+                            <td>
+                                Order
+                            </td>
+                            <td>
+                                Approval
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-info bg-light-info p-2 text-uppercase px-3">Close</div>
+                            </td>
+                            <td>
+                                12-08-2024
+                            </td>
+                            <td>
+                                Sapna Gohil
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bx bx-task"></i>
+                            </td>
+                            <td>
+                                Meeting regarding GPOA
+                            </td>
+                            <td>
+                                Tata
+                            </td>
+                            <td>
+                                Visited Vidyut Bhavan to attend pre...
+                            </td>
+                            <td>
+                                Lead
+                            </td>
+                            <td>
+                                Other
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-warning bg-light-warning p-2 text-uppercase px-3">Pending</div>
+                            </td>
+                            <td>
+                                22-12-2024
+                            </td>
+                            <td>
+                                Manoj Makwana
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bx bx-task"></i>
+                            </td>
+                            <td>
+                                Meeting regarding ABC
+                            </td>
+                            <td>
+                                Tata
+                            </td>
+                            <td>
+                                Visited Vadodara CPWD cvp office...
+                            </td>
+                            <td>
+                                Opportunity
+                            </td>
+                            <td>
+                                Other
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-warning bg-light-warning p-2 text-uppercase px-3">Pending</div>
+                            </td>
+                            <td>
+                                05-07-2024
+                            </td>
+                            <td>
+                                Priyanka Patel
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="lni lni-users"></i>
+                            </td>
+                            <td>
+                                Meeting regarding AIIMS
+                            </td>
+                            <td>
+                                Steag
+                            </td>
+                            <td>
+                                Meeting regarding AIIMS Amritsar pr..
+                            </td>
+                            <td>
+                                Customer
+                            </td>
+                            <td>
+                                Other
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">Open</div>
+                            </td>
+                            <td>
+                                11-10-2024
+                            </td>
+                            <td>
+                                Mahendra Solanki
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="lni lni-users"></i>
+                            </td>
+                            <td>
+                                Documentation work
+                            </td>
+                            <td>
+                                Steag
+                            </td>
+                            <td>
+                                Visited Delhi office for document
+                            </td>
+                            <td>
+                                Order
+                            </td>
+                            <td>
+                                Other
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-info bg-light-info p-2 text-uppercase px-3">Close</div>
+                            </td>
+                            <td>
+                                22-03-2024
+                            </td>
+                            <td>
+                                Anuj Kapadia
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="lni lni-users"></i>
+                            </td>
+                            <td>
+                                Documentation work
+                            </td>
+                            <td>
+                                Steag
+                            </td>
+                            <td>
+                                Visited Delhi office and worked on...
+                            </td>
+                            <td>
+                                Lead
+                            </td>
+                            <td>
+                                Documents
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-warning bg-light-warning p-2 text-uppercase px-3">Pending</div>
+                            </td>
+                            <td>
+                                15-08-2024
+                            </td>
+                            <td>
+                                Milan Shah
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="lni lni-users"></i>
+                            </td>
+                            <td>
+                                Documentation work
+                            </td>
+                            <td>
+                                Steag
+                            </td>
+                            <td>
+                                Visited Delhi office and worked on...
+                            </td>
+                            <td>
+                                Customer
+                            </td>
+                            <td>
+                                Documents
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">Open</div>
+                            </td>
+                            <td>
+                                22-03-2024
+                            </td>
+                            <td>
+                                Ravindra Kumar Singh
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Type</th>
+                            <th>Subject</th>
+                            <th>To</th>
+                            <th>Remarks</th>
+                            <th>Regarding</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Created On</th>
+                            <th>Sales Person</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+
+<script>
+    $(document).ready(function () {
+
+        $('#btnTask').click(function () {
+                window.location.replace('@Url.Action("Task", "SPActivities")');
+        });
+
+        $('#btnPhoneCall').click(function () {
+                window.location.replace('@Url.Action("PhoneCall", "SPActivities")');
+        });
+
+        $('#btnMeeting').click(function () {
+                window.location.replace('@Url.Action("Meeting", "SPActivities")');
+        });
+
+    });
+</script>
+@*<script src="~/Layout/vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js"></script>*@

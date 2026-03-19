@@ -1,0 +1,313 @@
+﻿
+@{
+    ViewBag.Title = "DailyVisitList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Daily Visit List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="hfSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <button id="btnNew" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Date">Date</option>
+                                        <option value="Contact_Company_Name">Customer Name</option>
+                                        <option value="Contact_Person_Name">Contact Person</option>
+                                        <option value="Visit_Name">Type</option>
+                                        <option value="Visit_SubType_Name">Sub Type</option>
+                                        <option value="Mode_of_Visit">Visit Mode</option>
+                                        <option value="Payment_Date">Payment Date</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtFromDate" type="date" class="form-control" style="display:none">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtToDate" type="date" class="form-control" style="display:none">
+                                    <div id="dvtxtSearch" class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <!---->
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                                <!---->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- -->
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Sub Type</th>
+                            <th>Customer</th>
+                            <th>Contact Person</th>
+                            <th>Event</th>
+                            <th>Topic</th>
+                            <th>Visit Mode</th>
+                            <th>Feedback</th>
+                            <th>Remarks</th>
+                            <th>Market Update</th>
+                            <th>Payment Date</th>
+                            <th>Payment Amt</th>
+                            <th>Payment Remarks</th>
+                            <th>Complain</th>
+                            <th>Complain Date</th>
+                            <th>Root Analysis</th>
+                            <th>Root Analysis Date</th>
+                            <th>Corrective Action</th>
+                            <th>Corrective Action Date</th>
+                            <th>Preventive Action</th>
+                            <th>Preventive Action Date</th>
+                            <th>Complain Invoice</th>
+                            <th>Compalain Products</th>
+                            <th>Complain Assign To</th>
+                            <th>Is PDC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Sub Type</th>
+                            <th>Customer</th>
+                            <th>Contact Person</th>
+                            <th>Event</th>
+                            <th>Topic</th>
+                            <th>Visit Mode</th>
+                            <th>Feedback</th>
+                            <th>Remarks</th>
+                            <th>Market Update</th>
+                            <th>Payment Date</th>
+                            <th>Payment Amt</th>
+                            <th>Payment Remarks</th>
+                            <th>Complain</th>
+                            <th>Complain Date</th>
+                            <th>Root Analysis</th>
+                            <th>Root Analysis Date</th>
+                            <th>Corrective Action</th>
+                            <th>Corrective Action Date</th>
+                            <th>Preventive Action</th>
+                            <th>Preventive Action Date</th>
+                            <th>Complain Invoice</th>
+                            <th>Compalain Products</th>
+                            <th>Complain Assign To</th>
+                            <th>Is PDC</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnWeekPlanNo" style="display:none" />
+                <input id="hdnDVPCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvComplainDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Complain Date</th>
+                                                <th scope="col">Complain Subject</th>
+                                                <th scope="col">Complain Product</th>
+                                                <th scope="col">Complain Assign To</th>
+                                                <th scope="col">Root Analysis</th>
+                                                <th scope="col">Corrective Action</th>
+                                                <th scope="col">Preventive Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblComplainDet">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvPaymentDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Payment Date</th>
+                                                <th scope="col">Payment Amount</th>
+                                                <th scope="col">Payment Remarks</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblPaymentDet">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvExpanseDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Visit Date</th>
+                                                <th scope="col">Start Time</th>
+                                                <th scope="col">End Time</th>
+                                                <th scope="col">Total Time</th>
+                                                <th scope="col">Start km</th>
+                                                <th scope="col">End km</th>
+                                                <th scope="col">Total km</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblExpanseDet">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvProductDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">UOM</th>
+                                                <th scope="col">Competitors</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblProductDet">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/DailyVisitList.js"></script>
+<script>
+    $(document).ready(function () {
+
+    $('#btnNew').click(function () {
+        window.location.replace('@Url.Action("DailyVisit", "SPVisitEntry")');
+    });
+
+});
+</script>

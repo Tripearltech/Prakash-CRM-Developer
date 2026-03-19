@@ -1,0 +1,262 @@
+﻿@model PrakashCRM.Data.Models.SPUserRoleRelationList
+@{
+    ViewBag.Title = "UserRoleRelationCard";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+    bool isEditMode = false;
+    try
+    {
+        if (Session["isUserRoleRelationEdit"] != null)
+        {
+            isEditMode = Convert.ToBoolean(Session["isUserRoleRelationEdit"]);
+        }
+    }
+    catch { isEditMode = false; }
+}
+@* Manual entry page; no dropdowns *@
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPRoles/UserRoleRelationList">User Role Relation</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Card</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            @using (Html.BeginForm("UserRoleRelationCard", "SPRoles", FormMethod.Post))
+            {
+                @Html.ValidationSummary(true)
+
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">User Relation Role ID<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.User_Relation_Role_ID, new { @class = "form-control", @id = "txtUserRelationRoleId", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(m => m.User_Relation_Role_ID, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 @(isEditMode ? "" : "d-none")">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">User Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.User_Name, new { @class = "form-control", @id = "ddlUserName", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(m => m.User_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">EMP No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.User_Security_ID, new { @class = "form-control", @id = "ddlUserSecurityId" })
+                                        @Html.ValidationMessageFor(m => m.User_Security_ID, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 @(isEditMode ? "" : "d-none")">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">Role Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.Role_Name, new { @class = "form-control", @id = "ddlRoleName", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(m => m.Role_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">Role ID<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.Role_ID, new { @class = "form-control", @id = "ddlRoleId" })
+                                        @Html.ValidationMessageFor(m => m.Role_ID, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 @(isEditMode ? "" : "d-none")">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">Full Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.Full_Name, new { @class = "form-control", @id = "ddlFullName", @readonly = "readonly" })
+                                        @Html.ValidationMessageFor(m => m.Full_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="text-end g-3">
+                        <input type="hidden" id="hdnUserRoleRelationAction" value="@Session["UserRoleRelationAction"]" />
+                        <input type="hidden" id="hdnSelectedUserSecurityId" value="@Model.User_Security_ID" />
+                        <input type="hidden" id="hdnSelectedUserName" value="@Model.User_Name" />
+                        <input type="hidden" id="hdnSelectedFullName" value="@Model.Full_Name" />
+                        <input type="hidden" id="hdnSelectedRoleId" value="@Model.Role_ID" />
+                        <input type="hidden" id="hdnSelectedRoleName" value="@Model.Role_Name" />
+                        <input id="getAppBaseUrl" value="@Url.Content("~/")" style="display:none" />
+                        <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
+                        &nbsp;
+                        <a href="/SPRoles/UserRoleRelationList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>
+
+<script>
+    (function () {
+        var appBaseUrl = $('#getAppBaseUrl').val() || '/';
+
+        function combineUrl(baseUrl, relativePath) {
+            baseUrl = baseUrl || '';
+            relativePath = relativePath || '';
+            if (baseUrl.length > 0 && baseUrl[baseUrl.length - 1] !== '/') baseUrl += '/';
+            if (relativePath.length > 0 && relativePath[0] === '/') relativePath = relativePath.substring(1);
+            return baseUrl + relativePath;
+        }
+
+        function setInputValue($input, value) {
+            $input.val(value || '');
+        }
+
+        function trimVal(v) {
+            return (v === undefined || v === null) ? '' : ('' + v).trim();
+        }
+
+        function debounce(fn, wait) {
+            var t = null;
+            return function () {
+                var ctx = this;
+                var args = arguments;
+                clearTimeout(t);
+                t = setTimeout(function () { fn.apply(ctx, args); }, wait || 250);
+            };
+        }
+
+        $(document).ready(function () {
+            function fetchEmployeeByNo(empNo) {
+                empNo = trimVal(empNo);
+                if (!empNo) {
+                    setInputValue($('#ddlUserName'), '');
+                    setInputValue($('#ddlFullName'), '');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SearchEmployees", "SPRoles")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { term: empNo, page: 1, pageSize: 20 }
+                }).done(function (data) {
+                    var results = (data && data.results) ? data.results : [];
+                    var match = null;
+                    for (var i = 0; i < results.length; i++) {
+                        var r = results[i];
+                        if (!r) continue;
+                        var id = trimVal(r.id || r.text);
+                        if (id && id.toLowerCase() === empNo.toLowerCase()) { match = r; break; }
+                    }
+                    if (!match && results.length === 1) match = results[0];
+
+                    if (match) {
+                        setInputValue($('#ddlUserName'), match.userName || match.id || empNo);
+                        setInputValue($('#ddlFullName'), match.fullName || '');
+                    } else {
+                        setInputValue($('#ddlUserName'), '');
+                        setInputValue($('#ddlFullName'), '');
+                    }
+                });
+            }
+
+            function fetchRoleById(roleId) {
+                roleId = trimVal(roleId);
+                if (!roleId) {
+                    setInputValue($('#ddlRoleName'), '');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SearchRoles", "SPRoles")',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: { term: roleId, page: 1, pageSize: 20 }
+                }).done(function (data) {
+                    var results = (data && data.results) ? data.results : [];
+                    var match = null;
+                    for (var i = 0; i < results.length; i++) {
+                        var r = results[i];
+                        if (!r) continue;
+                        var id = trimVal(r.id || r.text);
+                        if (id && id.toLowerCase() === roleId.toLowerCase()) { match = r; break; }
+                    }
+                    if (!match && results.length === 1) match = results[0];
+
+                    if (match) {
+                        setInputValue($('#ddlRoleName'), match.roleName || '');
+                    } else {
+                        setInputValue($('#ddlRoleName'), '');
+                    }
+                });
+            }
+
+            $('#ddlUserSecurityId').on('blur change', function () {
+                fetchEmployeeByNo($(this).val());
+            });
+            $('#ddlUserSecurityId').on('keyup', debounce(function () {
+                fetchEmployeeByNo($(this).val());
+            }, 400));
+
+            $('#ddlRoleId').on('blur change', function () {
+                fetchRoleById($(this).val());
+            });
+            $('#ddlRoleId').on('keyup', debounce(function () {
+                fetchRoleById($(this).val());
+            }, 400));
+
+            // Restore selected values (Edit mode)
+            var selectedSecId = $('#hdnSelectedUserSecurityId').val();
+            var selectedUserName = $('#hdnSelectedUserName').val();
+            var selectedFullName = $('#hdnSelectedFullName').val();
+            var selectedRoleId = $('#hdnSelectedRoleId').val();
+            var selectedRoleName = $('#hdnSelectedRoleName').val();
+
+            if (selectedSecId) {
+                setInputValue($('#ddlUserSecurityId'), selectedSecId);
+                setInputValue($('#ddlUserName'), selectedUserName || '');
+                setInputValue($('#ddlFullName'), selectedFullName || '');
+            }
+
+            if (selectedRoleId) {
+                setInputValue($('#ddlRoleId'), selectedRoleId);
+                setInputValue($('#ddlRoleName'), selectedRoleName || '');
+            }
+        });
+    })();
+</script>

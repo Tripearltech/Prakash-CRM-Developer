@@ -1,0 +1,247 @@
+﻿@{
+    ViewBag.Title = "InquiryManagement";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPReports/WebsiteLog">Inquiry Management</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Inquiry Management
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                @*<div>
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <input type="date" id="FromDate" class="form-control" placeholder="From Date" />
+                                <p id="Fdatevalidate" style="color:red"></p>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" id="ToDate" class="form-control" placeholder="To Date" />
+                                <p id="Tdatevalidate" style="color:red"></p>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="SearchBtn" class="btn btn-primary">Search</button>
+                                <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                    <i class="bx bx-rotate-right "></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>*@
+
+            </div>
+            <div class="">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <table class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Sales Person Name</th>
+                                            <th scope="col">Total Inquiry</th>
+                                            <th scope="col">Total Sales Quote</th>
+                                            <th scope="col">Total Send SMS</th>
+                                            <th scope="col">Total Send Email</th>
+                                            <th scope="col">Total Confirm Quote</th>
+                                            <th scope="col">Inquiry Conversion Ratio</th>
+                                            <th scope="col">Quote Conversion Ratio</th>
+                                            <th scope="col">Quote to SMS</th>
+                                            <th scope="col">Quote to Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblInquiryManagement">
+                                    </tbody>
+                                    <tbody id="tblemployeeInquiryManagement">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="DetailsModal" tableindex="-1" aria-labelledby="DetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sales Person Quote</h5>
+            </div>
+
+            <div>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <input type="date" id="FromDate" class="form-control" placeholder="From Date" />
+                        <p id="Fdatevalidate" style="color:red"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" id="ToDate" class="form-control" placeholder="To Date" />
+                        <p id="Tdatevalidate" style="color:red"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="SearchBtn" class="btn btn-primary">Search</button>
+                        <button type="button" id="btnClearFilter" class="btn btn-primary">Refresh</button>
+                        @*<button id="btnClearFilter" class="btn btn-primary" type="button">
+                                <i class="bx bx-rotate-right "></i>Refresh
+                            </button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="max-height:450px; overflow-y:auto;">
+                <table class="table mb-0 table-striped">
+                    <thead class="sticky-top bg-white" style="top: -20px;">
+                        <tr>
+                            <th scope="col">
+                                <input type="hidden" id="SalesPerson" />
+                                No
+                            </th>
+                            <th scope="col">Document Date</th>
+                            <th scope="col">Sell-to Customer Name</th>
+                            <th scope="col">Sell-to Contact</th>
+                            <th scope="col">Due Date</th>
+                            <th scope="col">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbleSalesPesonQuotes"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="confirmModal" tableindex="-1" aria-labelledby="DetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sales Person Confirm Quote</h5>
+            </div>
+
+            <div>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <input type="date" id="FDate" class="form-control" placeholder="From Date" />
+                        <p id="Fdate" style="color:red"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" id="TDate" class="form-control" placeholder="To Date" />
+                        <p id="Tdate" style="color:red"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="Search" class="btn btn-primary">Search</button>
+                        <button type="button" id="btnClear" class="btn btn-primary">Refresh</button>
+                        @*<button id="btnClearFilter" class="btn btn-primary" type="button">
+                                <i class="bx bx-rotate-right "></i>Refresh
+                            </button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="max-height:450px; overflow-y:auto;">
+                <table class="table mb-0 table-striped">
+                    <thead class="sticky-top bg-white" style="top: -20px;">
+                        <tr>
+                            <th scope="col">
+                                <input type="hidden" id="SalesPerson" />
+                                No
+                            </th>
+                            <th scope="col">Document Date</th>
+                            <th scope="col">Sell-to Customer Name</th>
+                            <th scope="col">Sell-to Contact</th>
+                            <th scope="col">Due Date</th>
+                            <th scope="col">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbleSalesPesonConfirmQuotes"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="SalesPesonModal" tableindex="-1" aria-labelledby="DetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sales Person Inquiry</h5>
+            </div>
+            <div>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <input type="date" id="FromDate1" class="form-control" placeholder="From Date" />
+                        <p id="Fdatevalidate1" style="color:red"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" id="ToDate1" class="form-control" placeholder="To Date" />
+                        <p id="Tdatevalidate1" style="color:red"></p>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="SearchBtn1" class="btn btn-primary">Search</button>
+                        <button type="button" id="btnClearFilter1" class="btn btn-primary">Refresh</button>
+                        @*<button id="btnClearFilter" class="btn btn-primary" type="button">
+                                <i class="bx bx-rotate-right "></i>Refresh
+                            </button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body" style="max-height:450px; overflow-y:auto;">
+                <table class="table mb-0 table-striped">
+                    <thead class="sticky-top bg-white" style="top: -20px;">
+                        <tr>
+                            <th scope="col">
+                                No
+                            </th>
+                            <th scope="col">Document Date</th>
+                            <th scope="col">Customer Name</th>
+                            <th scope="col">Contact Name</th>
+                            <th scope="col">Payment Terms Code</th>
+                            <th scope="col">Remarks</th>
+                            <th scope="col">Ship-to Code</th>
+                            <th scope="col">Ship-to Address</th>
+                            <th scope="col">Ship-to Address 2</th>
+                            <th scope="col">Ship-to City</th>
+                            <th scope="col">Ship-to Country/Region Code</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbleSalesPesonInquiry"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/reportjs/InquiryManagement.js"></script>

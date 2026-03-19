@@ -1,0 +1,72 @@
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CopyComplete
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+D:\Nishant\Projects\PrakashCRM\Project\Final PrakashCRM - NewTemp\Final PrakashCRM - NewTemp\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CopyComplete
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+D:\Nishant\Projects\PrakashCRM\Project\Updated\SalesPerson PrakashCRM\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CopyComplete
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+D:\Nishant\Projects\PrakashCRM\Git Folder\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CopyComplete
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+C:\Users\Tripearltech\Source\Repos\PrakashCRM_SalesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\obj\Release\PrakashC.3DFDDAF9.Up2Date
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+C:\PrakashCRM_SalesPerson\Azures-Code\PrakshCRM_SelesPerson\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Release\PrakashC.3DFDDAF9.Up2Date
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\obj\Release\PrakashC.3DFDDAF9.Up2Date
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Azures-Code\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashC.3DFDDAF9.Up2Date
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb

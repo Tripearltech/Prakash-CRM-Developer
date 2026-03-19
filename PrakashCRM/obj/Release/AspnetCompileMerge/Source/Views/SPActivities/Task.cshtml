@@ -1,0 +1,118 @@
+﻿@model PrakashCRM.Data.Models.SPTask
+@{
+    ViewBag.Title = "Task";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPActivities/Activities"><i class=""></i>&nbsp;Activities</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">&nbsp;Task</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body p-4">
+            <h5 class="card-title"><i class="bx bx-task"></i> Task</h5>
+            <hr />
+            <div class="form-body mt-4">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="border border-3 p-4 rounded">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Subject<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="txtSubject" placeholder="Enter Subject">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Due Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="date" class="form-control" id="txtDueDate" placeholder="Select Date">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Category<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlCategory" class="form-select">
+                                        <option value="---Select---">---Select Category---</option>
+                                        <option value="Ahmedabad">Ahmedabad</option>
+                                        <option value="Surat">Surat</option>
+                                        <option value="Baroda">Baroda</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Description</label>
+                                <div class="col-sm-9">
+                                    <textarea id="txtDescription" class="form-control" placeholder="Enter Description"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Regarding</label>
+                                <div class="col-sm-9">
+                                    <select id="ddlRegarding" class="form-select">
+                                        <option value="---Select---">---Select Regarding---</option>
+                                        <option value="Ahmedabad">Customer</option>
+                                        <option value="Surat">Lead</option>
+                                        <option value="Baroda">Opportunity</option>
+                                        <option value="Baroda">Order</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">For Customer</label>
+                                <div class="col-sm-9">
+                                    <select id="ddlCustomer" class="form-select">
+                                        <option value="---Select---">---Select Customer---</option>
+                                        <option value="Ahmedabad">Ahmedabad</option>
+                                        <option value="Surat">Surat</option>
+                                        <option value="Baroda">Baroda</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Task Team</label>
+                                <div class="col-sm-9">
+                                    <select id="ddlTaskTeam" class="form-select">
+                                        <option value="---Select---">---Select Task Team---</option>
+                                        <option value="Ahmedabad">Ahmedabad</option>
+                                        <option value="Surat">Surat</option>
+                                        <option value="Baroda">Baroda</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="border border-3 p-4 rounded">
+                            <div class="col-12">
+                                <label class="col-sm-3 col-form-label">Notes</label>
+                                <textarea id="txtNotes" class="form-control" placeholder="Enter Notes" style="height:360px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="toolbar">
+                    <div class="text-end g-3">
+                        <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
+                        &nbsp;
+                        <button type="button" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")

@@ -1,0 +1,504 @@
+﻿
+@{
+    ViewBag.Title = "ContactCompanyList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+
+    .verticalScroll {
+        padding: 15px;
+        overflow-y: auto;
+        height: 250px;
+    }
+
+    .ck-content, textarea {
+        height:270px;
+        padding:15px;
+        overflow-y:auto;
+    }
+
+    .ViewContactCls:hover {
+        cursor: pointer;
+    }
+
+    /*th:nth-child(11), td:nth-child(11),
+    th:nth-child(12), td:nth-child(12),
+    th:nth-child(13), td:nth-child(13) {
+        display: none
+    }*/
+
+</style>
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Contact List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <div class="row row-cols-auto g-3" align="right">
+                                <div class="col">
+                                    <button id="btnMSDS" type="button" class="btn btn-info">MSDS</button>
+                                </div>
+                                <div class="col">
+                                    <button id="btnItemSpec" type="button" class="btn btn-secondary">Item Specification</button>
+                                </div>
+                                <div class="col">
+                                    <button id="btnCOA" type="button" class="btn btn-info">COA</button>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSendMsg" type="button" class="btn btn-secondary">Send SMS/WhatsApp</button>
+                                </div>
+                                <div class="col">
+                                    <button id="btnFeedBack" type="button" class="btn btn-info">Feedback</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getCustVendorPortalUrl" value="@System.Configuration.ConfigurationManager.AppSettings["CustVendorPortalUrl"].ToString()" style="display:none" />
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <input id="getLoggedInSPEmail" value="@Session["loggedInUserEmail"].ToString()" style="display:none" />
+                            <input id="hfSPNo" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                            <button id="btnNew" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="No">No</option>
+                                        <option value="Name">Company Name</option>
+                                        <option value="Industry">Industry</option>
+                                        <option value="Source_of_Contact">Source Of Contact</option>
+                                        <option value="Business_Type">Business Type</option>
+                                        <option value="City">City</option>
+                                        <option value="Area">Area</option>
+                                        <option value="Post_Code">Pin</option>
+                                        <option value="Phone_No">Phone</option>
+                                        <option value="E_Mail">Email</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <div class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th><input type="checkbox" id="chkAll" class="form-check-input" /></th>
+                            <th></th>
+                            <th>Contact<br />Persons</th>
+                            <th>No</th>
+                            <th>Company Name</th>
+                            <th>Industry</th>
+                            <th>Source Of Contact</th>
+                            <th>Business Type</th>
+                            <th>City</th>
+                            <th>Area</th>
+                            <th>Pin</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Primary Contact Name</th>
+                            <th>Mobile</th>
+                            <th>Salesperson</th>
+                            <th>Credit Limit</th>
+                            <th>GST No</th>
+                            <th>PAN No</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>Contact<br />Persons</th>
+                            <th>No</th>
+                            <th>Company Name</th>
+                            <th>Industry</th>
+                            <th>Source Of Contact</th>
+                            <th>Business Type</th>
+                            <th>City</th>
+                            <th>Area</th>
+                            <th>Pin</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Primary Contact Name</th>
+                            <th>Mobile</th>
+                            <th>Salesperson</th>
+                            <th>Credit Limit</th>
+                            <th>GST No</th>
+                            <th>PAN No</th>
+                            <th>Feedback</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnItemSpecMSDSCOA" style="display:none" />
+                <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
+                <input id="hdnCCompanyCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalItemSpecMSDSCOA" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="margin-top:-60px">
+            <div class="modal-header">
+                <input type="hidden" id="hdnModalTitle" />
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-9">
+                                <input class="form-check-input" type="checkbox" value="" id="chkEmail">
+                                <label class="form-check-label">Email</label>
+                                &nbsp;
+                                <input class="form-check-input" type="checkbox" value="" id="chkWhatsApp">
+                                <label class="form-check-label">WhatsApp</label>
+                                &nbsp;
+                                <label id="lblOptErr" class="form-check-label" style="color:red;display:none">Please Select Email OR WhatsApp Option</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dvCOALocations" class="row g-3" style="display:none">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Branch Location:</label>
+                            <div class="col-sm-9">
+                                <select id="ddlLocations" class="form-select">
+                                    <option>---Select---</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Product:<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <select id="ddlItems" class="form-select">
+                                </select>
+                                &nbsp;
+                                <label id="lblProdErr" class="form-check-label" style="color:red;display:none">Please select product</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dvItemSpecMSDSCOAEmail" class="row g-3" style="display:none">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Email:</label>
+                            <div class="col-sm-9">
+                                <input id="txtItemSpecMSDSCOAEmail" type="text" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dvCOADetails" class="row g-3" style="display:none">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Available Stock: </label>
+                            <div class="col-sm-9">
+                                <label id="lblCOAProdAvailableStock" class="col-form-label" style="display:none"></label>
+                                <div id="dvCOAProdAvailableStock" class="verticalScroll" style="display:none">
+                                    <table id="tblBatchWiseQty" class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>Batch No</th>
+                                                <th>Available Stock</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblBatchWiseQtyDetails">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dvItemSpecMSDSCOAMobile" class="row g-3" style="display:none">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Mobile:</label>
+                            <div class="col-sm-9">
+                                <input id="txtItemSpecMSDSCOAMobile" type="text" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Body:</label>
+                            <div class="col-sm-9">
+                                <div id="editor"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="padding-bottom:0px">
+                
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <div class="col-sm-11">
+                                <label class="col-form-label">Path:</label>
+                                <label id="lblItemSpecMSDSCOAPath" class="col-form-label"></label>
+                            </div>
+                            <div class="col-sm-1" align="right">
+                                <button id="btnSendItemSpecMSDSCOA" type="button" class="btn btn-primary">Send</button>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalSendMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-9">
+                                <input class="form-check-input" type="checkbox" value="" id="chkSMS1">
+                                <label class="form-check-label">SMS</label>
+                                &nbsp;
+                                <input class="form-check-input" type="checkbox" value="" id="chkWhatsApp1">
+                                <label class="form-check-label">WhatsApp</label>
+                                &nbsp;
+                                <label id="lblOptErr1" class="form-check-label" style="color:red;display:none">Please Select SMS OR WhatsApp Option</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Mobile:</label>
+                            <div class="col-sm-9">
+                                <input id="txtMsgMobile" type="text" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Body:</label>
+                            <div class="col-sm-9">
+                                <textarea id="txtBody" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button id="btnModalSendMsg" type="button" class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalContacts" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvContacts" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Phone No.</th>
+                                                <th scope="col">Email</th>
+                                                <th scope="col">Department</th>
+                                                <th scope="col">Job Responsibility</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbContacts">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalMSDSItemSpecMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button id="btnCloseMSDSItemSpecMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    Sent Successfully.
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalFeedbackFormMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Feedback Form Link</h5>
+                <button id="btnCloseFeedbackFormMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    Feedback Form Link Sent Successfully.
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="https://cdn.ckeditor.com/ckeditor5/36.0.0/classic/ckeditor.js"></script>
+<script src="~/Scripts/appjs/ContactCompanyList.js"></script>
+<script>
+
+    $(document).ready(function () {
+        $('#btnNew').click(function () {
+            window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")');
+        });
+    });
+
+    ClassicEditor.create(document.querySelector('#editor'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>

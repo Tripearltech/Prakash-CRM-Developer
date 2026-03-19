@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BF410FDF-E32A-4445-8BBE-BDDCD0671C34}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PrakashCRM.Data</RootNamespace>
+    <AssemblyName>PrakashCRM.Data</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\ConBusinessRelation.cs" />
+    <Compile Include="Models\CustomerLedgerEntry.cs" />
+    <Compile Include="Models\DropDownList.cs" />
+    <Compile Include="Models\MarketUpdate.cs" />
+    <Compile Include="Models\SPActivities.cs" />
+    <Compile Include="Models\SPAdminBusinessPlan.cs" />
+    <Compile Include="Models\SPBranches.cs" />
+    <Compile Include="Models\SPBusinessPlanProds.cs" />
+    <Compile Include="Models\SPContacts.cs" />
+    <Compile Include="Models\Salesperson.cs" />
+    <Compile Include="Models\SPContCustForBusRel.cs" />
+    <Compile Include="Models\SPCustomers.cs" />
+    <Compile Include="Models\SPDailyVisit.cs" />
+    <Compile Include="Models\SPDashboardDetails.cs" />
+    <Compile Include="Models\SPFeedback.cs" />
+    <Compile Include="Models\SPGRN.cs" />
+    <Compile Include="Models\SPILEQtyForCountStock.cs" />
+    <Compile Include="Models\SPInquiry.cs" />
+    <Compile Include="Models\SPItems.cs" />
+    <Compile Include="Models\SPLocations.cs" />
+    <Compile Include="Models\SPCompanyInformation.cs" />
+    <Compile Include="Models\SPMeeting.cs" />
+    <Compile Include="Models\SPMenus.cs" />
+    <Compile Include="Models\SPNoSeries.cs" />
+    <Compile Include="Models\SPNotification.cs" />
+    <Compile Include="Models\SPOutstandingPayment.cs" />
+    <Compile Include="Models\SPPhoneCall.cs" />
+    <Compile Include="Models\SPPostedSalesInvoice.cs" />
+    <Compile Include="Models\SPRoleRights.cs" />
+    <Compile Include="Models\RoleWiseMenuRightsResponse.cs" />
+    <Compile Include="Models\SPRoles.cs" />
+    <Compile Include="Models\SPSalesOrders.cs" />
+    <Compile Include="Models\SPSalesQuotes.cs" />
+    <Compile Include="Models\SPSiteActivity.cs" />
+    <Compile Include="Models\SPSiteError.cs" />
+    <Compile Include="Models\SPTask.cs" />
+    <Compile Include="Models\SPTransporter.cs" />
+    <Compile Include="Models\SPUserTask.cs" />
+    <Compile Include="Models\SPVisitEntry.cs" />
+    <Compile Include="Models\SPWarehouse.cs" />
+    <Compile Include="Models\SPWarehousePurchase.cs" />
+    <Compile Include="Models\SPWarehouseSales.cs" />
+    <Compile Include="Models\SPWarehouseTransfer.cs" />
+    <Compile Include="Models\WhatsappAttachmentModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

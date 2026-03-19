@@ -1,0 +1,10 @@
+﻿.verticalScroll {
+    padding: 15px;
+    overflow-y: auto;
+    height: 300px;
+}
+
+/* Taller scroll area specifically for Dashboard Target vs Sales card */
+.dashboard-target-vs-sales.verticalScroll {
+    height: 450px;
+}

@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Sales Quote Approval</title>
+</head>
+
+<body style="font:normal 13px/22px Arial,Helvetica,sans-serif;color:#333">
+
+    <form id="form1" runat="server">
+
+        <div style="width:1000px;margin:0 auto;padding:20px;border:2px solid #C4C4C4;overflow:hidden">
+
+            <table cellpadding="5" cellspacing="5" border="0" width="100%">
+
+                <tr style="text-align:center;">
+                    <td colspan="4"><b>##heading##</b></td>
+                </tr>
+
+                <tr style="text-align:center;">
+                    <td colspan="4">
+                        <h3 style="font:bold 19px Verdana;margin:0 0 10px 0">Approval For Quote</h3>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <img src="{ApprovalFileFormatURL}" width="300" height="162" />
+                    </td>
+
+                    <td colspan="2" align="right">
+                        Prakash Chemicals Agencies Pvt. Ltd.<br />
+                        ‘Prakash House’, 39/40, Krishna Industrial Estate,<br />
+                        Opp.BIDC, Gorwa Road, BARODA – 390016<br />
+                        Tel.: +91 265 3926000<br />
+                        www.pcaplindia.com
+                    </td>
+                </tr>
+
+                <tr><td colspan="4"><hr style="border:1px solid #ddd"></td></tr>
+
+                <tr>
+                    <td colspan="4">
+                        <b>Ref No :</b> ##SalesQuoteNo##<br />
+                        <b>Date :</b> ##SalesQuoteDate##
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <b>To,</b><br />
+                        ##CustomerDetail##
+                    </td>
+                    <td colspan="2">
+                        <b>##ShippingHeader##</b><br />
+                        ##ShippingDetail##
+                    </td>
+                </tr>
+
+                <tr><td colspan="4" height="20"></td></tr>
+
+                <tr>
+                    <td colspan="4">
+                        <b>KIND ATTEN :</b> ##ContactName##<br />
+                        Dear Madam / Sir,
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        Thanks for your inquiry. We are pleased to quote our most competitive prices.
+                    </td>
+                </tr>
+
+                <tr><td colspan="4" height="15"></td></tr>
+
+                <!-- Credit Limit Table -->
+                <tr>
+                    <td colspan="4">
+                        <table width="100%" style="border-collapse:collapse">
+
+                            <tr style="background:#ccc;font-weight:bold">
+                                <td style="border:1px solid #bbb;padding:5px">Total Credit Limit</td>
+                                <td style="border:1px solid #bbb;padding:5px">Used Credit Limit</td>
+                                <td style="border:1px solid #bbb;padding:5px">Available Credit Limit</td>
+                            </tr>
+
+                            <tr>
+                                <td style="border:1px solid #bbb;padding:5px">##totalcreditlimit##</td>
+                                <td style="border:1px solid #bbb;padding:5px">##usedcreditlimit##</td>
+                                <td style="border:1px solid #bbb;padding:5px">##availablecreditlimit##</td>
+                            </tr>
+
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Line Items -->
+                <tr>
+                    <td colspan="4">
+                        ##LineDetails##
+                    </td>
+                </tr>
+
+                <tr><td colspan="4" height="15"></td></tr>
+
+                <!-- Terms -->
+                <tr>
+                    <td colspan="4">
+                        <!--<b>GST :</b> ##GSTNo##<br />-->
+                        <b>Sales Tax Details :</b> ##TaxGroupDetails##<br />
+                        <b>##PaymentTermsHeader####PaymentTerms##</b><br />
+                        <b>##ScheduleHeader####Schedule##</b><br />
+                        <b>Validity :</b> ##QuoteValidityDays##<br />
+                        <b>Note :</b> ##Note##
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        We hope our price will match your requirements and eagerly await your favourable reply.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        <b>Please feel free to contact us for any clarification.</b><br /><br />
+                        <b>For Prakash Chemicals Agencies Pvt. Ltd.</b>
+                    </td>
+                </tr>
+
+                <tr><td colspan="4" height="30"></td></tr>
+
+                <!-- ================= FOOTER UI ================= -->
+
+                <tr>
+                    <td colspan="4">
+
+                        ##FooterDetails##
+
+                    </td>
+                </tr>
+
+                <!-- Approval Link -->
+
+                <tr>
+                    <td colspan="4" align="center" style="padding-top:15px;">
+                        <b>
+                            <a href="##SalesQuoteApprovalFormURL##">Send Quote Confirmation</a>
+                        </b>
+                    </td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </form>
+</body>
+</html>

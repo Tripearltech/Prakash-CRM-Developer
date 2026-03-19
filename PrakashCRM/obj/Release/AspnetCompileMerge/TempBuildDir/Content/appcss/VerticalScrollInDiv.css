@@ -1,0 +1,5 @@
+﻿.verticalScroll {
+    padding: 15px;
+    overflow-y: auto;
+    height: 300px;
+}

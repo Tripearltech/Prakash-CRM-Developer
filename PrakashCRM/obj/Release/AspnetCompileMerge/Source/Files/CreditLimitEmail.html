@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style type="text/css">
+        body
+        {
+            font: normal 13px/22px Arial, Helvetica, sans-serif;
+            color: #333;
+        }
+        
+        .printWrap
+        {
+            width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 2px solid #C4C4C4;
+            overflow: hidden;
+        }
+        
+        .printWrap h3
+        {
+            font: bold 19px Verdana, Geneva, sans-serif;
+            margin: 0 0 10px 0 !important;
+        }
+        
+        .printTbl table
+        {
+            border-collapse: collapse;
+        }
+        
+        .printTbl table tr:first-child td
+        {
+            background: #ccc;
+            font-weight: bold !important;
+            text-transform: capitalize;
+        }
+        
+        .printTbl table td
+        {
+            border: 1px solid #BEBEBE;
+            padding: 4px;
+        }
+        
+        .lowerTxt
+        {
+            text-transform: capitalize !important;
+        }
+        
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div class="printWrap">
+        <table cellpadding="5" cellspacing="5" border="0" width="100%" align="left">
+            <tr style="text-align:center;"><td colspan="4"><b>##heading##</b></td></tr>
+            <tr>
+                <!---->
+                <td colspan="2" valign="top" align="left">
+                    <img src="~/Layout/assets/images/login-images/logo-2.jfif" width="250px" height="150px" />
+                </td>
+                <td valign="top" colspan="2" align="right">
+                    <h3>
+                        Approval For Quote</h3>
+                    Prakash Chemicals Agencies Pvt. Ltd.<br />
+                    ‘Prakash House’, 39/40, Krishna Industrial Estate,<br />
+                    Opp.BIDC, Gorwa Road,<br />
+                    BARODA 390016
+                    <br />
+                    Tel.: +91 265 3926000<br />
+                    Fax : +91 265 3926122 | www.pcaplindia.com
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <hr style="background-color: #DDD; border: 1PX solid #ddd;" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" height="30">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <h3>
+                        ##pageheading##
+                    </h3>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" height="20">
+                </td>
+            </tr>
+            <tr>
+                <td align="left" colspan="4">
+                    <b>Ref No : </b>##SalesQuoteNo##<br />
+                    <b>Date : </b>##SalesQuoteDate##
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" align="left">
+                    <b>To,</b><br />
+                    ##CustomerDetail##
+                </td>
+                <td colspan="9" align="left">
+                    <b>##ShippingHeader##</b><br />
+                    ##ShippingDetail##
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" height="30">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <table cellpadding="0" cellspacing="5" border="0" width="100%" align="left">
+                        <tr>
+                            <td colspan="2">
+                                <b>
+                                    KIND ATTEN : ##ContactName##<br />
+                                    Dear Madam / Sir,
+                                </b>
+                            </td>
+                            <td align="left">
+                                &nbsp;
+                            </td>
+                          
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td colspan="4" align="left">
+                    Thanks For your Inquiry.<br />
+                    We are pleased to quote our most competitive prices.for your kind consideration.
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" height="20"></td>
+            </tr>
+            <tr>
+                <td colspan="4" class="printTbl">
+                    <table width="100%">
+                        <tr>
+                            <td>Total Credit Limit</td>
+                            <td>Used Credit Limit</td>
+                            <td>Available Credit Limit</td>
+                        </tr>
+                        <tr>
+                            <td>##totalcreditlimit##</td>
+                            <td>##usedcreditlimit##</td>
+                            <td>##availablecreditlimit##</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4" align="left" class="printTbl">
+                    ##LineDetails##
+                </td>
+            </tr>
+            
+            <tr>
+                <td colspan="4" height="20">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="left">
+                   <b>Sales Tax Details :</b> ##TaxGroupDetails##
+                    <!--<b>##GSTAPPLICABLE##</b>-->
+                    <br />
+                    <b>##PaymentTermsHeader####PaymentTerms##</b>
+                    <br />
+                    <b>##ScheduleHeader####Schedule##</b>
+                    <br />
+                    <b>Validity : One Day</b><br />
+                    <b>Note : Price ruling at the time of delivery for GACL & GNFC products.</b>
+                </td>
+            </tr>
+          
+            <tr>
+                <td colspan="4" align="left">
+                    We hope our price will match your requirements and eagerly await your favourable
+                    reply at the earliest and oblige.
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="left">
+                    <b>Please feel free to contact us for any clarification or support.</b>
+                    <br />
+                    <b>Thanking You,</b><br />
+                    <br />
+                    <b>For Prakash Chemicals Agencies Pvt Ltd.</b>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="left">
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" height="50">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="left">
+                    ##FooterDetails##
+                </td>
+            </tr>
+            <!--<tr>
+               
+                <td colspan="4" align="center"><b>Justification : </b>##msg##</td>
+            </tr>-->
+            <tr>
+                <td colspan="4" align="center">
+                    <b>
+                        <a href="##page##SQN=##SRN##&CUSTNO=##custno##&CNAME=##custname##">Send Quote Confirmation</a>                  
+                        
+                        
+
+                        <!--<a href="localhost:53606/CreditLimit.aspx?ST=1&SQN=##SRN##">Approve</a>&nbsp; &nbsp;
+                        <a href="localhost:53606/CreditLimit.aspx?ST=0&SQN=##SRN##">Reject</a>-->
+                    </b>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </form>
+</body>
+</html>

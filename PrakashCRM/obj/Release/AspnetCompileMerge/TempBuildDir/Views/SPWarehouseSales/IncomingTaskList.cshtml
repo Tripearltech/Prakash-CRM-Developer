@@ -1,0 +1,198 @@
+﻿@model IEnumerable<PrakashCRM.Data.Models.SPWarehouseSales>
+@{
+    ViewBag.Title = "IncomingTaskList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Warehouse
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Warehouse Sales
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Incoming Task</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <input id="getLoggedInUserNo" value="@Session["loggedInUserNo"].ToString()" style="display:none" />
+                            <button id="btnAcceptSelected" class="btn btn-primary  mb-3 mb-lg-0" type="button" onclick="AccceptTask();"><i class='bx bx-message-square-check'></i>&nbsp;Accept</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="---Select---">---Select---</option>
+                                        <option value="No">Order No</option>
+                                        <option value="Sell_to_Customer_No">Customer No</option>
+                                        <option value="Sell_to_Customer_Name">Sell To Customer</option>
+                                        <option value="Location_Code">Location Code</option>
+                                        <option value="Shipment_Date">Shipment Date</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtFromDate" type="date" class="form-control" style="display:none">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="---Select---">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Less Than">Less Than</option>
+                                        <option value="Greater Than">Greater Than</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtToDate" type="date" class="form-control" style="display:none">
+                                    <div id="dvtxtSearch" class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- -->
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th><input type="checkbox" id="chkAll" class="form-check-input" /></th>
+                            <th>Order No</th>
+                            <th>Customer No</th>
+                            <th>Customer Name</th>
+                            <th>Location Code</th>
+                            <th>Shipment Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Order No</th>
+                            <th>Customer No</th>
+                            <th>Customer Name</th>
+                            <th>Location Code</th>
+                            <th>Shipment Date</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnWSITaskCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalSalesLineList" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvSalesLines" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product No</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">UOM</th>
+                                                <th scope="col">Packing Style</th>
+                                                <th scope="col">Location Code</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbSalesLines">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SalesIncomingTaskList.js"></script>

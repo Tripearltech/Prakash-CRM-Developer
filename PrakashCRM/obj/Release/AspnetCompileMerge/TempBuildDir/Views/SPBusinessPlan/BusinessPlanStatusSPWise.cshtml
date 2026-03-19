@@ -1,0 +1,211 @@
+﻿
+@{
+    ViewBag.Title = "BusinessPlanStatusSPWise";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Business Plan Status
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-1">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                        </div>
+                        <div class="col-md-3">
+                            <div class="row row-cols-auto g-3">
+                                <div class="col">
+                                    <label class="col-form-label">Financial Year:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlFinancialYear" class="form-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Salesperson_Purchaser_Name">Salesperson</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <div id="dvtxtSearch" class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-12" align="right">
+                    <button id="btnApproveRejectSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="visually-hidden">Loading...</span>
+                    </button>
+                    &nbsp;
+                    <button type="button" class="btn btn-outline-success px-5" onclick="ApproveRejectBusinessPlan('Approve','')">
+                        <i class='bx bx-check mr-1'></i>Approve
+                    </button>
+                    &nbsp;
+                    <button id="btnReject" type="button" class="btn btn-outline-danger px-5">
+                        <i class='bx bx-x mr-1'></i>Reject
+                    </button>
+                </div>
+
+            </div>
+            <div class="row g-3">
+
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table mb-0 table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="chkAll" class="form-check-input"></th>
+                                    <th>Salesperson</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblSPList">
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th>Salesperson</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
+                        <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalApproveRejectMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Business Plan Approval</h5>
+                <button id="btnCloseApproveRejectMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    <label id="lblApproveRejectMsg" class="form-label"></label>
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalRejectRemarks" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reject Remarks</h5>
+                <button id="btnCloseModalRejectRemarks" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Remarks</label>
+                            <div class="col-sm-9">
+                                <textarea id="txtRejectRemarks" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding-bottom:0px">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <div class="col-sm-12" align="right">
+                                <label id="lblRemarksMsg" class="col-form-label" style="color:red"></label>
+                                <button id="btnConfirmRejectSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Loading...</span>
+                                </button>
+                                <button id="btnConfirmReject" type="button" class="btn btn-primary">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/BusinessPlanStatusSPWise.js"></script>

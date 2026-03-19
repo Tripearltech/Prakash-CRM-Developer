@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewBag.Title = "ItemPriceChange";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Item Price Change
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div>
+                    @*<div class="row g-3">
+            <div class="col-md-4">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Product<span class="required" style="color:red;margin-left:2px">*</span></label>
+                    <div class="col-sm-9">
+                        <select id="ddlProduct" class="form-select">
+                            <option>---Select---</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Packing Style<span class="required" style="color:red;margin-left:2px">*</span></label>
+                    <div class="col-sm-9">
+                        <select id="ddlPackingStyle" class="form-select">
+                            <option>---Select---</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+            </div>
+        </div>
+        <br />
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Current Price</label>
+                    <div class="col-sm-9">
+                        <input id="txtCurrentPrice" class="form-control" readonly />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">New Price<span class="required" style="color:red;margin-left:2px">*</span></label>
+                    <div class="col-sm-9">
+                        <input id="txtNewPrice" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Discount<span class="required" style="color:red;margin-left:2px">*</span></label>
+                    <div class="col-sm-9">
+                        <input id="txtDiscount" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row g-3">
+            <div class="col-md-12" align="right">
+                <button type="button" id="btnSave" class="btn btn-success"><i class="bx bxs-save"></i> Save</button>
+                &nbsp;
+                <button type="button" id="btnCancel" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</button>
+            </div>
+        </div>
+        <br />*@
+                    <div class="row g-3">
+
+                        <div class="col-md-12" align="right">
+                            <button type="button" id="btnSave" class="btn btn-success"><i class="bx bxs-save"></i> Save</button>
+                        </div>
+
+                    </div>
+                    <div class="row g-3">
+
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+
+                                    <table class="table table-striped">
+
+                                        <thead>
+                                            <tr>
+                                                <th hidden>Product No</th>
+                                                <th>Product</th>
+                                                <th hidden>Packing Style Code</th>
+                                                <th>Packing Style</th>
+                                                <th>Current Price</th>
+                                                <th>New Price</th>
+                                                <th>Discount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblProdDetails">
+                                        </tbody>
+
+                                    </table>
+                                    <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/ItemPriceChange.js"></script>

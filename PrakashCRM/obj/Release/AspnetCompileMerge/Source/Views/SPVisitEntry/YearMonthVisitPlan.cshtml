@@ -1,0 +1,424 @@
+﻿@model PrakashCRM.Data.Models.SPVEYearMonthPlanPost
+@{
+    ViewBag.Title = "YearMonthVisitPlan";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .clsAddMonDetails, .clsDelYearMonthPlan {
+        cursor: pointer;
+    }
+</style>
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPVisitEntry/YearMonthPlanList"> Year Month Plan List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Year Month Visit Plan
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    @using (Html.BeginForm("YearMonthVisitPlan", "SPVisitEntry", FormMethod.Post))
+    {
+        @Html.ValidationSummary(true)
+        <div class="card">
+            <div class="card-body" style="padding-bottom:0px">
+
+                <div class="row">
+                    <div>
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <input id="hfType" name="hfType" value="@ViewBag.Type" style="display:none" />
+                                <input id="hfSubType" name="hfSubType" value="@ViewBag.SubType" style="display:none" />
+                                <input id="hfYear" name="hfYear" value="@ViewBag.Year" style="display:none" />
+                                <input id="hfEdate" name="hfEdate" value="@ViewBag.Edate" style="display:none" />
+                            </div>
+                        </div>
+
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-9"></div>
+                                    <label class="col-sm-1 col-form-label" align="right">Year<span class="required" style="color:red;margin-left:2px">*</span></label>
+
+                                    <div class="col-sm-2">
+                                        @*<select id="ddlYear" class="form-select">
+                                            </select>*@
+                                        @Html.DropDownListFor(model => model.Year, Enumerable.Empty<SelectListItem>(), new { Value = Model.Year, @id = "ddlYear", @class = "form-select" })
+                                        <br />
+                                        <label id="lblFinancialYearMsg" style="color:red;display:none">Please Select Year</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Type<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @*<select id="ddlType" class="form-select">
+                                            <option>--Select--</option>
+                                        </select>*@
+                                        @Html.DropDownListFor(model => model.Visit_Type, Enumerable.Empty<SelectListItem>(), new { Value = Model.Visit_Type, @id = "ddlType", @class = "form-select" })
+                                        <br />
+                                        <label id="lblTypeMsg" style="color:red;display:none">Please Select Type</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Sub Type<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @*<select id="ddlSubType" class="form-select">
+                                            <option>---Select---</option>
+                                        </select>*@
+                                        @Html.DropDownListFor(model => model.Visit_Sub_Type, Enumerable.Empty<SelectListItem>(), new { Value = Model.Visit_Sub_Type, @id = "ddlSubType", @class = "form-select" })
+                                        <br />
+                                        <label id="lblSubTypeMsg" style="color:red;display:none">Please Select Sub Type</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">No of Visit<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @*<input type="text" class="form-control" />*@
+                                        @Html.TextBoxFor(model => model.No_of_Visit, new { @id = "txtNoOfVisit", @class = "form-control", @type = "number" })
+                                        <br />
+                                        <label id="lblNoOfVisitMsg" style="color:red;display:none"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                @*<div class="row mb-3">
+                                    <div class="col-sm-3"></div>
+                                    <div class="col-sm-9">
+                                        @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input", @id="chkIsActive" }) Active
+                                    </div>
+                                </div>*@
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12" align="right">
+                                        <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                                        <input type="hidden" id="hdnYearMonthPlanAction" value="@Session["YearMonthPlanAction"]" />
+                                        <input type="hidden" id="hdnYearMonthPlanActionErr" value="@Session["YearMonthPlanActionErr"]" />
+                                        <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                        &nbsp;
+                                        <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Loading...</span>
+                                        </button>
+                                        &nbsp;
+                                        <button id="btnSave" class="btn btn-success" type="submit" onclick="return ChkNoOfVisitValue()"><i class="bx bxs-save"></i> Save</button>
+                                        &nbsp;
+                                        <button type="button" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div>
+                    <h6 class="mb-0 font-weight-bold">Yearly Visit</h6>
+                    <hr />
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Type</th>
+                                                <th scope="col">Sub Type</th>
+                                                <th scope="col">Total Yearly Visit</th>
+                                                <th scope="col">Actual Visit</th>
+                                                <th scope="col">Month</th>
+                                                @*<th scope="col">Delete</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblYearMonthPlan">
+                                            @*<tr>
+                                                    <td>Task</td>
+                                                    <td>Customer Visit</td>
+                                                    <td>480</td>
+                                                    <td><a onclick="showPopup()"><i class="bx bxs-edit"></i></a></td>
+                                                    <td><a href="#"><i class="bx bx-trash"></i></a></td>
+                                                </tr>*@
+                                        </tbody>
+                                    </table>
+                                    <input id="hdnYearMonthPlanNo" style="display:none" />
+                                    <input id="hdnType" style="display:none" />
+                                    <input id="hdnSubType" style="display:none" />
+                                    <input id="hdnNoOfVisit" style="display:none" />
+                                    <input id="hdnEdate" style="display:none" />
+                                    <input id="hdnYear" style="display:none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal" id="modalYearMonthPlan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Monthly Visit Plan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        @*&nbsp;<label id="lblYear" class="form-label"></label>*@
+                        @*&nbsp;<label id="lblYearNoOfVisit" class="form-label"></label>*@
+                        <table>
+                            <tr>
+                                <td><b>Type</b>&nbsp;</td>
+                                <td></td>
+                                <td id="tdType"></td>
+                                <td width="30"></td>
+                                <td><b>Sub Type</b>&nbsp;</td>
+                                <td></td>
+                                <td id="tdSubType"></td>
+                                <td width="30"></td>
+                                <td><b>Year</b>&nbsp;</td>
+                                <td></td>
+                                <td id="tdYear"></td>
+                                <td width="30"></td>
+                                <td><b>Total Yearly Visit</b>&nbsp;&nbsp;</td>
+                                <td></td>
+                                <td id="tdYearNoOfVisit"></td>
+                            </tr>
+                        </table>
+                        <br />
+                        <!--<div class="row mb-3">-->
+                        @*<label class="form-label" style="font-weight:bold">Year - </label>
+                <label id="lblYear" class="form-label">Year - </label>
+                <label class="form-label" style="font-weight:bold">Total Yearly Visit - </label>
+                <label id="lblYearNoOfVisit" class="form-label">Year - </label>*@
+
+                        <!--<label class="col-sm-1 col-form-label" style="font-weight:bold">Year - </label>
+            <label id="lblYear" class="col-sm-1 col-form-label"></label>
+            <label class="col-sm-2 col-form-label" style="font-weight:bold">Total Yearly Visit - </label>
+            <label id="lblYearNoOfVisit" class="col-sm-1 col-form-label"></label>
+            </div>-->
+                    </div>
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-5">
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <label class="form-label">
+                                    Month<span class="required" style="color:red;margin-left:2px">*</span>
+                                </label>
+                            </div>
+                            <div class="col-sm-9">
+                                <select id="ddlMonth" class="form-select">
+                                    @*<option value="-1">---Select---</option>
+                                    <option value="April">April</option>
+                                    <option value="May">May</option>
+                                    <option value="June">June</option>
+                                    <option value="July">July</option>
+                                    <option value="August">August</option>
+                                    <option value="September">September</option>
+                                    <option value="October">October</option>
+                                    <option value="November">November</option>
+                                    <option value="December">December</option>
+                                    <option value="January">January</option>
+                                    <option value="February">February</option>
+                                    <option value="March">March</option>*@
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">No Of Visit<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input id="MonNoOfVisit" type="text" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="row mb-3">
+                            <div class="col-sm-2">
+                                <button id="btnAddMonthlyVisit" type="button" class="btn btn-primary">Add</button>
+                            </div>
+                            <div class="col-sm-2">
+                                <button id="btnAddMonthSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Loading...</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<div class="col-md-1">
+                        <button id="btnAddMonthSpinner" class="btn btn-primary" type="button" disabled style="display:block">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </button>
+                    </div>*@
+
+                    @*<div class="col-md-2">
+                    </div>*@
+
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label id="lblMonVisitMsg" style="display:none"></label>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <div class="col-sm-12">
+                                <table class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Month</th>
+                                            <th scope="col">No of Visit</th>
+                                            <th scope="col">Actual Visit</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Sub Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblMonthlyVisit">
+                                        @*<tr>
+                                    <td>
+                                        January
+                                    </td>
+                                    <td>
+                                        5
+                                    </td>
+                                    <td>
+                                        Task
+                                    </td>
+                                    <td>
+                                        Customer Visit
+                                    </td>
+                                    <td>
+                                        <a href="#"><i class="bx bx-trash"></i></a>
+                                    </td>
+                                </tr>*@
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button id="btnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- -->
+<div class="modal" id="modalDelYearMonthPlan" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Year Month Plan</h5>
+                @*<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>*@
+            </div>
+            <div class="modal-body">
+                <center>
+                    Are you sure you want to delete it?
+                </center>
+            </div>
+            <div class="modal-footer">
+                <button id="btnDelYes" type="button" class="btn btn-primary">Yes</button>
+                <button id="btnDelNo" type="button" class="btn btn-secondary">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalDelMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Year Month Plan</h5>
+                <button id="btnCloseDelMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    Year Month Plan Deleted Successfully.
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+@*<script src="~/Scripts/appjs/YearDetails.js"></script>*@
+<script src="~/Scripts/appjs/YearMonthVisitPlan.js"></script>

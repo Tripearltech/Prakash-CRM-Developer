@@ -1,0 +1,469 @@
+﻿@model PrakashCRM.Data.Models.SPGRNCard
+@{ bool isEdit = HttpContext.Current.Request.QueryString["No"] != null; }
+@{
+    ViewBag.Title = "GRNCard";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+    var docimp = ViewBag.importDoc;
+    var doc = Convert.ToString(docimp);
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-home-alt"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPGRN/GRNList">GRN List</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        GRN Card
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="tab-content py-3">
+                <div class="tab-pane fade show active" id="profile" role="tabpanel">
+
+                    @using (Html.BeginForm("GRNCard", "GRN", FormMethod.Post))
+                    {
+                        @Html.ValidationSummary(true)
+                        <div class="row">
+                            <div>
+
+                                <h6 class="mb-0 font-weight-bold">GRN Header</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Document Type : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblDocumentType">@Model.DocumentType</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">No : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblDocumentNo">@Model.DocumentNo</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Order Date : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblOrderDate">@Model.OrderDate</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Name : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblVendorCustomerName">@Model.VendorCustomerName</label>
+                                                <input type="hidden" id="hfimportDoc" value="@doc" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Location : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblLocationCode">@Model.LocationCode</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="divCurrencyCode" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Currency : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblCurrencyCode">@Model.CurrencyCode</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div id="divVendorOrderNo" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Vendor Order No : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblOrderNo">@Model.VendorOrderNo</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="divSalesperson" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Salesperson : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblPurchaserCode">@Model.PurchaserCode</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div id="divContactName" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Contact Name : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblContactName">@Model.ContactName</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Posting Date : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtPostingDate" type="text" value="@Model.PostingDate" class="form-control datepicker" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div id="divDocumentDate" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Document Date : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtDocumentDate" type="text" value="@Model.DocumentDate" class="form-control datepicker" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="divVendorInvoiceNo" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Vendor Invoice No : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtVendorInvoiceNo" type="text" value="@Model.VendorInvoiceNo" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div id="divQcRemarks" class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">QC Remarks : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtQCRemarks" type="text" value="@Model.QCRemarks" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">LR/RR No : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtLRRRNo" type="text" value="@Model.LRRRNo" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">LR/RR Date : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtLRRRDate" type="text" value="@Model.LRRRDate" class="form-control datepicker" disabled />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Transporter Name : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtTransporterName" type="text" value="@Model.TransporterName" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Vehicle No : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtVehicleNo" type="text" value="@Model.VehicleNo" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Transporter No : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtTransporterNo" type="text" value="@Model.TransporterNo" class="form-control" readonly />
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Transportation Charges : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtTransportAmount" type="text" value="@Model.TransportAmount" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Loading Charges : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtLoadingCharges" type="text" value="@Model.LoadingCharges" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">UnLoading Charges : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtUnLoadingCharges" type="text" value="@Model.UnLoadingCharges" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label"> </label>
+                                            <div class="col-sm-9">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-0 font-weight-bold">Product Details</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div style="overflow-x: auto;">
+                                            <table class="table mb-0 table-striped nowrap">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Item Tracking</th>
+                                                        <th scope="col">Item Description</th>
+                                                        <th scope="col">Quantity</th>
+                                                        <th scope="col">UOM</th>
+                                                        <th scope="col">Qty to Receive/ Return Qty. to Receive</th>
+                                                        <th scope="col">Qty. Received</th>
+                                                        @if (Model.DocumentType == "Purchase Order")
+                                                        {
+                                                            <th scope="col">QC remarks</th>
+                                                        }
+
+                                                        <th scope="col">Reject Qty</th>
+                                                        @if (Model.DocumentType != "Transfer Order")
+                                                        {
+                                                            <th scope="col">BE No.</th>
+                                                            <th scope="col">BE Date</th>
+                                                            <th scope="col">Remarks</th>
+                                                            <th scope="col">Concentration Rate %</th>
+                                                        }
+                                                        @if (Model.DocumentType != "Sales Return")
+                                                        {
+                                                            <th scope="col">Expected Receipt Date</th>
+                                                        }
+                                                        <th scope="col">Packing Style Code</th>
+                                                        <th scope="col">Packing Qty.</th>
+
+                                                        <th scope="col">Packing UOM</th>
+                                                        @if (Model.DocumentType == "Purchase Order")
+                                                        {
+                                                            <th scope="col">Make/Mgf</th>
+                                                        }
+                                                        <th scope="col">HSN Code</th>
+                                                        @if (Model.DocumentType != "Transfer Order")
+                                                        {
+                                                            <th scope="col">Unit Net Weight</th>
+                                                        }
+                                                        <th scope="col">Branch Code (Dimension)</th>
+                                                        <th scope="col">Product Code (Dimension)</th>
+                                                        <th scope="col">Freight Charges</th>
+                                                        <th scope="col">Unloading Charges</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    @foreach (var line in Model.grnCardLines)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                @if (line.TrackingCode != "" && line.TrackingCode != null)
+                                                                {
+                                                                    <a style="cursor:pointer;" onclick="ShowItemTracking(@line.LineNo,'@line.ItemNo')"><i class="bx bx-show"></i></a>
+                                                                }
+                                                            </td>
+                                                            <td>@line.Description</td>
+                                                            <td id="qty_@line.LineNo">@line.Quantity</td>
+                                                            <td>@line.UOMCode</td>
+                                                            <td><input type="text" id="txtQtyToReceive_@line.LineNo" name="txtQtyToReceive_@line.LineNo" value="@line.QtyToReceive" class="form-control" style="width:110px;" /></td>
+                                                            <td id="qtyrec_@line.LineNo">@line.QuantityReceived</td>
+                                                            @*@if (Model.DocumentType == "Purchase Order")
+                                                                {
+                                                                    <td>
+                                                                        <select name="txtQCRemarks_@line.LineNo" class="form-select" style="width:100px;">
+                                                                            <option value="@line.QCRemarks"></option>
+                                                                            <option value="OK">Ok</option>
+                                                                            <option value="Not OK">Not Ok</option>
+                                                                        </select>
+                                                                    </td>
+                                                                }*@
+                                                            @if (Model.DocumentType == "Purchase Order")
+                                                            {
+                                                                <td>
+                                                                    @{ var qcRemark = (line.QCRemarks ?? "").Trim(); }
+                                                                    <select name="txtQCRemarks_@line.LineNo" class="form-select" style="width:100px;">
+                                                                        <option value="OK" @((qcRemark == "" || qcRemark == "OK" || qcRemark == "Ok" || qcRemark == "ok") ? "selected" : "")>Ok</option>
+                                                                        <option value="Not OK" @((qcRemark == "Not OK" || qcRemark == "Not Ok" || qcRemark == "NOT OK") ? "selected" : "")>Not Ok</option>
+                                                                    </select>
+                                                                </td>
+                                                            }
+                                                            <td><input type="text" name="txtRejectQC_@line.LineNo" value="@line.RejectQC" class="form-control" style="width:110px;" /></td>
+                                                            @if (Model.DocumentType != "Transfer Order")
+                                                            {
+                                                                <td><input type="text" name="txtBillOfEntryNo_@line.LineNo" value="@line.BillOfEntryNo" class="form-control" style="width:110px;" /></td>
+                                                                <td><input type="text" name="txtBillOfEntryDate_@line.LineNo" value="@line.BillOfEntryDate" class="form-control datepicker" style="width:110px;" /></td>
+                                                                <td><input type="text" name="txtRemarks_@line.LineNo" value="@line.Remarks" class="form-control" style="width:110px;" /></td>
+                                                                <td><input type="text" name="txtConcentrationRatePercent_@line.LineNo" value="@line.ConcentrationRatePercent" class="form-control" style="width:110px;" /></td>
+                                                            }
+                                                            @if (Model.DocumentType != "Sales Return")
+                                                            {
+                                                                <td>
+                                                                    @line.ExpectedReceiptDate
+                                                                </td>
+                                                            }
+                                                            <td>@line.PackingStyleCode</td>
+                                                            <td>@line.PackingQty</td>
+
+                                                            <td>@line.PackingUOM</td>
+                                                            @if (Model.DocumentType == "Purchase Order")
+                                                            {
+                                                                <td>
+                                                                    <div class="" id="spinnerId_@line.LineNo" style="width: 200px;">
+                                                                        <span class="input-group-text" id="loader_@line.LineNo" style="display: none;">
+                                                                            <span class="spinner-border spinner-border-sm text-primary"></span>
+                                                                        </span>
+                                                                        <input type="text" id="txtManufacturer_@line.LineNo" onkeyup="ManufacturerAutocompleteAPI('txtManufacturer_' + @line.LineNo)" class="form-control" data-lineno="@line.LineNo" placeholder="Type Manufacturer Name" value="@line.MfgName" />
+                                                                    </div>
+                                                                    <input type="hidden" id="hdnManufacturerNo_@line.LineNo" name="hdnManufacturerNo_@line.LineNo" value="@line.MakeMfgCode" />
+                                                                </td>
+                                                            }
+                                                            <td>@line.HSNSACCode</td>
+                                                            @if (Model.DocumentType != "Transfer Order")
+                                                            {
+                                                                <td>@line.NetWeight</td>
+                                                            }
+                                                            <td>@line.BranchCode</td>
+                                                            <td>@line.ProductCode</td>
+                                                            <td>@line.FreightCharges</td>
+                                                            <td>@line.UnloadingCharges</td>
+
+                                                        </tr>
+                                                    }
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="row g-3">
+                                    <label id="lblMsg" style="color:red; font-weight:bold;"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="toolbar">
+                            <div class="text-end g-3">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+
+                                <button id="btnSave" type="button" class="btn btn-success" onclick="SaveGRN();"><i class="bx bxs-save"></i> Save</button>
+                                &nbsp;
+                                <a href="/SPGRN/GRNList" class="btn btn-danger"><i class="lni lni-arrow-left"></i> Back</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalItemTracking" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvItemTracking" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="display:none;">Entry No</th>
+                                                <th scope="col">Line No</th>
+                                                <th scope="col">Item No</th>
+                                                <th scope="col">Lot No</th>
+                                                <th scope="col">Quantity to Handle</th>
+                                                <th scope="col">Expiration Date</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbItemTrackingLines">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center">
+                <div class="text-center flex-fill">
+                    <label style="font-weight: bold;">Total QTY:</label>
+                    <input id="txttotalQty" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                    <div id="lblItemTrackMsg" style="color:red; font-weight:bold; margin-top:4px;"></div>
+                </div>
+                <div class="text-center flex-fill">
+                    <label style="font-weight: bold;">Balance QTY:</label>
+                    <input id="txtbalanceQty" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                </div>
+                <button id="btnSave" type="button" class="btn btn-primary ms-auto" onclick="SaveGRNItemTracking();">Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+
+<script src="~/Scripts/appjs/SPGRNCard.js"></script>
+<script type="text/javascript">
+</script>

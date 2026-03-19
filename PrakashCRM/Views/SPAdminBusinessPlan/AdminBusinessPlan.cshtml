@@ -1,0 +1,153 @@
+﻿@{
+    ViewBag.Title = "AdminBusinessPlan";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+<style>
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        /*        border: 1px solid #ccc;*/
+        width: 100%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead, tbody {
+        display: block;
+    }
+
+    thead {
+        background-color: #f1f1f1;
+    }
+
+    tbody {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    th, td {
+        padding: 8px;
+        text-align: left;
+        /*        border: 1px solid #ddd;*/
+        width: 15%;
+        /*        box-sizing: border-box;*/
+    }
+</style>
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Admin Business Plan</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto"><label class="col-form-label">Financial Year:</label></div>
+                <div class="col-auto"><select id="ddlYear" class="form-select" onchange="onYearChange()"></select></div>
+                <div class="col d-flex justify-content-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <label style="font-weight: 500;">Item Filter:</label>
+                        <input type="text" id="txtitemName" class="form-control" placeholder="Type Item Name" style="width: 280px;" />
+                        <input type="hidden" id="hfitemNo" value="" />
+                        <button type="button" id="btnSearch" class="btn btn-primary">Search </button>
+                        <button type="button" id="btnRefresh" class="btn btn-primary">Clear Filter</button>
+                        <input id="getServiceApiUrl" type="hidden"value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"]" />
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="d-flex justify-content-end align-items-center gap-2">
+                        <span id="DateFilter"></span>
+                        <button id="btnClearFilter" class="btn btn-primary" type="button"><i class="bx bx-rotate-right"></i> Refresh</button>
+                        <button id="save-price" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="row g-1">
+                    <div class="col-12">
+                        @*<div class="row align-items-center">
+                                <div class="col-auto ms-2">
+                                    <label class="col-form-label">Financial Year:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <select id="ddlYear" class="form-select" onchange="onYearChange()">
+
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <div class="float-end">
+                                        <button id="save-price" class="btn btn-primary">Save</button>
+                                    </div>
+                                </div>
+                            </div>*@
+
+                        <table class="table mt-2 mb-0 table-striped table-container">
+
+                            <thead>
+                                <tr class="border-top">
+                                    <th scope="col"></th>
+                                    <th scope="col" colspan="2" class="text-center" id="pre-FY"></th>
+                                    <th scope="col" colspan="2" class="text-center">Actual</th>
+                                    <th scope="col" colspan="2" class="text-center" id="curr-FY"></th>
+                                </tr>
+                                <tr class="border-top">
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Avg Price</th>
+                                    <th scope="col">GP (%)</th>
+                                    <th scope="col">Avg Price</th>
+                                    <th scope="col">GP (%)</th>
+                                    <th scope="col">Avg Price</th>
+                                    <th scope="col">GP (%)</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbl-admin-business-plan">
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='loader' id='divImage' style="display:none">
+    <!-- MODAL CONTENT -->
+    <div class='loader-content'>
+        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+    </div>
+</div>
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/AdminBusinessPlan.js"></script>

@@ -1,0 +1,136 @@
+﻿
+@{
+    ViewBag.Title = "NotificationSetupList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Notification Setup List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <button id="btnNotifSetup" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;Notification Setup</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3">
+                                <div class="col">
+                                    <select id="ddlStatus" class="form-select">
+                                        <option value="true" selected>Active</option>
+                                        <option value="false">In Active</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="col-form-label">From Code:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlFromCode" class="form-select">
+                                    </select>
+                                </div>
+                                <!---->
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                                <!---->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- -->
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Type</th>
+                            <th>From Code</th>
+                            <th>To Email</th>
+                            <th>CC Email</th>
+                            <th>BCC Email</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>Type</th>
+                            <th>From Code</th>
+                            <th>To Email</th>
+                            <th>CC Email</th>
+                            <th>BCC Email</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnNotifSetupCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/NotificationList.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#btnNotifSetup').click(function () {
+            window.location.replace('@Url.Action("Notification", "SPNotification")');
+        });
+    });
+</script>
+

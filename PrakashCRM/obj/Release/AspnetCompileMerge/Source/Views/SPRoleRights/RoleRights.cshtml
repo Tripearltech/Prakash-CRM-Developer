@@ -1,0 +1,438 @@
+﻿@model IEnumerable<PrakashCRM.Data.Models.SPMenuList>
+@{
+    ViewBag.Title = "RoleRights";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .plus, .minus {
+        display: inline-block;
+        background-repeat: no-repeat;
+        background-size: 16px 16px !important;
+        width: 16px;
+        height: 16px;
+        
+    }
+
+    .plus {
+        background-image: url(https://img.icons8.com/color/48/000000/plus.png);
+    }
+
+    .minus {
+        background-image: url(https://img.icons8.com/color/48/000000/minus.png);
+    }
+
+    ul {
+        list-style: none;
+        padding: 0px 0px 0px 20px;
+    }
+
+        ul.inner_ul li:before {
+            content: "├";
+            font-size: 18px;
+            margin-left: -11px;
+            margin-top: -5px;
+            vertical-align: middle;
+            float: left;
+            width: 8px;
+            color: #41424e;
+        }
+
+        ul.inner_ul li:last-child:before {
+            content: "└";
+        }
+
+    .inner_ul {
+        padding: 0px 0px 0px 35px;
+    }
+</style>
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Role Rights
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Role</label>
+                                <div class="col-sm-9">
+                                    <input id="hdnSavedMenuRightsValues" style="display:none" />
+                                    <select id="ddlRoles" class="form-select">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                                <input id="_chk_Full_Rights" type="checkbox" /> Full Rights
+                        </div>
+                        <div class="col-md-2">
+                                <input id="_chk_Add_Rights" type="checkbox" /> Add Rights
+                        </div>
+                        <div class="col-md-2">
+                                <input id="_chk_Edit_Rights" type="checkbox" /> Edit Rights
+                        </div>
+                        <div class="col-md-2">
+                                <input id="_chk_View_Rights" type="checkbox" /> View Rights
+                        </div>
+                        <div class="col-md-2">
+                                <input id="_chk_Delete_Rights" type="checkbox" /> Delete Rights
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    
+                                    <div class="verticalScroll">
+                                        <div class="tree_main">
+                                            <ul id="bs_main" class="main_ul">
+                                                
+                                                @foreach (var item in Model)
+                                                {
+                                                    <li id="bs_@item.No">
+                                                        @if (item.subMenuList.Count > 0)
+                                                        {
+                                                            <span class="plus">&nbsp;</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                                        }
+                                                        <input type="checkbox" id="c_bs_@item.No-@item.No" />
+                                                        <span>@item.Menu_Name </span>
+                                                        @if (item.subSubListCnt > 0)
+                                                        {
+                                                            <ul id="bs_sub_sub_@item.No" style="display: none" class="sub_ul">
+                                                                @foreach (var item1 in item.subMenuList)
+                                                                {
+                                                                    <li id="bf_@item1.No">
+                                                                        <span class="plus">&nbsp;</span>
+                                                                        <input type="checkbox" id="c_bf_@item.No-@item1.No" />
+                                                                        <span>@item1.Menu_Name </span>
+                                                                        <ul id="bf_sub_sub_@item1.No" style="display: none" class="inner_ul">
+                                                                            @foreach (var item2 in item1.subSubMenuList)
+                                                                            {
+                                                                                <li id="io_@item1.No-@item2.No">
+                                                                                    <input type="checkbox" id="c_io_@item1.No-@item2.No" /><span>@item2.Menu_Name </span>
+                                                                                </li>
+                                                                            }
+                                                                        </ul>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                        else
+                                                        {
+                                                            <ul id="bs_sub_@item.No" class="inner_ul" style="display: none">
+                                                                @foreach (var item1 in item.subMenuList)
+                                                                {
+                                                                    <li id="bf_@item1.No">
+                                                                        <input type="checkbox" id="c_bf_@item.No-@item1.No" />
+                                                                        <span>@item1.Menu_Name </span>
+                                                                    </li>
+                                                                }
+                                                            </ul>
+                                                        }
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="toolbar">
+                <div class=" text-end g-3">
+                    
+                    <input type="hidden" id="hdnRoleRightsAction" value="@Session["RoleRightsAction"]" />
+                    <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                    <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
+                    &nbsp;
+                    <a href="/SPDashboard/Index" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script>
+
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPRoleRights/';
+
+    $(document).ready(function () {
+
+        BindRoles();
+
+        $(".plus").click(function () {
+            $(this).toggleClass("minus").siblings("ul").toggle();
+        });
+
+        $("input[type=checkbox]").click(function () {
+            //alert($(this).attr("id"));
+            //var sp = $(this).attr("id");
+            //if (sp.substring(0, 4) === "c_bs" || sp.substring(0, 4) === "c_bf") {
+            $(this).siblings("ul").find("input[type=checkbox]").prop('checked', $(this).prop('checked'));
+            //alert($(this).siblings("ul").find("input[type=checkbox] span").text());
+            //alert($(this).attr("id"));
+
+            //}
+        });
+
+        $("input[type=checkbox]").change(function () {
+            var sp = $(this).attr("id");
+            if (sp.substring(0, 4) === "c_io") {
+                var ff = $(this).parents("ul[id^=bf_l]").attr("id");
+                if ($('#' + ff + ' > li input[type=checkbox]:checked').length == $('#' + ff + ' > li input[type=checkbox]').length) {
+                    $('#' + ff).siblings("input[type=checkbox]").prop('checked', true);
+                    check_fst_lvl(ff);
+                }
+                else {
+                    $('#' + ff).siblings("input[type=checkbox]").prop('checked', false);
+                    check_fst_lvl(ff);
+                }
+            }
+
+            if (sp.substring(0, 4) === "c_bf") {
+                var ss = $(this).parents("ul[id^=bs_l]").attr("id");
+                if ($('#' + ss + ' > li input[type=checkbox]:checked').length == $('#' + ss + ' > li input[type=checkbox]').length) {
+                    $('#' + ss).siblings("input[type=checkbox]").prop('checked', true);
+                    check_fst_lvl(ss);
+                }
+                else {
+                    $('#' + ss).siblings("input[type=checkbox]").prop('checked', false);
+                    check_fst_lvl(ss);
+                }
+            }
+        });
+
+        $('#btnSave').click(function () {
+
+            var chklist = "";
+            var rightslist = "";
+
+            if ($('#_chk_Full_Rights').is(':checked') == false && $('#_chk_Add_Rights').is(':checked') == false && $('#_chk_Edit_Rights').is(':checked') == false && $('#_chk_View_Rights').is(':checked') == false && $('#_chk_Delete_Rights').is(':checked') == false) {
+
+                var msg = "Please select any rights";
+                ShowErrMsg(msg);
+                
+            }
+            else {
+
+                $("input:checkbox").each(function () {
+                    var $this = $(this);
+
+                    if ($this.is(':checked')) {
+                        chklist = chklist + $this.attr("id").substring(5) + ",";
+                    }
+                });
+
+                $.post(
+                    apiUrl + 'RoleRights?RoleNo=' + $('#ddlRoles').val() + '&PrevSavedMenusRights=' + $('#hdnSavedMenuRightsValues').val() + '&MenusWithRights=' + chklist,
+                    function (data) {
+
+                        if (data) {
+                            Lobibox.notify('success', {
+                                pauseDelayOnHover: true,
+                                size: 'mini',
+                                rounded: true,
+                                icon: 'bx bx-check-circle',
+                                delayIndicator: false,
+                                continueDelayOnInactiveTab: false,
+                                position: 'top right',
+                                msg: 'Role Rights Saved Successfully'
+                            });
+                        }
+                    }
+                );
+            }
+        });
+
+        $('#ddlRoles').change(function () {
+            
+            resetRightAndMenus();
+
+            $.ajax(
+                {
+                    url: '/SPRoleRights/GetAllMenusSubMenusOfRole?RoleNo=' + $('#ddlRoles').val(),
+                    type: 'GET',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        
+                        if (data != "") {
+                            
+                            var checkboxids = "";
+                            $('input[type=checkbox][id*=c_bs_]').each(function () {
+                                checkboxids = checkboxids + $(this).attr('id') + ",";
+                            });
+
+                            $('input[type=checkbox][id*=c_bf_]').each(function () {
+                                checkboxids = checkboxids + $(this).attr('id') + ",";
+                            });
+
+                            $('input[type=checkbox][id*=c_io_]').each(function () {
+                                checkboxids = checkboxids + $(this).attr('id') + ",";
+                            });
+
+                            $('#hdnSavedMenuRightsValues').val(data);
+
+                            const MenuSubMenu = data.split(",");
+                            const AllMenuSubMenu = checkboxids.split(",");
+
+                            for (var a = 0; a < MenuSubMenu.length; a++) {
+                                for (var b = 0; b < AllMenuSubMenu.length; b++) {
+                                    if (MenuSubMenu[a] == AllMenuSubMenu[b].substr(5)) {
+                                        if (AllMenuSubMenu[b].substr(0, 5) == "c_bf_") {
+                                            if (!$('#' + $('#' + AllMenuSubMenu[b]).closest('li').parent().parent().attr('id') + ' > span').hasClass("minus")) {
+                                                $('#' + $('#' + AllMenuSubMenu[b]).closest('li').parent().parent().attr('id') + ' > span.plus').toggleClass("minus").siblings("ul").toggle();
+                                            }
+
+                                        }
+                                        if (AllMenuSubMenu[b].substr(0, 5) == "c_io_") {
+                                            if (!$('#' + $('#' + AllMenuSubMenu[b]).closest('li').parent().parent().attr('id') + ' > span').hasClass("minus")) {
+                                                $('#' + $('#' + AllMenuSubMenu[b]).closest('li').parent().parent().attr('id') + ' > span.plus').toggleClass("minus").siblings("ul").toggle();
+                                                if (!$('#' + $('#' + AllMenuSubMenu[b]).closest('li').parent().parent().parent().parent().attr('id') + ' > span').hasClass("minus")) {
+                                                    $('#' + $('#' + AllMenuSubMenu[b]).closest('li').parent().parent().parent().parent().attr('id') + ' > span.plus').toggleClass("minus").siblings("ul").toggle();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            for (var a = 0; a < MenuSubMenu.length; a++) {
+                                if (MenuSubMenu[a] != "Add_Rights" && MenuSubMenu[a] != "Edit_Rights" && MenuSubMenu[a] != "View_Rights" && MenuSubMenu[a] != "Delete_Rights" && MenuSubMenu[a] != "Full_Rights") {
+                                    
+                                    $('#c_bs_' + MenuSubMenu[a]).prop('checked', true);
+                                    $('#c_bf_' + MenuSubMenu[a]).prop('checked', true);
+                                    $('#c_io_' + MenuSubMenu[a]).prop('checked', true);
+                                }
+                                else {
+                                    $('#_chk_' + MenuSubMenu[a]).prop('checked', true);
+                                }
+                            }
+                        }
+                        else {
+                            $('#hdnSavedMenuRightsValues').val('');
+                        }
+                    },
+                    error: function (data1) {
+                        //alert(data1);
+                    }
+                }
+            );
+        });
+
+    });
+
+    function BindRoles() {
+        $.ajax(
+            {
+                url: '/SPRoleRights/GetAllRolesForDDL',
+                type: 'GET',
+                contentType: 'application/json',
+                success: function (data) {
+                    
+                    if (data.length > 0) {
+
+                        $('#ddlRoles').append($('<option value="-1">---Select---</option>'));
+                        $.each(data, function (i, data) {
+                            $('<option>',
+                                {
+                                    value: data.No,
+                                    text: data.Role_Name
+                                }
+                            ).html(data.Role_Name).appendTo("#ddlRoles");
+                        });
+                    }
+                },
+                error: function (data1) {
+                    alert(data1);
+                }
+            }
+        );
+    }
+
+    function check_fst_lvl(dd) {
+        //var ss = $('#' + dd).parents("ul[id^=bs_l]").attr("id");
+        var ss = $('#' + dd).parent().closest("ul").attr("id");
+        if ($('#' + ss + ' > li input[type=checkbox]:checked').length == $('#' + ss + ' > li input[type=checkbox]').length) {
+            //$('#' + ss).siblings("input[id^=c_bs]").prop('checked', true);
+            $('#' + ss).siblings("input[type=checkbox]").prop('checked', true);
+        }
+        else {
+            //$('#' + ss).siblings("input[id^=c_bs]").prop('checked', false);
+            $('#' + ss).siblings("input[type=checkbox]").prop('checked', false);
+        }
+
+    }
+
+    function pageLoad() {
+
+        $(".plus").click(function () {
+            $(this).toggleClass("minus").siblings("ul").toggle();
+        });
+
+    }
+
+    function resetRightAndMenus() {
+
+        $('span.minus').removeClass("minus").addClass("plus").siblings("ul").toggle();
+        $('#_chk_Add_Rights').prop('checked', false);
+        $('#_chk_Edit_Rights').prop('checked', false);
+        $('#_chk_View_Rights').prop('checked', false);
+        $('#_chk_Delete_Rights').prop('checked', false);
+        $('#_chk_Full_Rights').prop('checked', false);
+
+        $('input[type=checkbox][id*=c_bs_]').each(function () {
+            $(this).prop('checked', false);
+        });
+
+        $('input[type=checkbox][id*=c_bf_]').each(function () {
+            $(this).prop('checked', false);
+        });
+
+        $('input[type=checkbox][id*=c_io_]').each(function () {
+            $(this).prop('checked', false);
+        });
+    }
+
+    function ShowErrMsg(errMsg) {
+
+        Lobibox.notify('error', {
+            pauseDelayOnHover: true,
+            size: 'mini',
+            rounded: true,
+            delayIndicator: false,
+            icon: 'bx bx-x-circle',
+            continueDelayOnInactiveTab: false,
+            position: 'top right',
+            msg: errMsg
+        });
+
+    }
+
+</script>

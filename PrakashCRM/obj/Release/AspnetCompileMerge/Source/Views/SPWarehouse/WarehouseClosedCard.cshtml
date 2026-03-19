@@ -1,0 +1,348 @@
+﻿@model PrakashCRM.Data.Models.SPWarehouseCard
+@{ bool isEdit = HttpContext.Current.Request.QueryString["No"] != null; }
+@{
+    ViewBag.Title = "WarehouseCard";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-home-alt"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPWarehouse/WarehouseClosedList">Closed Task List</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Closed Task Card
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="tab-content py-3">
+                <div class="tab-pane fade show active" id="profile" role="tabpanel">
+
+                    @using (Html.BeginForm("WarehouseCard", "Warehouse", FormMethod.Post))
+                    {
+                        @Html.ValidationSummary(true)
+                        <div class="row">
+                            <div>
+
+                                <h6 class="mb-0 font-weight-bold">General</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">No : </label>
+                                            <div class="col-sm-9">
+                                                @*@Html.Encode(Model.DocumentNo)
+                                                    @Html.TextBoxFor(model => model.DocumentNo, new { Value = Model.DocumentNo, @class = "form-control" })*@
+                                                <label id="lnlDocumentNo">@Model.DocumentNo</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Shipment Date : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.ShipmentDate)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Customer/Vendor : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.CustomerVendorName)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Document Type : </label>
+                                            <div class="col-sm-9">
+                                                <label id="lblDocumentType">@Model.DocumentType</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">From Address : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.FromAddress)
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">To Address : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.ToAddress)
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Inco Term : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.IncoTerm)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Accepted By : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.AcceptedBy)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="mb-0 font-weight-bold">Product Details</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <table class="table mb-0 table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Product No</th>
+                                                    <th scope="col">Product Name</th>
+                                                    <th scope="col">Quantity</th>
+                                                    <th scope="col">UOM</th>
+                                                    <th scope="col">Packing UOM</th>
+                                                    <th scope="col">Packing Style</th>
+                                                    <th scope="col">Transport Qty</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    // Initialize a variable to store the concatenated PackingUOM values
+                                                    var packingUOMs = "";
+                                                    decimal totalQty = 0;
+                                                }
+                                                @foreach (var line in Model.warehouseCardLines)
+                                                {
+                                                    packingUOMs += line.PackingUOM + ", ";
+                                                    totalQty = totalQty + @line.Qty;
+                                                    <tr>
+                                                        <td>@line.ItemNo</td>
+                                                        <td>@line.ItemDescription</td>
+                                                        <td>@line.Qty</td>
+                                                        <td>@line.UOM</td>
+                                                        <td>@line.PackingUOM</td>
+                                                        <td>@line.PackingStyle</td>
+                                                        <td>@line.TransportQty</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br />
+                                <h6 class="mb-0 font-weight-bold">Transporter Details</h6>
+                                <hr />
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Transporter :  </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_Transporter_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Freight Charges : </label>
+                                            <div class="col-sm-8">
+                                                @Html.Encode(Model.PCPL_Transport_Amount)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Loading Charges : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_Loading_Charges)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Unloading Charges : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_UnLoading_Charges)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">LR RR No. : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.LR_RR_No_)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">LR RR Date : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.LR_RR_Date)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Vehicle No. : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.VehiclenNo)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Driver Name : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_Driver_Name)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Driver MobileNo. : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_Driver_Mobile_No_)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Driver LicenseNo. : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_Driver_License_No_)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Remarks : </label>
+                                            <div class="col-sm-9">
+                                                @Html.Encode(Model.PCPL_Remarks)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="toolbar">
+                            <div class="text-end g-3">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                <input id="hfFromPincode" value="@Model.FromPincode" style="display:none" />
+                                <input id="hfToPincode" value="@Model.ToPincode" style="display:none" />
+                                <input id="hfPackingUOMs" value="@packingUOMs" style="display:none" />
+                                <input id="hfTotalQty" value="@totalQty" style="display:none" />
+                                <input id="hfVendorCompanyNo" value="" style="display:none" />
+                                <input id="hfTransporterNo" value="@Model.PCPL_Transporter_No" style="display:none" />@**@
+                                <input id="hfFromLocationCode" value="@Model.FromLocation" style="display:none" />
+                                <input id="hfToLocationCode" value="@Model.ToLocation" style="display:none" />
+                                <input id="hfSystemId" value="@Model.SystemId" style="display:none" />
+                                <input id="hfDriverflag" value="false" style="display:none" />
+
+                                @*<button id="btnSave" type="button" class="btn btn-success" onclick="SaveTransporter();"><i class="bx bxs-save"></i> Save</button>
+        &nbsp;
+        <button id="btnSaveTransport" type="button" class="btn btn-primary" onclick="SaveAndCloseTransporter();"><i class="bx bxs-send"></i> Save & Close </button>
+        &nbsp;*@
+                                <a href="/SPWarehouse/WarehouseClosedList" class="btn btn-danger"><i class="lni lni-arrow-left"></i> Back</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalTransporterRate" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div id="dvRateDetails">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col"></th>
+                                                <th scope="col" style="display:none;">No</th>
+                                                <th scope="col" style="display:none;">CompanyNo</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">From Post Code</th>
+                                                <th scope="col">To Post Code</th>
+                                                <th scope="col">From Area</th>
+                                                <th scope="col">To Area</th>
+                                                <th scope="col">UOM</th>
+                                                <th scope="col">Standard Weight</th>
+                                                <th scope="col">Rate for Standard Weight</th>
+                                                <th scope="col">Rate above Standard Weight</th>
+                                                <th scope="col">Rate Effective Date</th>
+                                                <th scope="col">Vehicle Type</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="tblRateLine">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SPWarehouseClosedCard.js"></script>

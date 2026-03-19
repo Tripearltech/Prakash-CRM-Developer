@@ -1,0 +1,1093 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+<link href="~/Content/appcss/VerticalScrollInDiv.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/CustDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                        <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                        <input id="getLoggedInUserNo" value="@Session["loggedInUserNo"].ToString()" style="display:none" />
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
+        <div class="col">
+            <div class="card radius-10 bg-primary bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-white">Contacts</p>
+                            <h4 id="CntContacts" class="my-1 text-white"></h4>
+                        </div>
+                        <div class="text-white ms-auto font-35">
+                            <i class="bx bx-user-pin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card radius-10 bg-danger bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-white">Customers</p>
+                            <h4 id="CntCustomers" class="my-1 text-white"></h4>
+                        </div>
+                        <div class="text-white ms-auto font-35">
+                            <i class="bx bx-group"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card radius-10 bg-warning bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-dark">Manufacturers</p>
+                            <h4 class="text-dark my-1">0</h4>
+                        </div>
+                        <div class="text-dark ms-auto font-35">
+                            <i class='bx bx-user-circle'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card radius-10 bg-success bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-white">Traders</p>
+                            <h4 class="my-1 text-white">0</h4>
+                        </div>
+                        <div class="text-white ms-auto font-35">
+                            <i class='bx bx-user-check'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
+        <div class="col">
+            <div class="card radius-10 bg-primary bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-white">Inquiries</p>
+                            <h4 id="CntInquiries" class="my-1 text-white">0</h4>
+                        </div>
+                        <div class="text-white ms-auto font-35">
+                            <i class='bx bx-phone-call'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card radius-10 bg-danger bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-white">Quotes</p>
+                            <h4 id="CntQuotes" class="my-1 text-white"></h4>
+                        </div>
+                        <div class="text-white ms-auto font-35">
+                            <i class='bx bx-file'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card radius-10 bg-warning bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-dark">Orders</p>
+                            <h4 id="CntOrders" class="text-dark my-1"></h4>
+                        </div>
+                        <div class="text-dark ms-auto font-35">
+                            <i class='bx bx-file'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card radius-10 bg-success bg-gradient">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <p class="mb-0 text-white">Invoices</p>
+                            <h4 id="CntInvoices" class="my-1 text-white"></h4>
+                        </div>
+                        <div class="text-white ms-auto font-35">
+                            <i class='bx bx-file'></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-xl-2">
+        <div class="col d-flex ">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Target vs Sales</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Salesperson</th>
+                                    <th scope="col">Demand Qty</th>
+                                    <th scope="col">Target Qty</th>
+                                    <th scope="col">Sales Qty</th>
+                                    <th scope="col">Sales Percentage(Qty)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Mayur Sant</td>
+                                    <td><a id="demandQtyAmt"><u>200.00</u></a></td>
+                                    <td><a href="#"><u>200.00</u></a></td>
+                                    <td><a href="#"><u>248.400</u></a></td>
+                                    <td><a href="#"><u>124.00%</u></a></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Total</b></td>
+                                    <td><b>200.00</b></td>
+                                    <td><b>200.00</b></td>
+                                    <td><b>248.400</b></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Support SP</th>
+                                    <th scope="col">Demand Qty</th>
+                                    <th scope="col">Target Qty</th>
+                                    <th scope="col">Sales Qty</th>
+                                    <th scope="col">Sales Percentage(Qty)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Mayur Sant</td>
+                                    <td><a id="demandQtyAmt"><u>200.00</u></a></td>
+                                    <td><a href="#"><u>200.00</u></a></td>
+                                    <td><a href="#"><u>248.400</u></a></td>
+                                    <td><a href="#"><u>124.00%</u></a></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Total</b></td>
+                                    <td><b>200.00</b></td>
+                                    <td><b>200.00</b></td>
+                                    <td><b>248.400</b></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <h6 class="mb-0 logo-text" style="font-size:18px">Top 10 Product(On Sales Qty)</h6>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Target Qty</th>
+                                    <th scope="col">Sales Qty</th>
+                                    <th scope="col">Sales Percentage(Qty)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Ethyl Acetate</td>
+                                    <td><a href="#"><u>0.000</u></a></td>
+                                    <td><a href="#"><u>125.570</u></a></td>
+                                    <td><a href="#"><u>0%</u></a></td>
+                                </tr>
+                                <tr>
+                                    <td>Acetic Acid (Glacial)-Carboy</td>
+                                    <td><a href="#"><u>0.000</u></a></td>
+                                    <td><a href="#"><u>24.330</u></a></td>
+                                    <td><a href="#"><u>0%</u></a></td>
+                                </tr>
+                                <tr>
+                                    <td>Ethyl Acetate - 185 Kgs</td>
+                                    <td><a href="#"><u>200.000</u></a></td>
+                                    <td><a href="#"><u>20.720</u></a></td>
+                                    <td><a href="#"><u>10.36%</u></a></td>
+                                </tr>
+                                <tr>
+                                    <td><b>Total</b></td>
+                                    <td><b>200.00</b></td>
+                                    <td>
+                                        <b>172.62</b>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Daily Visit</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Sub Type</th>
+                                    <th scope="col">Customer Name</th>
+                                    @*<th scope="col">Status</th>*@
+                                </tr>
+                            </thead>
+                            <tbody id="tblDailyVisitsDetails">
+                            </tbody>
+                        </table>
+                        <br />
+                        <button id="btnCreateDV" type="button" class="btn btn-primary px-5">Create Daily Visit</button>
+                        @*&nbsp;
+                        <button id="btnInvReport" type="button" class="btn btn-primary px-5">Item Wise Inventory Report</button>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+
+    <div class="row">
+        <div class="col">
+            <div class="card radius-10 mb-0 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-1 logo-text" style="font-size:18px">Customer Outstanding</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">No</th>
+                                    <th></th>
+                                    <th scope="col">SP Branch</th>
+                                    <th scope="col">Col. Upto MTD-1 Date</th>
+                                    <th scope="col">Date on Title - TD</th>
+                                    <th scope="col">Total Collection</th>
+                                    <th scope="col">Overdue CM-1</th>
+                                    <th scope="col">1st-10th Due Cur. Month</th>
+                                    <th scope="col">11th-20th Due Cur. Month</th>
+                                    <th scope="col">21st-30th Due Cur. Month</th>
+                                    <th scope="col">Total Due Cur. Month</th>
+                                    <th scope="col">Achievement in %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td><a id="Branch1Rec" class="clsPointer"><i class="bx bx-plus-circle"></i></a></td>
+                                    <td>AHMEDABAD</td>
+                                    <td>10</td>
+                                    <td>5</td>
+                                    <td>15</td>
+                                    <td>30</td>
+                                    <td>30</td>
+                                    <td>30</td>
+                                    <td>30</td>
+                                    <td>135</td>
+                                    <td>11%</td>
+                                </tr>
+                                <tr id="Branch1SPRecs" style="display:none">
+                                    <td></td>
+                                    <td></td>
+                                    <td>Salesperson</td>
+                                    <td>10</td>
+                                    <td>5</td>
+                                    <td>15</td>
+                                    <td>30</td>
+                                    <td>30</td>
+                                    <td>30</td>
+                                    <td>30</td>
+                                    <td>135</td>
+                                    <td>11%</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td><a id="Branch2Rec" class="clsPointer"><i class="bx bx-plus-circle"></i></a></td>
+                                    <td>BARODA</td>
+                                    <td>15</td>
+                                    <td>10</td>
+                                    <td>25</td>
+                                    <td>20</td>
+                                    <td>10</td>
+                                    <td>30</td>
+                                    <td>40</td>
+                                    <td>125</td>
+                                    <td>20%</td>
+                                </tr>
+                                <tr id="Branch2SPRecs" style="display:none">
+                                    <td></td>
+                                    <td></td>
+                                    <td>Salesperson</td>
+                                    <td>15</td>
+                                    <td>10</td>
+                                    <td>25</td>
+                                    <td>20</td>
+                                    <td>10</td>
+                                    <td>30</td>
+                                    <td>40</td>
+                                    <td>125</td>
+                                    <td>20%</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td><a id="Branch3Rec" class="clsPointer"><i class="bx bx-plus-circle"></i></a></td>
+                                    <td>SURAT</td>
+                                    <td>5</td>
+                                    <td>3</td>
+                                    <td>8</td>
+                                    <td>50</td>
+                                    <td>20</td>
+                                    <td>10</td>
+                                    <td>25</td>
+                                    <td>113</td>
+                                    <td>7%</td>
+                                </tr>
+                                <tr id="Branch3SPRecs" style="display:none">
+                                    <td></td>
+                                    <td></td>
+                                    <td>Salesperson</td>
+                                    <td>5</td>
+                                    <td>3</td>
+                                    <td>8</td>
+                                    <td>50</td>
+                                    <td>20</td>
+                                    <td>10</td>
+                                    <td>25</td>
+                                    <td>113</td>
+                                    <td>7%</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"><b>Grand Total</b></td>
+                                    <td><b>30</b></td>
+                                    <td><b>18</b></td>
+                                    <td><b>48</b></td>
+                                    <td><b>100</b></td>
+                                    <td><b>60</b></td>
+                                    <td><b>70</b></td>
+                                    <td><b>95</b></td>
+                                    <td><b>373</b></td>
+                                    <td><b>13%</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+    <br />
+    <div class="row row-cols-1 row-cols-xl-2">
+
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Notification</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">No</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Assign By</th>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Notification</th>
+                                    <th scope="col">Edit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6"><center>No Records Found</center></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Non Performing Customers</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer No</th>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Salesperson</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3"><center>No Records Found</center></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" class="btn btn-primary">Dispatch Details</button>
+        </div>
+    </div>
+    <br />
+    <div class="row row-cols-1 row-cols-xl-2">
+        <div class="col d-flex">
+            <div class="card radius-10 w-100  verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Today's Task</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Sub Type</th>
+                                    <th scope="col">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4"><center>No Records Found</center></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Weekly Task</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Sub Type</th>
+                                    <th scope="col">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4"><center>No Records Found</center></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+
+    <div class="row row-cols-1 row-cols-xl-2">
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Monthly Task</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Sub Type</th>
+                                    <th scope="col">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4"><center>No Records Found</center></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Feedbacks</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Customer Name</th>
+                                    <th scope="col">Feedback</th>
+                                </tr>
+                            </thead>
+                            @*<tbody>
+                                    <tr>
+                                        <td colspan="2"><center>No Records Found</center></td>
+                                    </tr>
+                                </tbody>*@
+                            <tbody id="tableFeedbackBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+
+    <div class="row row-cols-1 row-cols-xl-2">
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Finance</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Sales Funnel For Quote, Order, Inquiry</h6>
+                        </div>
+                    </div>
+                    <div>
+                        <center><img src="~/Layout/assets/images/appImages/sample-sales-funnel.png" /></center>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+
+    <div class="row">
+        <div class="col">
+            <div class="card radius-10 mb-0 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-1 logo-text" style="font-size:18px">Market Update</h6>
+                        </div>
+                        <div class="ms-auto">
+                            <button id="btnAddMUpdate" type="button" class="btn btn-primary  mb-3 mb-lg-0"><i class='bx bxs-plus-square'></i>&nbsp;Add</button>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Updation</th>
+                                    <th scope="col">SalesPerson</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableMarketUpdate">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+    <br />
+    <div class="row row-cols-1 row-cols-xl-2">
+
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Pending Task - Warehouse Sales</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex">
+            <div class="card radius-10 w-100 verticalScroll">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 logo-text" style="font-size:18px">Pending Task - Warehouse Purchase</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--end row-->
+
+</div>
+
+<div class='loader' id='divImage' style="display:none">
+    <!-- MODAL CONTENT -->
+    <div class='loader-content'>
+        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+    </div>
+</div>
+<div class="modal" id="modal1" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select View</h5>
+                <button type="button" id="btnCloseModalIcon" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table>
+                    <tr>
+                        <td>
+                            <p>
+                                <input type="radio" class="flat" name="view" id="viewC" value="customer" checked="" required /> Customer
+                                <input type="radio" class="flat" name="view" id="viewP" value="product" style="margin-top:20px" /> Product
+                            </p>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm td-space" id="btnShowDemandDetail">Show</button>
+                        </td>
+                    </tr>
+                </table>
+
+                <div>
+                    <div id="dvCustDetails" style="display:none">
+                        <h2>Demand Details For 2023-2024</h2>
+                        <table>
+                            <tr>
+                                <td>Contact</td>
+                                <td>
+                                    <input type="text" class="form-control td-space" style="width:400px;height:30px" />
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm td-space" id="btnSearch">Search</button>
+                                </td>
+                                <td>
+                                    Export
+                                </td>
+                                <td>
+                                    <select class="form-control drp-sm td-space">
+                                        <option>--Select--</option>
+                                        <option>Excel</option>
+                                        <option>Word</option>
+                                        <option>PDF</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm td-space" id="btnExport">Export</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="table table-striped jambo_table bulk_action" style="margin-top:5px">
+                            <thead>
+                                <tr class="headings">
+                                    <th class="column-title">No</th>
+                                    <th class="column-title">Customer Name </th>
+                                    <th class="column-title">Demand </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="even pointer">
+                                    <td class=" ">1</td>
+                                    <td class=" "><a id="custNameLink">Axalta Coatings Systems India Pvt Ltd</a></td>
+                                    <td class=" ">200</td>
+                                </tr>
+                                <tr class="odd pointer">
+                                    <td class=" "></td>
+                                    <td class=" "><b>Total</b></td>
+                                    <td class=" "><b>200</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="dvProdDetails" style="display:none">
+                        <h2>Demand Details For 2023-2024</h2>
+                        <table>
+                            <tr>
+                                <td>Product</td>
+                                <td>
+                                    <input type="text" class="form-control td-space" style="width:400px;height:30px" />
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm td-space" id="btnSearch">Search</button>
+                                </td>
+                                <td>
+                                    Export
+                                </td>
+                                <td>
+                                    <select class="form-control drp-sm td-space">
+                                        <option>--Select--</option>
+                                        <option>Excel</option>
+                                        <option>Word</option>
+                                        <option>PDF</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm td-space" id="btnExport">Export</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="table table-striped jambo_table bulk_action">
+                            <thead>
+                                <tr class="headings">
+                                    <th class="column-title">No</th>
+                                    <th class="column-title">Product Name </th>
+                                    <th class="column-title">Demand </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="even pointer">
+                                    <td class=" ">1</td>
+                                    <td class=" "><a id="prodNameLink">Ethyl Acetate - 185 Kgs</a></td>
+                                    <td class=" ">200</td>
+                                </tr>
+                                <tr class="odd pointer">
+                                    <td class=" "></td>
+                                    <td class=" "><b>Total</b></td>
+                                    <td class=" "><b>200</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal2" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="demandDetailsTitle" class="modal-title"></h5>
+                <button id="btnCloseSubModalIcon" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvSubCustDetails" style="display:none">
+                    <table>
+                        <tr>
+                            <td>Contact</td>
+                            <td>
+                                <input type="text" class="form-control td-space" style="width:400px;height:30px" />
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm td-space" id="btnSearch">Search</button>
+                            </td>
+                            <td>
+                                Export
+                            </td>
+                            <td>
+                                <select class="form-control drp-sm td-space">
+                                    <option>--Select--</option>
+                                    <option>Excel</option>
+                                    <option>Word</option>
+                                    <option>PDF</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm td-space" id="btnExport">Export</button>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table table-striped jambo_table bulk_action">
+                        <thead>
+                            <tr class="headings">
+                                <th class="column-title">No</th>
+                                <th class="column-title">Customer Name </th>
+                                <th class="column-title">Demand </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="even pointer">
+                                <td class=" ">1</td>
+                                <td class=" ">Axalta Coatings Systems India Pvt Ltd</td>
+                                <td class=" ">200</td>
+                            </tr>
+                            <tr class="odd pointer">
+                                <td class=" "></td>
+                                <td class=" "><b>Total</b></td>
+                                <td class=" "><b>200</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="dvSubProdDetails" style="display:none">
+                    <table>
+                        <tr>
+                            <td>Product</td>
+                            <td>
+                                <input type="text" class="form-control td-space" style="width:400px;height:30px" />
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm td-space" id="btnSearch">Search</button>
+                            </td>
+                            <td>
+                                Export
+                            </td>
+                            <td>
+                                <select class="form-control drp-sm td-space">
+                                    <option>--Select--</option>
+                                    <option>Excel</option>
+                                    <option>Word</option>
+                                    <option>PDF</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary btn-sm td-space" id="btnExport">Export</button>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table table-striped jambo_table bulk_action">
+                        <thead>
+                            <tr class="headings">
+                                <th class="column-title">No</th>
+                                <th class="column-title">Product Name </th>
+                                <th class="column-title">Demand </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="even pointer">
+                                <td class=" ">1</td>
+                                <td class=" ">Ethyl Acetate - 185 Kgs</td>
+                                <td class=" ">200</td>
+                            </tr>
+                            <tr class="odd pointer">
+                                <td class=" "></td>
+                                <td class=" "><b>Total</b></td>
+                                <td class=" "><b>200</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCloseSubModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalMarketUpdate" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Market Update</h5>
+                <button id="btnCloseMUpdateModal" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvMarketUpdate">
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <div class="col-sm-12">
+                                <div class="row g-3">
+                                    <div>
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Date </label>
+                                            <div class="col-sm-9">
+                                                <input id="hfEntryNo" value="0" type="text" style="display:none" />
+
+                                                <input id="txtMUDate" type="text" class="form-control datepicker" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div>
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Market Update </label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtMarketUpdate" class="form-control"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-8"></div>
+                                            <div class="col-sm-4" align="right">
+                                                <button id="btnSave" class="btn btn-success" onclick="AddMarketUpdate();"><i class="bx bxs-save"></i> Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/Dashboard.js"></script>
+<script>
+    $(document).ready(function () {
+
+    var apiUrl = '@(System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString())' + 'SPDashboard/';
+
+    $('#btnCreateDV').click(function () {
+        window.location.replace('@Url.Action("DailyVisit", "SPVisitEntry")');
+    });
+
+    $.get(apiUrl + 'GetDashboardDetails?SPCode=@Session["loggedInUserSPCode"].ToString()', function (data) {
+
+        if (data != null)
+        {
+            $('#CntOrders').html("<a href='@Url.Action("SalesOrdersList","SPSalesOrders")?filter=All' class='text-dark my-1'>" + data.OrdersCount + "</a>");
+            $('#CntInvoices').html("<a href='@Url.Action("PostedSalesInvoiceList", "SPPostedSalesInvoice")?filter=All' class='text-white my-1'>" + data.InvoicesCount + "</a>");
+            $('#CntContacts').html("<a href='@Url.Action("ContactCompanyList", "SPContacts")?filter=All' class='text-white my-1'>" + data.ContactsCount + "</a>");
+            $('#CntCustomers').html("<a href='@Url.Action("CustomerList", "SPCustomers")?filter=All' class='text-white my-1'>" + data.CustomersCount + "</a>");
+            $('#CntQuotes').html("<a href='@Url.Action("SalesQuoteList", "SPSalesQuotes")?filter=All' class='text-white my-1'>" + data.QuotesCount + "</a>");
+            $('#CntInquiries').html("<a href='@Url.Action("InquiryList", "SPInquiry")' class='text-white my-1'>" + data.InquiryCount + "</a>");
+
+        }
+
+    });
+
+    $('#demandQtyAmt').click(function () {
+        $('#modal1').css('display', 'block');
+    });
+
+    $('#btnShowDemandDetail').click(function () {
+
+        if ($('input[name=view]:checked').val() == "customer") {
+            $('#dvCustDetails').css('display', 'block');
+        }
+        else {
+            $('#dvCustDetails').css('display', 'none');
+        }
+
+        if ($('input[name=view]:checked').val() == "product") {
+            $('#dvProdDetails').css('display', 'block');
+        }
+        else {
+            $('#dvProdDetails').css('display', 'none');
+        }
+
+    });
+
+    $('#custNameLink').click(function () {
+        $('#modal1').css('display', 'none');
+        $('#modal2').css('display', 'block');
+        $('#dvSubProdDetails').css('display', 'block');
+        $('#dvSubCustDetails').css('display', 'none');
+        var demandDetailsTitle = "Demand Details Of " + $('#custNameLink').text() + " For 2023-2024";
+        $('#demandDetailsTitle').text(demandDetailsTitle);
+    });
+
+    $('#prodNameLink').click(function () {
+        $('#modal1').css('display', 'none');
+        $('#modal2').css('display', 'block');
+        $('#dvSubCustDetails').css('display', 'block');
+        $('#dvSubProdDetails').css('display', 'none');
+        var demandDetailsTitle = "Demand Details Of " + $('#prodNameLink').text() + " For 2023-2024";
+        $('#demandDetailsTitle').text(demandDetailsTitle);
+    });
+
+    $("#btnCloseModal, #btnCloseModalIcon").on("click", function () {
+        $("#modal1").css("display", "none");
+        $("#modal2").css("display", "none");
+    });
+
+    $('#btnCloseSubModal, #btnCloseSubModalIcon').click(function () {
+        $("#modal2").css("display", "none");
+        $("#modal1").css("display", "block");
+    });
+
+    $('#btnAddMUpdate').click(function () {
+        $('#modalMarketUpdate').css('display', 'block');
+    });
+
+    $('#btnCloseMUpdateModal').click(function () {
+        $('#modalMarketUpdate').css('display', 'none');
+    });
+
+        $('#Branch1Rec').click(function () {
+            $('#Branch1SPRecs').toggle();
+        });
+
+        $('#Branch2Rec').click(function () {
+            $('#Branch2SPRecs').toggle();
+        });
+
+        $('#Branch3Rec').click(function () {
+            $('#Branch3SPRecs').toggle();
+        });
+
+
+
+});
+</script>

@@ -1,0 +1,118 @@
+﻿@model PrakashCRM.Data.Models.SPMenus
+@{
+    ViewBag.Title = "Menu";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPMenus/MenuList"> Menu List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Menu
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            @using (Html.BeginForm("Menu", "SPMenus", FormMethod.Post))
+            {
+                @Html.ValidationSummary(true)
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Menu Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @*<input type="text" class="form-control" />*@
+                                        @Html.TextBoxFor(model => model.Menu_Name, new { @class = "form-control", @id = "txtMenuName" })
+                                        @Html.ValidationMessageFor(model => model.Menu_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Parent Menu</label>
+                                    <div class="col-sm-9">
+                                        @Html.DropDownListFor(model => model.Parent_Menu_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlParentMenuNo", @class = "form-select" })
+                                        @Html.TextBoxFor(model => model.Parent_Menu_Name, new { @class = "form-control", @id = "txtParentMenuName", style = "display:none" })
+                                        @*<select class="form-select">
+                                              <option>---Select---</option>
+                                          </select>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Serial No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @Html.TextBoxFor(model => model.Serial_No, new { @class = "form-control", @id = "txtSerialNo" })
+                                        @Html.ValidationMessageFor(model => model.Serial_No, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Type</label>
+                                    <div class="col-sm-9">
+                                        @Html.DropDownListFor(model => model.Type, Enumerable.Empty<SelectListItem>(), new { @id = "ddlType", @class = "form-select" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Class Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        @Html.TextBoxFor(model => model.ClassName, new { @class = "form-control", @id = "txtClassName" })
+                                        @Html.ValidationMessageFor(model => model.ClassName, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label"></label>
+                                    <div class="col-sm-9">
+                                        @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" }) Active
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <div class=" text-end g-3">
+                        <input type="hidden" id="hdnMenuAction" value="@Session["MenuAction"]" />
+                        <input type="hidden" id="hdnMenuType" value="@ViewBag.MenuType" />
+                        <input type="hidden" id="hdnParentMenuNo" value="@ViewBag.ParentMenuNo" />
+                        <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                        <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
+                        &nbsp;
+                        <a href="/SPMenus/MenuList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SPMenu.js"></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>

@@ -1,0 +1,262 @@
+@model PrakashCRM.Data.Models.SPUserRoleRelationList
+@{
+    ViewBag.Title = "UserRoleRelationCard";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPRoles/UserRoleRelationList">User Role Relation</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Card</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            @using (Html.BeginForm("UserRoleRelationCard", "SPRoles", FormMethod.Post))
+            {
+                @Html.ValidationSummary(true)
+
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">User Relation Role ID<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.TextBoxFor(m => m.User_Relation_Role_ID, new { @class = "form-control", @id = "txtUserRelationRoleId" })
+                                        @Html.ValidationMessageFor(m => m.User_Relation_Role_ID, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">EMP No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(m => m.User_Security_ID, Enumerable.Empty<SelectListItem>
+                                            (), new { @class = "form-select", @id = "ddlUserSecurityId" })
+                                        @Html.ValidationMessageFor(m => m.User_Security_ID, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">User Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(m => m.User_Name, Enumerable.Empty<SelectListItem>
+                                            (), new { @class = "form-select", @id = "ddlUserName" })
+                                        @Html.ValidationMessageFor(m => m.User_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">Role ID<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(m => m.Role_ID, Enumerable.Empty<SelectListItem>
+                                            (), new { @class = "form-select", @id = "ddlRoleId" })
+                                        @Html.ValidationMessageFor(m => m.Role_ID, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">Role Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(m => m.Role_Name, Enumerable.Empty<SelectListItem>
+                                            (), new { @class = "form-select", @id = "ddlRoleName" })
+                                        @Html.ValidationMessageFor(m => m.Role_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label">Full Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        @Html.DropDownListFor(m => m.Full_Name, Enumerable.Empty<SelectListItem>
+                                            (), new { @class = "form-select", @id = "ddlFullName" })
+                                        @Html.ValidationMessageFor(m => m.Full_Name, null, new { style = "color:red" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="text-end g-3">
+                        <input type="hidden" id="hdnUserRoleRelationAction" value="@Session["UserRoleRelationAction"]" />
+                        <input type="hidden" id="hdnSelectedUserSecurityId" value="@Model.User_Security_ID" />
+                        <input type="hidden" id="hdnSelectedUserName" value="@Model.User_Name" />
+                        <input type="hidden" id="hdnSelectedFullName" value="@Model.Full_Name" />
+                        <input type="hidden" id="hdnSelectedRoleId" value="@Model.Role_ID" />
+                        <input type="hidden" id="hdnSelectedRoleName" value="@Model.Role_Name" />
+                        <input id="getAppBaseUrl" value="@Url.Content("~/")" style="display:none" />
+                        <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
+                        &nbsp;
+                        <a href="/SPRoles/UserRoleRelationList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>
+
+<script>
+    (function () {
+        var appBaseUrl = $('#getAppBaseUrl').val() || '/';
+
+        function combineUrl(baseUrl, relativePath) {
+            baseUrl = baseUrl || '';
+            relativePath = relativePath || '';
+            if (baseUrl.length > 0 && baseUrl[baseUrl.length - 1] !== '/') baseUrl += '/';
+            if (relativePath.length > 0 && relativePath[0] === '/') relativePath = relativePath.substring(1);
+            return baseUrl + relativePath;
+        }
+
+        function selectOptionByAttr($select, attrName, attrValue) {
+            if (!attrValue) return;
+            var $opt = $select.find('option[' + attrName + '="' + attrValue.replace(/"/g, '&quot;') + '"]').first();
+            if ($opt.length) {
+                $select.val($opt.val());
+            }
+        }
+
+        function syncUserFromSecurityId() {
+            var secId = $('#ddlUserSecurityId').val();
+            if (!secId) return;
+            selectOptionByAttr($('#ddlUserName'), 'data-sec', secId);
+            selectOptionByAttr($('#ddlFullName'), 'data-sec', secId);
+        }
+
+        function syncUserFromUserName() {
+            var secId = $('#ddlUserName option:selected').attr('data-sec');
+            if (!secId) return;
+            $('#ddlUserSecurityId').val(secId);
+            selectOptionByAttr($('#ddlFullName'), 'data-sec', secId);
+        }
+
+        function syncUserFromFullName() {
+            var secId = $('#ddlFullName option:selected').attr('data-sec');
+            if (!secId) return;
+            $('#ddlUserSecurityId').val(secId);
+            selectOptionByAttr($('#ddlUserName'), 'data-sec', secId);
+        }
+
+        function syncRoleFromRoleId() {
+            var roleId = $('#ddlRoleId').val();
+            if (!roleId) return;
+            selectOptionByAttr($('#ddlRoleName'), 'data-roleid', roleId);
+        }
+
+        function syncRoleFromRoleName() {
+            var roleId = $('#ddlRoleName option:selected').attr('data-roleid');
+            if (!roleId) return;
+            $('#ddlRoleId').val(roleId);
+        }
+
+        function addDefaultOption($select) {
+            $select.empty();
+            $select.append($('<option/>', { value: '', text: '---Select---' }));
+        }
+
+        $(document).ready(function () {
+            addDefaultOption($('#ddlUserSecurityId'));
+            addDefaultOption($('#ddlUserName'));
+            addDefaultOption($('#ddlFullName'));
+            addDefaultOption($('#ddlRoleId'));
+            addDefaultOption($('#ddlRoleName'));
+
+            $.ajax({
+                url: '@Url.Action("GetUserRoleRelationLookups", "SPRoles")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (resp) {
+                    var users = (resp && resp.users) ? resp.users : [];
+                    var roles = (resp && resp.roles) ? resp.roles : [];
+
+                    // Users
+                    users.forEach(function (u) {
+                        var sec = u.User_Security_ID || '';
+                        var uname = u.User_Name || '';
+                        var fname = u.Full_Name || '';
+                        if (!sec) return;
+
+                        $('#ddlUserSecurityId').append($('<option/>', { value: sec, text: sec }));
+                        $('#ddlUserName').append($('<option/>', { value: uname, text: uname }).attr('data-sec', sec));
+                        $('#ddlFullName').append($('<option/>', { value: fname, text: fname }).attr('data-sec', sec));
+                    });
+
+                    // Roles
+                    roles.forEach(function (r) {
+                        var rid = r.Role_ID || '';
+                        var rname = r.Role_Name || '';
+                        if (!rid) return;
+                        $('#ddlRoleId').append($('<option/>', { value: rid, text: rid }));
+                        $('#ddlRoleName').append($('<option/>', { value: rname, text: rname }).attr('data-roleid', rid));
+                    });
+
+                    // Restore selected values (Edit mode)
+                    var selectedSecId = $('#hdnSelectedUserSecurityId').val();
+                    var selectedUserName = $('#hdnSelectedUserName').val();
+                    var selectedFullName = $('#hdnSelectedFullName').val();
+                    var selectedRoleId = $('#hdnSelectedRoleId').val();
+                    var selectedRoleName = $('#hdnSelectedRoleName').val();
+
+                    if (selectedSecId) {
+                        $('#ddlUserSecurityId').val(selectedSecId);
+                        syncUserFromSecurityId();
+                    } else if (selectedUserName) {
+                        $('#ddlUserName').val(selectedUserName);
+                        syncUserFromUserName();
+                    } else if (selectedFullName) {
+                        $('#ddlFullName').val(selectedFullName);
+                        syncUserFromFullName();
+                    }
+
+                    if (selectedRoleId) {
+                        $('#ddlRoleId').val(selectedRoleId);
+                        syncRoleFromRoleId();
+                    } else if (selectedRoleName) {
+                        $('#ddlRoleName').val(selectedRoleName);
+                        syncRoleFromRoleName();
+                    }
+                },
+                error: function (xhr) {
+                    // If session expired, MVC may return 401 (or a redirect page). Surface this for debugging.
+                    console.error('GetUserRoleRelationLookups failed:', xhr.status, xhr.responseText);
+                }
+            });
+
+            // Sync handlers
+            $('#ddlUserSecurityId').on('change', syncUserFromSecurityId);
+            $('#ddlUserName').on('change', syncUserFromUserName);
+            $('#ddlFullName').on('change', syncUserFromFullName);
+
+            $('#ddlRoleId').on('change', syncRoleFromRoleId);
+            $('#ddlRoleName').on('change', syncRoleFromRoleName);
+        });
+    })();
+</script>

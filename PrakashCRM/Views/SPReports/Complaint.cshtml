@@ -1,0 +1,110 @@
+﻿
+@{
+    ViewBag.Title = "Complaint";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPReports/Complaint"> Reports </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Complaint
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            </div>
+                            <div class="col-md-12">
+                                <table id="dataList" class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+
+                                            <th scope="col">Complaint No</th>
+                                            <th scope="col">DV No</th>
+                                            <th scope="col">Customer name</th>
+                                            <th scope="col">Complain</th>
+                                            <th scope="col">Complain Date</th>
+                                            <th scope="col">Root Cause Analysis</th>
+                                            <th scope="col">Root Cause Analysis Date</th>
+                                            <th scope="col">Corrective Action</th>
+                                            <th scope="col">Corrective Date</th>
+                                            <th scope="col">Preventive Action</th>
+                                            <th scope="col">Preventive Date</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblComplaint">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Complaint No</th>
+                                            <th scope="col">DV No</th>
+                                            <th>Customer name</th>
+                                            <th>Complain</th>
+                                            <th>Complain Date</th>
+                                            <th>Root Cause Analysis</th>
+                                            <th>Root Cause Analysis Date</th>
+                                            <th>Corrective Action</th>
+                                            <th>Corrective Date</th>
+                                            <th>Preventive Action</th>
+                                            <th>Preventive Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <input id="hdnSPSICount" style="display:none" />
+                                <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/reportjs/Complaint.js"></script>

@@ -1,0 +1,743 @@
+﻿
+@{
+    ViewBag.Title = "SalesQuoteList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .SQverticalScroll {
+        padding: 15px;
+        overflow-y: auto;
+        height: 500px;
+    }
+
+    .QtyCountCls, .ScheduleOrderCls,
+    .EditCls:hover {
+        cursor: pointer;
+    }
+</style>
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Sales Quote List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="hfFirstRowDropShipmentStatus" value="" style="display:none" />
+                            <input id="hfSQNo" value="" style="display:none" />
+                            <input id="hfProdNo" value="" style="display:none" />
+                            <input id="hfSchProdNo" value="" style="display:none" />
+                            <input id="hfLocCode" value="" style="display:none" />
+                            <input id="hfTRSQProdNo" value="" style="display:none" />
+                            <input id="hdnSPEmail" value="@Session["loggedInUserEmail"]" style="display:none" />
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <input id="hfShortcloseType" style="display:none" />
+                            <button id="btnCreateSQ" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;Create Sales Quote</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <td id="btnFinancehide" class="col">
+                                    <button id="btnReopenSQ" class="btn btn-success" type="button">
+                                        Price Updated Quotes
+                                    </button>
+                                </td>
+                                <div class="col">
+                                    <select id="ddlStatus" class="form-select">
+                                        <option value="-1">All</option>
+                                        <option value="Pending" selected>Pending</option>
+                                        <option value="Partial">Partial</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="PendingPartial">Pending | Partial</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="No">Quote No</option>
+                                        <option value="Sell_to_Customer_Name">Customer Name</option>
+                                        <option value="Order_Date">Quote Date</option>
+                                        <option value="Amount">Amount</option>
+                                        <option value="TPTPL_Short_Close">Shortclose</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtFromDate" type="date" class="form-control" style="display:none">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                        <option value="Less Than">Less Than</option>
+                                        <option value="Greater Than">Greater Than</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <input id="txtToDate" type="date" class="form-control" style="display:none">
+                                    <div id="dvtxtSearch" class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Edit</th>
+                            <th></th>
+                            @*<th>SMS</th>
+                                <th>Email</th>
+                                <th>Print</th>*@
+                            <th>Quote No</th>
+                            <th>Quote Date</th>
+                            <th>Customer Name</th>
+                            <th>Schedule<br />Order</th>
+                            <th>Total Quote<br />Qty</th>
+                            <th>Schedule/<br />Ordered Qty</th>
+                            <th>Invoiced<br />Qty</th>
+                            <th>In Process<br />Order Qty</th>
+                            <th>Quote Approval</th>
+                            <th>Shortclose</th>
+                            <th>Payment Terms</th>
+                            <th>Reject Remarks</th>
+                            <th>Shortclose Qty</th>
+                            <th>Balance Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th>Edit</th>
+                            <th></th>
+                            @*<th>SMS</th>
+                                <th>Email</th>
+                                <th>Print</th>*@
+                            <th>Quote No</th>
+                            <th>Quote Date</th>
+                            <th>Customer Name</th>
+                            <th>Schedule<br />Order</th>
+                            <th>Total Quote<br />Qty</th>
+                            <th>Schedule/<br />Ordered Qty</th>
+                            <th>Invoiced<br />Qty</th>
+                            <th>In Process<br />Order Qty</th>
+                            <th>Quote Approval</th>
+                            <th>Shortclose</th>
+                            <th>Payment Terms</th>
+                            <th>Reject Remarks</th>
+                            <th>Shortclose Qty</th>
+                            <th>Balance Qty</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
+                @if (Session["loggedInUserRole"] != null)
+                {
+                    <input id="hdnLoggedInUserRole" value="@Session["loggedInUserRole"].ToString()" style="display:none" />
+                }
+                <input id="hdnSPCodesOfReportingPersonUser" value="@Session["SPCodesOfReportingPersonUser"]" style="display:none" />
+                <input id="hdnSPSQCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='loader' id='divImage' style="display:none">
+    <!-- MODAL CONTENT -->
+    <div class='loader-content'>
+        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+    </div>
+</div>
+<div class="modal" id="modalQtyDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><label id="lblQtyDetailsTitle"></label></h5>
+                <button id="btnCloseQtyDetails" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <table>
+                            <tr>
+                                <td><label style="font-weight:bold">Sales Quote No: </label></td>
+                                <td>&nbsp;</td>
+                                <td><label id="lblSQProdSQNo"></label></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <br />
+                <div id="dvSQProd" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product No</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Packing Style</th>
+                                                <th scope="col">UOM</th>
+                                                <th scope="col">Basic Purchase Cost</th>
+                                                <th scope="col">Unit Price(Sales Price)</th>
+                                                <th scope="col">Drop Shipment</th>
+                                                @*<th scope="col">Vendor</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblSQProduct">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvOrderedQtyDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">
+                                                    Sales
+                                                    Order No
+                                                </th>
+                                                <th scope="col">Order Date</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Packing Style</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Schedule Qty</th>
+                                                <th scope="col">Schedule Date</th>
+                                                <th scope="col">Remarks</th>
+                                                <th scope="col">Assign To</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblOrderedQtyDetails">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvInvoicedQtyDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Invoice No</th>
+                                                <th scope="col">Posting Date</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Packing Style</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Vehicle No</th>
+                                                <th scope="col">Driver Mobile No</th>
+                                                <th scope="col">LR No</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblInvoicedQtyDetails">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvInProcessQtyDetails" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Sales Order No</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Packing Style</th>
+                                                <th scope="col">Transporter Name</th>
+                                                <th scope="col">LR No</th>
+                                                <th scope="col">Vehicle No</th>
+                                                <th scope="col">
+                                                    Driver
+                                                    Mobile No
+                                                </th>
+                                                <th scope="col">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblInProcessQtyDetails">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalInvQty" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="InvQtyDetailsTitle" class="modal-title"></h5>
+                <button id="btnCloseInvQty" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div id="dvLocationDet" class="SQverticalScroll">
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th hidden scope="col"></th>
+                                                <th scope="col">Manufacturer</th>
+                                                <th scope="col">Lot No</th>
+                                                <th scope="col">Available Qty</th>
+                                                <th scope="col">Requested Qty</th>
+                                                <th scope="col">Required Qty</th>
+                                                <th scope="col">Unit Cost</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblInvDetails">
+                                        </tbody>
+                                    </table>
+                                    <input id="txtMrpFromILE" style="display:none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label id="lblInvQtyAddMsg" style="display:none"></label>
+                <button type="button" id="btnAddQty" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalSQ" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" id="btnCloseModalSQ" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div id="dvSQScheOrder" style="display:none">
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <input id="hfQuoteNo" style="display:none">
+                            <input id="hfIsScheduleOrder" style="display:none" />
+                            <label class="form-label" style="font-weight:bold">Quote No : </label>
+                            &nbsp;
+                            <label id="lblSchOrderQuoteNo" class="form-label"></label>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Order Date:<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input id="txtScheduleDate" type="date" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">External Document No:<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input id="txtExternalDocNo" type="text" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Assign To:</label>
+                                <div class="col-sm-9">
+                                    <select id="ddlUsers" class="form-select">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Document Date:<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input id="txtDocumentDate" type="date" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label id="lblErrMsgDateDocNo" style="color: red; display: none"></label>
+                        </div>
+                    </div>
+                    @*<div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">External Document No:</label>
+                                    <div class="col-sm-3">
+                                        <input id="txtExternalDocNo" type="text" class="form-control">
+                                        <br />
+                                        <label id="lblErrMsgDateDocNo" style="color: red; display: none"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+
+                    @*<div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Customer Reference No:</label>
+                                    <div class="col-sm-9">
+                                        <input id="txtPopupCustRefNo" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th hidden scope="col">Product No</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Drop<br />Shipment</th>
+                                                <th scope="col"></th>
+                                                <th scope="col">Balance Qty</th>
+                                                <th scope="col">Schedule Qty</th>
+                                                <th scope="col">Remarks</th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblProdsForSchOrdr">
+                                            @*<tr>
+                                                    <td>
+                                                        <select id="ddlSQProds" class="form-select">
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <label id="lblDropShipment"></label>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" id="btnShowInvQty" class="btn btn-primary bx bx-show-alt" title="Quantity From Inventory"></button>
+                                                    </td>
+                                                    <td>
+                                                        <input id="txtBalQty" type="text" class="form-control" />
+                                                    </td>
+                                                    <td>
+                                                        <input id="txtScheduleQty" type="text" class="form-control" value="" />
+                                                    </td>
+                                                    <td>
+                                                        <input id="txtSchRemarks" type="text" class="form-control" />
+                                                    </td>
+                                                </tr>*@
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-10" align="right">
+                                        <label id="lblSchOrderErrMsg" class="form-label" style="color:red;display:none"></label>
+                                    </div>
+                                    <div class="col-sm-2" align="right">
+                                        <button id="btnAddRow" type="button" class="btn btn-primary">Add Row</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table id="tblSchOrderDetails" class="table mb-0 table-striped" style="display:none">
+                                            <thead>
+                                                <tr>
+                                                    <th hidden>Product No</th>
+                                                    <th scope="col">Product Name</th>
+                                                    <th scope="col">Balance Qty</th>
+                                                    <th scope="col">Schedule Qty</th>
+                                                    <th scope="col">Remarks</th>
+                                                    <th scope="col">Drop Shipment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblSchOrderProds">
+                                            </tbody>
+                                        </table>
+                                        <br />
+                                        <table id="tblLotNoWiseQtyDetails">
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+                </div>
+                <div id="dvSQLineItems" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Req Qty</th>
+                                                <th scope="col">Sales Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyLItems">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" align="right">
+                <lable id="lblSchOrdrMsg"></lable>
+                <button id="btnSchOrderSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading...</span>
+                </button>
+                <button id="btnScheduleOrder" type="button" class="btn btn-primary">Schedule Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalSchOrderMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Schedule Order</h5>
+                <button id="btnCloseSchOrderMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    @*<img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />*@
+                    <img id="resIcon" />
+                    <br />
+                    <label id="resOrderNo" class="form-label" style="font-weight:bold"></label>
+                    <br />
+                    <label id="resMsg" class="form-label"></label>
+                    @*Order Scheduled Successfully.*@
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalEmailSent" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Email - Sales Quote</h5>
+                <button id="btnCloseEmailSent" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    Email Sent Successfully
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalShortclose" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="ShortcloseTitle" class="modal-title"></h5>
+                <button id="btnCloseModalShortclose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Shortclose Reason<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <select id="ddlShortcloseReason" class="form-select">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div id="dvShortcloseRemarks" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Shortclose Remarks<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea id="txtShortcloseRemarks" class="form-control"></textarea>
+                                    <input id="hfSCRemarksSetupValue" value="" style="display:none" />
+                                    <input id="hfShortcloseWithRemarks" value="" style="display:none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label id="lblShortcloseErrMsg" class="form-label" style="color: red; display: none"></label>
+                &nbsp;
+                <button id="btnShortcloseSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading...</span>
+                </button>
+                &nbsp;
+                <button id="btnShortclose" type="button" class="btn btn-primary">Shortclose</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalShortcloseMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Shortclose</h5>
+                <button id="btnCloseShortcloseMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    <label id="lblSQShortclose" class="form-label"></label>
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SalesQuoteList.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#btnCreateSQ').click(function () {
+            window.location.replace('@Url.Action("SalesQuote", "SPSalesQuotes")');
+        });
+
+    });
+
+    function EditSalesQuote(SQNo, ScheduleStatus, SQStatus, SQFor, LoggedInUserRole) {
+        window.location.replace('@Url.Action("SalesQuote", "SPSalesQuotes")?SQNo=' + SQNo + '&ScheduleStatus=' + ScheduleStatus + '&SQStatus=' + SQStatus + '&SQFor=' + SQFor + '&LoggedInUserRole=' + LoggedInUserRole);
+
+    }
+
+</script>

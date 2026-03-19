@@ -1,0 +1,243 @@
+﻿
+@{
+    ViewBag.Title = "WeekPlanList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .clsEditDelWeekPlan {
+        cursor: pointer;
+    }
+    .verticalScroll {
+        padding: 15px;
+        overflow-y: auto;
+        height: 220px;
+    }
+    .verticalScroll1 {
+        padding: 15px;
+        overflow-y: auto;
+        height: 550px;
+    }
+</style>
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Week Plan List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row g-3">
+                <div class="col-md-1">
+                    <button id="btnCreateWeekPlan" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                </div>
+                <div class="col-md-5">
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Financial Year</label>
+                        <div class="col-sm-10">
+                            @*<select id="ddlFinancialYear" class="form-select"></select>*@
+                            <label id="lblCurrFinancialYear" class="form-label" style="font-weight:bold"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Week No</th>
+                                    <th>From Date</th>
+                                    <th>To Date</th>
+                                    <th>No Of Task</th>
+                                    <th>No Of Actual Task</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblWeekPlans">
+                                @*<tr>
+                                <td>1</td>
+                                <td>01-04-2025</td>
+                                <td>05-04-2025</td>
+                                <td><a onclick="ShowWeekPlans()" style="cursor:pointer">17</a></td>
+                                <td><a href="#">7</a></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>07-04-2025</td>
+                                <td>12-04-2025</td>
+                                <td><a href="#">15</a></td>
+                                <td><a href="#">5</a></td>
+                            </tr>*@
+                            </tbody>
+                        </table>
+                        <input id="hdnWeekPlanNo" style="display:none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+<div class="modal" id="modalWeekPlansTypeWise" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Week Plans</h5>
+                <button type="button" id="btnCloseModalWeekPlansTypeWise" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <table>
+                            <tr>
+                                <td><b>Week No</b>&nbsp;</td>
+                                <td></td>
+                                <td id="tdWeekNo"></td>
+                                <td width="30"></td>
+                                <td><b>From Date</b>&nbsp;</td>
+                                <td></td>
+                                <td id="tdFromDate"></td>
+                                <td width="30"></td>
+                                <td><b>To Date</b>&nbsp;</td>
+                                <td></td>
+                                <td id="tdToDate"></td>
+                                <td width="30"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <br />
+                <div class="row g-3">
+
+                    <div class="col-md-12 verticalScroll">
+
+                        <table class="table mb-0 table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Sub Type</th>
+                                    <th scope="col">No Of Visit</th>
+                                    <th scope="col">No Of Actual Visit</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblWeekPlansTypeWise">
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="WeeklyDailyPlanModal" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="WeeklyDailyPlanTitle" class="modal-title"></h5>
+                <button id="btnWeeklyDailyPlanModelClose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvWeeklyPlanDetails" style="display:none">
+                    <div class="row g-3">
+
+                        <div class="col-md-12 verticalScroll1">
+
+                            <table class="table mb-0 table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Customer</th>
+                                        <th scope="col">Contact Person</th>
+                                        <th scope="col">Visit Type</th>
+                                        <th scope="col">Visit Sub Type</th>
+                                        <th scope="col">Event</th>
+                                        <th scope="col">Topic</th>
+                                        <th scope="col">Purpose<br /> Of Visit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblWeekPlansDetails">
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div id="dvDailyPlanDetails" style="display:none">
+                    <div class="row g-3">
+
+                        <div class="col-md-12 verticalScroll1">
+                            <div class="table-responsive">
+
+                                <table id="dataList" class="display responsive nowrap" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>Date</th>
+                                            <th>Customer</th>
+                                            <th>Contact Person</th>
+                                            <th>Visit Type</th>
+                                            <th>Visit Sub Type</th>
+                                            <th>Event</th>
+                                            <th>Topic</th>
+                                            <th>Mode Of<br />Visit</th>
+                                            <th>Feedback</th>
+                                            <th>Remarks</th>
+                                            <th>Market Update</th>
+                                            <th>Payment Date</th>
+                                            <th>Payment Amt</th>
+                                            <th>Payment Remarks</th>
+                                            <th>Complain</th>
+                                            <th>Complain Date</th>
+                                            <th>Root Analysis</th>
+                                            <th>Root Analysis Date</th>
+                                            <th>Corrective Action</th>
+                                            <th>Corrective Action Date</th>
+                                            <th>Preventive Action</th>
+                                            <th>Preventive Action Date</th>
+                                            <th>Complain Invoice</th>
+                                            <th>Compalain Products</th>
+                                            <th>Complain Assign To</th>
+                                            <th>Is PDC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDailyPlansDetails">
+                                    </tbody>
+                                </table>
+                                <div id="orderInfo"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/WeekPlanList.js"></script>
+<script>
+$(document).ready(function () {
+    $('#btnCreateWeekPlan').click(function () {
+        window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")');
+    });
+});
+
+function EditWeekPlan(No) {
+
+    window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")?No=' + No);
+
+}
+</script>

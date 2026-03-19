@@ -1,0 +1,195 @@
+﻿
+@{
+    ViewBag.Title = "RoleList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .EditRoleCls, .DeleteRoleCls:hover {
+        cursor: pointer;
+    }
+</style>
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SalesPerson/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Role List</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            <button id="btnNew" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                        </div>
+
+                        <div class="col-md-10">
+                            <div class="row row-cols-auto g-3" style="float:right">
+                                <div class="col">
+                                    <select id="ddlStatus" class="form-select">
+                                        <option value="true" selected>Active</option>
+                                        <option value="false">In Active</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label class="col-form-label">Filter:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlField" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="No">No</option>
+                                        <option value="Role_Name">Role</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlOperator" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Equal">Equal</option>
+                                        <option value="Not Equal">Not Equal</option>
+                                        <option value="Starts With">Starts With</option>
+                                        <option value="Ends With">Ends With</option>
+                                        <option value="Contains" selected>Contains</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <div class="position-relative">
+                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
+                                    &nbsp;
+                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
+                                    </button>
+                                </div>
+                                <div style="display:none" class="col">
+                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:70%" align="left">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th style="width:10%"></th>
+                            <th style="width:20%">No</th>
+                            <th style="width:70%">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th></th>
+                            <th style="width:10%"></th>
+                            <th style="width:20%">No</th>
+                            <th style="width:70%">Role</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <input id="hdnRoleNo" style="display:none" />
+                <input id="hdnRoleName" style="display:none" />
+                <input id="hdnRoleCount" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalDelRole" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete it?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnDelYes" class="btn btn-primary">Yes</button>
+                <button type="button" id="btnDelNo" class="btn btn-secondary">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalDelMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Role</h5>
+                <button id="btnCloseDelMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    Role Deleted Successfully.
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SPRoleList.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#btnNew').click(function () {
+            window.location.replace('@Url.Action("Role", "SPRoles")');
+        });
+
+    });
+</script>

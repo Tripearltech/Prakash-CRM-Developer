@@ -1,0 +1,745 @@
+﻿
+@{
+    ViewBag.Title = "Menu";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .InqLineCls, .DeleteInqLineCls:hover {
+        cursor: pointer;
+    }
+</style>
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPInquiry/InquiryList"> Inquiry List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Inquiry
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <input id="hfInqEdit" name="hfInqEdit" value="false" style="display:none" />
+                                <input id="hfInqNo" name="hfInqNo" value="" style="display:none" />
+                                <input id="hfContactCompanyNo" name="hfContactCompanyNo" value="" style="display:none" />
+                                <input id="hfContactPersonNo" name="hfContactPersonNo" value="" style="display:none" />
+                                <input id="hfContactDetails" name="hfContactDetails" value="" style="display:none" />
+                                <input id="hfPrimaryContactNo" name="hfPrimaryContactNo" value="" style="display:none" />
+                                <input id="hfCustomerNo" name="hfCustomerNo" value="" style="display:none" />
+                                <input id="hfCustPANNo" name="hfCustPANNo" value="" style="display:none" />
+                                <input id="hfProdLineNo" name="hfProdLineNo" value="" style="display:none" />
+                                <input id="hfProdNo" name="hfProdNo" value="" style="display:none" />
+                                <input id="hfProdNoEdit" name="hfProdNoEdit" value="" style="display:none" />
+                                <input id="hfUOM" name="hfUOM" value="" style="display:none" />
+                                <input id="hfInquiryNo" name="hfInquiryNo" value="@ViewBag.InquiryNo" style="display:none" />
+                                <input id="hfIsInqHeaderAdded" name="hfIsInqHeaderAdded" value="@ViewBag.isInqHeaderAdded" style="display:none" />
+                                <input id="hfSavedCustomerName" name="hfSavedCustomerName" value="@ViewBag.CustomerName" style="display:none" />
+                                <input id="hfSavedContactCompanyNo" name="hfSavedContactCompanyNo" value="@ViewBag.ContactCompanyNo" style="display:none" />
+                                <input id="hfSavedContactPersonNo" name="hfSavedContactPersonNo" value="@ViewBag.ContactPersonNo" style="display:none" />
+                                <input id="hfSavedConsigneeCode" name="hfSavedConsigneeCode" value="@ViewBag.ConsigneeCode" style="display:none" />
+                                <input id="hfSavedContactName" name="hfSavedContactName" value="@ViewBag.ContactName" style="display:none" />
+                                <input id="hfSavedPaymentTermsCode" name="hfSavedPaymentTermsCode" value="@ViewBag.PaymentTermsCode" style="display:none" />
+                                <input id="hfSavedPaymentTerms" name="hfSavedPaymentTerms" value="" style="display:none" />
+                                <input id="hfIsLineDetailsUpdate" name="hfIsLineDetailsUpdate" value="" style="display:none" />
+                                <input id="hfEditPackingStyle" name="hfEditPackingStyle" value="" style="display:none" />
+                                <input id="hfDocNoUpdate" name="hfDocNoUpdate" value="" style="display:none" />
+                                <input id="hfLineNoUpdate" name="hfLineNoUpdate" value="" style="display:none" />
+                                <input id="hfDocNoDel" name="hfDocNoDel" value="" style="display:none" />
+                                <input id="hfLineNoDel" name="hfLineNoDel" value="" style="display:none" />
+                                <input id="hfSavedShiptoCode" name="hfSavedShiptoCode" value="@ViewBag.ShiptoCode" style="display:none" />
+                                <input id="hfSavedJobtoCode" name="hfSavedJobtoCode" value="@ViewBag.JobtoCode" style="display:none" />
+                                <input id="hfCustomerTemplateCode" name="hfCustomerTemplateCode" value="" style="display:none" />
+                                <input id="hfPostCode" name="hfPostCode" value="" style="display:none" />
+                                <input id="hfAreaCode" name="hfAreaCode" value="" style="display:none" />
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Inquiry Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="date" id="txtInquiryDate" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Customer Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        <input id="hfCompany" name="hfCompany" style="display:none" />
+                                        <input type="text" id="txtCustomerName" value="" class="form-control" />
+                                        @*<select id="ddlCustomer" class="form-select"></select>*@
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button id="btnAddNewContactCompany" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Company"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Contact Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-8">
+                                        <select id="ddlContact" class="form-select"></select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person" disabled></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Contact Company Address</label>
+                                    <div class="col-sm-9">
+                                        @*<select id="ddlConsigneeAddress" class="form-select"></select>*@
+                                        <label id="lblConsigneeAddress" class="form-label"></label>
+                                        <input id="hfConsigneeAdd" name="hfConsigneeAdd" style="display:none" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Bill-to Address</label>
+                                    <div class="col-sm-8">
+                                        <select id="ddlBillTo" class="form-select"></select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button id="btnAddNewBillTo" type="button" class="btn btn-primary bx bx-plus" title="Add New Bill-to Address" disabled></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Delivery-to Address</label>
+                                    <div class="col-sm-8">
+                                        <select id="ddlShipTo" class="form-select"></select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <button id="btnAddNewJobTo" type="button" class="btn btn-primary bx bx-plus" title="Add New Delivery-to Address" disabled></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Payment Terms<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <select id="ddlPaymentTerms" class="form-select"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Remarks</label>
+                                    <div class="col-sm-9">
+                                        <textarea id="txtRemarks" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-0 font-weight-bold">Inquiry Line Details</h6>
+                        <hr />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Product Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input id="txtProductName" type="text" class="form-control" /><br />
+                                        @*<input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All*@
+                                        @*<select id="ddlProductName" class="form-select"></select>*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Packing Style<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <select id="ddlPackingStyle" class="form-select"></select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Qty<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input id="txtProdQty" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">UOM</label>
+                                    <div class="col-sm-9">
+                                        <input id="txtUOM" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Delivery Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input id="txtDeliveryDate" type="date" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Payment Terms</label>
+                                    <div class="col-sm-9">
+                                        <input id="txtProDetailsPaymentTerms" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-8"></div>
+                                    <div class="col-sm-4" align="right">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <button id="btnSaveProd" type="button" class="btn btn-primary"><i class="bx bxs-save"></i> Save Product</button>
+                                                </td>
+                                                <td></td>
+                                                <td>
+                                                    <button id="btnResetProdDetails" type="button" class="btn btn-danger"><i class="lni lni-close"></i> Clear</button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-0 font-weight-bold">Inquiry Line Items</h6>
+                        <hr />
+
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table id="tblProdList" class="table table-striped" style="display:none">
+
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th hidden>Product No</th>
+                                                    <th>Product Name</th>
+                                                    <th>Qty</th>
+                                                    <th>Packing Style</th>
+                                                    <th>UOM</th>
+                                                    <th>Delivery Date</th>
+                                                    <th>Payment Terms</th>
+                                                    <th hidden></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblProducts">
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="toolbar">
+                            <div class=" text-end g-3">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                <input id="hfSPNo" value="@Session["loggedInUserSPCode"]" style="display:none" />
+                                <input type="hidden" id="hfInquiryAction" value="@Session["InquiryAction"]" />
+                                <input type="hidden" id="hfInquiryActionErr" value="@Session["InquiryActionErr"]" />
+                                <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
+                                &nbsp;
+                                <a href="/SPInquiry/InquiryList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                                @if (ViewBag.InquiryNo != null)
+                                {
+                                    <button type="button" class="btn btn-primary">Convert To SQ</button>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+<div class='loader' id='divImage' style="display:none">
+    <!-- MODAL CONTENT -->
+    <div class='loader-content'>
+        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+    </div>
+</div>
+<div class="modal" id="modalDelInqLine" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Inquiry Line</h5>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <label class="col-sm-12 col-form-label">Are you sure you want to delete?</label>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button id="btnDelInqConfirm" type="button" class="btn btn-primary">Yes</button>
+                <button id="btnDelInqCancel" type="button" class="btn btn-secondary">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalInquiry" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <input id="hfAddNewDetails" style="display:none" />
+                <h5 class="modal-title">Add New Contact Person<br />In Selected Company</h5>
+                <button id="btnCloseModalInquiry" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div id="dvAddNewCPerson" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtCPersonName" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtCPersonMobile" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                @*<label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>*@
+                                <label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtCPersonEmail" class="form-control" />
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Department<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    @*<input type="hidden" id="hfDepartmentCode" value="@ViewBag.PCPL_Department_Code" />*@
+                                    <select id="ddlDepartment" class="form-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtJobResponsibility" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Allow Login</label>
+                                <div class="col-sm-9">
+                                    <input type="checkbox" id="chkAllowLogin" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
+                                <div class="col-sm-9">
+                                    <input type="checkbox" id="chkEnableOTPOnLogin" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Is Primary</label>
+                                <div class="col-sm-9">
+                                    <input type="checkbox" id="chkIsPrimary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dvAddNewShiptoAddress" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddName" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddCode" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea id="txtNewShiptoAddress" class="form-control" maxlength="100"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Address2</label>
+                                <div class="col-sm-9">
+                                    <textarea id="txtNewShiptoAddress2" class="form-control" maxlength="50"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddPostCode" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Country/Region</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddCountryCode" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">State<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddState" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">District</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddDistrict" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">City</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddCity" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlNewShiptoAddArea" class="form-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewShiptoAddGSTNo" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+                </div>
+                <div id="dvAddNewJobtoAddress" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddName" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddCode" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <textarea id="txtNewJobtoAddress" class="form-control" maxlength="100"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Address2</label>
+                                <div class="col-sm-9">
+                                    <textarea id="txtNewJobtoAddress2" class="form-control" maxlength="50"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddPostCode" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Country/Region</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddCountryCode" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">State<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddState" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">District</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddDistrict" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">City</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddCity" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlNewJobtoAddArea" class="form-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtNewJobtoAddGSTNo" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label id="lblMsg" style="display:none" class="form-label"></label>
+                &nbsp;
+                <button id="btnAddSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading...</span>
+                </button>
+                &nbsp;
+                <button id="btnConfirmAdd" class="btn btn-primary" type="button">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color:red">Error</h5>
+                <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="color:red" align="center">
+                <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                <br /><br />
+                <h6 id="modalErrDetails" style="color:red"></h6>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/Inquiry.js"></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>
+<script src="~/Scripts/appjs/json2.js"></script>
+<script src="~/Layout/vendors/raphael/raphael.min.js"></script>
+<script src="~/Layout/vendors/morris.js/morris.min.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('#btnAddNewContactCompany').click(function () {
+            window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")');
+        });
+
+        $('#btnSave').click(function () {
+
+            var errMsg = CheckFieldValues();
+
+            if (errMsg != "") {
+
+                ShowErrMsg(errMsg);
+            }
+            else {
+
+                $('#divImage').show();
+                var inquiryheader = {};
+                var productDetails_ = new Array();
+
+                inquiryheader.IsInqEdit = $('#hfInqEdit').val();
+                inquiryheader.InquiryNo = $('#hfInqNo').val();
+                inquiryheader.InquiryDate = $('#txtInquiryDate').val();
+                inquiryheader.ConsigneeAddress = $('#ddlConsigneeAddress option:selected').text();
+                inquiryheader.ContactCompanyNo = $('#hfContactCompanyNo').val();
+                inquiryheader.CustomerName = $('#txtCustomerName').val();
+                inquiryheader.ContactPersonNo = $('#hfContactPersonNo').val();
+                inquiryheader.CustomerNo = $('#hfCustomerNo').val();
+                inquiryheader.JobtoCode = $('#ddlShipTo').val();
+                inquiryheader.ShiptoCode = $('#ddlBillTo').val();
+                inquiryheader.PaymentTerms = $('#ddlPaymentTerms').val();
+                inquiryheader.Inquiry_Status_Remarks = $('#txtRemarks').val();
+                inquiryheader.CustomerTemplateCode = $('#hfCustomerTemplateCode').val();
+                inquiryheader.SPCode = $('#hfSPNo').val();
+
+                $("#tblProducts TR").each(function () {
+                    var productDetails = {};
+                    productDetails.Product_No = $(this).find("TD").eq(1).html();
+                    productDetails.Quantity = $(this).find("TD").eq(3).html();
+                    productDetails.PCPL_Packing_Style_Code = $(this).find("TD").eq(4).html();
+                    productDetails.Delivery_Date = $(this).find("TD").eq(6).html();
+
+                    if ($('#hfInqEdit').val() == "true") {
+                        productDetails.Line_No = $(this).find("TD").eq(8).html();
+                    }
+                    else {
+                        productDetails.Line_No = "";
+                    }
+
+                    productDetails_.push(productDetails);
+                });
+
+                inquiryheader.Products = productDetails_;
+
+                (async () => {
+                    const rawResponse = await fetch('/SPInquiry/PostInquiry', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(inquiryheader)
+                    });
+                    const res = await rawResponse.ok;
+                    //if (res) {
+                        $('#divImage').hide();
+                        window.location.replace('@Url.Action("Inquiry", "SPInquiry")');
+                        $('#hfInqEdit').val("false");
+                    //}
+
+                })();
+
+            }
+
+
+        });
+
+    });
+</script>

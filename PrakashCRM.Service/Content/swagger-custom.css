@@ -1,0 +1,192 @@
+/* PrakashCRM Custom Swagger Styles */
+
+/* Header Styling */
+.swagger-ui .topbar {
+    background-color: #2c3e50 !important;
+    border-bottom: 3px solid #3498db;
+}
+
+.swagger-ui .topbar-wrapper .link {
+    color: #ecf0f1 !important;
+}
+
+/* Info Section */
+.swagger-ui .info {
+    margin: 30px 0;
+}
+
+.swagger-ui .info .title {
+    font-size: 36px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.swagger-ui .info .description {
+    font-size: 16px;
+    color: #7f8c8d;
+}
+
+/* Operation Blocks */
+.swagger-ui .opblock {
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.swagger-ui .opblock-tag {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding: 15px 20px;
+}
+
+/* HTTP Method Colors */
+.swagger-ui .opblock.opblock-post {
+    border-color: #49cc90;
+    background: rgba(73, 204, 144, 0.05);
+}
+
+.swagger-ui .opblock.opblock-get {
+    border-color: #61affe;
+    background: rgba(97, 175, 254, 0.05);
+}
+
+.swagger-ui .opblock.opblock-delete {
+    border-color: #f93e3e;
+    background: rgba(249, 62, 62, 0.05);
+}
+
+.swagger-ui .opblock.opblock-put {
+    border-color: #fca130;
+    background: rgba(252, 161, 48, 0.05);
+}
+
+/* Buttons */
+.swagger-ui .btn.execute {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.swagger-ui .btn.execute:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Response Section */
+.swagger-ui .responses-wrapper {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.swagger-ui .response {
+    margin-bottom: 15px;
+}
+
+/* Parameters Section */
+.swagger-ui .parameters-col_description {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Models Section */
+.swagger-ui .model-container {
+    background: #fafafa;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+/* Try it out button */
+.swagger-ui .btn.try-out__btn {
+    background-color: #27ae60;
+    color: white;
+    border-radius: 4px;
+    padding: 8px 16px;
+    transition: all 0.3s;
+}
+
+.swagger-ui .btn.try-out__btn:hover {
+    background-color: #229954;
+}
+
+/* Filter Box */
+.swagger-ui .filter-container {
+    margin: 20px 0;
+}
+
+.swagger-ui .filter-container input {
+    border: 2px solid #3498db;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+/* Success/Error Messages */
+.swagger-ui .response .response-col_status {
+    font-weight: bold;
+}
+
+.swagger-ui .response .response-col_status.response-col_status-200 {
+    color: #27ae60;
+}
+
+.swagger-ui .response .response-col_status.response-col_status-400,
+.swagger-ui .response .response-col_status.response-col_status-500 {
+    color: #e74c3c;
+}
+
+/* Scrollbar Styling */
+.swagger-ui ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+    background: #3498db;
+    border-radius: 10px;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+/* Authorization Section */
+.swagger-ui .auth-wrapper {
+    padding: 20px;
+    background: #ecf0f1;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+/* Schema Section */
+.swagger-ui .model-box {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .swagger-ui .info .title {
+        font-size: 24px;
+    }
+    
+    .swagger-ui .opblock-tag {
+        font-size: 18px;
+    }
+}

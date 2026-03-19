@@ -1,0 +1,7 @@
+{
+  "dotnet.preferCSharpExtension": true
+  ,"files.associations": {
+    "*.cshtml": "html",
+    "*.vbhtml": "html"
+  }
+}

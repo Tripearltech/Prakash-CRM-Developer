@@ -1,0 +1,35 @@
+﻿.page_link, .prev_link, .next_link, .ell > span {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+}
+
+.pagination .page_link.active {
+    background-color: #8833ff;
+    color: white;
+    border: 1px solid #8833ff;
+}
+
+.pagination .page_link:hover:not(.active) {
+    background-color: #ddd;
+}
+
+.pagination .page_link:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.pagination .page_link:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.form-select {
+    margin-bottom: 5px;
+}
+
+.form-control {
+    margin-bottom: 5px;
+}
