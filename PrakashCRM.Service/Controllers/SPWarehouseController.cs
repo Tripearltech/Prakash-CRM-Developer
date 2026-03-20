@@ -644,9 +644,9 @@ namespace PrakashCRM.Service.Controllers
                             PackingUOM = purchaseLine.PCPL_Packing_UOM,
                             PackingStyle = purchaseLine.PCPLPackingStyleDescription_Purchase_Line,
                             TransportQty = purchaseLine.Transport_Quantity_Line,
-                            PCPL_Item_Tracking_Code = purchaseLine.Tracking_Code,
+                            PCPL_Item_Tracking_Code = string.IsNullOrWhiteSpace(purchaseLine.Tracking_Code) ? "" : purchaseLine.Tracking_Code,
                             PackingQty = purchaseLine.PCPL_Packing_Qty_,
-                            //LineNo = purchaseLine.Line_No_
+                            LineNo = purchaseLine.Line_No_
                         });
 
                     }
@@ -729,9 +729,9 @@ namespace PrakashCRM.Service.Controllers
                             PackingUOM = transferLine.PCPL_Packing_UOM,
                             PackingStyle = transferLine.PCPLPackingStyleDescription_SalesLine,
                             TransportQty = transferLine.Transport_Quantity_Line,
-                            PCPL_Item_Tracking_Code = transferLine.Tracking_Code,
+                            PCPL_Item_Tracking_Code = string.IsNullOrWhiteSpace(transferLine.Tracking_Code) ? "" : transferLine.Tracking_Code,
                             PackingQty = transferLine.PCPL_Packing_Qty_,
-                            //LineNo = transferLine.Line_No_
+                            LineNo = transferLine.Line_No_
 
 
                         });
