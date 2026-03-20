@@ -66,6 +66,8 @@ namespace PrakashCRM.Data.Models
 
     public class SPGRNCard
     {
+        public dynamic UnLoadingName;
+
         public string DocumentType { get; set; }
         public string DocumentNo { get; set; }
         public string OrderDate { get; set; }
@@ -90,11 +92,12 @@ namespace PrakashCRM.Data.Models
         public string MakeMfgCode { get; set; }
         public bool EXM_Import_Document { get; set; }
         public List<SPGRNCardLine> grnCardLines { get; set; }
-
+        public dynamic LoadingName { get; set; }
     }
 
     public class SPGRNCardLine
     {
+        public string loadingName { get; set; }
         public string Description { get; set; }
         public string Quantity { get; set; }
         public string UOMCode { get; set; }
@@ -121,6 +124,7 @@ namespace PrakashCRM.Data.Models
         public string TrackingCode { get; set; }
         public string ItemNo { get; set; }
         public string MakeMfgCode { get; set; }
+        public string UnloadingName { get; set; }
     }
 
     public class SPGRNPurchaseCard
@@ -145,6 +149,8 @@ namespace PrakashCRM.Data.Models
         public string PCPL_Transporter_No { get; set; }
         public string PCPL_Transport_Amount { get; set; }
         public string PCPL_Loading_Charges { get; set; }
+        public string PCPL_UnLoading_Vendor_Name { get; set; }
+        public string PCPL_Loading_Vendor_Name { get; set; }
         public string PCPL_UnLoading_Charges { get; set; }
         public string PCPL_Make_Mfg_Code { get; set; }
         public bool EXM_Import_Document { get; set; }
@@ -204,6 +210,8 @@ namespace PrakashCRM.Data.Models
         public string PCPL_Transport_Amount { get; set; }
         public string PCPL_Loading_Charges { get; set; }
         public string PCPL_UnLoading_Charges { get; set; }
+        public string PCPL_UnLoading_Vendor_Name { get; set; }
+        public string PCPL_Loading_Vendor_Name { get; set; }
     }
 
     public class SPGRNSalesReturnLine
@@ -247,6 +255,8 @@ namespace PrakashCRM.Data.Models
         public string PCPL_Transport_Amount { get; set; }
         public string PCPL_Loading_Charges { get; set; }
         public string PCPL_UnLoading_Charges { get; set; }
+        public string PCPL_Loading_Vendor_Name { get; set; }
+        public string PCPL_UnLoading_Vendor_Name { get; set; }
     }
 
     public class SPGRNTransferLine

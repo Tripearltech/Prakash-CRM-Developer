@@ -212,6 +212,7 @@ namespace PrakashCRM.Service.Controllers
                     spgrnCard.TransportAmount = purchase.PCPL_Transport_Amount;
                     spgrnCard.LoadingCharges = purchase.PCPL_Loading_Charges;
                     spgrnCard.UnLoadingCharges = purchase.PCPL_UnLoading_Charges;
+                    spgrnCard.UnLoadingName = purchase.PCPL_UnLoading_Vendor_Name;
                     spgrnCard.MakeMfgCode = purchase.PCPL_Make_Mfg_Code;
                     spgrnCard.EXM_Import_Document = purchase.EXM_Import_Document;
                     List<SPGRNCardLine> spgrnCardLine = new List<SPGRNCardLine>();
@@ -249,6 +250,7 @@ namespace PrakashCRM.Service.Controllers
                                 ProductCode = purchaseline.Shortcut_Dimension_2_Code,
                                 FreightCharges = purchaseline.PCPL_Freight_Charges,
                                 UnloadingCharges = purchaseline.PCPL_Unloading_Charges,
+                                //UnloadingName = purchaseline.PCPL_UnLoading_Vendor_Name,
                                 TrackingCode = purchaseline.Tracking_Code,
                                 ItemNo = purchaseline.No
                             });
@@ -324,7 +326,9 @@ namespace PrakashCRM.Service.Controllers
                     spgrnCard.TransporterNo = salesreturn.PCPL_Transporter_No;
                     spgrnCard.TransportAmount = salesreturn.PCPL_Transport_Amount;
                     spgrnCard.LoadingCharges = salesreturn.PCPL_Loading_Charges;
+                    spgrnCard.LoadingName = salesreturn.PCPL_Loading_Vendor_Name;
                     spgrnCard.UnLoadingCharges = salesreturn.PCPL_UnLoading_Charges;
+                    spgrnCard.UnLoadingName = salesreturn.PCPL_UnLoading_Vendor_Name;
                     spgrnCard.MakeMfgCode = "";
 
                     List<SPGRNCardLine> spgrnCardLine = new List<SPGRNCardLine>();
@@ -362,6 +366,8 @@ namespace PrakashCRM.Service.Controllers
                                 ProductCode = salesreturnline.Shortcut_Dimension_2_Code,
                                 FreightCharges = salesreturnline.PCPL_Freight_Charges,
                                 UnloadingCharges = salesreturnline.PCPL_Unloading_Charges,
+                                //UnloadingName = salesreturnline.PCPL_UnLoading_Vendor_Name,
+                                //loadingname = salesreturnline.PCPL_Loading_Vendor_Name,
                                 TrackingCode = salesreturnline.Tracking_Code,
                                 ItemNo = salesreturnline.No
                             });
@@ -429,6 +435,8 @@ namespace PrakashCRM.Service.Controllers
                     spgrnCard.TransportAmount = transfer.PCPL_Transport_Amount;
                     spgrnCard.LoadingCharges = transfer.PCPL_Loading_Charges;
                     spgrnCard.UnLoadingCharges = transfer.PCPL_UnLoading_Charges;
+                    spgrnCard.UnLoadingName = transfer.PCPL_UnLoading_Vendor_Name;
+                    spgrnCard.LoadingName = transfer.PCPL_Loading_Vendor_Name;
                     spgrnCard.MakeMfgCode = "";
 
                     List<SPGRNCardLine> spgrnCardLine = new List<SPGRNCardLine>();
@@ -466,6 +474,8 @@ namespace PrakashCRM.Service.Controllers
                                 ProductCode = transferline.Shortcut_Dimension_2_Code,
                                 FreightCharges = transferline.PCPL_Freight_Charges,
                                 UnloadingCharges = transferline.PCPL_Unloading_Charges,
+                                //loadingName = transferline.PCPL_Loading_Vendor_Name,
+                                //UnloadingName = transferline.PCPL_UnLoading_Vendor_Name,
                                 TrackingCode = transferline.Tracking_Code,
                                 ItemNo = transferline.No
                             });
@@ -772,7 +782,7 @@ namespace PrakashCRM.Service.Controllers
             bool headerflag = false;
             if (reservationEntryForGRNs == null || reservationEntryForGRNs.Count == 0)
             {
-                return false; 
+                return false;
             }
 
             foreach (var item in reservationEntryForGRNs)
@@ -900,7 +910,7 @@ namespace PrakashCRM.Service.Controllers
             return msg;
         }
 
-        
+
         public async Task<(SPGRNSaveResponse, errorDetails)> PostCodeUnit<DeleteReservationEntryForGRNRequest>(string apiendpoint, DeleteReservationEntryForGRNRequest requestModel, SPGRNSaveResponse responseModel)
         {
             string _codeUnitBaseUrl = System.Configuration.ConfigurationManager.AppSettings["CodeUnitBaseURL"];
