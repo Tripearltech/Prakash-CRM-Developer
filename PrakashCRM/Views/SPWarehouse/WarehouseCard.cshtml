@@ -42,7 +42,13 @@
                         <div class="row">
                             <div>
 
-                                <h6 class="mb-0 font-weight-bold">General</h6>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h6 class="mb-0 font-weight-bold">General</h6>
+                                    @if (string.IsNullOrWhiteSpace(Model.AcceptedBy))
+                                    {
+                                        <button id="btnAcceptTask" type="button" class="btn btn-primary" onclick="return AcceptCurrentWarehouseTask();"><i class='bx bx-message-square-check'></i> Accept</button>
+                                    }
+                                </div>
                                 <hr />
 
                                 <div class="row g-3">
@@ -150,7 +156,8 @@
 
                                 <div class="row g-3">
                                     <div class="col-md-12">
-                                        @{ bool canEditTransportQty = Model.DocumentType == "Sales Order" || Model.DocumentType == "Sales Return"; }
+                                        @{ bool canEditTransportQty = Model.DocumentType == "Sales Order" || Model.DocumentType == "Sales Return" || Model.DocumentType == "Purchase Order" || Model.DocumentType == "Transfer Order"; }
+                                        @{ string transportQtyLabel = Model.DocumentType == "Purchase Order" ? "Qty to Receive" : "Transport Qty"; }
                                         <table class="table mb-0 table-striped">
                                             <thead>
                                                 <tr>
@@ -161,7 +168,7 @@
                                                     <th scope="col">Gross Weight</th>
                                                     <th scope="col" hidden>Packing UOM</th>
                                                     <th scope="col">Packing Style</th>
-                                                    <th scope="col">Transport Qty</th>
+                                                    <th scope="col">@transportQtyLabel</th>
                                                     <th scope="col">Packing Qty</th>
                                                     <th scope="col">Shipped Qty</th>
                                                     @if (canEditTransportQty)
@@ -230,10 +237,10 @@
                                                 }
 
                                                 @* @if (packingUOMs.EndsWith(", "))
-                                                    {
-                                                        packingUOMs = packingUOMs.Substring(0, packingUOMs.Length - 2);
+                        {
+                            packingUOMs = packingUOMs.Substring(0, packingUOMs.Length - 2);
 
-                                                    }*@
+                        }*@
                                             </tbody>
                                         </table>
                                     </div>
@@ -345,8 +352,8 @@
                                                     <div><button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person"></button></div>
                                                 </div>
                                                 @*<div class="col-sm-1" style="margin-left:-15px;" id="divAddNewContactPerson">
-                                                    <button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person"></button>
-                                                </div>*@
+                            <button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person"></button>
+                        </div>*@
                                             </div>
                                         </div>
                                     </div>
@@ -428,7 +435,7 @@
                                 <input id="hfTotalQty" value="@totalQty" style="display:none" />
                                 <input id="hfVendorCompanyNo" value="" style="display:none" />
                                 <input id="hfTransporterContactNo" value="@Model.PCPL_Transporter_Contact_No_" style="display:none" />
-                                <input id="hfSPNo" value="@Session["loggedInUserSPCode"]" style="display:none" />
+                                <input id="hfSPNo" value="@Session["loggedInUserNo"]" style="display:none" />
                                 <input id="hfTransporterNo" value="@Model.PCPL_Transporter_No" style="display:none" />@**@
                                 <input id="hfFromLocationCode" value="@Model.FromLocation" style="display:none" />
                                 <input id="hfToLocationCode" value="@Model.ToLocation" style="display:none" />
@@ -437,8 +444,13 @@
                                 <input id="hfUnLoadingVendorNo" value="@Model.PCPL_UnLoading_Vendor" style="display:none" />@**@
                                 <input id="hfLoadingVendorNo" value="@Model.PCPL_Loading_Vendor" style="display:none" />@**@
                                 <input id="hfDocumentType" value="@Model.DocumentType" style="display:none" />@**@
+                                <input id="hfHasPendingDropShipment" value="@Model.TPTPLDropShipment" style="display:none" />
                                 @*///  <input id="hfLoadingVendorNo" value="@Model.s" style="display:none" />*@
 
+                                <button id="btnAcceptSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Loading...</span>
+                                </button>
                                 <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                     <span class="visually-hidden">Loading...</span>

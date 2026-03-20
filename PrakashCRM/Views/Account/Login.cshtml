@@ -410,6 +410,23 @@
                 } catch (e) { }
             }
 
+            var originalShowErrorMsg = window.ShowErrorMsg;
+            window.ShowErrorMsg = function (errMsg) {
+                try {
+                    if (errMsg) {
+                        sendSiteError({
+                            Error_Code: 'LOGIN_ERR',
+                            Exception_Message: errMsg,
+                            Source: 'Login Action',
+                            Description: 'Severity: High | Action: Login',
+                            Web_URL: window.location.pathname + window.location.search
+                        });
+                    }
+                } catch (e) { }
+
+                return originalShowErrorMsg.apply(this, arguments);
+            };
+
             window.addEventListener('error', function (event) {
                 sendSiteError({
                     Error_Code: 'JS_ERR',

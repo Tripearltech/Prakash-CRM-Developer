@@ -1,29 +1,10 @@
 ﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
-var custVendorPortalUrl = $('#getCustVendorPortalUrl').val();
-var currentCompanyName = "";
-
-function getSafeText(value) {
-    if (value === null || value === undefined) return "";
-    return (value + "").trim();
-}
-
-function getCurrentCompanyLabel() {
-    return getSafeText(currentCompanyName) || "Selected Company";
-}
-
-function escapeHtmlAttr(value) {
-    return (value === null || value === undefined ? '' : (value + ''))
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
 
 /* start pagination filter code */
 var filter = "";
 var orderBy = 4;
 var orderDir = "asc";
+
 $(document).ready(function () {
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     $('#ddlField').val("Name");
@@ -1267,3 +1248,23 @@ $('#btnDailyVisitShowAll').click(function () {
     $('#txtDailyVisitFDate, #txtDailyVisitTDate').val("");
     BindContactDailyVisit("", "", "");
 });
+var custVendorPortalUrl = $('#getCustVendorPortalUrl').val();
+var currentCompanyName = "";
+
+function getSafeText(value) {
+    if (value === null || value === undefined) return "";
+    return (value + "").trim();
+}
+
+function getCurrentCompanyLabel() {
+    return getSafeText(currentCompanyName) || "Selected Company";
+}
+
+function escapeHtmlAttr(value) {
+    return (value === null || value === undefined ? '' : (value + ''))
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}

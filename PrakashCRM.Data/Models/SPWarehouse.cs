@@ -147,6 +147,7 @@ namespace PrakashCRM.Data.Models
         public string UnitofMeasure_Purchase_Line { get; set; }
         public string PCPLPackingStyleDescription_Purchase_Line { get; set; }
         public string PCPL_Packing_UOM { get; set; }
+        public string Qty_to_Receive { get; set; }
         public string Transport_Quantity_Line { get; set; }
         public string Tracking_Code { get; set; }
         public string Line_No_ { get; set; }
@@ -217,6 +218,7 @@ namespace PrakashCRM.Data.Models
         public string PCPLPackingStyleDescription_SalesLine { get; set; }
         public string PCPL_Packing_UOM { get; set; }
         public string Transport_Quantity_Line { get; set; }
+        public string Qty_to_Receive { get; set; }
         public string Tracking_Code { get; set; }
         public string Line_No_ { get; set; }
         public string TransferfromCode { get; set; }

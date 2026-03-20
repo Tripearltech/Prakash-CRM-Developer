@@ -848,11 +848,10 @@ namespace PrakashCRM.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> GetloadingAndUnloadingDropDown(string prefix)
+        public async Task<JsonResult> GetloadingAndUnloadingDropDown(string prefix, string type)
         {
             string baseUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString();
-            string apiUrl = baseUrl + "SPWarehouse/GetloadingAndUnloadingDropDown?" + "prefix=" + HttpUtility.UrlEncode(prefix);
-
+            string apiUrl = baseUrl + "SPWarehouse/GetloadingAndUnloadingDropDown?prefix=" + HttpUtility.UrlEncode(prefix ?? string.Empty) + "&type=" + HttpUtility.UrlEncode(type ?? string.Empty);
 
             HttpClient client = new HttpClient();
             List<UnloadingAndLoading> unloadingAndloading = new List<UnloadingAndLoading>();

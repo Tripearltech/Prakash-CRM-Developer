@@ -473,12 +473,16 @@ namespace PrakashCRM.Service.Controllers
                 if (result.Result.Item1.value.Count > 0)
                 {
                     List<WarehouseCardLine> warehouseCardLine = new List<WarehouseCardLine>();
+                    bool hasPendingDropShipment = false;
 
                     int i = 0;
                     //string date = "";
 
                     foreach (var salesLine in result.Result.Item1.value)
                     {
+                        if (salesLine.TPTPL_Drop_Shipment == "true" && string.IsNullOrWhiteSpace(Convert.ToString(salesLine.PCPLVendorName_SalesLine)))
+                            hasPendingDropShipment = true;
+
                         if (i == 0)
                         {
                             sPWarehouseCard.DocumentNo = salesLine.No_SalesHeader;
@@ -504,6 +508,7 @@ namespace PrakashCRM.Service.Controllers
 
                             sPWarehouseCard.FromPincode = salesLine.PostCode_Location;
                             sPWarehouseCard.ToPincode = salesLine.Job_to_Code == "" ? salesLine.ShiptoPostCode : salesLine.Job_To_Post_Code;
+                            sPWarehouseCard.TPTPLDropShipment = hasPendingDropShipment ? "Yes" : "No";
                             sPWarehouseCard.DropShipmentVendor = salesLine.PCPLVendorName_SalesLine.ToString();
                             sPWarehouseCard.AcceptedBy = salesLine.PCPLAcceptedbyName_SalesHeader;
                             sPWarehouseCard.IncoTerm = salesLine.IncoTerms_SalesHeader;
@@ -558,6 +563,7 @@ namespace PrakashCRM.Service.Controllers
                         });
 
                     }
+                    sPWarehouseCard.TPTPLDropShipment = hasPendingDropShipment ? "Yes" : "No";
                     sPWarehouseCard.warehouseCardLines = warehouseCardLine;
                 }
             }
@@ -588,6 +594,7 @@ namespace PrakashCRM.Service.Controllers
                             sPWarehouseCard.ToAddress = $"{purchaseLine.ShiptoAddress}, {purchaseLine.ShiptoAddress2}, {purchaseLine.ShiptoCity}, {purchaseLine.ShiptoPostCode}, {purchaseLine.ShiptoCountryRegionCode}";
                             sPWarehouseCard.FromPincode = purchaseLine.PostCodeLocation;
                             sPWarehouseCard.ToPincode = purchaseLine.ShiptoPostCode;
+                            sPWarehouseCard.TPTPLDropShipment = "No";
                             sPWarehouseCard.DropShipmentVendor = "";
                             sPWarehouseCard.AcceptedBy = purchaseLine.PCPLAcceptedbyName_Purchase_Header;
                             sPWarehouseCard.IncoTerm = purchaseLine.IncoTerms_Purchase_Header;
@@ -673,6 +680,7 @@ namespace PrakashCRM.Service.Controllers
                             sPWarehouseCard.ToAddress = $"{transferLine.TransfertoAddress}, {transferLine.TransfertoAddress2}, {transferLine.TransfertoCity}, {transferLine.TransfertoPostCode}, {transferLine.TransfertoCounty}";
                             sPWarehouseCard.FromPincode = transferLine.TransferfromPostCode;
                             sPWarehouseCard.ToPincode = transferLine.TransfertoPostCode;
+                            sPWarehouseCard.TPTPLDropShipment = "No";
                             sPWarehouseCard.DropShipmentVendor = "";
                             sPWarehouseCard.AcceptedBy = transferLine.PCPLAcceptedName;
                             sPWarehouseCard.IncoTerm = "";
@@ -1072,7 +1080,7 @@ namespace PrakashCRM.Service.Controllers
                 result = PostCodeUnit("CodeunitAPIMgmt_updateacceptedbyPurchase", requestWarehouseSales, resWarehouseSales);
                 if (result.Result.Item1 != null)
                 {
-                    soflag = Convert.ToBoolean(result.Result.Item1.value);
+                    poflag = Convert.ToBoolean(result.Result.Item1.value);
                 }
             }
 
@@ -1088,7 +1096,7 @@ namespace PrakashCRM.Service.Controllers
                 result = PostCodeUnit("CodeunitAPIMgmt_updateacceptedbyTransfer", requestWarehouseSales, resWarehouseSales);
                 if (result.Result.Item1 != null)
                 {
-                    soflag = Convert.ToBoolean(result.Result.Item1.value);
+                    toflag = Convert.ToBoolean(result.Result.Item1.value);
                 }
             }
 
@@ -1182,58 +1190,6 @@ namespace PrakashCRM.Service.Controllers
             return allWarehouseData;
         }
 
-        [HttpPost]
-        [Route("UpdateTransportQty")]
-        public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
-        {
-            if (string.IsNullOrWhiteSpace(doctype) || string.IsNullOrWhiteSpace(documentno) || string.IsNullOrWhiteSpace(lineno))
-                return false;
-
-            if (!int.TryParse(lineno, out int parsedLineNo))
-                return false;
-
-            decimal parsedTransportQty;
-            if (!decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedTransportQty)
-                && !decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedTransportQty))
-            {
-                return false;
-            }
-
-            var requestModel = new
-            {
-                Transport_Quantity_Line = parsedTransportQty
-            };
-            var responseModel = new
-            {
-                Transport_Quantity_Line = 0m
-            };
-
-            const string endpoint = "pcplSalesOrderSubformAPI";
-            string docTypeForFilter = "";
-            string safeDocNo = documentno.Replace("'", "''");
-            string filter = "";
-
-            switch ((doctype ?? "").Trim().ToLower())
-            {
-                case "sales order":
-                    docTypeForFilter = "Order";
-                    break;
-                case "sales return":
-                    docTypeForFilter = "Return Order";
-                    break;
-                default:
-                    return false;
-            }
-
-            // Dynamic primary key for pcplSalesOrderSubformAPI.
-            filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
-
-            API ac = new API();
-            var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
-            return result.Result.Item2 != null && result.Result.Item2.isSuccess;
-        }
-
-        ////all cases
         //[HttpPost]
         //[Route("UpdateTransportQty")]
         //public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
@@ -1244,16 +1200,23 @@ namespace PrakashCRM.Service.Controllers
         //    if (!int.TryParse(lineno, out int parsedLineNo))
         //        return false;
 
+        //    decimal parsedTransportQty;
+        //    if (!decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedTransportQty)
+        //        && !decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedTransportQty))
+        //    {
+        //        return false;
+        //    }
+
         //    var requestModel = new
         //    {
-        //        Transport_Quantity_Line = transportqty ?? ""
+        //        Transport_Quantity_Line = parsedTransportQty
         //    };
         //    var responseModel = new
         //    {
-        //        Transport_Quantity_Line = ""
+        //        Transport_Quantity_Line = 0m
         //    };
 
-        //    string endpoint = "";
+        //    const string endpoint = "pcplSalesOrderSubformAPI";
         //    string docTypeForFilter = "";
         //    string safeDocNo = documentno.Replace("'", "''");
         //    string filter = "";
@@ -1261,34 +1224,79 @@ namespace PrakashCRM.Service.Controllers
         //    switch ((doctype ?? "").Trim().ToLower())
         //    {
         //        case "sales order":
-        //            endpoint = "SalesOrderLineDotNetAPI";
         //            docTypeForFilter = "Order";
         //            break;
         //        case "sales return":
-        //            endpoint = "SalesOrderLineDotNetAPI";
         //            docTypeForFilter = "Return Order";
-        //            break;
-        //        case "purchase order":
-        //            endpoint = "PurchaseLinesDotNetAPI";
-        //            docTypeForFilter = "Order";
-        //            break;
-        //        case "transfer order":
-        //            endpoint = "TransferLinesDotNetAPI";
         //            break;
         //        default:
         //            return false;
         //    }
 
-        //    if (doctype.Equals("Transfer Order", StringComparison.OrdinalIgnoreCase))
-        //        filter = "Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
-        //    else
-        //        filter = "Document_Type='" + docTypeForFilter + "',Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
+        //    // Dynamic primary key for pcplSalesOrderSubformAPI.
+        //    filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
 
         //    API ac = new API();
         //    var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
-
         //    return result.Result.Item2 != null && result.Result.Item2.isSuccess;
         //}
+
+        //all cases
+        [HttpPost]
+        [Route("UpdateTransportQty")]
+        public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
+        {
+            if (string.IsNullOrWhiteSpace(doctype) || string.IsNullOrWhiteSpace(documentno) || string.IsNullOrWhiteSpace(lineno))
+                return false;
+
+            if (!int.TryParse(lineno, out int parsedLineNo))
+                return false;
+
+            var requestModel = new
+            {
+                Transport_Quantity_Line = transportqty ?? ""
+            };
+            var responseModel = new
+            {
+                Transport_Quantity_Line = ""
+            };
+
+            string endpoint = "";
+            string docTypeForFilter = "";
+            string safeDocNo = documentno.Replace("'", "''");
+            string filter = "";
+
+            switch ((doctype ?? "").Trim().ToLower())
+            {
+                case "sales order":
+                    endpoint = "SalesOrderLineDotNetAPI";
+                    docTypeForFilter = "Order";
+                    break;
+                case "sales return":
+                    endpoint = "SalesOrderLineDotNetAPI";
+                    docTypeForFilter = "Return Order";
+                    break;
+                case "purchase order":
+                    endpoint = "PurchaseOrderSubformAPI";
+                    docTypeForFilter = "Order";
+                    break;
+                case "transfer order":
+                    endpoint = "TransferOrderSubformAPI";
+                    break;
+                default:
+                    return false;
+            }
+
+            if (doctype.Equals("Transfer Order", StringComparison.OrdinalIgnoreCase))
+                filter = "Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
+            else
+                filter = "Document_Type='" + docTypeForFilter + "',Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
+
+            API ac = new API();
+            var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
+
+            return result.Result.Item2 != null && result.Result.Item2.isSuccess;
+        }
 
         [HttpPost]
         [Route("SaveDropShipmentVendor")]
@@ -1314,22 +1322,39 @@ namespace PrakashCRM.Service.Controllers
         }
 
         [Route("GetloadingAndUnloadingDropDown")]
-        public List<UnloadingAndLoading> GetloadingAndUnloadingDropDown(string prefix)
+        public async Task<IHttpActionResult> GetloadingAndUnloadingDropDown(string prefix, string type)
         {
-            API ac = new API();
             List<UnloadingAndLoading> unloadingAndloading = new List<UnloadingAndLoading>();
-            string filter = "startswith(Name,'" + prefix.ToUpper() + "')";
 
-            filter += " and Transporter eq true";
+            try
+            {
+                if (string.IsNullOrWhiteSpace(prefix) || prefix.Trim().Length < 2)
+                {
+                    return Ok(unloadingAndloading);
+                }
 
+                API ac = new API();
+                string safePrefix = prefix.Trim().ToUpper().Replace("'", "''");
+                string filter = $"startswith(Name,'{safePrefix}') and Transporter eq true";
+                var apiResponse = await ac.GetData<UnloadingAndLoading>("VendorDotNetAPI", filter);
 
-            var result = ac.GetData<UnloadingAndLoading>("VendorDotNetAPI", filter);
+                // tuple ko directly access karo (NO .Result)
+                var items = apiResponse.Item1;
+                var error = apiResponse.Item2;
 
-            if (result != null && result.Result.Item1.value.Count > 0)
-                unloadingAndloading = result.Result.Item1.value;
+                if (items != null && items.value != null && items.value.Count > 0)
+                {
+                    unloadingAndloading = items.value.Take(10).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                // optional logging
+            }
 
-            return unloadingAndloading;
+            return Ok(unloadingAndloading);
         }
+
         #endregion
         [HttpPost]
         [Route("SaveNewDriver")]
