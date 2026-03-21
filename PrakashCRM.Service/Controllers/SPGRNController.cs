@@ -551,22 +551,23 @@ namespace PrakashCRM.Service.Controllers
 
         public string dd_MM_yyyytoyyyy_MM_dd(string dd_MM_yyyyDate)
         {
-            if (dd_MM_yyyyDate != "" && dd_MM_yyyyDate != null)
+            if (!string.IsNullOrEmpty(dd_MM_yyyyDate))
             {
                 DateTime yyyy_MM_ddDate;
-                bool success = DateTime.TryParseExact(dd_MM_yyyyDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out yyyy_MM_ddDate);
+
+                bool success = DateTime.TryParseExact(dd_MM_yyyyDate,"dd-MM-yyyy",CultureInfo.InvariantCulture,DateTimeStyles.None,out yyyy_MM_ddDate
+                );
 
                 if (success)
                 {
-                    Console.WriteLine("TryParseExact date: " + yyyy_MM_ddDate);
+                    return yyyy_MM_ddDate.ToString("yyyy-MM-dd");
                 }
                 else
                 {
-                    yyyy_MM_ddDate = DateTime.ParseExact(dd_MM_yyyyDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-                    Console.WriteLine("ParseExact date: " + yyyy_MM_ddDate);
+                    // Handle invalid format safely
+                    Console.WriteLine("Invalid Date Format: " + dd_MM_yyyyDate);
+                    return dd_MM_yyyyDate; // or return null / throw custom error
                 }
-
-                return yyyy_MM_ddDate.ToString("yyyy-MM-dd");
             }
             else
             {
@@ -908,6 +909,63 @@ namespace PrakashCRM.Service.Controllers
             }
 
             return msg;
+        }
+
+        [HttpPost]
+        [Route("UploadGRNItemTrackingAttachments")]
+        public bool UploadGRNItemTrackingAttachments([FromBody] UploadGRNItemTrackingAttachmentsRequest request)
+        {
+            if (request == null || request.Attachments == null || request.Attachments.Count == 0)
+            {
+                return false;
+            }
+
+            API ac = new API();
+            bool allSuccess = true;
+
+            foreach (var attachment in request.Attachments)
+            {
+                if (attachment == null
+                    || string.IsNullOrWhiteSpace(attachment.No)
+                    || string.IsNullOrWhiteSpace(attachment.Item_No)
+                    || string.IsNullOrWhiteSpace(attachment.File_Name)
+                    || string.IsNullOrWhiteSpace(attachment.Base64Text))
+                {
+                    return false;
+                }
+
+                attachment.Table_ID = 6505;
+                var postResult = ac.PostItem<GRNDocumentAttachmentPayload>("DocumentAttachments", attachment, new GRNDocumentAttachmentPayload());
+                if (!postResult.Result.Item2.isSuccess)
+                {
+                    allSuccess = false;
+                    break;
+                }
+            }
+
+            return allSuccess;
+        }
+
+        [HttpPost]
+        [Route("GetGRNItemTrackingAttachments")]
+        public List<GRNDocumentAttachmentPayload> GetGRNItemTrackingAttachments([FromBody] GetGRNItemTrackingAttachmentsRequest request)
+        {
+            var attachments = new List<GRNDocumentAttachmentPayload>();
+            if (request == null || string.IsNullOrWhiteSpace(request.LotNo) || string.IsNullOrWhiteSpace(request.ItemNo))
+            {
+                return attachments;
+            }
+
+            API ac = new API();
+            string filter = "Table_ID eq 6505 and No eq '" + request.LotNo.Replace("'", "''") + "' and Item_No eq '" + request.ItemNo.Replace("'", "''") + "'";
+            var result = ac.GetData<GRNDocumentAttachmentPayload>("DocumentAttachments", filter);
+
+            if (result != null && result.Result.Item2 != null && result.Result.Item2.isSuccess && result.Result.Item1 != null && result.Result.Item1.value != null)
+            {
+                attachments = result.Result.Item1.value;
+            }
+
+            return attachments;
         }
 
 

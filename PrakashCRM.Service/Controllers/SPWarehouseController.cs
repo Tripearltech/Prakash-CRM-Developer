@@ -21,6 +21,12 @@ namespace PrakashCRM.Service.Controllers
     public class SPWarehouseController : ApiController
     {
         public bool Latest_Rate { get; private set; }
+
+        private static string ResolveItemTrackingCode(string pcplItemTrackingCode, string trackingCode)
+        {
+            return string.IsNullOrWhiteSpace(pcplItemTrackingCode) ? (trackingCode ?? "") : pcplItemTrackingCode;
+        }
+
         #region IncomingTask
 
         [Route("GetWarehouseSales")]
@@ -556,7 +562,7 @@ namespace PrakashCRM.Service.Controllers
                             PackingUOM = salesLine.PCPL_Packing_UOM,
                             PackingStyle = salesLine.PCPLPackingStyleDescription_SalesLine,
                             TransportQty = salesLine.Transport_Quantity_Line,
-                            PCPL_Item_Tracking_Code = string.IsNullOrWhiteSpace(salesLine.PCPL_Item_Tracking_Code) ? salesLine.Tracking_Code : salesLine.PCPL_Item_Tracking_Code,
+                            PCPL_Item_Tracking_Code = ResolveItemTrackingCode(salesLine.PCPL_Item_Tracking_Code, salesLine.Tracking_Code),
                             PackingQty = salesLine.PCPL_Packing_Qty_,
                             Shipqty = salesLine.Quantity_Shipped,
                             LineNo = salesLine.Line_No_
@@ -644,7 +650,7 @@ namespace PrakashCRM.Service.Controllers
                             PackingUOM = purchaseLine.PCPL_Packing_UOM,
                             PackingStyle = purchaseLine.PCPLPackingStyleDescription_Purchase_Line,
                             TransportQty = purchaseLine.Transport_Quantity_Line,
-                            PCPL_Item_Tracking_Code = string.IsNullOrWhiteSpace(purchaseLine.Tracking_Code) ? "" : purchaseLine.Tracking_Code,
+                            PCPL_Item_Tracking_Code = ResolveItemTrackingCode(purchaseLine.PCPL_Item_Tracking_Code, purchaseLine.Tracking_Code),
                             PackingQty = purchaseLine.PCPL_Packing_Qty_,
                             LineNo = purchaseLine.Line_No_
                         });
@@ -729,7 +735,7 @@ namespace PrakashCRM.Service.Controllers
                             PackingUOM = transferLine.PCPL_Packing_UOM,
                             PackingStyle = transferLine.PCPLPackingStyleDescription_SalesLine,
                             TransportQty = transferLine.Transport_Quantity_Line,
-                            PCPL_Item_Tracking_Code = string.IsNullOrWhiteSpace(transferLine.Tracking_Code) ? "" : transferLine.Tracking_Code,
+                            PCPL_Item_Tracking_Code = ResolveItemTrackingCode(transferLine.PCPL_Item_Tracking_Code, transferLine.Tracking_Code),
                             PackingQty = transferLine.PCPL_Packing_Qty_,
                             LineNo = transferLine.Line_No_
 
@@ -1190,58 +1196,6 @@ namespace PrakashCRM.Service.Controllers
             return allWarehouseData;
         }
 
-        //[HttpPost]
-        //[Route("UpdateTransportQty")]
-        //public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
-        //{
-        //    if (string.IsNullOrWhiteSpace(doctype) || string.IsNullOrWhiteSpace(documentno) || string.IsNullOrWhiteSpace(lineno))
-        //        return false;
-
-        //    if (!int.TryParse(lineno, out int parsedLineNo))
-        //        return false;
-
-        //    decimal parsedTransportQty;
-        //    if (!decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedTransportQty)
-        //        && !decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedTransportQty))
-        //    {
-        //        return false;
-        //    }
-
-        //    var requestModel = new
-        //    {
-        //        Transport_Quantity_Line = parsedTransportQty
-        //    };
-        //    var responseModel = new
-        //    {
-        //        Transport_Quantity_Line = 0m
-        //    };
-
-        //    const string endpoint = "pcplSalesOrderSubformAPI";
-        //    string docTypeForFilter = "";
-        //    string safeDocNo = documentno.Replace("'", "''");
-        //    string filter = "";
-
-        //    switch ((doctype ?? "").Trim().ToLower())
-        //    {
-        //        case "sales order":
-        //            docTypeForFilter = "Order";
-        //            break;
-        //        case "sales return":
-        //            docTypeForFilter = "Return Order";
-        //            break;
-        //        default:
-        //            return false;
-        //    }
-
-        //    // Dynamic primary key for pcplSalesOrderSubformAPI.
-        //    filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
-
-        //    API ac = new API();
-        //    var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
-        //    return result.Result.Item2 != null && result.Result.Item2.isSuccess;
-        //}
-
-        //all cases
         [HttpPost]
         [Route("UpdateTransportQty")]
         public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
@@ -1252,16 +1206,23 @@ namespace PrakashCRM.Service.Controllers
             if (!int.TryParse(lineno, out int parsedLineNo))
                 return false;
 
+            decimal parsedTransportQty;
+            if (!decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedTransportQty)
+                && !decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedTransportQty))
+            {
+                return false;
+            }
+
             var requestModel = new
             {
-                Transport_Quantity_Line = transportqty ?? ""
+                Transport_Quantity_Line = parsedTransportQty
             };
             var responseModel = new
             {
-                Transport_Quantity_Line = ""
+                Transport_Quantity_Line = 0m
             };
 
-            string endpoint = "";
+            const string endpoint = "pcplSalesOrderSubformAPI";
             string docTypeForFilter = "";
             string safeDocNo = documentno.Replace("'", "''");
             string filter = "";
@@ -1269,34 +1230,79 @@ namespace PrakashCRM.Service.Controllers
             switch ((doctype ?? "").Trim().ToLower())
             {
                 case "sales order":
-                    endpoint = "SalesOrderLineDotNetAPI";
                     docTypeForFilter = "Order";
                     break;
                 case "sales return":
-                    endpoint = "SalesOrderLineDotNetAPI";
                     docTypeForFilter = "Return Order";
-                    break;
-                case "purchase order":
-                    endpoint = "PurchaseOrderSubformAPI";
-                    docTypeForFilter = "Order";
-                    break;
-                case "transfer order":
-                    endpoint = "TransferOrderSubformAPI";
                     break;
                 default:
                     return false;
             }
 
-            if (doctype.Equals("Transfer Order", StringComparison.OrdinalIgnoreCase))
-                filter = "Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
-            else
-                filter = "Document_Type='" + docTypeForFilter + "',Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
+            // Dynamic primary key for pcplSalesOrderSubformAPI.
+            filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
 
             API ac = new API();
             var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
-
             return result.Result.Item2 != null && result.Result.Item2.isSuccess;
         }
+
+        //all cases
+        //[HttpPost]
+        //[Route("UpdateTransportQty")]
+        //public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
+        //{
+        //    if (string.IsNullOrWhiteSpace(doctype) || string.IsNullOrWhiteSpace(documentno) || string.IsNullOrWhiteSpace(lineno))
+        //        return false;
+
+        //    if (!int.TryParse(lineno, out int parsedLineNo))
+        //        return false;
+
+        //    var requestModel = new
+        //    {
+        //        Transport_Quantity_Line = transportqty ?? ""
+        //    };
+        //    var responseModel = new
+        //    {
+        //        Transport_Quantity_Line = ""
+        //    };
+
+        //    string endpoint = "";
+        //    string docTypeForFilter = "";
+        //    string safeDocNo = documentno.Replace("'", "''");
+        //    string filter = "";
+
+        //    switch ((doctype ?? "").Trim().ToLower())
+        //    {
+        //        case "sales order":
+        //            endpoint = "SalesOrderLineDotNetAPI";
+        //            docTypeForFilter = "Order";
+        //            break;
+        //        case "sales return":
+        //            endpoint = "SalesOrderLineDotNetAPI";
+        //            docTypeForFilter = "Return Order";
+        //            break;
+        //        case "purchase order":
+        //            endpoint = "PurchaseOrderSubformAPI";
+        //            docTypeForFilter = "Order";
+        //            break;
+        //        case "transfer order":
+        //            endpoint = "TransferOrderSubformAPI";
+        //            break;
+        //        default:
+        //            return false;
+        //    }
+
+        //    if (doctype.Equals("Transfer Order", StringComparison.OrdinalIgnoreCase))
+        //        filter = "Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
+        //    else
+        //        filter = "Document_Type='" + docTypeForFilter + "',Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
+
+        //    API ac = new API();
+        //    var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
+
+        //    return result.Result.Item2 != null && result.Result.Item2.isSuccess;
+        //}
 
         [HttpPost]
         [Route("SaveDropShipmentVendor")]
