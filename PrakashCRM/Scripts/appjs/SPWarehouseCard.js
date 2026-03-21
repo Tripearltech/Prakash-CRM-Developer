@@ -949,8 +949,8 @@ function SaveTransportQty(lineNo, itemNo, btn) {
 
     var doctype = $('#lblDocumentType').text().trim();
     var documentno = $('#lnlDocumentNo').text().trim();
-    if (doctype !== "Sales Order" && doctype !== "Sales Return") {
-        ShowErrMsg('Transport Qty update is allowed only for Sales Order and Sales Return.');
+    if (doctype !== "Sales Order" && doctype !== "Sales Return" && doctype !== "Purchase Order" && doctype !== "Transfer Order") {
+        ShowErrMsg('Transport Qty update is allowed only for Sales Order, Sales Return, Purchase Order and Transfer Order.');
         return false;
     }
 
