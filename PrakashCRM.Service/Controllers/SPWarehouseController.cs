@@ -1222,7 +1222,7 @@ namespace PrakashCRM.Service.Controllers
                 Transport_Quantity_Line = 0m
             };
 
-            const string endpoint = "pcplSalesOrderSubformAPI";
+            string endpoint = "";
             string docTypeForFilter = "";
             string safeDocNo = documentno.Replace("'", "''");
             string filter = "";
@@ -1230,79 +1230,42 @@ namespace PrakashCRM.Service.Controllers
             switch ((doctype ?? "").Trim().ToLower())
             {
                 case "sales order":
+                    endpoint = "pcplSalesOrderSubformAPI";
                     docTypeForFilter = "Order";
                     break;
                 case "sales return":
+                    endpoint = "pcplSalesOrderSubformAPI";
                     docTypeForFilter = "Return Order";
+                    break;
+                case "purchase order":
+                    endpoint = "PurchaseOrderSubformAPI";
+                    docTypeForFilter = "Order";
+                    break;
+                case "transfer order":
+                    endpoint = "TransferOrderSubformAPI";
                     break;
                 default:
                     return false;
             }
 
-            // Dynamic primary key for pcplSalesOrderSubformAPI.
-            filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
+            if (doctype.Equals("Sales Order", StringComparison.OrdinalIgnoreCase)
+                || doctype.Equals("Sales Return", StringComparison.OrdinalIgnoreCase))
+            {
+                filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
+            }
+            else if (doctype.Equals("Transfer Order", StringComparison.OrdinalIgnoreCase))
+            {
+                filter = "Document_No='" + safeDocNo + "',Line_No_=" + parsedLineNo;
+            }
+            else
+            {
+                filter = "Document_Type='" + docTypeForFilter + "',Document_No='" + safeDocNo + "',Line_No_=" + parsedLineNo;
+            }
 
             API ac = new API();
             var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
             return result.Result.Item2 != null && result.Result.Item2.isSuccess;
         }
-
-        //all cases
-        //[HttpPost]
-        //[Route("UpdateTransportQty")]
-        //public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
-        //{
-        //    if (string.IsNullOrWhiteSpace(doctype) || string.IsNullOrWhiteSpace(documentno) || string.IsNullOrWhiteSpace(lineno))
-        //        return false;
-
-        //    if (!int.TryParse(lineno, out int parsedLineNo))
-        //        return false;
-
-        //    var requestModel = new
-        //    {
-        //        Transport_Quantity_Line = transportqty ?? ""
-        //    };
-        //    var responseModel = new
-        //    {
-        //        Transport_Quantity_Line = ""
-        //    };
-
-        //    string endpoint = "";
-        //    string docTypeForFilter = "";
-        //    string safeDocNo = documentno.Replace("'", "''");
-        //    string filter = "";
-
-        //    switch ((doctype ?? "").Trim().ToLower())
-        //    {
-        //        case "sales order":
-        //            endpoint = "SalesOrderLineDotNetAPI";
-        //            docTypeForFilter = "Order";
-        //            break;
-        //        case "sales return":
-        //            endpoint = "SalesOrderLineDotNetAPI";
-        //            docTypeForFilter = "Return Order";
-        //            break;
-        //        case "purchase order":
-        //            endpoint = "PurchaseOrderSubformAPI";
-        //            docTypeForFilter = "Order";
-        //            break;
-        //        case "transfer order":
-        //            endpoint = "TransferOrderSubformAPI";
-        //            break;
-        //        default:
-        //            return false;
-        //    }
-
-        //    if (doctype.Equals("Transfer Order", StringComparison.OrdinalIgnoreCase))
-        //        filter = "Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
-        //    else
-        //        filter = "Document_Type='" + docTypeForFilter + "',Document_No='" + safeDocNo + "',Line_No=" + parsedLineNo;
-
-        //    API ac = new API();
-        //    var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
-
-        //    return result.Result.Item2 != null && result.Result.Item2.isSuccess;
-        //}
 
         [HttpPost]
         [Route("SaveDropShipmentVendor")]
