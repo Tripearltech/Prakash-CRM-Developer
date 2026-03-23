@@ -233,27 +233,73 @@ namespace PrakashCRM.Controllers
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPGRN/SaveSPGRNCard";
             bool flag = false;
 
-            HttpClient client = new HttpClient();
-
-            client.BaseAddress = new Uri(apiUrl);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-            string UserObjString = JsonConvert.SerializeObject(grncard);
-            var content = new StringContent(UserObjString, Encoding.UTF8, "application/json");
-
-            HttpRequestMessage request = new HttpRequestMessage
+            try
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(apiUrl),
-                Content = content
-            };
+                HttpClient client = new HttpClient();
 
-            HttpResponseMessage response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
+                client.BaseAddress = new Uri(apiUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string UserObjString = JsonConvert.SerializeObject(grncard);
+                var content = new StringContent(UserObjString, Encoding.UTF8, "application/json");
+
+                HttpRequestMessage request = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(apiUrl),
+                    Content = content
+                };
+
+                HttpResponseMessage response = await client.SendAsync(request);
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+                    flag = Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(data);
+                }
+            }
+            catch (Exception)
             {
-                var data = await response.Content.ReadAsStringAsync();
-                flag = Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(data);
+                flag = false;
+            }
+
+            return flag;
+        }
+
+        [HttpPost]
+        public async Task<bool> SaveSPGRNLine(SPGRNCardLineRequest grnLine)
+        {
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPGRN/SaveSPGRNLine";
+            bool flag = false;
+
+            try
+            {
+                HttpClient client = new HttpClient();
+
+                client.BaseAddress = new Uri(apiUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                string userObjString = JsonConvert.SerializeObject(grnLine);
+                var content = new StringContent(userObjString, Encoding.UTF8, "application/json");
+
+                HttpRequestMessage request = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new Uri(apiUrl),
+                    Content = content
+                };
+
+                HttpResponseMessage response = await client.SendAsync(request);
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+                    flag = Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(data);
+                }
+            }
+            catch (Exception)
+            {
+                flag = false;
             }
 
             return flag;
@@ -363,6 +409,108 @@ namespace PrakashCRM.Controllers
             }
 
             return msg;
+        }
+
+        [HttpPost]
+        public async Task<bool> UploadGRNItemTrackingAttachments(UploadGRNItemTrackingAttachmentsRequest request)
+        {
+            request = request ?? ReadJsonRequestBody<UploadGRNItemTrackingAttachmentsRequest>();
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPGRN/UploadGRNItemTrackingAttachments";
+            bool flag = false;
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            string requestJson = JsonConvert.SerializeObject(request);
+            var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadAsStringAsync();
+                flag = JsonConvert.DeserializeObject<bool>(data);
+            }
+
+            return flag;
+         }
+
+        private T ReadJsonRequestBody<T>() where T : class
+        {
+            if (Request == null || Request.InputStream == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                Request.InputStream.Position = 0;
+                using (var reader = new StreamReader(Request.InputStream, Encoding.UTF8, true, 1024, true))
+                {
+                    var requestBody = reader.ReadToEnd();
+                    if (string.IsNullOrWhiteSpace(requestBody))
+                    {
+                        return null;
+                    }
+
+                    Request.InputStream.Position = 0;
+                    return JsonConvert.DeserializeObject<T>(requestBody);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetGRNItemTrackingAttachments(GetGRNItemTrackingAttachmentsRequest request)
+        {
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPGRN/GetGRNItemTrackingAttachments";
+            List<GRNDocumentAttachmentPayload> attachments = new List<GRNDocumentAttachmentPayload>();
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            string requestJson = JsonConvert.SerializeObject(request);
+            var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadAsStringAsync();
+                attachments = JsonConvert.DeserializeObject<List<GRNDocumentAttachmentPayload>>(data);
+            }
+
+            return Json(attachments, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public async Task<bool> DeleteGRNItemTrackingAttachment(DeleteGRNItemTrackingAttachmentRequest request)
+        {
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPGRN/DeleteGRNItemTrackingAttachment";
+            bool flag = false;
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            string requestJson = JsonConvert.SerializeObject(request);
+            var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadAsStringAsync();
+                flag = JsonConvert.DeserializeObject<bool>(data);
+            }
+
+            return flag;
         }
     }
 }

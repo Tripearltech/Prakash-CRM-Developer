@@ -238,6 +238,7 @@ namespace PrakashCRM.Data.Models
         public string PCPL_Unloading_Charges { get; set; }//not in API
         public string Tracking_Code { get; set; }
         public string No { get; set; }
+        public string PCPL_Concentration_Rate_Percent { get; set; }
     }
 
     public class SPGRNTransferCard
@@ -394,7 +395,10 @@ namespace PrakashCRM.Data.Models
 
     public class GRNDocumentAttachmentPayload
     {
+        public string SystemId { get; set; }
         public int Table_ID { get; set; }
+        public string Document_Type { get; set; }
+        public string Line_No { get; set; }
         public string No { get; set; }
         public string Item_No { get; set; }
         public string File_Extension { get; set; }
@@ -412,8 +416,15 @@ namespace PrakashCRM.Data.Models
 
     public class GetGRNItemTrackingAttachmentsRequest
     {
+        public string DocumentType { get; set; }
+        public string LineNo { get; set; }
         public string LotNo { get; set; }
         public string ItemNo { get; set; }
+    }
+
+    public class DeleteGRNItemTrackingAttachmentRequest
+    {
+        public string SystemId { get; set; }
     }
 
     public class FinalizeGRNItemTrackingAttachmentMapping
