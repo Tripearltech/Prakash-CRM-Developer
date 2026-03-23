@@ -168,6 +168,142 @@ function ShowActionMsg(actionMsg) {
 
 }
 
+function getNumericValue(value) {
+    var normalizedValue = (value || '').toString().trim();
+    if (normalizedValue === '') {
+        return 0;
+    }
+
+    var parsedValue = parseFloat(normalizedValue);
+    return isNaN(parsedValue) ? 0 : parsedValue;
+}
+
+function getGRNLineControls(lineNo) {
+    return {
+        qtyInput: document.querySelector(`input[name='txtQtyToReceive_${lineNo}']`),
+        qcRemarks: document.querySelector(`select[name='txtQCRemarks_${lineNo}']`),
+        rejectQty: document.querySelector(`input[name='txtRejectQC_${lineNo}']`),
+        billOfEntryNo: document.querySelector(`input[name='txtBillOfEntryNo_${lineNo}']`),
+        billOfEntryDate: document.querySelector(`input[name='txtBillOfEntryDate_${lineNo}']`),
+        remarks: document.querySelector(`input[name='txtRemarks_${lineNo}']`),
+        concentrationRatePercent: document.querySelector(`input[name='txtConcentrationRatePercent_${lineNo}']`),
+        manufacturer: document.querySelector(`#txtManufacturer_${lineNo}`),
+        manufacturerNo: document.querySelector(`#hdnManufacturerNo_${lineNo}`)
+    };
+}
+
+function buildGRNLineRequest(lineNo) {
+    var controls = getGRNLineControls(lineNo);
+    var doctype = $('#lblDocumentType').text().trim();
+    var docnumber = $('#lblDocumentNo').text().trim();
+    var manufacturerValue = controls.manufacturer ? controls.manufacturer.value : "";
+    var mfgcode = "";
+    var makemfgname = "";
+
+    if (manufacturerValue && manufacturerValue.includes(" - ")) {
+        const parts = manufacturerValue.split(" - ");
+        makemfgname = parts[1].trim();
+        mfgcode = parts[0].trim();
+    } else {
+        makemfgname = manufacturerValue;
+        mfgcode = controls.manufacturerNo ? controls.manufacturerNo.value : "";
+    }
+
+    return {
+        documenttype: doctype,
+        documentno: docnumber,
+        lineno: parseInt(lineNo, 10) || 0,
+        qtytoreceive: getNumericValue(controls.qtyInput ? controls.qtyInput.value : ""),
+        qcremarks: controls.qcRemarks && controls.qcRemarks.value ? controls.qcRemarks.value : "OK",
+        rejectqty: getNumericValue(controls.rejectQty ? controls.rejectQty.value : ""),
+        beno: controls.billOfEntryNo ? controls.billOfEntryNo.value : "",
+        bedate: controls.billOfEntryDate ? controls.billOfEntryDate.value : null,
+        remarks: controls.remarks ? controls.remarks.value : "",
+        concentratepercent: getNumericValue(controls.concentrationRatePercent ? controls.concentrationRatePercent.value : ""),
+        makemfgname: makemfgname,
+        mfgcode: mfgcode
+    };
+}
+
+function getGRNLineValidationError(lineNo) {
+    var controls = getGRNLineControls(lineNo);
+    var headerQCrem = ($('#txtQCRemarks').val() || '').trim();
+    var docflag = ($('#hfimportDoc').val() || '').trim();
+    var qtyToReceive = getNumericValue(controls.qtyInput ? controls.qtyInput.value : "");
+    var rejectQty = getNumericValue(controls.rejectQty ? controls.rejectQty.value : "");
+    var qcRemarkVal = controls.qcRemarks ? controls.qcRemarks.value : "";
+    var actualQty = parseFloat($("#qty_" + lineNo).text()) || 0;
+    var qtyReceived = parseFloat($("#qtyrec_" + lineNo).text()) || 0;
+    var remainingQty = actualQty - qtyReceived;
+
+    if (!controls.qtyInput || (controls.qtyInput.value || '').toString().trim() === '') {
+        return { message: 'Qty to receive is required.', element: controls.qtyInput };
+    }
+
+    if (qtyToReceive < 0) {
+        return { message: 'Qty to receive cannot be negative.', element: controls.qtyInput };
+    }
+
+    if (qtyToReceive > actualQty) {
+        return { message: 'Qty to receive cannot be greater than available quantity (' + actualQty + ').', element: controls.qtyInput };
+    }
+
+    if (qtyToReceive > remainingQty) {
+        return { message: 'Qty to receive cannot be greater than remaining quantity (' + remainingQty + ').', element: controls.qtyInput };
+    }
+
+    if (docflag === 'False') {
+        if (qcRemarkVal === 'OK' && rejectQty > 0) {
+            return { message: 'Reject Qty should be 0 when QC Remark is OK.', element: controls.rejectQty };
+        }
+
+        if (qcRemarkVal === 'Not OK') {
+            if (headerQCrem === '') {
+                return { message: 'QC Remarks in header must not be blank.', element: document.querySelector('#txtQCRemarks') };
+            }
+
+            if (!controls.rejectQty || (controls.rejectQty.value || '').toString().trim() === '' || rejectQty === 0) {
+                return { message: "When QC Remarks are 'Not Ok', Reject Qty should not be 0.", element: controls.rejectQty };
+            }
+
+            if (rejectQty > qtyToReceive) {
+                return { message: 'Reject Qty should not be greater than Qty. to Receive.', element: controls.rejectQty };
+            }
+        }
+    }
+
+    if (docflag === 'True') {
+        if (qcRemarkVal === 'OK' && rejectQty > 0) {
+            return { message: 'Reject Qty should be 0 when QC Remark is OK.', element: controls.rejectQty };
+        }
+
+        if (qcRemarkVal === 'Not OK') {
+            if (headerQCrem === '') {
+                return { message: 'QC Remarks in header must not be blank.', element: document.querySelector('#txtQCRemarks') };
+            }
+
+            if (rejectQty > 0) {
+                return { message: 'Reject Qty should be 0 when QC Remark is OK.', element: controls.rejectQty };
+            }
+        }
+    }
+
+    return null;
+}
+
+function ValidateGRNLine(lineNo) {
+    var validationError = getGRNLineValidationError(lineNo);
+    if (validationError) {
+        ShowErrMsg('Line ' + lineNo + ': ' + validationError.message);
+        if (validationError.element && typeof validationError.element.focus === 'function') {
+            validationError.element.focus();
+        }
+        return false;
+    }
+
+    return true;
+}
+
 function getItemTrackingSourceParams(documentType) {
     switch ((documentType || '').trim()) {
         case 'Purchase Order':
@@ -207,7 +343,7 @@ function SaveGRN() {
         return;
     }
 
-    debugger;
+
     var apiUrl = '/SPGRN/SaveSPGRNCard';
 
     var GRNHeaderLine = {};
@@ -236,81 +372,86 @@ function SaveGRN() {
     GRNHeaderLine.transportername = $('#txtTransporterName').val();
     GRNHeaderLine.vehicleno = $('#txtVehicleNo').val();
     GRNHeaderLine.transporterno = $('#txtTransporterNo').val();
-    GRNHeaderLine.transportationamount = $('#txtTransportAmount').val();
-    GRNHeaderLine.loadingcharges = $('#txtLoadingCharges').val();
-    GRNHeaderLine.unloadingcharges = $('#txtUnLoadingCharges').val();
+    GRNHeaderLine.transportationamount = getNumericValue($('#txtTransportAmount').val());
+    GRNHeaderLine.loadingcharges = getNumericValue($('#txtLoadingCharges').val());
+    GRNHeaderLine.unloadingcharges = getNumericValue($('#txtUnLoadingCharges').val());
 
     const txtQtyToReceive = document.querySelectorAll('input[name^="txtQtyToReceive_"]');
 
     txtQtyToReceive.forEach(input => {
-        var GRNLine = {};
-
         var lineNo = input.name.replace('txtQtyToReceive_', '');
-        const qcremarks = document.querySelector(`select[name="txtQCRemarks_${lineNo}"]`);
-        const rejectqty = document.querySelector(`input[name="txtRejectQC_${lineNo}"]`);
-        const beno = document.querySelector(`input[name="txtBillOfEntryNo_${lineNo}"]`);
-
-        const bedate = document.querySelector(`input[name="txtBillOfEntryDate_${lineNo}"]`);
-        const remarks = document.querySelector(`input[name="txtRemarks_${lineNo}"]`);
-        const concentrationratepercent = document.querySelector(`input[name="txtConcentrationRatePercent_${lineNo}"]`);
-        // Save MakeMfgname/MgfCode
-        const manufacturerValue = $('#txtManufacturer_' + lineNo).val();
-        let mfgcode = "";
-        let makemfgname = "";
-        if (manufacturerValue && manufacturerValue.includes(" - ")) {
-            const parts = manufacturerValue.split(" - ");
-            makemfgname = parts[1].trim();
-            mfgcode = parts[0].trim();
-        } else {
-            makemfgname = manufacturerValue;
-            mfgcode = $('#hdnManufacturerNo_' + lineNo).val();
-        }
-        GRNLine.makemfgname = makemfgname;
-        GRNLine.mfgcode = mfgcode;
-
-
-        GRNLine.documenttype = doctype;
-        GRNLine.documentno = docnumber;
-        GRNLine.lineno = lineNo;
-        GRNLine.qtytoreceive = input.value;
-        GRNLine.qcremarks = (qcremarks && qcremarks.value) ? qcremarks.value : "OK";
-        GRNLine.rejectqty = rejectqty ? rejectqty.value : "";
-        GRNLine.beno = beno ? beno.value : "";
-
-        GRNLine.bedate = bedate ? bedate.value : null;
-        GRNLine.remarks = remarks ? remarks.value : "";
-        GRNLine.concentratepercent = concentrationratepercent ? concentrationratepercent.value : "";
-
-
-        grnLines.push(GRNLine);
+        grnLines.push(buildGRNLineRequest(lineNo));
     });
 
     GRNHeaderLine.grnCardLineRequest = grnLines;
 
     (async () => {
-        const rawResponse = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(GRNHeaderLine)
-        });
-        const res = await rawResponse.ok;
-        if (res) {
-            var actionMsg = "GRN Save Successfully.";
-            ShowActionMsg(actionMsg);
-            window.setTimeout(function () {
+        try {
+            const rawResponse = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(GRNHeaderLine)
+            });
+            const responseText = await rawResponse.text();
+            const res = responseText.toString().trim().toLowerCase() === 'true';
 
-                window.location.href = '/SPGRN/GRNList';
+            if (rawResponse.ok && res) {
+                var actionMsg = "GRN Save Successfully.";
+                ShowActionMsg(actionMsg);
+                window.setTimeout(function () {
 
-            }, 2000);
+                    window.location.href = '/SPGRN/GRNList';
+
+                }, 2000);
+            }
+            else {
+                var errorText = responseText ? (' ' + responseText) : '';
+                var actionMsg = "Error in GRN Save process. Try again." + errorText;
+                ShowErrMsg(actionMsg);
+            }
         }
-        else {
-            var actionMsg = "Error in GRN Save process. Try again.";
-            ShowErrMsg(actionMsg);
+        catch (error) {
+            var errorMessage = error && error.message ? error.message : 'Network error while saving GRN.';
+            ShowErrMsg('Error in GRN Save process. ' + errorMessage);
         }
     })();
+}
+
+function SaveGRNLine(lineNo, btn) {
+    if (!ValidateGRNLine(lineNo)) {
+        return false;
+    }
+
+    var $btn = $(btn);
+    var oldHtml = $btn.html();
+
+    $btn.prop('disabled', true);
+    $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Save');
+
+    $.ajax({
+        type: 'POST',
+        url: '/SPGRN/SaveSPGRNLine',
+        data: JSON.stringify(buildGRNLineRequest(lineNo)),
+        contentType: 'application/json; charset=utf-8',
+        success: function (data) {
+            $btn.prop('disabled', false).html(oldHtml);
+
+            if (data === true || data === 'true') {
+                ShowActionMsg('Line ' + lineNo + ' saved successfully.');
+            } else {
+                ShowErrMsg('Error saving line ' + lineNo + '.');
+            }
+        },
+        error: function (xhr) {
+            $btn.prop('disabled', false).html(oldHtml);
+            ShowErrMsg('Error saving line ' + lineNo + '. ' + (xhr.responseText || ''));
+        }
+    });
+
+    return false;
 }
 
 function validateForm() {
@@ -410,7 +551,7 @@ function DeleteItemTrackingInGrid(button) {
     });
 
     // remove row from DOM
-    $row.remove();
+    $(button).closest('tr').remove();
     UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
 
     // if no rows left, show "No Records Found"
@@ -712,7 +853,6 @@ function AddItemTrackingInGrid() {
         UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
     });
 }
-
 function CreateTrackingRowKey(lineNo, itemNo, entryNo, rowIndex) {
     grnAttachmentSequence += 1;
     return ['grn', lineNo || '0', itemNo || 'item', entryNo || '0', rowIndex || '0', grnAttachmentSequence].join('-');

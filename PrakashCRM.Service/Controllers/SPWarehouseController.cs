@@ -1196,6 +1196,58 @@ namespace PrakashCRM.Service.Controllers
             return allWarehouseData;
         }
 
+        //[HttpPost]
+        //[Route("UpdateTransportQty")]
+        //public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
+        //{
+        //    if (string.IsNullOrWhiteSpace(doctype) || string.IsNullOrWhiteSpace(documentno) || string.IsNullOrWhiteSpace(lineno))
+        //        return false;
+
+        //    if (!int.TryParse(lineno, out int parsedLineNo))
+        //        return false;
+
+        //    decimal parsedTransportQty;
+        //    if (!decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.InvariantCulture, out parsedTransportQty)
+        //        && !decimal.TryParse(transportqty, NumberStyles.Any, CultureInfo.CurrentCulture, out parsedTransportQty))
+        //    {
+        //        return false;
+        //    }
+
+        //    var requestModel = new
+        //    {
+        //        Transport_Quantity_Line = parsedTransportQty
+        //    };
+        //    var responseModel = new
+        //    {
+        //        Transport_Quantity_Line = 0m
+        //    };
+
+        //    const string endpoint = "pcplSalesOrderSubformAPI";
+        //    string docTypeForFilter = "";
+        //    string safeDocNo = documentno.Replace("'", "''");
+        //    string filter = "";
+
+        //    switch ((doctype ?? "").Trim().ToLower())
+        //    {
+        //        case "sales order":
+        //            docTypeForFilter = "Order";
+        //            break;
+        //        case "sales return":
+        //            docTypeForFilter = "Return Order";
+        //            break;
+        //        default:
+        //            return false;
+        //    }
+
+        //    // Dynamic primary key for pcplSalesOrderSubformAPI.
+        //    filter = "DocumentType_SalesHeader='" + docTypeForFilter + "',No_SalesHeader='" + safeDocNo + "',Line_No_=" + parsedLineNo;
+
+        //    API ac = new API();
+        //    var result = ac.PatchItem(endpoint, requestModel, responseModel, filter);
+        //    return result.Result.Item2 != null && result.Result.Item2.isSuccess;
+        //}
+
+        //all cases
         [HttpPost]
         [Route("UpdateTransportQty")]
         public bool UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)

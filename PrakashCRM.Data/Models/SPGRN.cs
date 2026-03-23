@@ -280,6 +280,7 @@ namespace PrakashCRM.Data.Models
         public string PCPL_Unloading_Charges { get; set; } //not in API
         public string Tracking_Code { get; set; }
         public string No { get; set; }
+        public int Derived_From_Line_No { get; set; }
 
     }
 
