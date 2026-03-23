@@ -576,6 +576,131 @@ namespace PrakashCRM.Controllers
             return View();
         }
 
+        [HttpPost]
+        public async Task<JsonResult> RequestPasswordReset(string email)
+        {
+            PasswordResetResult result = new PasswordResetResult
+            {
+                Success = false,
+                Status = "Invalid",
+                Message = "Please Enter Email ID Of Registered User."
+            };
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                result.Message = "Please Enter Email ID.";
+                return Json(result);
+            }
+
+            string baseApiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString();
+            string portalUrl = ConfigurationManager.AppSettings["SPPortalUrl"].ToString();
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string getUserUrl = baseApiUrl + "Salesperson/GetByEmail?email=" + Uri.EscapeDataString(email.Trim());
+                HttpResponseMessage getUserResponse = await client.GetAsync(getUserUrl);
+                if (!getUserResponse.IsSuccessStatusCode)
+                {
+                    result.Message = "Unable to process password reset right now.";
+                    return Json(result);
+                }
+
+                string getUserPayload = await getUserResponse.Content.ReadAsStringAsync();
+                UserCustVendor user = JsonConvert.DeserializeObject<UserCustVendor>(getUserPayload);
+                if (user == null || string.IsNullOrWhiteSpace(user.No) || string.IsNullOrWhiteSpace(user.Company_E_Mail))
+                    return Json(result);
+
+                string forgotPasswordUrl = baseApiUrl
+                    + "Salesperson/ForgotPassword?email=" + Uri.EscapeDataString(user.Company_E_Mail)
+                    + "&userNo=" + Uri.EscapeDataString(user.No)
+                    + "&role=" + Uri.EscapeDataString(user.Role ?? string.Empty)
+                    + "&portalUrl=" + Uri.EscapeDataString(portalUrl);
+
+                HttpResponseMessage forgotPasswordResponse = await client.GetAsync(forgotPasswordUrl);
+                if (!forgotPasswordResponse.IsSuccessStatusCode)
+                {
+                    result.Message = "Unable to process password reset right now.";
+                    return Json(result);
+                }
+
+                string forgotPasswordPayload = await forgotPasswordResponse.Content.ReadAsStringAsync();
+                PasswordResetResult forgotPasswordResult = JsonConvert.DeserializeObject<PasswordResetResult>(forgotPasswordPayload);
+
+                return Json(forgotPasswordResult ?? result);
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> ValidatePasswordResetToken(string token)
+        {
+            PasswordResetValidationResult invalidResult = new PasswordResetValidationResult
+            {
+                IsValid = false,
+                Status = "Invalid",
+                Message = "Invalid link"
+            };
+
+            if (string.IsNullOrWhiteSpace(token))
+                return Json(invalidResult, JsonRequestBehavior.AllowGet);
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()
+                + "Salesperson/ValidateResetToken?token=" + Uri.EscapeDataString(token.Trim());
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.GetAsync(apiUrl);
+                if (!response.IsSuccessStatusCode)
+                    return Json(invalidResult, JsonRequestBehavior.AllowGet);
+
+                string payload = await response.Content.ReadAsStringAsync();
+                PasswordResetValidationResult validationResult = JsonConvert.DeserializeObject<PasswordResetValidationResult>(payload);
+
+                return Json(validationResult ?? invalidResult, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> CompletePasswordReset(string token, string newPassword)
+        {
+            PasswordResetResult invalidResult = new PasswordResetResult
+            {
+                Success = false,
+                Status = "Invalid",
+                Message = "Invalid link"
+            };
+
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(newPassword))
+                return Json(invalidResult);
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()
+                + "Salesperson/ResetForgotPassword?token=" + Uri.EscapeDataString(token.Trim())
+                + "&newPassword=" + Uri.EscapeDataString(newPassword);
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.PostAsync(apiUrl, null);
+                if (!response.IsSuccessStatusCode)
+                    return Json(invalidResult);
+
+                string payload = await response.Content.ReadAsStringAsync();
+                PasswordResetResult resetResult = JsonConvert.DeserializeObject<PasswordResetResult>(payload) ?? invalidResult;
+
+                if (resetResult.Success && !string.IsNullOrWhiteSpace(resetResult.UserNo))
+                    UserTokenStore.InvalidateAllTokensForUsers(new[] { resetResult.UserNo });
+
+                return Json(resetResult);
+            }
+        }
+
         public ActionResult ForgotPassword()
         {
             return View();

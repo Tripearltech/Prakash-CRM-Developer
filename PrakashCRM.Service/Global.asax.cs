@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using PrakashCRM.Service.Classes;
 
 namespace PrakashCRM.Service
 {
@@ -18,6 +19,14 @@ namespace PrakashCRM.Service
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            try
+            {
+                PasswordResetTokenStore.EnsureCreated();
+            }
+            catch
+            {
+            }
         }
         protected void Application_PostAuthorizeRequest()
             {

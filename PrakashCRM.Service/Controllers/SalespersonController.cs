@@ -4,6 +4,7 @@ using PrakashCRM.Data.Models;
 using PrakashCRM.Service.Classes;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -16,29 +17,97 @@ namespace PrakashCRM.Service.Controllers
     [RoutePrefix("api/Salesperson")]
     public class SalespersonController : ApiController
     {
+        private static readonly TimeSpan DefaultResetTokenLifetime = TimeSpan.FromMinutes(15);
+
+        private static LoggedInUserProfile MapLoggedInUserProfile(SPProfile user)
+        {
+            LoggedInUserProfile loggedInUserProfile = new LoggedInUserProfile();
+
+            if (user == null)
+                return loggedInUserProfile;
+
+            loggedInUserProfile.No = user.No;
+            loggedInUserProfile.First_Name = user.First_Name;
+            loggedInUserProfile.Last_Name = user.Last_Name;
+            loggedInUserProfile.Company_E_Mail = user.Company_E_Mail;
+            loggedInUserProfile.Mobile_Phone_No = user.Mobile_Phone_No;
+            loggedInUserProfile.Job_Title = user.Job_Title;
+            loggedInUserProfile.Address = user.Address;
+            loggedInUserProfile.Address_2 = user.Address_2;
+            loggedInUserProfile.Salespers_Purch_Code = user.Salespers_Purch_Code;
+            loggedInUserProfile.Role = user.Role;
+
+            return loggedInUserProfile;
+        }
+
+        private static ContactNoOTPForLogin MapOtpLoginProfile(ContactNoOTPForLogin user)
+        {
+            ContactNoOTPForLogin profile = new ContactNoOTPForLogin();
+
+            if (user == null)
+                return profile;
+
+            profile.No = user.No;
+            profile.First_Name = user.First_Name;
+            profile.Last_Name = user.Last_Name;
+            profile.Company_E_Mail = user.Company_E_Mail;
+            profile.Job_Title = user.Job_Title;
+            profile.Mobile_Phone_No = user.Mobile_Phone_No;
+            profile.Salespers_Purch_Code = user.Salespers_Purch_Code;
+            profile.Phone_No_2 = user.Phone_No_2;
+            profile.Role = user.Role;
+            profile.PCPL_OTP = user.PCPL_OTP;
+            profile.PCPL_Enable_OTP_On_Login = user.PCPL_Enable_OTP_On_Login;
+            profile.Status = user.Status;
+            profile.Global_Dimension_1_Code = user.Global_Dimension_1_Code;
+
+            return profile;
+        }
+
+        private static int GetPasswordResetTokenExpiryMinutes()
+        {
+            int expiryMinutes;
+            return int.TryParse(ConfigurationManager.AppSettings["PasswordResetTokenExpiryMinutes"], out expiryMinutes)
+                && expiryMinutes > 0
+                    ? expiryMinutes
+                    : (int)DefaultResetTokenLifetime.TotalMinutes;
+        }
+
+        private static string BuildSecurePortalUrl(string portalUrl)
+        {
+            if (string.IsNullOrWhiteSpace(portalUrl))
+                return string.Empty;
+
+            portalUrl = portalUrl.Trim();
+            Uri absoluteUrl;
+            if (Uri.TryCreate(portalUrl, UriKind.Absolute, out absoluteUrl))
+            {
+                UriBuilder builder = new UriBuilder(absoluteUrl)
+                {
+                    Scheme = Uri.UriSchemeHttps,
+                    Port = absoluteUrl.Port == 80 ? 443 : absoluteUrl.Port
+                };
+
+                string formatted = builder.Uri.ToString();
+                return formatted.EndsWith("/") ? formatted : formatted + "/";
+            }
+
+            return portalUrl.EndsWith("/") ? portalUrl : portalUrl + "/";
+        }
 
         [Route("GetByEmailPass")]
         public LoggedInUserProfile GetByEmailPass(string email, string pass)
         {
             API ac = new API();
             LoggedInUserProfile loggedInUserProfile = new LoggedInUserProfile();
-            string encryptedPass = EncryptDecryptClass.Encrypt(pass, true);
 
-            var result = ac.GetData<SPProfile>("EmployeesDotNetAPI", "Company_E_Mail eq '" + email + "' and Password eq '" + encryptedPass + "'");
+            var result = ac.GetData<SPProfile>("EmployeesDotNetAPI", "Company_E_Mail eq '" + email + "'");
 
             if (result.Result.Item1.value.Count > 0)
             {
-                loggedInUserProfile.No = result.Result.Item1.value[0].No;
-
-                loggedInUserProfile.First_Name = result.Result.Item1.value[0].First_Name;
-                loggedInUserProfile.Last_Name = result.Result.Item1.value[0].Last_Name;
-                loggedInUserProfile.Company_E_Mail = result.Result.Item1.value[0].Company_E_Mail;
-
-                loggedInUserProfile.Mobile_Phone_No = result.Result.Item1.value[0].Mobile_Phone_No;
-                loggedInUserProfile.Job_Title = result.Result.Item1.value[0].Job_Title;
-                loggedInUserProfile.Address = result.Result.Item1.value[0].Address;
-                loggedInUserProfile.Address_2 = result.Result.Item1.value[0].Address_2;
-                loggedInUserProfile.Salespers_Purch_Code = result.Result.Item1.value[0].Salespers_Purch_Code;
+                SPProfile user = result.Result.Item1.value[0];
+                if (PasswordSecurity.VerifyPassword(pass, user.Password))
+                    loggedInUserProfile = MapLoggedInUserProfile(user);
             }
 
             return loggedInUserProfile;
@@ -77,26 +146,15 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             ContactNoOTPForLogin contactNoOTPForLogin = new ContactNoOTPForLogin();
-            string encryptedPass = EncryptDecryptClass.Encrypt(pass, true);
             pass = pass.Trim();
 
-            var result = ac.GetData<ContactNoOTPForLogin>("EmployeesDotNetAPI", "Company_E_Mail eq '" + email + "' and Password eq '" + encryptedPass + "'");
+            var result = ac.GetData<ContactNoOTPForLoginProfile>("EmployeesDotNetAPI", "Company_E_Mail eq '" + email + "'");
 
             if (result.Result.Item1.value.Count > 0)
             {
-                contactNoOTPForLogin.No = result.Result.Item1.value[0].No;
-                contactNoOTPForLogin.First_Name = result.Result.Item1.value[0].First_Name;
-                contactNoOTPForLogin.Last_Name = result.Result.Item1.value[0].Last_Name;
-                contactNoOTPForLogin.Company_E_Mail = result.Result.Item1.value[0].Company_E_Mail;
-                contactNoOTPForLogin.Job_Title = result.Result.Item1.value[0].Job_Title;
-                contactNoOTPForLogin.Mobile_Phone_No = result.Result.Item1.value[0].Mobile_Phone_No;
-                contactNoOTPForLogin.Salespers_Purch_Code = result.Result.Item1.value[0].Salespers_Purch_Code;
-                contactNoOTPForLogin.Phone_No_2 = result.Result.Item1.value[0].Phone_No_2;
-                contactNoOTPForLogin.Role = result.Result.Item1.value[0].Role;
-                contactNoOTPForLogin.PCPL_OTP = result.Result.Item1.value[0].PCPL_OTP;
-                contactNoOTPForLogin.PCPL_Enable_OTP_On_Login = result.Result.Item1.value[0].PCPL_Enable_OTP_On_Login;
-                contactNoOTPForLogin.Status = result.Result.Item1.value[0].Status;
-                contactNoOTPForLogin.Global_Dimension_1_Code = result.Result.Item1.value[0].Global_Dimension_1_Code;
+                ContactNoOTPForLoginProfile user = result.Result.Item1.value[0];
+                if (PasswordSecurity.VerifyPassword(pass, user.Password))
+                    contactNoOTPForLogin = MapOtpLoginProfile(user);
             }
 
             return contactNoOTPForLogin;
@@ -175,6 +233,9 @@ namespace PrakashCRM.Service.Controllers
             if (result.Result.Item1.value.Count > 0)
                 userPassword = result.Result.Item1.value[0].Password;
 
+            if (PasswordSecurity.IsHashedPassword(userPassword))
+                return string.Empty;
+
             string decryptPass = EncryptDecryptClass.Decrypt(userPassword, true);
 
             return decryptPass.Trim();
@@ -182,9 +243,26 @@ namespace PrakashCRM.Service.Controllers
 
         [HttpGet]
         [Route("ForgotPassword")]
-        public Salesperson ForgotPassword(string email, string userNo, string role, string portalUrl)
+        public PasswordResetResult ForgotPassword(string email, string userNo, string role, string portalUrl)
         {
-            string encryptedEmail = EncryptDecryptClass.Encrypt(email, true);
+            PasswordResetResult result = new PasswordResetResult
+            {
+                Success = false,
+                Status = "Invalid",
+                Message = "Invalid link"
+            };
+
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(userNo))
+                return result;
+
+            PasswordResetTokenRecord token = PasswordResetTokenStore.CreateToken(
+                userNo.Trim(),
+                email.Trim(),
+                role,
+                GetPasswordResetTokenExpiryMinutes());
+
+            string securePortalUrl = BuildSecurePortalUrl(portalUrl);
+            string resetUrl = securePortalUrl + "Account/ResetForgotPassword?token=" + Uri.EscapeDataString(token.Token);
 
             EmailService emailService = new EmailService();
 
@@ -196,36 +274,28 @@ namespace PrakashCRM.Service.Controllers
             sbMailBody.Append("<p>User Email: " + email + "</p>");
             sbMailBody.Append("<p>User Role: " + role + "</p>");
             sbMailBody.Append("<p>&nbsp;</p>");
-            //sbMailBody.Append("<p>Reset Password Link : </p><a href='https://localhost:44337/Account/ResetForgotPassword?token=" + encryptedEmail + "'>https://localhost:44337/Account/ResetForgotPassword?token=" + encryptedEmail + "</a>");
-            sbMailBody.Append("<p>Reset Password Link : </p><a target='_self' href='" + portalUrl + "Account/ResetForgotPassword?token=" + encryptedEmail + "'>" + portalUrl + "Account/ResetForgotPassword?token=" + encryptedEmail + "</a>");
+            sbMailBody.Append("<p>Reset Password Link : </p><a target='_self' href='" + resetUrl + "'>" + resetUrl + "</a>");
+            sbMailBody.Append("<p>This link will expire in " + GetPasswordResetTokenExpiryMinutes() + " minutes and can be used only once.</p>");
             sbMailBody.Append("<p>&nbsp;</p>");
             sbMailBody.Append("<p>Warm Regards,</p>");
             sbMailBody.Append("<p>Support Team</p>");
 
             emailService.SendEmailTo(email, sbMailBody.ToString(), "Reset Password - PrakashCRM");
 
-            var ac = new API();
-            errorDetails ed = new errorDetails();
+            result.Success = true;
+            result.Status = "ResetLinkSent";
+            result.Message = "Reset password link sent.";
+            result.UserNo = userNo;
+            result.Email = email;
 
-            Salesperson responseUser = new Salesperson();
+            return result;
+        }
 
-            Salesperson requestUser = new Salesperson()
-            {
-                No = userNo,
-                Company_E_Mail = email,
-                Role = role,
-                Password = ""
-            };
-
-            var result = ac.PatchItem("EmployeesDotNetAPI", requestUser, responseUser, "No='" + userNo + "'");
-
-            if (result.Result.Item1.No != null)
-                responseUser = result.Result.Item1;
-
-            if (result.Result.Item2.message != null)
-                ed = result.Result.Item2;
-
-            return responseUser;
+        [HttpGet]
+        [Route("ValidateResetToken")]
+        public PasswordResetValidationResult ValidateResetToken(string token)
+        {
+            return PasswordResetTokenStore.ValidateToken(token);
         }
 
         //[HttpGet]
@@ -307,12 +377,8 @@ namespace PrakashCRM.Service.Controllers
             if (userResult.Result.Item1.value.Count > 0)
             {
                 string storedPassword = userResult.Result.Item1.value[0].Password;
-                string decryptedStoredPassword = EncryptDecryptClass.Decrypt(storedPassword, true);
-
-                // Validate current password
-                if (decryptedStoredPassword.Trim() != currentPassword.Trim())
+                if (!PasswordSecurity.VerifyPassword(currentPassword, storedPassword))
                 {
-                    // Current password doesn't match
                     return false;
                 }
             }
@@ -326,7 +392,7 @@ namespace PrakashCRM.Service.Controllers
             {
                 No = userNo,
                 Company_E_Mail = email,
-                Password = EncryptDecryptClass.Encrypt(newPassword, true),
+                Password = PasswordSecurity.ProtectPasswordForStorage(newPassword),
                 Role = role
             };
 
@@ -548,7 +614,7 @@ namespace PrakashCRM.Service.Controllers
             if (isEdit)
                 requestUser.Password = Password;
             else
-                requestUser.Password = EncryptDecryptClass.Encrypt(generatedPassword, true);
+                requestUser.Password = PasswordSecurity.ProtectPasswordForStorage(generatedPassword);
 
             bool flagEmail = false;
 
@@ -603,35 +669,61 @@ namespace PrakashCRM.Service.Controllers
         }
 
         [Route("ResetForgotPassword")]
-        public bool ResetForgotPassword(string email, string userNo, string role, string newPassword)
+        [HttpPost]
+        public PasswordResetResult ResetForgotPassword(string token, string newPassword)
         {
-            bool flag = false;
+            PasswordResetResult resetResult = new PasswordResetResult
+            {
+                Success = false,
+                Status = "Invalid",
+                Message = "Invalid link"
+            };
+
+            PasswordResetValidationResult validation = PasswordResetTokenStore.ValidateToken(token);
+            if (!validation.IsValid)
+            {
+                resetResult.Status = validation.Status;
+                resetResult.Message = validation.Message;
+                resetResult.UserNo = validation.UserNo;
+                resetResult.Email = validation.Email;
+                return resetResult;
+            }
+
+            DateTime usedUtc = DateTime.UtcNow;
+            PasswordResetTokenRecord consumedToken = PasswordResetTokenStore.TryMarkTokenUsed(token.Trim(), usedUtc);
+            if (consumedToken == null)
+            {
+                validation = PasswordResetTokenStore.ValidateToken(token);
+                resetResult.Status = validation.Status;
+                resetResult.Message = validation.Message;
+                resetResult.UserNo = validation.UserNo;
+                resetResult.Email = validation.Email;
+                return resetResult;
+            }
+
             var ac = new API();
             errorDetails ed = new errorDetails();
-
             Salesperson responseUser = new Salesperson();
-            UserCustVendor responseCustVendor = new UserCustVendor();
 
             Salesperson requestUser = new Salesperson()
             {
-                No = userNo,
-                Company_E_Mail = email,
-                Role = role,
-                Password = EncryptDecryptClass.Encrypt(newPassword, true)
+                No = consumedToken.UserNo,
+                Company_E_Mail = consumedToken.Email,
+                Role = consumedToken.Role,
+                Password = PasswordSecurity.ProtectPasswordForStorage(newPassword)
             };
 
-            var result = ac.PatchItem("EmployeesDotNetAPI", requestUser, responseUser, "No='" + userNo + "'");
+            var result = ac.PatchItem("EmployeesDotNetAPI", requestUser, responseUser, "No='" + consumedToken.UserNo + "'");
 
             if (result.Result.Item1.No != null)
             {
-                flag = true;
                 responseUser = result.Result.Item1;
             }
 
             if (result.Result.Item2.message != null)
                 ed = result.Result.Item2;
 
-            if (flag)
+            if (responseUser.No != null)
             {
                 EmailService emailService = new EmailService();
                 StringBuilder sbMailBody = new StringBuilder();
@@ -639,8 +731,8 @@ namespace PrakashCRM.Service.Controllers
                 sbMailBody.Append("<p>Hi,</p>");
                 sbMailBody.Append("<p>&nbsp;</p>");
                 sbMailBody.Append("<p>Welcome to the <strong>Prakash CRM Portal</strong>.</p>");
-                sbMailBody.Append("<p>User Email: " + email + "</p>");
-                sbMailBody.Append("<p>User Role: " + role + "</p>");
+                sbMailBody.Append("<p>User Email: " + consumedToken.Email + "</p>");
+                sbMailBody.Append("<p>User Role: " + consumedToken.Role + "</p>");
                 sbMailBody.Append("<p>&nbsp;</p>");
                 sbMailBody.Append("<p>You have reset your password</p>");
                 sbMailBody.Append("<p>Now you can login with new password</p>");
@@ -648,9 +740,24 @@ namespace PrakashCRM.Service.Controllers
                 sbMailBody.Append("<p>Warm Regards,</p>");
                 sbMailBody.Append("<p>Support Team</p>");
 
-                emailService.SendEmailTo(email, sbMailBody.ToString(), "New Password - PrakashCRM");
+                emailService.SendEmailTo(consumedToken.Email, sbMailBody.ToString(), "New Password - PrakashCRM");
+
+                resetResult.Success = true;
+                resetResult.Status = "Success";
+                resetResult.Message = "Password updated successfully.";
+                resetResult.UserNo = consumedToken.UserNo;
+                resetResult.Email = consumedToken.Email;
+                return resetResult;
             }
-            return flag;
+
+            PasswordResetTokenStore.RevertTokenUsage(consumedToken.Id);
+            resetResult.Status = "ResetFailed";
+            resetResult.Message = ed != null && !string.IsNullOrWhiteSpace(ed.message)
+                ? ed.message
+                : "Unable to reset password.";
+            resetResult.UserNo = consumedToken.UserNo;
+            resetResult.Email = consumedToken.Email;
+            return resetResult;
         }
 
         [Route("Profile")]
@@ -789,7 +896,7 @@ namespace PrakashCRM.Service.Controllers
             {
                 No = model.UserNo,
                 Company_E_Mail = model.Email,
-                Password = EncryptDecryptClass.Encrypt(model.NewPassword, true)
+                Password = PasswordSecurity.ProtectPasswordForStorage(model.NewPassword)
             };
 
             Salesperson1 responseUser = new Salesperson1();
