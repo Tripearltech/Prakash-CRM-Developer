@@ -43,6 +43,39 @@ namespace PrakashCRM.Data.Models
     public string NewPassword { get; set; }
 }
 
+    public class PasswordResetTokenRecord
+    {
+        public int Id { get; set; }
+        public string UserNo { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+        public string Token { get; set; }
+        public DateTime ExpiryUtc { get; set; }
+        public bool IsUsed { get; set; }
+        public DateTime CreatedUtc { get; set; }
+        public DateTime? UsedUtc { get; set; }
+    }
+
+    public class PasswordResetValidationResult
+    {
+        public bool IsValid { get; set; }
+        public string Status { get; set; }
+        public string Message { get; set; }
+        public string Token { get; set; }
+        public string UserNo { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+    }
+
+    public class PasswordResetResult
+    {
+        public bool Success { get; set; }
+        public string Status { get; set; }
+        public string Message { get; set; }
+        public string UserNo { get; set; }
+        public string Email { get; set; }
+    }
+
 
     //public class PasswordResetToken
     //{
@@ -379,6 +412,11 @@ namespace PrakashCRM.Data.Models
         public string Status { get; set; }
 
         public bool PCPL_Enable_OTP_On_Login { get; set; }
+    }
+
+    public class ContactNoOTPForLoginProfile : ContactNoOTPForLogin
+    {
+        public string Password { get; set; }
     }
 
     public class ContactNoOTPForLoginUpdate
