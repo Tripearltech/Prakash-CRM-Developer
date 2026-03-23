@@ -191,6 +191,8 @@
     <Compile Include="Classes\Email.cs" />
     <Compile Include="Classes\EmailService.cs" />
     <Compile Include="Classes\EncryptDecryptClass.cs" />
+    <Compile Include="Classes\PasswordResetTokenStore.cs" />
+    <Compile Include="Classes\PasswordSecurity.cs" />
     <Compile Include="Classes\RazorRenderer.cs" />
     <Compile Include="Controllers\SPActivitiesController.cs" />
     <Compile Include="Controllers\SPAdminBusinessPlanController.cs" />

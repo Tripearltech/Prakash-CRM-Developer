@@ -352,7 +352,7 @@ namespace PrakashCRM.Service.Controllers
                                 BillOfEntryNo = salesreturnline.PCPL_Bill_of_Entry_No,
                                 BillOfEntryDate = salesreturnline.PCPL_Bill_of_Entry_Date == "0001-01-01" ? "" : salesreturnline.PCPL_Bill_of_Entry_Date,
                                 Remarks = salesreturnline.PCPL_Remarks,
-                                ConcentrationRatePercent = salesreturnline.PCPL_Concentration_Bool,
+                                ConcentrationRatePercent = salesreturnline.PCPL_Concentration_Rate_Percent,
                                 ExpectedReceiptDate = "",
                                 PackingStyleCode = salesreturnline.PCPL_Packing_Style_Code,
                                 PackingQty = salesreturnline.PCPL_Packing_Qty,
@@ -440,7 +440,7 @@ namespace PrakashCRM.Service.Controllers
                     spgrnCard.MakeMfgCode = "";
 
                     List<SPGRNCardLine> spgrnCardLine = new List<SPGRNCardLine>();
-                    resultline = ac.GetData<SPGRNTransferLine>("TransferLinesDotNetAPI", "Document_No eq '" + No + "'");
+                    resultline = ac.GetData<SPGRNTransferLine>("TransferLinesDotNetAPI", "Document_No eq '" + No + "' and Derived_From_Line_No eq 0");
 
                     if (resultline.Result.Item1.value.Count > 0)
                     {
@@ -493,13 +493,14 @@ namespace PrakashCRM.Service.Controllers
         public bool SaveSPGRNCard(SPGRNCardRequest grnCardRequest)
         {
             bool headerflag = false;
-            bool lineflag = false;
+            bool lineflag = true;
+            string normalizedDocumentType = NormalizeDocumentTypeForPost(grnCardRequest.documenttype);
 
             var resGRNSave = new SPGRNSaveResponse();
             //lrdate = dd_MM_yyyytoyyyy_MM_dd(lrdate);
             SPGRNHeaderRequest sPGRNHeaderRequest = new SPGRNHeaderRequest
             {
-                documenttype = grnCardRequest.documenttype,
+                documenttype = normalizedDocumentType,
                 documentno = grnCardRequest.documentno,
                 postingdate = dd_MM_yyyytoyyyy_MM_dd(grnCardRequest.postingdate),
                 documentdate = dd_MM_yyyytoyyyy_MM_dd(grnCardRequest.documentdate),
@@ -524,29 +525,61 @@ namespace PrakashCRM.Service.Controllers
                 headerflag = Convert.ToBoolean(result.Result.Item1.value);
                 if (headerflag)
                 {
-                    foreach (SPGRNCardLineRequest lineRequest in sPGRNCardLineRequests)
+                    if (sPGRNCardLineRequests == null)
                     {
-                        var resultLine = (dynamic)null;
-                        lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
-                        resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
-
-                        if (resultLine.Result.Item1 != null)
+                        lineflag = false;
+                    }
+                    else
+                    {
+                        foreach (SPGRNCardLineRequest lineRequest in sPGRNCardLineRequests)
                         {
-                            lineflag = Convert.ToBoolean(resultLine.Result.Item1.value);
-                            if (lineflag)
-                            {
+                            var resultLine = (dynamic)null;
+                            lineRequest.documenttype = normalizedDocumentType;
+                            lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
+                            resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
 
+                            if (resultLine.Result.Item1 != null)
+                            {
+                                lineflag = Convert.ToBoolean(resultLine.Result.Item1.value);
+                                if (!lineflag)
+                                {
+                                    break;
+                                }
                             }
                             else
                             {
-
+                                lineflag = false;
+                                break;
                             }
                         }
                     }
                 }
             }
 
-            return headerflag;
+            return headerflag && lineflag;
+        }
+
+        [HttpPost]
+        [Route("SaveSPGRNLine")]
+        public bool SaveSPGRNLine(SPGRNCardLineRequest lineRequest)
+        {
+            if (lineRequest == null)
+            {
+                return false;
+            }
+
+            var resGRNSave = new SPGRNSaveResponse();
+            lineRequest.documenttype = NormalizeDocumentTypeForPost(lineRequest.documenttype);
+            lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
+
+            var resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
+
+            if (resultLine.Result.Item1 != null)
+            {
+                return Convert.ToBoolean(resultLine.Result.Item1.value);
+            }
+
+            return false;
         }
 
         public string dd_MM_yyyytoyyyy_MM_dd(string dd_MM_yyyyDate)
@@ -555,8 +588,7 @@ namespace PrakashCRM.Service.Controllers
             {
                 DateTime yyyy_MM_ddDate;
 
-                bool success = DateTime.TryParseExact(dd_MM_yyyyDate,"dd-MM-yyyy",CultureInfo.InvariantCulture,DateTimeStyles.None,out yyyy_MM_ddDate
-                );
+                bool success = DateTime.TryParseExact(dd_MM_yyyyDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out yyyy_MM_ddDate);
 
                 if (success)
                 {
@@ -572,6 +604,17 @@ namespace PrakashCRM.Service.Controllers
             else
             {
                 return dd_MM_yyyyDate;
+            }
+        }
+
+        private string NormalizeDocumentTypeForPost(string documentType)
+        {
+            switch ((documentType ?? string.Empty).Trim())
+            {
+                case "Sales Return":
+                    return "Return Order";
+                default:
+                    return documentType;
             }
         }
 
@@ -603,6 +646,14 @@ namespace PrakashCRM.Service.Controllers
 
             }
             errorDetails errordetail = new errorDetails();
+            if (response == null)
+            {
+                errordetail.isSuccess = false;
+                errordetail.code = "NO_RESPONSE";
+                errordetail.message = "Post request failed: no response received.";
+                return (responseModel, errordetail);
+            }
+
             errordetail.isSuccess = response.IsSuccessStatusCode;
             if (response.IsSuccessStatusCode)
             {
@@ -664,6 +715,14 @@ namespace PrakashCRM.Service.Controllers
 
             }
             errorDetails errordetail = new errorDetails();
+            if (response == null)
+            {
+                errordetail.isSuccess = false;
+                errordetail.code = "NO_RESPONSE";
+                errordetail.message = "Post request failed: no response received.";
+                return (responseModel, errordetail);
+            }
+
             errordetail.isSuccess = response.IsSuccessStatusCode;
             if (response.IsSuccessStatusCode)
             {
@@ -915,6 +974,8 @@ namespace PrakashCRM.Service.Controllers
         [Route("UploadGRNItemTrackingAttachments")]
         public bool UploadGRNItemTrackingAttachments([FromBody] UploadGRNItemTrackingAttachmentsRequest request)
         {
+            request = request ?? ReadJsonRequestBody<UploadGRNItemTrackingAttachmentsRequest>();
+
             if (request == null || request.Attachments == null || request.Attachments.Count == 0)
             {
                 return false;
@@ -925,6 +986,16 @@ namespace PrakashCRM.Service.Controllers
 
             foreach (var attachment in request.Attachments)
             {
+                if (attachment != null)
+                {
+                    attachment.Table_ID = 6505;
+                    attachment.Base64Text = NormalizeGRNAttachmentBase64(attachment.Base64Text);
+                    if (string.IsNullOrWhiteSpace(attachment.Item_No) && !string.IsNullOrWhiteSpace(request.ItemNo))
+                    {
+                        attachment.Item_No = request.ItemNo.Trim();
+                    }
+                }
+
                 if (attachment == null
                     || string.IsNullOrWhiteSpace(attachment.No)
                     || string.IsNullOrWhiteSpace(attachment.Item_No)
@@ -934,16 +1005,115 @@ namespace PrakashCRM.Service.Controllers
                     return false;
                 }
 
-                attachment.Table_ID = 6505;
-                var postResult = ac.PostItem<GRNDocumentAttachmentPayload>("DocumentAttachments", attachment, new GRNDocumentAttachmentPayload());
-                if (!postResult.Result.Item2.isSuccess)
+                var existingAttachment = FindExistingGRNAttachment(ac, attachment);
+                if (existingAttachment != null && !string.IsNullOrWhiteSpace(existingAttachment.SystemId))
                 {
-                    allSuccess = false;
-                    break;
+                    attachment.SystemId = existingAttachment.SystemId;
+                    var patchResult = ac.PatchItem("DocumentAttachments", attachment, new GRNDocumentAttachmentPayload(), existingAttachment.SystemId);
+                    if (patchResult.Result.Item2 == null || !patchResult.Result.Item2.isSuccess)
+                    {
+                        allSuccess = false;
+                        break;
+                    }
+                    continue;
                 }
+
+                allSuccess = false;
+                break;
             }
 
             return allSuccess;
+        }
+
+        private T ReadJsonRequestBody<T>() where T : class
+        {
+            try
+            {
+                if (Request == null || Request.Content == null)
+                {
+                    return null;
+                }
+
+                var requestBody = Request.Content.ReadAsStringAsync().Result;
+                if (string.IsNullOrWhiteSpace(requestBody))
+                {
+                    return null;
+                }
+
+                return JsonConvert.DeserializeObject<T>(requestBody);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private GRNDocumentAttachmentPayload FindExistingGRNAttachment(API ac, GRNDocumentAttachmentPayload attachment)
+        {
+            if (ac == null || attachment == null)
+            {
+                return null;
+            }
+
+            string baseFilter = "Table_ID eq 6505"
+                + " and No eq '" + (attachment.No ?? string.Empty).Replace("'", "''") + "'"
+                + " and Item_No eq '" + (attachment.Item_No ?? string.Empty).Replace("'", "''") + "'";
+
+            if (!string.IsNullOrWhiteSpace(attachment.Document_Type))
+            {
+                baseFilter += " and Document_Type eq '" + attachment.Document_Type.Replace("'", "''") + "'";
+            }
+
+            if (!string.IsNullOrWhiteSpace(attachment.Line_No))
+            {
+                baseFilter += " and Line_No eq '" + attachment.Line_No.Replace("'", "''") + "'";
+            }
+
+            var exactMatch = GetExistingGRNAttachment(ac, baseFilter + " and File_Name eq '" + (attachment.File_Name ?? string.Empty).Replace("'", "''") + "'");
+            if (exactMatch != null)
+            {
+                return exactMatch;
+            }
+
+            return GetExistingGRNAttachment(ac, baseFilter);
+        }
+
+        private GRNDocumentAttachmentPayload GetExistingGRNAttachment(API ac, string filter)
+        {
+            if (ac == null || string.IsNullOrWhiteSpace(filter))
+            {
+                return null;
+            }
+
+            var result = ac.GetData<GRNDocumentAttachmentPayload>("DocumentAttachments", filter);
+            if (result == null
+                || result.Result.Item2 == null
+                || !result.Result.Item2.isSuccess
+                || result.Result.Item1 == null
+                || result.Result.Item1.value == null)
+            {
+                return null;
+            }
+
+            return result.Result.Item1.value.FirstOrDefault();
+        }
+
+        private static string NormalizeGRNAttachmentBase64(string base64Text)
+        {
+            if (string.IsNullOrWhiteSpace(base64Text))
+            {
+                return string.Empty;
+            }
+
+            var normalizedText = base64Text.Trim();
+            var commaIndex = normalizedText.IndexOf(',');
+
+            if (commaIndex >= 0 && normalizedText.Substring(0, commaIndex).IndexOf("base64", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                normalizedText = normalizedText.Substring(commaIndex + 1);
+            }
+
+            return string.Concat(normalizedText.Where(ch => !char.IsWhiteSpace(ch)));
         }
 
         [HttpPost]
@@ -958,6 +1128,14 @@ namespace PrakashCRM.Service.Controllers
 
             API ac = new API();
             string filter = "Table_ID eq 6505 and No eq '" + request.LotNo.Replace("'", "''") + "' and Item_No eq '" + request.ItemNo.Replace("'", "''") + "'";
+            if (!string.IsNullOrWhiteSpace(request.DocumentType))
+            {
+                filter += " and Document_Type eq '" + request.DocumentType.Replace("'", "''") + "'";
+            }
+            if (!string.IsNullOrWhiteSpace(request.LineNo))
+            {
+                filter += " and Line_No eq '" + request.LineNo.Replace("'", "''") + "'";
+            }
             var result = ac.GetData<GRNDocumentAttachmentPayload>("DocumentAttachments", filter);
 
             if (result != null && result.Result.Item2 != null && result.Result.Item2.isSuccess && result.Result.Item1 != null && result.Result.Item1.value != null)
@@ -966,6 +1144,22 @@ namespace PrakashCRM.Service.Controllers
             }
 
             return attachments;
+        }
+
+        [HttpPost]
+        [Route("DeleteGRNItemTrackingAttachment")]
+        public bool DeleteGRNItemTrackingAttachment([FromBody] DeleteGRNItemTrackingAttachmentRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.SystemId))
+            {
+                return false;
+            }
+
+            API ac = new API();
+            var responseModel = new GRNDocumentAttachmentPayload();
+            var result = ac.DeleteItem("DocumentAttachments", responseModel, responseModel, request.SystemId);
+
+            return result.Result.Item2 != null && result.Result.Item2.isSuccess;
         }
 
 
