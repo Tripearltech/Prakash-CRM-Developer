@@ -247,7 +247,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">UnLoading Name </label>
                                             <div class="col-sm-9">
-                                                <input id="txtUnLoadingCharges" type="text" value="@Model.UnLoadingName" class="form-control" readonly />
+                                                <input id="txtUnLoadingName" type="text" value="@Model.UnLoadingName" class="form-control" readonly />
                                             </div>
                                         </div>
                                     </div>
@@ -257,7 +257,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Loading name : </label>
                                             <div class="col-sm-9">
-                                                <input id="txtUnLoadingCharges" type="text" value="@Model.LoadingName" class="form-control" readonly />
+                                                <input id="txtLoadingName" type="text" value="@Model.LoadingName" class="form-control" readonly />
                                             </div>
                                         </div>
                                     </div>
@@ -493,7 +493,7 @@
         </div>
         <div id="grnAttachmentDropZone" class="grn-attachment-dropzone">
             <div><strong>Files drag and drop kijiye</strong> ya browse kijiye</div>
-            <div class="grn-attachment-hint">Multiple files supported. Upload payload mein `Table_ID = 6505` fixed rahega.</div>
+            <div class="grn-attachment-hint">Multiple files supported. Ye attachment panel abhi UI-only mode mein hai.</div>
             <button type="button" class="btn btn-outline-primary btn-sm" onclick="OpenGRNAttachmentFilePicker();">Browse Files</button>
         </div>
         <input id="grnAttachmentFileInput" type="file" multiple style="display:none;" />
