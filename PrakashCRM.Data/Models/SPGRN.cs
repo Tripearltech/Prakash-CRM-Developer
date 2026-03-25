@@ -300,6 +300,8 @@ namespace PrakashCRM.Data.Models
         public decimal transportationamount { get; set; }
         public decimal loadingcharges { get; set; }
         public decimal unloadingcharges { get; set; }
+        public string loadingname { get; set; }
+        public string unloadingname { get; set; }
         public List<SPGRNCardLineRequest> grnCardLineRequest { get; set; }
 
     }
@@ -376,70 +378,6 @@ namespace PrakashCRM.Data.Models
     public class ReservationEntryForGRNRequest
     {
         public string text { get; set; }
-    }
-
-    public class GRNItemTrackingAttachment
-    {
-        public string AttachmentId { get; set; }
-        public string DocumentType { get; set; }
-        public string DocumentNo { get; set; }
-        public string LineNo { get; set; }
-        public string RowKey { get; set; }
-        public string FileName { get; set; }
-        public string FileExtension { get; set; }
-        public long FileSize { get; set; }
-        public string ContentType { get; set; }
-        public string UploadedAt { get; set; }
-        public string StoredFileName { get; set; }
-        public string DownloadUrl { get; set; }
-    }
-
-    public class GRNDocumentAttachmentPayload
-    {
-        public string SystemId { get; set; }
-        public int Table_ID { get; set; }
-        public string Document_Type { get; set; }
-        public string Line_No { get; set; }
-        public string No { get; set; }
-        public string Item_No { get; set; }
-        public string File_Extension { get; set; }
-        public string File_Name { get; set; }
-        public string File_Type { get; set; }
-        public string Base64Text { get; set; }
-    }
-
-    public class UploadGRNItemTrackingAttachmentsRequest
-    {
-        public string DocumentNo { get; set; }
-        public string ItemNo { get; set; }
-        public List<GRNDocumentAttachmentPayload> Attachments { get; set; } = new List<GRNDocumentAttachmentPayload>();
-    }
-
-    public class GetGRNItemTrackingAttachmentsRequest
-    {
-        public string DocumentType { get; set; }
-        public string LineNo { get; set; }
-        public string LotNo { get; set; }
-        public string ItemNo { get; set; }
-    }
-
-    public class DeleteGRNItemTrackingAttachmentRequest
-    {
-        public string SystemId { get; set; }
-    }
-
-    public class FinalizeGRNItemTrackingAttachmentMapping
-    {
-        public string OldRowKey { get; set; }
-        public string NewRowKey { get; set; }
-    }
-
-    public class FinalizeGRNItemTrackingAttachmentsRequest
-    {
-        public string DocumentType { get; set; }
-        public string DocumentNo { get; set; }
-        public string LineNo { get; set; }
-        public List<FinalizeGRNItemTrackingAttachmentMapping> Mappings { get; set; } = new List<FinalizeGRNItemTrackingAttachmentMapping>();
     }
 
     public class SPGRNVendors

@@ -250,7 +250,6 @@ namespace PrakashCRM.Service.Controllers
                                 ProductCode = purchaseline.Shortcut_Dimension_2_Code,
                                 FreightCharges = purchaseline.PCPL_Freight_Charges,
                                 UnloadingCharges = purchaseline.PCPL_Unloading_Charges,
-                                //UnloadingName = purchaseline.PCPL_UnLoading_Vendor_Name,
                                 TrackingCode = purchaseline.Tracking_Code,
                                 ItemNo = purchaseline.No
                             });
@@ -366,8 +365,6 @@ namespace PrakashCRM.Service.Controllers
                                 ProductCode = salesreturnline.Shortcut_Dimension_2_Code,
                                 FreightCharges = salesreturnline.PCPL_Freight_Charges,
                                 UnloadingCharges = salesreturnline.PCPL_Unloading_Charges,
-                                //UnloadingName = salesreturnline.PCPL_UnLoading_Vendor_Name,
-                                //loadingname = salesreturnline.PCPL_Loading_Vendor_Name,
                                 TrackingCode = salesreturnline.Tracking_Code,
                                 ItemNo = salesreturnline.No
                             });
@@ -474,8 +471,6 @@ namespace PrakashCRM.Service.Controllers
                                 ProductCode = transferline.Shortcut_Dimension_2_Code,
                                 FreightCharges = transferline.PCPL_Freight_Charges,
                                 UnloadingCharges = transferline.PCPL_Unloading_Charges,
-                                //loadingName = transferline.PCPL_Loading_Vendor_Name,
-                                //UnloadingName = transferline.PCPL_UnLoading_Vendor_Name,
                                 TrackingCode = transferline.Tracking_Code,
                                 ItemNo = transferline.No
                             });
@@ -493,14 +488,13 @@ namespace PrakashCRM.Service.Controllers
         public bool SaveSPGRNCard(SPGRNCardRequest grnCardRequest)
         {
             bool headerflag = false;
-            bool lineflag = true;
-            string normalizedDocumentType = NormalizeDocumentTypeForPost(grnCardRequest.documenttype);
+            bool lineflag = false;
 
             var resGRNSave = new SPGRNSaveResponse();
             //lrdate = dd_MM_yyyytoyyyy_MM_dd(lrdate);
             SPGRNHeaderRequest sPGRNHeaderRequest = new SPGRNHeaderRequest
             {
-                documenttype = normalizedDocumentType,
+                documenttype = grnCardRequest.documenttype,
                 documentno = grnCardRequest.documentno,
                 postingdate = dd_MM_yyyytoyyyy_MM_dd(grnCardRequest.postingdate),
                 documentdate = dd_MM_yyyytoyyyy_MM_dd(grnCardRequest.documentdate),
@@ -525,99 +519,83 @@ namespace PrakashCRM.Service.Controllers
                 headerflag = Convert.ToBoolean(result.Result.Item1.value);
                 if (headerflag)
                 {
-                    if (sPGRNCardLineRequests == null)
+                    foreach (SPGRNCardLineRequest lineRequest in sPGRNCardLineRequests)
                     {
-                        lineflag = false;
-                    }
-                    else
-                    {
-                        foreach (SPGRNCardLineRequest lineRequest in sPGRNCardLineRequests)
-                        {
-                            var resultLine = (dynamic)null;
-                            lineRequest.documenttype = normalizedDocumentType;
-                            lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
-                            resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
+                        var resultLine = (dynamic)null;
+                        lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
+                        resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
 
-                            if (resultLine.Result.Item1 != null)
+                        if (resultLine.Result.Item1 != null)
+                        {
+                            lineflag = Convert.ToBoolean(resultLine.Result.Item1.value);
+                            if (lineflag)
                             {
-                                lineflag = Convert.ToBoolean(resultLine.Result.Item1.value);
-                                if (!lineflag)
-                                {
-                                    break;
-                                }
+
                             }
                             else
                             {
-                                lineflag = false;
-                                break;
+
                             }
                         }
                     }
                 }
             }
 
-            return headerflag && lineflag;
+            return headerflag;
         }
 
-        [HttpPost]
-        [Route("SaveSPGRNLine")]
-        public bool SaveSPGRNLine(SPGRNCardLineRequest lineRequest)
-        {
-            if (lineRequest == null)
-            {
-                return false;
-            }
+        //public string dd_MM_yyyytoyyyy_MM_dd(string dd_MM_yyyyDate)
+        //{
+        //    if (dd_MM_yyyyDate != "" && dd_MM_yyyyDate != null)
+        //    {
+        //        DateTime yyyy_MM_ddDate;
+        //        bool success = DateTime.TryParseExact(dd_MM_yyyyDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out yyyy_MM_ddDate);
 
-            var resGRNSave = new SPGRNSaveResponse();
-            lineRequest.documenttype = NormalizeDocumentTypeForPost(lineRequest.documenttype);
-            lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
+        //        if (success)
+        //        {
+        //            Console.WriteLine("TryParseExact date: " + yyyy_MM_ddDate);
+        //        }
+        //        else
+        //        {
+        //            yyyy_MM_ddDate = DateTime.ParseExact(dd_MM_yyyyDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+        //            Console.WriteLine("ParseExact date: " + yyyy_MM_ddDate);
+        //        }
 
-            var resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
-
-            if (resultLine.Result.Item1 != null)
-            {
-                return Convert.ToBoolean(resultLine.Result.Item1.value);
-            }
-
-            return false;
-        }
-
+        //        return yyyy_MM_ddDate.ToString("yyyy-MM-dd");
+        //    }
+        //    else
+        //    {
+        //        return dd_MM_yyyyDate;
+        //    }
+        //}
         public string dd_MM_yyyytoyyyy_MM_dd(string dd_MM_yyyyDate)
         {
-            if (!string.IsNullOrEmpty(dd_MM_yyyyDate))
+            if (string.IsNullOrWhiteSpace(dd_MM_yyyyDate))
+                return dd_MM_yyyyDate;
+
+            DateTime parsedDate;
+
+            // Support multiple formats (best practice)
+            string[] formats = { "dd-MM-yyyy", "dd/MM/yyyy", "yyyy-MM-dd" };
+
+            bool success = DateTime.TryParseExact(
+                dd_MM_yyyyDate,
+                formats,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out parsedDate
+            );
+
+            if (success)
             {
-                DateTime yyyy_MM_ddDate;
-
-                bool success = DateTime.TryParseExact(dd_MM_yyyyDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out yyyy_MM_ddDate);
-
-                if (success)
-                {
-                    return yyyy_MM_ddDate.ToString("yyyy-MM-dd");
-                }
-                else
-                {
-                    // Handle invalid format safely
-                    Console.WriteLine("Invalid Date Format: " + dd_MM_yyyyDate);
-                    return dd_MM_yyyyDate; // or return null / throw custom error
-                }
+                return parsedDate.ToString("yyyy-MM-dd");
             }
             else
             {
-                return dd_MM_yyyyDate;
+                // Optional: log error here
+                return ""; // or return dd_MM_yyyyDate OR throw custom message
             }
         }
-
-        private string NormalizeDocumentTypeForPost(string documentType)
-        {
-            switch ((documentType ?? string.Empty).Trim())
-            {
-                case "Sales Return":
-                    return "Return Order";
-                default:
-                    return documentType;
-            }
-        }
-
         public async Task<(SPGRNSaveResponse, errorDetails)> PostGRNCard<SPGRNHeaderRequest>(string apiendpoint, SPGRNHeaderRequest requestModel, SPGRNSaveResponse responseModel)
         {
             string _codeUnitBaseUrl = System.Configuration.ConfigurationManager.AppSettings["CodeUnitBaseURL"];
@@ -646,14 +624,6 @@ namespace PrakashCRM.Service.Controllers
 
             }
             errorDetails errordetail = new errorDetails();
-            if (response == null)
-            {
-                errordetail.isSuccess = false;
-                errordetail.code = "NO_RESPONSE";
-                errordetail.message = "Post request failed: no response received.";
-                return (responseModel, errordetail);
-            }
-
             errordetail.isSuccess = response.IsSuccessStatusCode;
             if (response.IsSuccessStatusCode)
             {
@@ -715,14 +685,6 @@ namespace PrakashCRM.Service.Controllers
 
             }
             errorDetails errordetail = new errorDetails();
-            if (response == null)
-            {
-                errordetail.isSuccess = false;
-                errordetail.code = "NO_RESPONSE";
-                errordetail.message = "Post request failed: no response received.";
-                return (responseModel, errordetail);
-            }
-
             errordetail.isSuccess = response.IsSuccessStatusCode;
             if (response.IsSuccessStatusCode)
             {
@@ -968,198 +930,6 @@ namespace PrakashCRM.Service.Controllers
             }
 
             return msg;
-        }
-
-        [HttpPost]
-        [Route("UploadGRNItemTrackingAttachments")]
-        public bool UploadGRNItemTrackingAttachments([FromBody] UploadGRNItemTrackingAttachmentsRequest request)
-        {
-            request = request ?? ReadJsonRequestBody<UploadGRNItemTrackingAttachmentsRequest>();
-
-            if (request == null || request.Attachments == null || request.Attachments.Count == 0)
-            {
-                return false;
-            }
-
-            API ac = new API();
-            bool allSuccess = true;
-
-            foreach (var attachment in request.Attachments)
-            {
-                if (attachment != null)
-                {
-                    attachment.Table_ID = 6505;
-                    attachment.Base64Text = NormalizeGRNAttachmentBase64(attachment.Base64Text);
-                    if (string.IsNullOrWhiteSpace(attachment.Item_No) && !string.IsNullOrWhiteSpace(request.ItemNo))
-                    {
-                        attachment.Item_No = request.ItemNo.Trim();
-                    }
-                }
-
-                if (attachment == null
-                    || string.IsNullOrWhiteSpace(attachment.No)
-                    || string.IsNullOrWhiteSpace(attachment.Item_No)
-                    || string.IsNullOrWhiteSpace(attachment.File_Name)
-                    || string.IsNullOrWhiteSpace(attachment.Base64Text))
-                {
-                    return false;
-                }
-
-                var existingAttachment = FindExistingGRNAttachment(ac, attachment);
-                if (existingAttachment != null && !string.IsNullOrWhiteSpace(existingAttachment.SystemId))
-                {
-                    attachment.SystemId = existingAttachment.SystemId;
-                    var patchResult = ac.PatchItem("DocumentAttachments", attachment, new GRNDocumentAttachmentPayload(), existingAttachment.SystemId);
-                    if (patchResult.Result.Item2 == null || !patchResult.Result.Item2.isSuccess)
-                    {
-                        allSuccess = false;
-                        break;
-                    }
-                    continue;
-                }
-
-                allSuccess = false;
-                break;
-            }
-
-            return allSuccess;
-        }
-
-        private T ReadJsonRequestBody<T>() where T : class
-        {
-            try
-            {
-                if (Request == null || Request.Content == null)
-                {
-                    return null;
-                }
-
-                var requestBody = Request.Content.ReadAsStringAsync().Result;
-                if (string.IsNullOrWhiteSpace(requestBody))
-                {
-                    return null;
-                }
-
-                return JsonConvert.DeserializeObject<T>(requestBody);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private GRNDocumentAttachmentPayload FindExistingGRNAttachment(API ac, GRNDocumentAttachmentPayload attachment)
-        {
-            if (ac == null || attachment == null)
-            {
-                return null;
-            }
-
-            string baseFilter = "Table_ID eq 6505"
-                + " and No eq '" + (attachment.No ?? string.Empty).Replace("'", "''") + "'"
-                + " and Item_No eq '" + (attachment.Item_No ?? string.Empty).Replace("'", "''") + "'";
-
-            if (!string.IsNullOrWhiteSpace(attachment.Document_Type))
-            {
-                baseFilter += " and Document_Type eq '" + attachment.Document_Type.Replace("'", "''") + "'";
-            }
-
-            if (!string.IsNullOrWhiteSpace(attachment.Line_No))
-            {
-                baseFilter += " and Line_No eq '" + attachment.Line_No.Replace("'", "''") + "'";
-            }
-
-            var exactMatch = GetExistingGRNAttachment(ac, baseFilter + " and File_Name eq '" + (attachment.File_Name ?? string.Empty).Replace("'", "''") + "'");
-            if (exactMatch != null)
-            {
-                return exactMatch;
-            }
-
-            return GetExistingGRNAttachment(ac, baseFilter);
-        }
-
-        private GRNDocumentAttachmentPayload GetExistingGRNAttachment(API ac, string filter)
-        {
-            if (ac == null || string.IsNullOrWhiteSpace(filter))
-            {
-                return null;
-            }
-
-            var result = ac.GetData<GRNDocumentAttachmentPayload>("DocumentAttachments", filter);
-            if (result == null
-                || result.Result.Item2 == null
-                || !result.Result.Item2.isSuccess
-                || result.Result.Item1 == null
-                || result.Result.Item1.value == null)
-            {
-                return null;
-            }
-
-            return result.Result.Item1.value.FirstOrDefault();
-        }
-
-        private static string NormalizeGRNAttachmentBase64(string base64Text)
-        {
-            if (string.IsNullOrWhiteSpace(base64Text))
-            {
-                return string.Empty;
-            }
-
-            var normalizedText = base64Text.Trim();
-            var commaIndex = normalizedText.IndexOf(',');
-
-            if (commaIndex >= 0 && normalizedText.Substring(0, commaIndex).IndexOf("base64", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                normalizedText = normalizedText.Substring(commaIndex + 1);
-            }
-
-            return string.Concat(normalizedText.Where(ch => !char.IsWhiteSpace(ch)));
-        }
-
-        [HttpPost]
-        [Route("GetGRNItemTrackingAttachments")]
-        public List<GRNDocumentAttachmentPayload> GetGRNItemTrackingAttachments([FromBody] GetGRNItemTrackingAttachmentsRequest request)
-        {
-            var attachments = new List<GRNDocumentAttachmentPayload>();
-            if (request == null || string.IsNullOrWhiteSpace(request.LotNo) || string.IsNullOrWhiteSpace(request.ItemNo))
-            {
-                return attachments;
-            }
-
-            API ac = new API();
-            string filter = "Table_ID eq 6505 and No eq '" + request.LotNo.Replace("'", "''") + "' and Item_No eq '" + request.ItemNo.Replace("'", "''") + "'";
-            if (!string.IsNullOrWhiteSpace(request.DocumentType))
-            {
-                filter += " and Document_Type eq '" + request.DocumentType.Replace("'", "''") + "'";
-            }
-            if (!string.IsNullOrWhiteSpace(request.LineNo))
-            {
-                filter += " and Line_No eq '" + request.LineNo.Replace("'", "''") + "'";
-            }
-            var result = ac.GetData<GRNDocumentAttachmentPayload>("DocumentAttachments", filter);
-
-            if (result != null && result.Result.Item2 != null && result.Result.Item2.isSuccess && result.Result.Item1 != null && result.Result.Item1.value != null)
-            {
-                attachments = result.Result.Item1.value;
-            }
-
-            return attachments;
-        }
-
-        [HttpPost]
-        [Route("DeleteGRNItemTrackingAttachment")]
-        public bool DeleteGRNItemTrackingAttachment([FromBody] DeleteGRNItemTrackingAttachmentRequest request)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.SystemId))
-            {
-                return false;
-            }
-
-            API ac = new API();
-            var responseModel = new GRNDocumentAttachmentPayload();
-            var result = ac.DeleteItem("DocumentAttachments", responseModel, responseModel, request.SystemId);
-
-            return result.Result.Item2 != null && result.Result.Item2.isSuccess;
         }
 
 
