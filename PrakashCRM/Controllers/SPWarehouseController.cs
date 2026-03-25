@@ -869,38 +869,19 @@ namespace PrakashCRM.Controllers
 
         #endregion
         [HttpPost]
-        public async Task<bool> SaveNewDriver(string Name, string Registration_Number, string Mobile_Phone_No, string Company_No, string Type)
+        public async Task<bool> SaveNewDriver(string Name, string Registration_Number, string Mobile_Phone_No, string Company_No, string Type, string JobTitle)
         {
-            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPWarehouse/SaveNewDriver";
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPWarehouse/SaveNewDriver" + "?Name=" + HttpUtility.UrlEncode(Name ?? string.Empty) + "&Registration_Number=" + HttpUtility.UrlEncode(Registration_Number ?? string.Empty) + "&Mobile_Phone_No=" + HttpUtility.UrlEncode(Mobile_Phone_No ?? string.Empty) + "&Company_No=" + HttpUtility.UrlEncode(Company_No ?? string.Empty) + "&Type=" + HttpUtility.UrlEncode(Type ?? string.Empty) + "&JobTitle=" + HttpUtility.UrlEncode(JobTitle ?? string.Empty);
+
             bool flag = false;
-
-            HttpClient client = new HttpClient();
-            WarehouseCardDrivers warehouseCardDrivers = new WarehouseCardDrivers();
-            warehouseCardDrivers.Name = Name;
-            warehouseCardDrivers.Registration_Number = Registration_Number;
-            warehouseCardDrivers.Mobile_Phone_No = Mobile_Phone_No;
-            warehouseCardDrivers.No = Company_No;
-            warehouseCardDrivers.Job_Title = Type;
-            client.BaseAddress = new Uri(apiUrl);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-            string UserObjString = JsonConvert.SerializeObject(warehouseCardDrivers);
-            var content = new StringContent(UserObjString, Encoding.UTF8, "application/json");
-
-            HttpRequestMessage request = new HttpRequestMessage
+            using (HttpClient client = new HttpClient())
             {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri(apiUrl),
-                Content = content
-            };
-
-            HttpResponseMessage response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var data = await response.Content.ReadAsStringAsync();
-                warehouseCardDrivers = Newtonsoft.Json.JsonConvert.DeserializeObject<WarehouseCardDrivers>(data);
-                flag = true;
+                HttpResponseMessage response = await client.PostAsync(apiUrl, null);
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+                    bool.TryParse((data ?? string.Empty).Replace("\"", ""), out flag);
+                }
             }
 
             return flag;
