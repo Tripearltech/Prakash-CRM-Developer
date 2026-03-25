@@ -123,6 +123,8 @@ namespace PrakashCRM.Data.Models
     public class SPWarehousePurchaseHeaderLine
     {
         public string No_Purchase_Header { get; set; }
+        public string No_PurchHeader { get; set; }
+        public string DocumentType_Purchase_Header { get; set; }
         public string ShiptoName { get; set; }
         public string ShiptoAddress { get; set; }
         public string ShiptoAddress2 { get; set; }
@@ -148,7 +150,6 @@ namespace PrakashCRM.Data.Models
         public string PCPLPackingStyleDescription_Purchase_Line { get; set; }
         public string PCPL_Packing_UOM { get; set; }
         public string Qty_to_Receive { get; set; }
-        public string Quantity_Shipped { get; set; }
         public string Quantity_Received { get; set; }
         public string Transport_Quantity_Line { get; set; }
         public string PCPL_Item_Tracking_Code { get; set; }
@@ -260,6 +261,7 @@ namespace PrakashCRM.Data.Models
         public string City_Location { get; set; }
         public string Sell_to_City { get; set; }
         public string ShiptoCity { get; set; }
+        public string No_Filter { get; set; }
     }
 
     public class SPWarehouseList
@@ -269,6 +271,7 @@ namespace PrakashCRM.Data.Models
         public string CustomerVendorNo { get; set; }
         public string CustomerVendorName { get; set; }
         public string DocumentType { get; set; }
+        public string documentType { get; set; }
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public string IsAnyLineWithDropShipment { get; set; }
@@ -305,6 +308,8 @@ namespace PrakashCRM.Data.Models
         public string FrompurCity { get; set; }
         public string fromTransCity { get; set; }
         public string fromVenFromCity { get; set; }
+        public string Line_No_ { get; set; }
+        public string Shipqty { get; set; }
     }
 
     public class SPWarehouseSalesAccept
