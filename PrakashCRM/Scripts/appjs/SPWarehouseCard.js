@@ -967,10 +967,7 @@ function SaveTransportQty(lineNo, itemNo, btn) {
     $btn.prop('disabled', true);
     $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Save');
 
-    $.post('/SPWarehouse/UpdateTransportQty?doctype=' + encodeURIComponent(doctype)
-        + '&documentno=' + encodeURIComponent(documentno)
-        + '&lineno=' + encodeURIComponent(lineNo)
-        + '&transportqty=' + encodeURIComponent(transportqty),
+    $.post('/SPWarehouse/UpdateTransportQty?doctype=' + encodeURIComponent(doctype) + '&documentno=' + encodeURIComponent(documentno) + '&lineno=' + encodeURIComponent(lineNo) + '&transportqty=' + encodeURIComponent(transportqty),
         function (data) {
             $btn.prop('disabled', false).html(oldHtml);
             if (data === true || data === "true") {

@@ -830,10 +830,7 @@ namespace PrakashCRM.Controllers
         public async Task<JsonResult> UpdateTransportQty(string doctype, string documentno, string lineno, string transportqty)
         {
             string baseUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString();
-            string apiUrl = baseUrl + "SPWarehouse/UpdateTransportQty?doctype=" + HttpUtility.UrlEncode(doctype)
-                + "&documentno=" + HttpUtility.UrlEncode(documentno)
-                + "&lineno=" + HttpUtility.UrlEncode(lineno)
-                + "&transportqty=" + HttpUtility.UrlEncode(transportqty);
+            string apiUrl = baseUrl + "SPWarehouse/UpdateTransportQty?doctype=" + HttpUtility.UrlEncode(doctype) + "&documentno=" + HttpUtility.UrlEncode(documentno) + "&lineno=" + HttpUtility.UrlEncode(lineno) + "&transportqty=" + HttpUtility.UrlEncode(transportqty);
 
             HttpClient client = new HttpClient();
             bool updated = false;
