@@ -1113,6 +1113,11 @@ function SaveTransporter() {
             ShowErrMsg('Error while saving task. Please try again.');
         });
     }
+    else {
+        $('#btnSaveSpinner').hide();
+        ShowErrMsg('Unable to save task. System Id not found.');
+        return false;
+    }
 }
 
 
