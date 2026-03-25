@@ -95,38 +95,39 @@ $(document).ready(function () {
         var name = $.trim($('#txtWarehouseCPersonName').val());
         var licenseno = $.trim($('#txtWarehouseCPersonLicenseNo').val());
         var phoneno = $.trim($('#txtWarehouseCPersonMobile').val());
-        var transportContect = $("#hfTransporterContactNo").val();
+        var jobTitle = $.trim($('#txtWarehouseCPersonJobTitle').val()) || 'Driver';
         $('#btnAddWarehouseContactSpinner').show();
         $('#lblWarehouseContactMsg').hide().text('');
 
-        //ResolveWarehouseVendorCompanyNo(function (companyno) {
-        //    if (!companyno) {
-        //        $('#btnAddWarehouseContactSpinner').hide();
-        //        $('#lblWarehouseContactMsg').text('Please select transporter before adding contact person.').css('color', 'red').show();
-        //        return;
-        //    }
-
-        SaveNewDriver(name, licenseno, phoneno, transportContect, function (isSuccess) {
-            $('#btnAddWarehouseContactSpinner').hide();
-
-            if (!isSuccess) {
-                $('#lblWarehouseContactMsg').text('Unable to add contact person. Please try again.').css('color', 'red').show();
+        ResolveWarehouseVendorCompanyNo(function (companyno) {
+            if (!companyno) {
+                $('#btnAddWarehouseContactSpinner').hide();
+                $('#lblWarehouseContactMsg').text('Please select transporter before adding contact person.').css('color', 'red').show();
                 return;
             }
 
-            $('#hfVendorCompanyNo').val(transportContect);
-            $('#txtDirverName').val(name);
-            $('#txtDirverLicenseNo').val(licenseno);
-            $('#txtDirverMobileNo').val(phoneno);
-            $('#hfDriverflag').val(true);
-            BindDrivers(transportContect, "company");
+            SaveNewDriver(name, licenseno, phoneno, companyno, jobTitle, function (isSuccess) {
+                $('#btnAddWarehouseContactSpinner').hide();
 
-            $('#lblWarehouseContactMsg').text('Contact Person Added Successfully').css('color', 'green').show();
+                if (!isSuccess) {
+                    $('#lblWarehouseContactMsg').text('Unable to add contact person. Please try again.').css('color', 'red').show();
+                    return;
+                }
 
-            window.setTimeout(function () {
-                ResetWarehouseContactPersonDetails();
-                $('#modalAddWarehouseContactPerson').modal('hide');
-            }, 500);
+                $('#hfVendorCompanyNo').val(companyno);
+                $('#txtDirverName').val(name);
+                $('#txtDirverLicenseNo').val(licenseno);
+                $('#txtDirverMobileNo').val(phoneno);
+                $('#hfDriverflag').val(true);
+                BindDrivers(companyno, "company");
+
+                $('#lblWarehouseContactMsg').text('Contact Person Added Successfully').css('color', 'green').show();
+
+                window.setTimeout(function () {
+                    ResetWarehouseContactPersonDetails();
+                    $('#modalAddWarehouseContactPerson').css('display', 'none');
+                }, 500);
+            });
         });
     });
 });
@@ -794,7 +795,7 @@ function SetDriverDetail(name, licenseno, phoneno) {
 
 }
 
-function SaveNewDriver(name, licenseno, phoneno, companyno, onComplete) {
+function SaveNewDriver(name, licenseno, phoneno, companyno, jobTitle, onComplete) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
 
@@ -804,7 +805,7 @@ function SaveNewDriver(name, licenseno, phoneno, companyno, onComplete) {
     }
 
     $.post(
-        apiUrl + 'SaveNewDriver?Name=' + encodeURIComponent(name) + '&Registration_Number=' + encodeURIComponent(licenseno) + '&Mobile_Phone_No=' + encodeURIComponent(phoneno) + '&Company_No=' + encodeURIComponent(companyno) + '&Type=' + "Person" + '&JobTitle=' + $("#txtWarehouseCPersonJobTitle").val(),
+        apiUrl + 'SaveNewDriver?Name=' + encodeURIComponent(name) + '&Registration_Number=' + encodeURIComponent(licenseno) + '&Mobile_Phone_No=' + encodeURIComponent(phoneno) + '&Company_No=' + encodeURIComponent(companyno) + '&Type=' + encodeURIComponent('Person') + '&JobTitle=' + encodeURIComponent(jobTitle || 'Driver'),
         function (data) {
             if (data) {
 

@@ -1,0 +1,1411 @@
+﻿/* start pagination filter code */
+
+var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
+
+$(document).ready(function () {
+
+    initializeTransportQtyState();
+    // Call AutoCompleteDropDownFunction
+    UnloadingVendorDropDown();
+    LoadingVendorDropDown();
+    BindTransporter();
+
+    var doctype = $("#hfDocumentType").val();
+    if (doctype == "Sales Order") {
+        $("#divAddNewContactPerson").show();
+        $("#btnAddNewContactPerson").show();
+    }
+    else {
+        $("#divAddNewContactPerson").hide();
+        $("#btnAddNewContactPerson").hide();
+
+    }
+
+    $('.datepicker').pickadate({
+        selectMonths: true,
+        selectYears: true,
+        format: 'dd-mm-yyyy'
+    });
+    $('#txtGSTorARNNo').prop('readonly', true);
+
+    // Vehicle No: alphanumeric only, max 10 (no spaces/special characters)
+    $('#txtVehicleNo').on('input', function () {
+        var clean = sanitizeVehicleNo(this.value);
+        if (this.value !== clean) this.value = clean;
+    });
+
+    $('#dataList th').click(function () {
+        var table = $(this).parents('table').eq(0)
+
+        this.asc = !this.asc;
+        if (this.cellIndex != 0) {
+            orderBy = parseInt(this.cellIndex);
+            orderDir = "asc";
+
+            if (this.asc) {
+                orderDir = "asc";
+            }
+            else {
+                orderDir = "desc";
+            }
+            $('ul.pager li').remove();
+            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+        }
+    });
+
+    $('#btnClose,.btn-close').click(function () {
+        $('#modalTransporterRate').css('display', 'none');
+        $('#modalItemTracking').css('display', 'none');
+        $('#tblRateLine').empty();
+    });
+    $(document).on('click', '.btn-delete-itemtracking', function () {
+        DeleteItemTrackingInGrid(this);
+    });
+
+    $(document).on('input', "input[id^='txtTransportQty_']", function () {
+        var lineNo = (this.id || '').split('_')[1] || '';
+        if (!lineNo) return;
+
+        var currentQty = parseFloat($(this).val());
+        if (isNaN(currentQty)) currentQty = 0;
+        var savedQty = transportQtySavedByLine[lineNo];
+        if (typeof savedQty === 'undefined' || savedQty === null || isNaN(savedQty)) savedQty = 0;
+
+        transportQtyDirtyByLine[lineNo] = Math.abs(currentQty - savedQty) > 0.0001;
+    });
+
+    $('#btnAddNewContactPerson').click(function () {
+        ResetWarehouseContactPersonDetails();
+        $('#lblWarehouseContactMsg').hide().text('');
+        $('#modalAddWarehouseContactPerson').css('display', 'block');
+    });
+
+    $('#btnCloseWarehouseContact, #btnCloseWarehouseContactIcon').click(function () {
+        ResetWarehouseContactPersonDetails();
+        $('#modalAddWarehouseContactPerson').css('display', 'none');
+    });
+
+    $('#btnConfirmWarehouseContactAdd').click(function () {
+        var errMsg = CheckWarehouseContactFieldValues();
+        if (errMsg !== "") {
+            $('#lblWarehouseContactMsg').text(errMsg).css('color', 'red').show();
+            return;
+        }
+
+        var name = $.trim($('#txtWarehouseCPersonName').val());
+        var licenseno = $.trim($('#txtWarehouseCPersonLicenseNo').val());
+        var phoneno = $.trim($('#txtWarehouseCPersonMobile').val());
+        var jobTitle = $.trim($('#txtWarehouseCPersonJobTitle').val()) || 'Driver';
+        $('#btnAddWarehouseContactSpinner').show();
+        $('#lblWarehouseContactMsg').hide().text('');
+
+        ResolveWarehouseVendorCompanyNo(function (companyno) {
+            if (!companyno) {
+                $('#btnAddWarehouseContactSpinner').hide();
+                $('#lblWarehouseContactMsg').text('Please select transporter before adding contact person.').css('color', 'red').show();
+                return;
+            }
+
+            SaveNewDriver(name, licenseno, phoneno, companyno, jobTitle, function (isSuccess) {
+                $('#btnAddWarehouseContactSpinner').hide();
+
+                if (!isSuccess) {
+                    $('#lblWarehouseContactMsg').text('Unable to add contact person. Please try again.').css('color', 'red').show();
+                    return;
+                }
+
+                $('#hfVendorCompanyNo').val(companyno);
+                $('#txtDirverName').val(name);
+                $('#txtDirverLicenseNo').val(licenseno);
+                $('#txtDirverMobileNo').val(phoneno);
+                $('#hfDriverflag').val(true);
+                BindDrivers(companyno, "company");
+
+                $('#lblWarehouseContactMsg').text('Contact Person Added Successfully').css('color', 'green').show();
+
+                window.setTimeout(function () {
+                    ResetWarehouseContactPersonDetails();
+                    $('#modalAddWarehouseContactPerson').css('display', 'none');
+                }, 500);
+            });
+        });
+    });
+});
+
+BindTransporter();
+
+$('#btnTransporterRateCard').click(function () {
+
+    var transporterno = $('#hfTransporterNo').val();
+    if ($('#txtTransporterNo').val() == "") {
+        transporterno = "";
+    }
+    var UOMs = $('#hfPackingUOMs').val()
+    var uom = UOMs.split(" ");
+    var PakingUOMS = uom[0];
+
+    $.ajax(
+        {
+            url: '/SPWarehouse/GetTransporterRate?FromPincode=' + $('#hfFromPincode').val() + '&ToPincode=' + $('#hfToPincode').val() + '&PackingUOMs=' + PakingUOMS + '&TransporterNo=' + transporterno,
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (data) {
+                $('#tblRateLine').empty();
+                var rateLine = "";
+                $.each(data, function (index, item) {
+                    rateLine = rateLine + "<tr><td><a href='' onclick='return SetFreight(this)'>Select</a></td><td style='display: none;'>" + item.Transporter_No + "</td><td style='display: none;'>" + item.Contact_No + "</td><td>" + item.Transporter_Name + "</td><td>" + item.From_Post_Code + "</td><td>" + item.To_Post_Code + "</td><td>" + item.From_Area + "</td><td>" + item.To_Area + "</td><td>" + item.UOM + "</td><td>" + item.Standard_Weight + "</td><td>" + item.Rate_for_Standard_Weight + "</td><td>" + item.Rate_above_Standard_Weight + "</td><td>" + item.Rate_Effective_Date + "</td><td>" + item.Vehicle_Type + "</td></tr>";
+                });
+
+                $('#tblRateLine').append(rateLine);
+
+                $('#modalTransporterRate').css('display', 'block');
+                $('.modal-title').text('Transporter Rate Card');
+
+            },
+            error: function () {
+                //alert("error");
+            }
+        }
+    );
+});
+
+if ($('#hfTransporterNo').val() == "") {
+    SetLoaingUnloading();
+}
+else {
+    $('#hfDriverflag').val(true);
+}
+
+$('#txtTransporterNo').change(function (event) {
+    //do stuff with the "event" object as the object that called the method
+    //alert(event);
+    if (this.value == "") {
+        $('#hfTransporterNo').val("");
+        BindDrivers($('#hfTransporterNo').val(), "vendor");
+        setTransporterGSTNumber($('#hfTransporterNo').val());
+    }
+});
+
+BindDrivers($('#hfTransporterNo').val(), "vendor");
+setTransporterGSTNumber($('#hfTransporterNo').val());
+
+// Call AutoCompleteDropDownFunction
+UnloadingVendorDropDown();
+LoadingVendorDropDown();
+
+//  vendor fields based on doctype on page load/reopen
+var doctype = $('#lblDocumentType').text();
+if (doctype === "Sales Order") {
+    $('#hfUnLoadingVendorNo').val("");
+    $('#txtUnLoadingVendor').val("");
+    $('#txtUnloadingCharges').val("0");
+    // Disable input
+    $('#txtUnLoadingVendor').prop('disabled', false);
+} else if (doctype === "Sales Return") {
+    $('#hfLoadingVendorNo').val("");
+    $('#txtLoadingVendor').val("");
+    $('#txtLoadingCharges').val("0");
+    $('#txtLoadingVendor').prop('disabled', false);
+} else if (doctype === "Purchase Order") {
+    $('#hfLoadingVendorNo').val("");
+    $('#txtLoadingVendor').val("");
+    $('#txtLoadingCharges').val("0");
+    $('#txtLoadingVendor').prop('disabled', false);
+} else if (doctype === "Transfer Order") {
+}
+var today = new Date();
+var day = ("0" + today.getDate()).slice(-2);
+var month = ("0" + (today.getMonth() + 1)).slice(-2);
+var year = today.getFullYear();
+
+var formattedDate = day + "-" + month + "-" + year;
+$('#txtLRRRDate').val(formattedDate);
+
+// Agar pickadate ko update karna hai to:
+if ($('#txtLRRRDate').pickadate) {
+$('#txtLRRRDate').pickadate('picker').set('select', [year, today.getMonth(), today.getDate()]);
+}
+
+
+var dtable;
+function SetFreight(link) {
+
+    var standardqty = parseFloat($(link).closest('tr').find('td').eq(9).html());
+    var standardrate = parseFloat($(link).closest('tr').find('td').eq(10).html());
+    var aboverate = parseFloat($(link).closest('tr').find('td').eq(11).html());
+    var companyno = $(link).closest('tr').find('td').eq(2).html();
+    var vendorno = $(link).closest('tr').find('td').eq(1).html();
+    var vendorname = $(link).closest('tr').find('td').eq(3).html();
+
+    var totalqty = parseFloat($('#hfTotalQty').val());
+    var freight = 0;
+    if (totalqty <= standardqty) {
+        freight = standardrate;
+    } else {
+
+        freight = totalqty * aboverate;
+    }
+    $('#txtFraightCharges').val(freight.toFixed(2));
+    $('#hfVendorCompanyNo').val(companyno);
+    $('#hfTransporterNo').val(vendorno);
+    $('#txtTransporterNo').val(vendorname);
+
+    BindDrivers(companyno, "company");
+    setTransporterGSTNumber(vendorno);
+    $('#modalTransporterRate').css('display', 'none');
+    return false;
+}
+
+function dataTableFunction(orderBy, orderDir) {
+    dtable = $('#dataList').DataTable({
+        retrieve: true,
+        filter: false,
+        paging: false,
+        info: false,
+        responsive: true,
+        ordering: false,
+    });
+
+    if (orderDir == "asc") {
+        $('#dataList th:first-child').removeClass("sorting_asc").removeClass("sorting_disabled");
+        $('#dataList th:gt(0)').removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
+        $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_desc").addClass("sorting_asc");
+    }
+    if (orderDir == "desc") {
+        $('#dataList th:first-child').removeClass("sorting_desc").removeClass("sorting_disabled");
+        $('#dataList th:gt(0)').removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
+        $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_asc").addClass("sorting_desc");
+    }
+}
+
+function ShowErrMsg(errMsg) {
+
+    Lobibox.notify('error', {
+        pauseDelayOnHover: true,
+        size: 'mini',
+        rounded: true,
+        delayIndicator: false,
+        icon: 'bx bx-x-circle',
+        continueDelayOnInactiveTab: false,
+        position: 'top right',
+        msg: errMsg
+    });
+
+}
+
+function ShowActionMsg(actionMsg) {
+
+    Lobibox.notify('success', {
+        pauseDelayOnHover: true,
+        size: 'mini',
+        rounded: true,
+        icon: 'bx bx-check-circle',
+        delayIndicator: false,
+        continueDelayOnInactiveTab: false,
+        position: 'top right',
+        msg: actionMsg
+    });
+}
+
+//function DeleteItemTrackingInGrid(button) {
+//    var $row = $(button).closest('tr');
+//    var entryNo = $row.find('td:eq(0)').text().trim();
+//    var documentNo = $('#lnlDocumentNo').text().trim();
+//    var lineNo = $row.find('td:eq(1)').text().trim();
+
+//    if (entryNo && entryNo !== "0") {
+//        deletedEntries.push(entryNo.toString());
+//        $.ajax({
+//            type: "POST",
+//            url: '/SPGRN/DeleteGRNLineItemTracking',
+//            contentType: "application/json; charset=utf-8",
+//            data: JSON.stringify({
+//                OrderNo: documentNo,
+//                EntryNo: entryNo,
+//                LineNo: lineNo
+//            }),
+//            success: function () { },
+//            error: function (xhr) {
+//                ShowErrMsg("Error in DeleteGRNLineItemTracking API. " + xhr.responseText);
+//            }
+//        });
+//    }
+
+//    $row.remove();
+//    UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
+
+//    if ($('#tbItemTrackingLines .itemtrackingtr').length === 0) {
+//        $('#tbItemTrackingLines').append("<tr><td colspan=6>No Records Found</td></tr>");
+//    }
+//}
+
+function ShowWarehouseItemTracking(lineNo, itemNo) {
+    var documentType = $('#lblDocumentType').text().trim();
+    var documentNo = $('#lnlDocumentNo').text().trim();
+    var sourceParams = getItemTrackingSourceParams(documentType);
+    var qtyToHandle = parseFloat($('#txtTransportQty_' + lineNo).val()) || 0;
+    var salesLineQty = parseFloat($('#txtTransportQty_' + lineNo).attr('data-qty')) || 0;
+
+    if (qtyToHandle === 0) {
+        ShowErrMsg("Transport Qty cannot be 0.");
+        return false;
+    }
+
+    $('#txtbalanceQty').data('original', qtyToHandle);
+    $('#txtbalanceQty').val(qtyToHandle.toFixed(2));
+    $('#txttotalQty').val(salesLineQty.toFixed(2));
+    $('#txtTransportQtyFixed').val(qtyToHandle.toFixed(2));
+    $('#lblItemTrackMsg').html('');
+
+    if (documentType === "" || documentNo === "") {
+        return false;
+    }
+
+    $.ajax({
+        url: '/SPGRN/GetGRNLineItemTrackingForPopup?DocumentType=' + encodeURIComponent(documentType)
+            + '&DocumentNo=' + encodeURIComponent(documentNo)
+            + '&LineNo=' + encodeURIComponent(lineNo)
+            + '&sourceType=' + encodeURIComponent(sourceParams.sourceType)
+            + '&sourceSubtype=' + encodeURIComponent(sourceParams.sourceSubtype),
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
+            var rowData = "";
+            $('#tbItemTrackingLines').empty();
+
+            if (deletedEntries.length > 0) {
+                data = data.filter(item => !deletedEntries.includes((item.Entry_No || "").toString()));
+            }
+
+            if (data && data.length > 0) {
+                $.each(data, function (index, item) {
+                    var lotNoText = item.Lot_No || "";
+                    var qtyToHandleValue = toPositiveNumber(item.Qty_to_Handle_Base || 0);
+                    var quantityValue = toPositiveNumber((item.Quantity) || 0);
+                    rowData = "<tr class='itemtrackingtr'><td style='display: none;'>" + item.Entry_No + "</td><td>" + lineNo + "</td><td>" + item.Item_No + "</td><td><span class='lot-no-text'>" + encodeHtml(lotNoText) + "</span><input type='hidden' name='txtLotNo_" + (index + 1) + "' value='" + encodeHtml(lotNoText) + "' /></td><td><input type='text' name='txtQtyToHandle_" + (index + 1) + "' value='" + qtyToHandleValue + "' class='form-control' /></td><td>" + quantityValue + "</td></tr>";
+                    $('#tbItemTrackingLines').append(rowData);
+                });
+            } else {
+                $('#tbItemTrackingLines').append("<tr><td colspan=6>No Records Found</td></tr>");
+            }
+
+            $('#modalItemTracking').css('display', 'block');
+            $('#modalItemTracking .modal-title').text('Item Tracking Lines');
+            $('#dvItemTracking').css('display', 'block');
+            UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
+
+            $(document).off('input', '#tbItemTrackingLines input[name^="txtQtyToHandle"]').on('input', '#tbItemTrackingLines input[name^="txtQtyToHandle"]', function () {
+                var qtyToHandle = toPositiveNumber($(this).val());
+                $(this).val(qtyToHandle);
+                UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
+            });
+        },
+        error: function () {
+            ShowErrMsg("Error loading item tracking data. Please try again.");
+        }
+    });
+
+    return false;
+}
+
+function AcceptCurrentWarehouseTask() {
+
+    var acceptedBy = ($('#lblAcceptedBy').text() || '').trim();
+    if (acceptedBy !== '') {
+        ShowActionMsg('Task already accepted.');
+        return false;
+    }
+
+    var documentNo = ($('#lnlDocumentNo').text() || '').trim();
+    var documentType = ($('#lblDocumentType').text() || '').trim();
+    var systemId = ($('#hfSystemId').val() || '').trim();
+    var loggedInUser = ($('#hfSPNo').val() || '').trim();
+    var hasPendingDropShipment = ($('#hfHasPendingDropShipment').val() || '').trim();
+
+    if (hasPendingDropShipment === 'Yes') {
+        ShowErrMsg('Not accept ' + documentNo + ' task due to Drop Shipment.');
+        return false;
+    }
+
+    if (systemId === '' || documentType === '' || loggedInUser === '') {
+        ShowErrMsg('Unable to accept the current task. Please reload the page and try again.');
+        return false;
+    }
+
+    var isAccept = confirm('Are you sure you want to Accept it?');
+    if (!isAccept) {
+        return false;
+    }
+
+    $('#btnAcceptTask').hide();
+    $('#btnAcceptSpinner').show();
+
+    var acceptSystemId = systemId + ',' + documentType;
+    $.post(
+        apiUrl + 'AcceptTaskOfWarehouse?systemids=' + encodeURIComponent(acceptSystemId) + '&AcceptedBy=' + encodeURIComponent(loggedInUser),
+        function (data) {
+            $('#btnAcceptSpinner').hide();
+
+            if (data) {
+                ShowActionMsg('Task Accepted Successfully');
+                window.setTimeout(function () {
+                    window.location.href = '/SPWarehouse/WarehouseCard?No=' + encodeURIComponent(documentNo) + '&DocumentType=' + encodeURIComponent(documentType);
+                }, 1000);
+            }
+            else {
+                $('#btnAcceptTask').show();
+                ShowErrMsg('Task accept failed. Please try again.');
+            }
+        }
+    ).fail(function () {
+        $('#btnAcceptSpinner').hide();
+        $('#btnAcceptTask').show();
+        ShowErrMsg('Error while accepting task. Please try again.');
+    });
+
+    return false;
+}
+
+function toNegativeNumber(value) {
+    var num = parseFloat(value);
+    if (isNaN(num) || num === 0) {
+        return 0;
+    }
+    return -Math.abs(num);
+}
+
+function toPositiveNumber(value) {
+    var num = parseFloat(value);
+    if (isNaN(num) || num === 0) {
+        return 0;
+    }
+    return Math.abs(num);
+}
+
+function UpdateItemTrackingTotals(originalBalance) {
+    var total = getTotalQuantityToHandle();
+    $('#lblItemTrackMsg').html('');
+
+    // BalanceQTy = TransportQTy - totalQuantitytoHandle
+    var balance = originalBalance - total;
+    if (balance < 0) {
+        $('#lblItemTrackMsg').html('<span style="color: red;">Balance quantity cannot be negative.</span>');
+        balance = 0;
+    }
+
+    $('#txtbalanceQty').val(balance.toFixed(2));
+}
+
+function getTotalQuantityToHandle() {
+    var total = 0;
+    $('#tbItemTrackingLines input[name^="txtQtyToHandle"]').each(function () {
+        var val = parseFloat($(this).val());
+        if (!isNaN(val)) {
+            // Existing records can come as negative quantities; use magnitude for handled quantity.
+            total += Math.abs(val);
+        }
+    });
+    return total;
+}
+
+function validateItemTrackingVsProductTransportQty() {
+    for (var lineNo in itemTrackingTransportQtyByLine) {
+        if (!Object.prototype.hasOwnProperty.call(itemTrackingTransportQtyByLine, lineNo)) {
+            continue;
+        }
+
+        var trackingQty = parseFloat(itemTrackingTransportQtyByLine[lineNo]) || 0;
+        var productQty = parseFloat($('#txtTransportQty_' + lineNo).val()) || 0;
+
+        if (Math.abs(productQty - trackingQty) > 0.0001) {
+            var productNo = $('#txtTransportQty_' + lineNo).closest('tr').find('td').eq(1).text().trim() || '';
+            ShowErrMsg('Transport Qty. on Item Tracking Lines and Transport Qty. in Product details for "' + productNo + '" does not match.');
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function SyncItemTrackingQuantityColumns() {
+    $('#tbItemTrackingLines .itemtrackingtr').each(function () {
+        var $row = $(this);
+        var qtyToHandle = toPositiveNumber($row.find('td:eq(4) input').val());
+        $row.find('td:eq(4) input').val(qtyToHandle);
+        $row.find('td:eq(5)').text(qtyToHandle);
+    });
+}
+
+function SaveWarehouseItemTracking() {
+    $('#lblItemTrackMsg').html('');
+
+    var originalBalance = parseFloat($('#txtbalanceQty').data('original')) || 0;
+    var total = getTotalQuantityToHandle();
+    var balance = originalBalance - total;
+
+    if (Math.abs(balance) > 0.0001) {
+        $('#lblItemTrackMsg').html('<span style="color: red;">Lot is not yet defined for "' + balance.toFixed(2) + '" Qty.</span>');
+        return false;
+    }
+
+    if (total > originalBalance) {
+        $('#lblItemTrackMsg').html('<span style="color: red;">Total quantity cannot exceed Transport quantity.</span>');
+        return false;
+    }
+
+    var documentType = $('#lblDocumentType').text().trim();
+    var orderNo = $('#lnlDocumentNo').text().trim();
+    var locationCode = $('#hfFromLocationCode').val() || $('#hfToLocationCode').val() || "";
+    var reservationEntryforGRN = [];
+
+    $('#tbItemTrackingLines .itemtrackingtr').each(function () {
+        var $tds = $(this).find('td');
+        var entryNo = $tds.eq(0).text().trim() || "0";
+        var lineNo = $tds.eq(1).text().trim();
+        var itemNo = $tds.eq(2).text().trim();
+        var lotNo = $tds.eq(3).find('input').val() || "";
+        var qtyToHandleDisplay = toPositiveNumber($tds.eq(4).find('input').val());
+        var qtyToHandle = toNegativeNumber(qtyToHandleDisplay);
+
+        if (!lineNo || qtyToHandleDisplay === 0) {
+            return;
+        }
+
+        reservationEntryforGRN.push({
+            EntryNo: entryNo,
+            DocumentType: documentType,
+            OrderNo: orderNo,
+            LocationCode: locationCode,
+            LineNo: lineNo,
+            ItemNo: itemNo,
+            LotNo: lotNo,
+            Qty: qtyToHandle
+        });
+    });
+
+    if (reservationEntryforGRN.length === 0) {
+        $('#lblItemTrackMsg').html('<span style="color: red;">No valid item tracking lines to save.</span>');
+        return false;
+    }
+
+    var $warehouseSaveBtn = $('#btnSaveItemTrackingWarehouse');
+    var warehouseSaveBtnHtml = $warehouseSaveBtn.html();
+    $warehouseSaveBtn.prop('disabled', true);
+    $warehouseSaveBtn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Save');
+
+    $.ajax({
+        type: "POST",
+        url: '/SPGRN/SaveGRNLineItemTracking',
+        data: JSON.stringify(reservationEntryforGRN),
+        contentType: "application/json; charset=utf-8",
+        success: function (data) {
+            if (data) {
+                var trackedLineNo = reservationEntryforGRN.length > 0 ? reservationEntryforGRN[0].LineNo : '';
+                if (trackedLineNo) {
+                    itemTrackingTransportQtyByLine[trackedLineNo] = total;
+                }
+                $('#modalItemTracking').hide();
+                ShowActionMsg("Item Tracking lines saved successfully.");
+                $('#txtbalanceQty').val($('#txtbalanceQty').data('original').toFixed(2));
+            } else {
+                $('#lblItemTrackMsg').html('<span style="color: red;">Error saving Item Tracking data.</span>');
+            }
+        },
+        error: function (xhr) {
+            ShowErrMsg("Error in SaveGRNLineItemTracking API. " + xhr.responseText);
+        },
+        complete: function () {
+            $warehouseSaveBtn.prop('disabled', false);
+            $warehouseSaveBtn.html(warehouseSaveBtnHtml);
+        }
+    });
+}
+
+function AddItemTrackingInGrid() {
+    $('#tbItemTrackingLines tr:contains("No Records Found")').remove();
+    var firstRow = $('#tbItemTrackingLines tr').first();
+    var entryNo = firstRow.find('td').eq(0).text().trim();
+    var originalBalance = parseFloat($('#txtbalanceQty').data('original')) || 0;
+    var totalQty = getTotalQuantityToHandle();
+
+    if (totalQty > originalBalance) {
+        ShowActionMsg("Total quantity cannot exceed Balance Quantity. Cannot add more Qty.");
+        return false;
+    }
+
+    var lineNo = firstRow.find('td').eq(1).text().trim();
+    var itemNo = firstRow.find('td').eq(2).text().trim();
+    var lotNo = firstRow.find('input[name^="txtLotNo"]').val();
+    var qty = firstRow.find('input[name^="txtQtyToHandle"]').val();
+    var newIndex = $('#tbItemTrackingLines tr').length;
+
+    var newRow = "<tr class='itemtrackingtr'><td style='display: none;'>" + entryNo + "</td><td>" + lineNo + "</td><td>" + itemNo + "</td><td><span class='lot-no-text'>" + encodeHtml(lotNo || "") + "</span><input type='hidden' name='txtLotNo_" + newIndex + "' value='" + encodeHtml(lotNo || "") + "' /></td><td><input type='text' name='txtQtyToHandle_" + newIndex + "' value='" + (qty || 0) + "' class='form-control'></td><td>" + (qty || 0) + "</td></tr>";
+    $('#tbItemTrackingLines').append(newRow);
+    firstRow.find('input[type="text"]').val('');
+    UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
+}
+function BindTransporter() {
+
+    if (typeof ($.fn.autocomplete) === 'undefined') { return; }
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
+    $.get(apiUrl + 'GetAllTransporterForDDL', function (data) {
+        if (data != null) {
+            var str1 = "";
+            //debugger;
+            var i;
+            for (i = 0; i <= data.length - 1; i++) {
+                str1 = str1 + '"' + data[i].No + '"' + ":" + '"' + data[i].Name + '"' + ","
+            }
+            str1 = str1.substring(0, str1.length - 1);
+            str1 = "{" + str1 + "}";
+
+            let objFromStr = JSON.parse(str1);
+
+            var pincode = objFromStr;// { AA: "Abc", AO: "Abc", BB: "Bcd", CC: "Cde", DD: "Def", EE: "Efg", EH: "Ester", FF: "Fgh", GG: "Ghi", HH: "Hij", II: "Ijk", JJ: "Jkl", JO: "Jim", KK: "Klm", LL: "Lmn", LT: "Lina", MH: "Marty", OF: "Otis", RB: "Robin" };
+
+            var pincodeArray = $.map(pincode, function (value, key) {
+                return {
+                    value: value,
+                    data: key
+                };
+            });
+            $('#txtTransporterNo').autocomplete({
+                lookup: pincodeArray,
+                onSelect: function (selecteditem) {
+                    if ($('#hfTransporterNo').val() != selecteditem.data) {
+                        $('#hfTransporterNo').val((selecteditem.data));
+                        //alert($('#hfTransporterNo').val());
+                        BindDrivers($('#hfTransporterNo').val(), "vendor");
+                        setTransporterGSTNumber($('#hfTransporterNo').val());
+                    }
+                },
+
+            });
+        }
+    });
+}
+
+function setTransporterGSTNumber(vendorno) {
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
+    $.get(apiUrl + 'GetTransporterDetailByVendorNo?vendorno=' + vendorno, function (data) {
+        if (data != null && data.length > 0) {
+            if (data[0].GST_Registration_No && data[0].GST_Registration_No.length > 0) {
+                $('#txtGSTorARNNo').val(data[0].GST_Registration_No);
+            } else {
+                $('#txtGSTorARNNo').val(data[0].ARN_No);
+            }
+        }
+    });
+}
+function CloseTask() {
+    //debugger;
+    var doctype, transporterCode, lrno, lrdate, drivername, driverlicenseno, drivermobileno, vehicleno, applyloadingcharges, applyunloadingcharges, applyfreightcharges, freightcharge, remarks
+    var systemIds = "";
+
+    doctype = $('#lnlDocumentType')[0].innerText;
+    transporterCode = $('#hfTransporterNo')[0].value;
+    lrno = $('#txtLRRRNo')[0].value || "";
+    lrdate = $('#txtLRRRDate')[0].value;
+    drivername = $('#txtDirverName')[0].value;
+    driverlicenseno = $('#txtDirverLicenseNo')[0].value;
+    drivermobileno = $('#txtDirverMobileNo')[0].value;
+    vehicleno = getVehicleNo();
+    applyloadingcharges = $('#chkApplyLoadingCharges')[0].checked;
+    applyunloadingcharges = $('#chkApplyUnloadingCharges')[0].checked;
+    applyfreightcharges = $('#chkApplyFreightCharges')[0].checked;
+    freightcharge = $('#txtFraightCharges')[0].value;
+    remarks = $('#txtRemarks')[0].value;
+
+    $('#tableBody input[type=checkbox]:checked').each(function () {
+
+        systemIds += $(this).val() + "|";
+    });
+    systemIds = systemIds.slice(0, -1);
+
+    if (systemIds.length > 0) {
+        //return;
+        $.post(
+            apiUrl + 'ClosedTaskOfWarehouse?doctype=' + doctype + '&transporterCode=' + transporterCode + '&systemids=' + systemIds + '&lrno=' + lrno + '&lrdate=' + lrdate + '&drivername=' + drivername + '&driverlicenseno=' + driverlicenseno + '&drivermobileno=' + drivermobileno + '&vehicleno=' + vehicleno + '&applyloadingcharges=' + applyloadingcharges + '&applyunloadingcharges=' + applyunloadingcharges + '&applyfreightcharges=' + applyfreightcharges + '&freightcharge=' + freightcharge + '&remarks=' + remarks + '&loadingVendor=' + loadingVendor + '&unloadingVendor=' + unloadingVendor,
+
+            function (data) {
+                //alert(data);
+                if (data) {
+
+                    var actionMsg = "Task Closed Successfully.";
+                    ShowActionMsg(actionMsg);
+                    rebindGrid();
+                }
+            }
+        );
+    }
+    else {
+        var msg = "Please Select Atleast One task to accept.";
+        ShowErrMsg(msg);
+
+    }
+}
+
+function BindDrivers(vendorno, numbertype) {
+
+    if (vendorno != "" && numbertype != "") {
+        $.ajax(
+            {
+                url: '/SPWarehouse/GetVendorDrivers?vendorNo=' + vendorno + '&numberType=' + numbertype,
+                type: 'GET',
+                contentType: 'application/json',
+                success: function (data) {
+                    //debugger;
+                    $('#tbDriver').empty();
+                    var rowData = "";
+
+                    if (data != null && data != "") {
+                        $.each(data, function (index, item) {
+                            var rowData = "<tr><td><a href='' onclick='return SetDriverDetail(\"" + item.Name + "\",\"" + item.Registration_Number + "\",\"" + item.Mobile_Phone_No + "\")'>Select</a></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.Job_Title + "</td><td>" + item.Registration_Number + "</td><td>" + item.Mobile_Phone_No + "</td></tr>";
+                            $('#tbDriver').append(rowData);
+                        });
+                    }
+                    else {
+                        rowData = "<tr><td colspan=7>No Records Found</td></tr>";
+                        $('#tbDriver').append(rowData);
+                    }
+
+                },
+                error: function () {
+                    alert("error");
+                }
+            }
+        );
+    }
+    else {
+        $('#tbDriver').empty();
+        $('#tbDriver').append("<tr><td colspan=7>No Records Found</td></tr>");
+    }
+}
+
+function SetDriverDetail(name, licenseno, phoneno) {
+    //debugger;
+    //alert(link);
+    //alert($(link).closest('tr').find('td').eq(2).html());
+    //$('#txtDirverName').val($(link).closest('tr').find('td').eq(2).html());
+    $('#txtDirverName').val(name);
+    $('#txtDirverLicenseNo').val(licenseno);
+    $('#txtDirverMobileNo').val(phoneno);
+    $('#hfDriverflag').val(true);
+    return false;
+
+}
+
+function SaveNewDriver(name, licenseno, phoneno, companyno, jobTitle, onComplete) {
+
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
+
+    if (!companyno) {
+        if (onComplete) onComplete(false);
+        return;
+    }
+
+    $.post(
+        apiUrl + 'SaveNewDriver?Name=' + encodeURIComponent(name)
+        + '&Registration_Number=' + encodeURIComponent(licenseno)
+        + '&Mobile_Phone_No=' + encodeURIComponent(phoneno)
+        + '&Company_No=' + encodeURIComponent(companyno)
+        + '&Type=' + encodeURIComponent('Person')
+        + '&JobTitle=' + encodeURIComponent(jobTitle || 'Driver'),
+        function (data) {
+            if (data) {
+
+                var actionMsg = "Contact Added Successfully";
+                ShowActionMsg(actionMsg);
+                if (onComplete) onComplete(true);
+                $('#modalAddWarehouseContactPerson').css('display', 'none');
+            }
+            else {
+                if (onComplete) onComplete(false);
+            }
+        }
+    ).fail(function () {
+        if (onComplete) onComplete(false);
+    });
+}
+
+function ResolveWarehouseVendorCompanyNo(onResolved) {
+    var cachedCompanyNo = $.trim($('#hfVendorCompanyNo').val() || '');
+    if (cachedCompanyNo !== '') {
+        onResolved(cachedCompanyNo);
+        return;
+    }
+
+    var vendorNo = $.trim($('#hfTransporterNo').val() || '');
+    if (vendorNo === '') {
+        onResolved('');
+        return;
+    }
+
+    $.get(apiUrl + 'GetCompanyNoByVendorNo?vendorno=' + encodeURIComponent(vendorNo), function (data) {
+        var companyNo = (data || '').toString().replace(/"/g, '').trim();
+        if (companyNo !== '') {
+            $('#hfVendorCompanyNo').val(companyNo);
+        }
+        onResolved(companyNo);
+    }).fail(function () {
+        onResolved('');
+    });
+}
+
+function CheckWarehouseContactFieldValues() {
+    var name = $.trim($('#txtWarehouseCPersonName').val());
+    var mobile = $.trim($('#txtWarehouseCPersonMobile').val());
+
+    if (name === '') {
+        return 'Enter Contact Person Name';
+    }
+    if (mobile === '') {
+        return 'Enter Mobile Number';
+    }
+    if (!/^\d{10}$/.test(mobile)) {
+        return 'Enter valid 10 digit Mobile Number';
+    }
+
+    return '';
+}
+
+function ResetWarehouseContactPersonDetails() {
+    $('#txtWarehouseCPersonName').val('');
+    $('#txtWarehouseCPersonLicenseNo').val('');
+    $('#txtWarehouseCPersonMobile').val('');
+    $('#txtWarehouseCPersonJobTitle').val('Driver');
+    $('#lblWarehouseContactMsg').hide().text('');
+    $('#btnAddWarehouseContactSpinner').hide();
+}
+
+function SetLoaingUnloading() {
+    //debugger;
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
+
+    var fromcode = "";
+    var tocode = "";
+    var doctype = "";
+    var filter = "";
+    var totalqty = 0;
+
+    fromcode = $('#hfFromLocationCode').val();
+    tocode = $('#hfToLocationCode').val();
+    doctype = $('#lblDocumentType')[0].innerText;
+    totalqty = $('#hfTotalQty').val();
+
+    if (doctype == "Sales Order") {
+        filter = "Code eq '" + fromcode + "'";
+    }
+    else if (doctype == "Purchase Order") {
+        filter = "Code eq '" + tocode + "'";
+    }
+    else if (doctype == "Transfer Order" || doctype == "Sales Return") {
+        filter = "(Code eq '" + fromcode + "' or Code eq '" + tocode + "')";
+    }
+
+    //if (filter != "") {
+
+    //    $.get(
+    //        apiUrl + 'GetLoadingUnloadingCharge?filter=' + filter,
+    //        function (data) {
+    //            if (data) {
+
+    //                if (doctype == "Sales Order") {
+    //                    var loading = parseFloat(data.PCPL_Loading_Charges_Per_Unit) * totalqty;
+    //                    $('#txtLoadingCharges').val(loading);//data.PCPL_Loading_Charges_Per_Unit * totalqty
+    //                    $('#txtUnloadingCharges').val("0");
+    //                }
+    //                else if (doctype == "Purchase Order") {
+    //                    $('#txtLoadingCharges').val("0");
+    //                    $('#txtUnloadingCharges').val(data.PCPL_Unloading_Chgs_Per_Unit * totalqty);
+    //                }
+    //                else if (doctype == "Transfer Order") {
+    //                    $('#txtLoadingCharges').val(data.PCPL_Loading_Charges_Per_Unit * totalqty);
+    //                    $('#txtUnloadingCharges').val(data.PCPL_Unloading_Chgs_Per_Unit * totalqty);
+    //                }
+    //            }
+    //        }
+    //    );
+
+    //}
+    //else {
+    //    alert('Kindly check From & To Location of Document');
+    //}
+
+}
+function SaveTransportQty(lineNo, itemNo, btn) {
+    $('#lblMsg').html('').css('color', 'red').hide();
+
+    var doctype = $('#lblDocumentType').text().trim();
+    var qtyFieldLabel = doctype === "Purchase Order" ? "Qty to Receive" : "Transport Qty";
+
+    if ($('#lblAcceptedBy')[0].innerHTML == "") {
+        alert('Please Accept The Task First Then You Can Update ' + qtyFieldLabel + '...!!!');
+        return false;
+    }
+
+    var documentno = $('#lnlDocumentNo').text().trim();
+    if (doctype !== "Sales Order" && doctype !== "Sales Return" && doctype !== "Purchase Order" && doctype !== "Transfer Order") {
+        ShowErrMsg(qtyFieldLabel + ' update is allowed only for Sales Order, Sales Return, Purchase Order and Transfer Order.');
+        return false;
+    }
+
+    var $qtyInput = $('#txtTransportQty_' + lineNo);
+    var transportqty = ($qtyInput.val() || '').toString().trim();
+    var baseQty = parseFloat($qtyInput.attr('data-qty') || '0');
+    var transportQtyNumber = parseFloat(transportqty);
+
+    if (transportqty === '') {
+        ShowErrMsg('Please enter ' + qtyFieldLabel + '.');
+        return false;
+    }
+    if (isNaN(transportQtyNumber)) {
+        ShowErrMsg('Please enter valid ' + qtyFieldLabel + '.');
+        return false;
+    }
+    if (!isNaN(baseQty) && transportQtyNumber > baseQty) {
+        ShowErrMsg(qtyFieldLabel + ' cannot be greater than Qty.');
+        return false;
+    }
+
+    var $btn = $(btn);
+    var oldHtml = $btn.html();
+    $btn.prop('disabled', true);
+    $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Save');
+
+    $.post('/SPWarehouse/UpdateTransportQty?doctype=' + encodeURIComponent(doctype) + '&documentno=' + encodeURIComponent(documentno) + '&lineno=' + encodeURIComponent(lineNo) + '&transportqty=' + encodeURIComponent(transportqty),
+        function (data) {
+            $btn.prop('disabled', false).html(oldHtml);
+            if (data === true || data === "true") {
+                transportQtySavedByLine[lineNo] = transportQtyNumber;
+                transportQtyDirtyByLine[lineNo] = false;
+                ShowActionMsg('Product ' + itemNo + ' ' + qtyFieldLabel.toLowerCase() + ' updated successfully.');
+            } else {
+                ShowErrMsg('Unable to update ' + qtyFieldLabel + ' for product ' + itemNo + '.');
+            }
+        }).fail(function () {
+            transportQtyDirtyByLine[lineNo] = true;
+            $btn.prop('disabled', false).html(oldHtml);
+            ShowErrMsg('Error while updating ' + qtyFieldLabel + ' for product ' + itemNo + '.');
+        });
+
+    return false;
+}
+
+function validateTransportQtyAgainstMTS() {
+    var isValid = true;
+    var invalidItemNo = '';
+
+    $("input[id^='txtTransportQty_']").each(function () {
+        var $input = $(this);
+        var lineNo = ($input.attr('id') || '').split('_')[1] || '';
+        var transportQty = parseFloat($input.val());
+        var qtyInMTS = parseFloat($input.attr('data-qty'));
+
+        if (isNaN(transportQty)) {
+            transportQty = 0;
+        }
+
+        if (!isNaN(qtyInMTS) && transportQty > qtyInMTS) {
+            isValid = false;
+            invalidItemNo = $input.closest('tr').find('td').eq(1).text().trim() || lineNo;
+            $input.focus();
+            return false;
+        }
+    });
+
+    if (!isValid) {
+        ShowErrMsg('Transport Qty should be less than or equal to Qty. in MTS. Invalid product: ' + invalidItemNo + '.');
+    }
+
+    return isValid;
+}
+
+function SaveTransporter() {
+
+    $('#lblMsg').html('').css('color', 'red').hide();
+
+    if ($('#lblAcceptedBy')[0].innerHTML == "") {
+        alert('Please Accept The Task First Then You Can Map the Details...!!!');
+        return false;
+    }
+    if (!validateTransportQtyAgainstMTS()) {
+        return false;
+    }
+
+    if (!validateTransportQtySavedStatus()) {
+        return false;
+    }
+
+    if (!validateItemTrackingVsProductTransportQty()) {
+        return false;
+    }
+    //if ((!transporterCode || transporterCode === "") && (!vehicleno || vehicleno === "")) {
+    //    $('#lblMsg').html('Please enter Transporter Code or Vehicle Number before saving.').show();
+    //    return false;
+    ////}
+    $('#btnSaveSpinner').show();
+
+    var doctype, transporterCode, lrno, lrdate, drivername, driverlicenseno, drivermobileno, vehicleno, loadingcharges, unloadingcharges, transporteramount, remarks, isclosed, vendorcompanyNo, createDriver, loadingVendor, unloadingVendor, vendorcompanyNo;
+
+    var systemId = "";
+    doctype = $('#lblDocumentType')[0].innerText;
+    systemId = $('#hfSystemId')[0].value;
+    transporterCode = $('#hfTransporterNo')[0].value;
+    lrno = $('#txtLRRRNo')[0].value || "";
+    lrdate = $('#txtLRRRDate')[0].value;
+    drivername = $('#txtDirverName')[0].value;
+    driverlicenseno = $('#txtDirverLicenseNo')[0].value;
+    drivermobileno = $('#txtDirverMobileNo')[0].value;
+    vehicleno = getVehicleNo();
+    loadingcharges = $('#txtLoadingCharges')[0].value;
+    unloadingcharges = $('#txtUnloadingCharges')[0].value;
+    transporteramount = $('#txtFraightCharges')[0].value;
+    remarks = $('#txtRemarks')[0].value;
+    isclosed = false;
+    createDriver = $('#hfDriverflag')[0].value;
+    vendorcompanyNo = $('#hfVendorCompanyNo')[0].value;
+
+    if ((!transporterCode && !vehicleno) ||
+        (transporterCode.trim() === "" && vehicleno.trim() === "")) {
+        $('#lblMsg').html('Please enter Transporter Code or Vehicle Number before saving.').show();
+        return false;
+    }
+    loadingVendor = "";
+    unloadingVendor = "";
+
+    if (doctype === "Sales Order") {
+        loadingVendor = $('#hfLoadingVendorNo').val() || "";
+        $('#hfUnLoadingVendorNo').val("");
+        $('#txtUnLoadingVendor').val("");
+    }
+    else if (doctype === "Sales Return") {
+        unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
+        $('#hfLoadingVendorNo').val("");
+        $('#txtLoadingVendor').val("");
+    }
+    else if (doctype === "Transfer Order") {
+        loadingVendor = $('#hfLoadingVendorNo').val() || "";
+        unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
+    }
+    else if (doctype === "Purchase Order") {
+        unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
+        $('#hfLoadingVendorNo').val("");
+        $('#txtLoadingVendor').val("");
+    }
+
+    if (systemId.length > 0) {
+        var saveUrl = apiUrl + 'ClosedTaskOfWarehouse?doctype=' + encodeURIComponent(doctype) + '&transporterCode=' + encodeURIComponent(transporterCode) + '&systemids=' + encodeURIComponent(systemId) + '&lrno=' + encodeURIComponent(lrno) + '&lrdate=' + encodeURIComponent(lrdate) + '&drivername=' + encodeURIComponent(drivername) + '&driverlicenseno=' + encodeURIComponent(driverlicenseno) + '&drivermobileno=' + encodeURIComponent(drivermobileno) + '&vehicleno=' + encodeURIComponent(vehicleno) + '&loadingcharges=' + encodeURIComponent(loadingcharges) + '&unloadingcharges=' + encodeURIComponent(unloadingcharges) + '&transporteramount=' + encodeURIComponent(transporteramount) + '&remarks=' + encodeURIComponent(remarks) + '&isclosed=' + encodeURIComponent(isclosed) + '&selectedExisting=' + encodeURIComponent(createDriver) + '&vendorcompanyNo=' + encodeURIComponent(vendorcompanyNo) + '&loadingvendor=' + encodeURIComponent(loadingVendor) + '&unloadingvendor=' + encodeURIComponent(unloadingVendor);
+
+        $.post(saveUrl, function (data) {
+            $('#btnSaveSpinner').hide();
+            if (data) {
+                var actionMsg = "Task Save Successfully.";
+                ShowActionMsg(actionMsg);
+                window.setTimeout(function () {
+                    window.location.href = '/SPWarehouse/WarehouseCard?No=' + encodeURIComponent(documentno) + '&DocumentType=' + encodeURIComponent(doctype);
+                }, 2000);
+            } else {
+                ShowErrMsg('Task save failed. Please verify details and try again.');
+            }
+        }).fail(function () {
+            $('#btnSaveSpinner').hide();
+            ShowErrMsg('Error while saving task. Please try again.');
+        });
+    }
+}
+
+
+function SaveAndCloseTransporter() {
+
+    var flag = validateForm();
+    $('#lblMsg').html('').css('color', 'red').hide();
+
+    if (flag == true) {
+        if (!validateTransportQtyAgainstMTS()) {
+            return false;
+        }
+
+        if (!validateTransportQtySavedStatus()) {
+            return false;
+        }
+
+        if (!validateItemTrackingVsProductTransportQty()) {
+            return false;
+        }
+
+        var doctype, transporterCode, lrno, lrdate, drivername, driverlicenseno, drivermobileno, vehicleno, loadingcharges, unloadingcharges, transporteramount, remarks, isclosed, loadingVendor, unloadingVendor;
+        var systemId = "";
+
+        doctype = $('#lblDocumentType')[0].innerText;
+        systemId = $('#hfSystemId')[0].value;
+        transporterCode = $('#hfTransporterNo')[0].value;
+        lrno = $('#txtLRRRNo')[0].value || "";
+        lrdate = $('#txtLRRRDate')[0].value;
+        drivername = $('#txtDirverName')[0].value;
+        driverlicenseno = $('#txtDirverLicenseNo')[0].value;
+        drivermobileno = $('#txtDirverMobileNo')[0].value;
+        vehicleno = getVehicleNo();
+        loadingcharges = $('#txtLoadingCharges')[0].value;
+        unloadingcharges = $('#txtUnloadingCharges')[0].value;
+        transporteramount = $('#txtFraightCharges')[0].value;
+        remarks = $('#txtRemarks')[0].value;
+        isclosed = true;
+        createDriver = $('#hfDriverflag')[0].value;
+        vendorcompanyNo = $('#hfVendorCompanyNo')[0].value;
+
+        if ((!transporterCode && !vehicleno) ||
+            (transporterCode.trim() === "" && vehicleno.trim() === "")) {
+            $('#lblMsg').html('Please enter Transporter Code or Vehicle Number before saving.').show();
+            return false;
+        }
+        loadingVendor = "";
+        unloadingVendor = "";
+
+        if (doctype === "Sales Order") {
+            loadingVendor = $('#hfLoadingVendorNo').val() || "";
+            $('#hfUnLoadingVendorNo').val("");
+            $('#txtUnLoadingVendor').val("");
+        } else if (doctype === "Sales Return") {
+
+            unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
+            $('#hfLoadingVendorNo').val(""); $('#txtLoadingVendor').val("");
+        } else if (doctype === "Transfer Order") {
+
+            loadingVendor = $('#hfLoadingVendorNo').val() || "";
+            unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
+        } else if (doctype === "Purchase Order") {
+
+            unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
+            $('#hfLoadingVendorNo').val(""); $('#txtLoadingVendor').val("");
+        }
+
+        var saveCloseUrl = apiUrl + 'ClosedTaskOfWarehouse?doctype=' + encodeURIComponent(doctype)+ '&transporterCode=' + encodeURIComponent(transporterCode)+ '&systemids=' + encodeURIComponent(systemId)+ '&lrno=' + encodeURIComponent(lrno)+ '&lrdate=' + encodeURIComponent(lrdate)+ '&drivername=' + encodeURIComponent(drivername)+ '&driverlicenseno=' + encodeURIComponent(driverlicenseno)+ '&drivermobileno=' + encodeURIComponent(drivermobileno)+ '&vehicleno=' + encodeURIComponent(vehicleno)+ '&loadingcharges=' + encodeURIComponent(loadingcharges)+ '&unloadingcharges=' + encodeURIComponent(unloadingcharges)+ '&transporteramount=' + encodeURIComponent(transporteramount)+ '&remarks=' + encodeURIComponent(remarks)+ '&isclosed=' + encodeURIComponent(isclosed)+ '&selectedExisting=' + encodeURIComponent(createDriver)+ '&vendorcompanyNo=' + encodeURIComponent(vendorcompanyNo)+ '&loadingvendor=' + encodeURIComponent(loadingVendor)+ '&unloadingvendor=' + encodeURIComponent(unloadingVendor);
+
+        $.post(saveCloseUrl, function (data) {
+            if (data) {
+                var actionMsg = "Task Closed Successfully.";
+                ShowActionMsg(actionMsg);
+                window.setTimeout(function () {
+                    window.location.href = '/SPWarehouse/WarehouseList';
+                }, 2000);
+            } else {
+                ShowErrMsg('Task close failed. Please verify details and try again.');
+            }
+        }).fail(function () {
+            ShowErrMsg('Error while closing task. Please try again.');
+        });
+
+    } else {
+        return false;
+    }
+}
+
+var filter = "";
+var orderBy = 5;
+var orderDir = "asc";
+var deletedEntries = [];
+var itemTrackingTransportQtyByLine = {};
+var transportQtySavedByLine = {};
+var transportQtyDirtyByLine = {};
+
+function initializeTransportQtyState() {
+    $("input[id^='txtTransportQty_']").each(function () {
+        var lineNo = (this.id || '').split('_')[1] || '';
+        if (!lineNo) return;
+
+        var qty = parseFloat($(this).val());
+        if (isNaN(qty)) qty = 0;
+
+        transportQtySavedByLine[lineNo] = qty;
+        transportQtyDirtyByLine[lineNo] = false;
+    });
+}
+
+function validateTransportQtySavedStatus() {
+    var invalidLineNo = '';
+    $("input[id^='txtTransportQty_']").each(function () {
+        var lineNo = (this.id || '').split('_')[1] || '';
+        if (lineNo && transportQtyDirtyByLine[lineNo] === true) {
+            invalidLineNo = lineNo;
+            $(this).focus();
+            return false;
+        }
+    });
+
+    if (invalidLineNo) {
+        var productNo = $('#txtTransportQty_' + invalidLineNo).closest('tr').find('td').eq(1).text().trim() || '';
+        ShowErrMsg('Transport Qty. on Item Tracking Lines and Transport Qty. in Product details for "' + productNo + '" does not match.');
+        return false;
+    }
+
+    return true;
+}
+
+function encodeHtml(value) {
+    return $('<div/>').text(value == null ? '' : value).html();
+}
+
+function getItemTrackingSourceParams(documentType) {
+    switch ((documentType || '').trim()) {
+        case 'Purchase Order':
+            return { sourceType: 39, sourceSubtype: '1' };
+        case 'Sales Return':
+            return { sourceType: 37, sourceSubtype: '5' };
+        case 'Sales Order':
+            return { sourceType: 37, sourceSubtype: '1' };
+        case 'Transfer Order':
+            return { sourceType: 5741, sourceSubtype: '1' };
+        default:
+            return { sourceType: '', sourceSubtype: '' };
+    }
+}
+
+function sanitizeVehicleNo(v) {
+    v = (v === undefined || v === null) ? '' : ('' + v);
+    // Alphanumeric only (no spaces/special characters), max 10
+    return v.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 10);
+}
+
+function getVehicleNo() {
+    var $el = $('#txtVehicleNo');
+    if ($el.length === 0) return '';
+    var clean = sanitizeVehicleNo($el.val());
+    if ($el.val() !== clean) $el.val(clean);
+    return clean;
+}
+function validateForm() {
+
+    $('#lblMsg').html('');
+
+
+    if ($('#lblAcceptedBy')[0].innerHTML == "") {
+        alert('Please Accept the Task first then you Can Map the Details....');
+        return false;
+    }
+
+    if ($('#hfTransporterNo').val() == "") {
+        $('#lblMsg').html('Select Transporter');
+        $('#txtTransporterNo').focus();
+        return false;
+    }
+
+    //else if ($('#txtFraightCharges').val() == "") {
+    //    $('#lblMsg').html('Enter Fraight Charges');
+    //    $('#txtFraightCharges').focus();
+    //    return false;
+    //}
+    //else if ($('#txtLoadingCharges').val() == "") {
+    //    $('#lblMsg').html('Enter Loading Charges');
+    //    $('#txtLoadingCharges').focus();
+    //    return false;
+    //}
+    //else if ($('#txtUnloadingCharges').val() == "") {
+    //    $('#lblMsg').html('Enter Unloading Charges');
+    //    $('#txtUnloadingCharges').focus();
+    //    return false;
+    //}
+    //else if ($('#txtLRRRNo').val() == "") {
+    //    $('#lblMsg').html('Enter LR RR No');
+    //    $('#txtLRRRNo').focus();
+    //    return false;
+    //}
+    //else if ($('#txtLRRRDate').val() == "") {
+    //    $('#lblMsg').html('Enter LR RR Date');
+    //    $('#txtLRRRDate').focus();
+    //    return false;
+    //}
+    else if (getVehicleNo() == "") {
+        $('#lblMsg').html('Enter VehicleNo');
+        $('#txtVehicleNo').focus();
+        return false;
+    }
+
+    // Safety check (should already be enforced by input handler)
+    var vno = getVehicleNo();
+    if (vno.length > 10) {
+        $('#lblMsg').html('VehicleNo should be upto 10 characters');
+        $('#txtVehicleNo').focus();
+        return false;
+    }
+    //else if ($('#txtDirverName').val() == "") {
+    //    $('#lblMsg').html('Enter Dirver Name');
+    //    $('#txtDirverName').focus();
+    //    return false;
+    //}
+    //else if ($('#txtDirverMobileNo').val() == "") {
+    //    $('#lblMsg').html('Enter Dirver MobileNo');
+    //    $('#txtDirverMobileNo').focus();
+    //    return false;
+    //}
+    //else if ($('#txtDirverLicenseNo').val() == "") {
+    //    $('#lblMsg').html('Enter Dirver LicenseNo');
+    //    $('#txtDirverLicenseNo').focus();
+    //    return false;
+    //}
+    return true;
+}
+
+function BindVendorAutoComplete(selector, hiddenField, type) {
+
+    if (typeof ($.fn.autocomplete) === 'undefined') return;
+
+    var $input = $(selector);
+
+    $input.autocomplete({
+        serviceUrl: '/SPWarehouse/GetloadingAndUnloadingDropDown',
+        paramName: "prefix",
+
+        minChars: 2,              
+        //deferRequestBy: 100,  
+        noCache: false,
+
+        ajaxSettings: {
+            type: "POST"
+        },
+
+        params: {
+            type: type
+        },
+
+        beforeRender: function () {
+            $("#globalLoader").show();
+        },
+
+        onHide: function () {
+            $("#globalLoader").hide();
+        },
+
+        onSelect: function (suggestion) {
+            $(hiddenField).val(suggestion.data);
+            $input.val(suggestion.value);
+        },
+
+        transformResult: function (response) {
+
+            let json;
+            try {
+                json = typeof response === "string" ? JSON.parse(response) : response;
+            } catch (e) {
+                console.error("Invalid JSON", response);
+                return { suggestions: [] };
+            }
+
+            return {
+                suggestions: $.map(json, function (item) {
+                    return {
+                        value: item.Name,
+                        data: item.No
+                    };
+                })
+            };
+        }
+    });
+} 
+function UnloadingVendorDropDown() {
+    BindVendorAutoComplete('#txtUnLoadingVendor', '#hfUnLoadingVendorNo', 'unloading');
+}
+
+function LoadingVendorDropDown() {
+    BindVendorAutoComplete('#txtLoadingVendor', '#hfLoadingVendorNo', 'loading');
+}
