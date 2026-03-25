@@ -489,12 +489,13 @@ namespace PrakashCRM.Service.Controllers
         {
             bool headerflag = false;
             bool lineflag = false;
+            string normalizedDocumentType = NormalizeGRNDocumentTypeForPost(grnCardRequest.documenttype);
 
             var resGRNSave = new SPGRNSaveResponse();
             //lrdate = dd_MM_yyyytoyyyy_MM_dd(lrdate);
             SPGRNHeaderRequest sPGRNHeaderRequest = new SPGRNHeaderRequest
             {
-                documenttype = grnCardRequest.documenttype,
+                documenttype = normalizedDocumentType,
                 documentno = grnCardRequest.documentno,
                 postingdate = dd_MM_yyyytoyyyy_MM_dd(grnCardRequest.postingdate),
                 documentdate = dd_MM_yyyytoyyyy_MM_dd(grnCardRequest.documentdate),
@@ -522,6 +523,7 @@ namespace PrakashCRM.Service.Controllers
                     foreach (SPGRNCardLineRequest lineRequest in sPGRNCardLineRequests)
                     {
                         var resultLine = (dynamic)null;
+                        lineRequest.documenttype = NormalizeGRNDocumentTypeForPost(lineRequest.documenttype, normalizedDocumentType);
                         lineRequest.bedate = dd_MM_yyyytoyyyy_MM_dd(lineRequest.bedate);
                         resultLine = PostGRNLine("APIMngt_GRNPostLines", lineRequest, resGRNSave);
 
@@ -542,6 +544,20 @@ namespace PrakashCRM.Service.Controllers
             }
 
             return headerflag;
+        }
+
+        private string NormalizeGRNDocumentTypeForPost(string documentType, string fallbackDocumentType = null)
+        {
+            string normalizedInput = string.IsNullOrWhiteSpace(documentType)
+                ? fallbackDocumentType
+                : documentType.Trim();
+
+            if (string.Equals(normalizedInput, "Sales Return", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Sales Return Order";
+            }
+
+            return normalizedInput;
         }
 
         //public string dd_MM_yyyytoyyyy_MM_dd(string dd_MM_yyyyDate)
