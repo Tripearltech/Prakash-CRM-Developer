@@ -202,6 +202,7 @@
     <Compile Include="Classes\PasswordResetTokenStore.cs" />
     <Compile Include="Classes\PasswordSecurity.cs" />
     <Compile Include="Classes\RazorRenderer.cs" />
+    <Compile Include="Controllers\GRNDocumentAttachment.cs" />
     <Compile Include="Controllers\SPActivitiesController.cs" />
     <Compile Include="Controllers\SPAdminBusinessPlanController.cs" />
     <Compile Include="Controllers\SPBranchesController.cs" />
