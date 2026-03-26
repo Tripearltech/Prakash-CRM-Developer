@@ -1,5 +1,4 @@
-﻿
-/* start pagination filter code */
+﻿/* start pagination filter code */
 var filter = "";
 var orderBy = 3;
 var orderDir = "asc";
@@ -125,7 +124,7 @@ $(document).ready(function () {
     $('#txtNewPassword').blur(function () {
         if ($('#txtNewPassword').val() != "") {
             var str = $('#txtNewPassword').val();
-            if (str.match(/[a-z]/g) && str.match(/[A-Z]/g) && str.match(/[0-9]/g) && str.match(/[^a-zA-Z\d]/g) && isValid(str) && str.length >= 8) {
+            if (isPasswordPolicyValid(str)) {
                 document.getElementById('lblMsg').innerText = "";
             }
             else {
@@ -153,36 +152,46 @@ $(document).ready(function () {
     $('#btnUpdatePassword').click(function () {
 
         var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
+        var newPassword = $('#txtNewPassword').val();
+        var confirmPassword = $('#txtConfirmPassword').val();
 
-        if ($('#txtNewPassword').val() != "" &&
-            $('#txtConfirmPassword').val() != "" &&
-            $('#txtNewPassword').val() == $('#txtConfirmPassword').val()) {
-
-            $('#btnUpdatePassSpinner').show();
-
-            $.post(
-                apiUrl + 'UpdatePassword',
-                {
-                    email: $('#hfSPEmail').val(),
-                    userNo: $('#hfSPNo').val(),
-                   //role: $('#hfSPRole').val(), 
-                    newPassword: $('#txtConfirmPassword').val()
-                },
-                function (data) {
-                    if (data === true) {
-                        $('#lblMsg').text("Password updated successfully.");
-                        $('#txtNewPassword').val('');
-                        $('#txtConfirmPassword').val('');
-                        $('#btnUpdatePassword').prop('disabled', true);
-                    }
-                    $('#btnUpdatePassSpinner').hide();
-                }
-            );
+        if (newPassword == "" || confirmPassword == "") {
+            $('#lblMsg').text("Please enter New Password and Confirm Password.");
+            $('#txtNewPassword').focus();
+            return;
         }
-        else {
+
+        if (!isPasswordPolicyValid(newPassword)) {
+            $('#lblMsg').text("Password does not match the policy guidelines.");
+            $('#txtNewPassword').focus();
+            return;
+        }
+
+        if (newPassword != confirmPassword) {
             $('#lblMsg').text("Please enter matching New Password and Confirm Password.");
             $('#txtConfirmPassword').focus();
+            return;
         }
+
+        $('#btnUpdatePassSpinner').show();
+
+        $.post(
+            apiUrl + 'UpdatePassword',
+            {
+                email: $('#hfSPEmail').val(),
+                userNo: $('#hfSPNo').val(),
+                newPassword: confirmPassword
+            },
+            function (data) {
+                if (data === true) {
+                    $('#lblMsg').text("Password updated successfully.");
+                    $('#txtNewPassword').val('');
+                    $('#txtConfirmPassword').val('');
+                    $('#btnUpdatePassword').prop('disabled', true);
+                }
+                $('#btnUpdatePassSpinner').hide();
+            }
+        );
     });
 
 
@@ -191,8 +200,17 @@ $(document).ready(function () {
     });
 });
 
+function isPasswordPolicyValid(str) {
+    return !!str
+        && str.length >= 8
+        && /[a-z]/.test(str)
+        && /[A-Z]/.test(str)
+        && /[0-9]/.test(str)
+        && /[^a-zA-Z0-9]/.test(str);
+}
+
 function isValid(str) {
-    return /^(?=.*[!@$_])[a-zA-Z0-9!@$_]+$/.test(str);
+    return /^(?=.*[^a-zA-Z0-9]).+$/.test(str);
 }
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
@@ -486,4 +504,4 @@ function ShowErrMsg(errMsg) {
     });
 
 }
-/* end pagination filter code */
+/* end pagination filter code *//* end pagination filter code */

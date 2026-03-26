@@ -70,3 +70,12 @@ c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\Prak
 c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashC.3DFDDAF9.Up2Date
 c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
 c:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Release\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Release\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Release\Newtonsoft.Json.dll
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Release\Newtonsoft.Json.xml
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.AssemblyReference.cache
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Release\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Release\PrakashC.3DFDDAF9.Up2Date
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Release\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Release\PrakashCRM.Data.pdb

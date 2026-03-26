@@ -210,7 +210,7 @@ function SaveGRN() {
         GRNLine.documentno = docnumber;
         GRNLine.lineno = lineNo;
         GRNLine.qtytoreceive = input.value;
-        GRNLine.qcremarks = qcremarks ? qcremarks.value : "";
+        GRNLine.qcremarks = (qcremarks && qcremarks.value) ? qcremarks.value : "OK";
         GRNLine.rejectqty = rejectqty ? rejectqty.value : "";
         GRNLine.beno = beno ? beno.value : "";
 

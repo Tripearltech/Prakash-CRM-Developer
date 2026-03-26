@@ -1,10 +1,10 @@
 ﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
-var custVendorPortalUrl = $('#getCustVendorPortalUrl').val();
 
 /* start pagination filter code */
 var filter = "";
 var orderBy = 4;
 var orderDir = "asc";
+
 $(document).ready(function () {
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     $('#ddlField').val("Name");
@@ -212,10 +212,17 @@ $(document).ready(function () {
 
             });
 
-            $('.modal-title').text('SMS/WhatsApp');
+            $('#modalSendMsg .modal-title').text('SMS/WhatsApp');
             ItemSpecMobile = ItemSpecMobile.slice(0, -1);
             $('#txtMsgMobile').val(ItemSpecMobile);
         }
+    });
+
+    $(document).on('click', '.js-view-contact', function (e) {
+        e.preventDefault();
+        var companyNo = $(this).attr('data-company-no') || '';
+        var companyName = $(this).attr('data-company-name') || '';
+        ViewContactPerson(companyNo, companyName);
     });
 
     $('#chkEmail').change(function () {
@@ -547,19 +554,19 @@ function showPopup(popuptype) {
 
         $('#modalItemSpecMSDSCOA').css('display', 'block');
         if (popuptype == "ItemSpecification") {
-            $('.modal-title').text('Item Specification Sheet');
+            $('#modalItemSpecMSDSCOA .modal-title').text('Item Specification Sheet');
             $('#hdnModalTitle').val('Item Specification Sheet');
             $('#dvCOALocations').css('display', 'none');
             $('#hdnItemSpecMSDSCOA').val('ItemSpecification');
         }
         if (popuptype == "MSDS") {
-            $('.modal-title').text('MSDS Sheet');
+            $('#modalItemSpecMSDSCOA .modal-title').text('MSDS Sheet');
             $('#hdnModalTitle').val('Item Specification - MSDS Sheet');
             $('#dvCOALocations').css('display', 'none');
             $('#hdnItemSpecMSDSCOA').val('MSDS');
         }
         if (popuptype == "COA") {
-            $('.modal-title').text('COA Document');
+            $('#modalItemSpecMSDSCOA .modal-title').text('COA Document');
             $('#hdnModalTitle').val('COA Document');
             $('#dvCOALocations').css('display', 'block');
             $('#hdnItemSpecMSDSCOA').val('COA');
@@ -654,10 +661,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     //    "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + (item.Mobile_Phone_No || "N/A") + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
                     //    "</td><td>" + item.GST_Registration_No + "</td><td>" + item.P_A_N_No + "</td>";
                     const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
+                    const itemNameAttr = escapeHtmlAttr(item.Name);
+                    const itemNoAttr = escapeHtmlAttr(item.No);
                     var rowData = `<tr><td></td><td><input type='checkbox' class='form-check-input' /></td><td><a href='/SPContacts/CompanyContactCard?No=` + item.No + `'><i class='bx bxs-edit'></i></a></td><td data-item="${itemJson}"><div class='dropdown ms-auto'><div class='cursor-pointer text-dark font-24 dropdown-toggle dropdown-toggle-nocaret' data-bs-toggle='dropdown'><i class='bx bx-dots-horizontal-rounded text-option'></i></div>` +
                         `<div class='dropdown-menu dropdown-menu-end'><a class='dropdown-item' onclick='DailyVisit(${itemJson})' href='javaScript:;'  style='cursor:pointer'>Daily Visit Plan</a><a class='dropdown-item' onclick='BusinessPlan(${itemJson})'  href='javaScript:;'  style='cursor:pointer'>Bussines Plan</a>` +
-                        `<a class='dropdown-item' style='cursor:pointer' onclick='SalesQuotes(${itemJson})'>Sales Quotes</a></div></div></td><td align='center'><a class='ViewContactCls' onclick='ViewContactPerson(\"` + item.No +
-                        "\",\"" + item.Name + "\")'><i class='bx bx-show'></i></a></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
+                        `<a class='dropdown-item' style='cursor:pointer' onclick='SalesQuotes(${itemJson})'>Sales Quotes</a></div></div></td><td align='center'><a class='ViewContactCls js-view-contact' data-company-no='${itemNoAttr}' data-company-name='${itemNameAttr}' href='javascript:;'><i class='bx bx-show'></i></a></td><td>` + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
                         "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + (item.Mobile_Phone_No || "N/A") + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
                         "</td><td>" + item.GST_Registration_No + "</td><td>" + item.P_A_N_No + "</td>";
 
@@ -906,7 +914,7 @@ function ViewContactPerson(itemNo, itemName) {
 
                 $('#tbContacts').append(rowData);
 
-                $('.modal-title').text(itemName + '\'s Contact Person');
+                $('#modalContacts .modal-title').text(getSafeText(itemName) + '\'s Contact Person');
                 $('#modalContacts').css('display', 'block');
                 $('#dvContacts').css('display', 'block');
             },
@@ -953,6 +961,8 @@ function ShowErrMsg(errMsg) {
 //sales quotes
 
 function SalesQuotes(item) {
+    currentCompanyName = getSafeText(item && item.Name);
+    $('#quotesModal .modal-title').text(getCurrentCompanyLabel() + ' - Sales Quotes');
     var no = item.No;
     BindContactSQ("", "", no);
     $("#CompanyNo").val(no);
@@ -973,6 +983,7 @@ function BindContactSQ(FromDate, ToDate, No) {
             var TROpts = "";
 
             $('#tblContactSQ').empty();
+            $('#quotesModal .modal-title').text(getCurrentCompanyLabel() + ' - Sales Quotes');
             $('#quotesModal').modal('show');
             if (data.length > 0) {
 
@@ -1121,6 +1132,8 @@ function BindFinancialYear() {
 
 function BusinessPlan(item) {
     //$("#CompanyNo").val('');
+    currentCompanyName = getSafeText(item && item.Name);
+    $('#businessplanModal .modal-title').text(getCurrentCompanyLabel() + ' - Business Plan');
     var no = item.No;
 
     $("#CompanyNo").val(no);
@@ -1145,6 +1158,7 @@ function BindContactBusinessPlan(PlanYear, No) {
         var TROpts = "";
         var i;
         $('#tblDetailsContactBusinessPlan').empty();
+        $('#businessplanModal .modal-title').text(getCurrentCompanyLabel() + ' - Business Plan');
         $('#businessplanModal').modal('show');
 
         if (data.length > 0) {
@@ -1173,6 +1187,8 @@ function BindContactBusinessPlan(PlanYear, No) {
 
 //daily visit 
 function DailyVisit(item) {
+    currentCompanyName = getSafeText(item && item.Name);
+    $('#DetailsModal .modal-title').text(getCurrentCompanyLabel() + ' - Daily Visit Plan');
     var no = item.No;
     $("#CompanyNo").val(no);
     BindContactDailyVisit("", "", no);
@@ -1188,6 +1204,7 @@ function BindContactDailyVisit(FromDate, ToDate, No) {
         var TROpts = "";
         var i;
         $('#tblContactDailyVisit').empty();
+        $('#DetailsModal .modal-title').text(getCurrentCompanyLabel() + ' - Daily Visit Plan');
         $('#DetailsModal').modal('show');
         if (data.length > 0) {
 
@@ -1231,3 +1248,23 @@ $('#btnDailyVisitShowAll').click(function () {
     $('#txtDailyVisitFDate, #txtDailyVisitTDate').val("");
     BindContactDailyVisit("", "", "");
 });
+var custVendorPortalUrl = $('#getCustVendorPortalUrl').val();
+var currentCompanyName = "";
+
+function getSafeText(value) {
+    if (value === null || value === undefined) return "";
+    return (value + "").trim();
+}
+
+function getCurrentCompanyLabel() {
+    return getSafeText(currentCompanyName) || "Selected Company";
+}
+
+function escapeHtmlAttr(value) {
+    return (value === null || value === undefined ? '' : (value + ''))
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}

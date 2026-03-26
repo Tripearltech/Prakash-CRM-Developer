@@ -245,8 +245,27 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label"> </label>
+                                            <label class="col-sm-3 col-form-label">UnLoading Name </label>
                                             <div class="col-sm-9">
+                                                <input id="txtUnLoadingName" type="text" value="@Model.UnLoadingName" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Loading name : </label>
+                                            <div class="col-sm-9">
+                                                <input id="txtLoadingName" type="text" value="@Model.LoadingName" class="form-control" readonly />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label"></label>
+                                            <div class="col-sm-9">
+                                                @*<input id="txtUnLoadingCharges" type="text" value="@Model.UnLoadingName" class="form-control" readonly />*@
                                             </div>
                                         </div>
                                     </div>
@@ -332,10 +351,10 @@
                                                             @if (Model.DocumentType == "Purchase Order")
                                                             {
                                                                 <td>
+                                                                    @{ var qcRemark = (line.QCRemarks ?? "").Trim(); }
                                                                     <select name="txtQCRemarks_@line.LineNo" class="form-select" style="width:100px;">
-                                                                        <option value="">--Select--</option>
-                                                                        <option value="OK" @(line.QCRemarks == "OK" ? "selected" : "")>Ok</option>
-                                                                        <option value="Not OK" @(line.QCRemarks == "Not OK" ? "selected" : "")>Not Ok</option>
+                                                                        <option value="OK" @((qcRemark == "" || qcRemark == "OK" || qcRemark == "Ok" || qcRemark == "ok") ? "selected" : "")>Ok</option>
+                                                                        <option value="Not OK" @((qcRemark == "Not OK" || qcRemark == "Not Ok" || qcRemark == "NOT OK") ? "selected" : "")>Not Ok</option>
                                                                     </select>
                                                                 </td>
                                                             }
@@ -433,6 +452,7 @@
                                                 <th scope="col">Quantity to Handle</th>
                                                 <th scope="col">Expiration Date</th>
                                                 <th scope="col">Quantity</th>
+                                                <th scope="col">Attachment</th>
                                                 <th scope="col">Action</th>
                                             </tr>
                                         </thead>
@@ -461,6 +481,452 @@
         </div>
     </div>
 </div>
+
+<div id="grnAttachmentOverlay" class="grn-attachment-overlay">
+    <div class="grn-attachment-panel">
+        <div class="grn-attachment-header">
+            <div>
+                <div class="grn-attachment-title">Line Attachments</div>
+                <div id="grnAttachmentMeta" class="grn-attachment-meta"></div>
+            </div>
+            <button type="button" class="btn-close" aria-label="Close" onclick="CloseGRNAttachmentPanel();"></button>
+        </div>
+        <div id="grnAttachmentDropZone" class="grn-attachment-dropzone">
+            <div><strong>Files drag and drop kijiye</strong> ya browse kijiye</div>
+            <div class="grn-attachment-hint">Multiple files supported. Ye attachment panel abhi UI-only mode mein hai.</div>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="OpenGRNAttachmentFilePicker();">Browse Files</button>
+        </div>
+        <input id="grnAttachmentFileInput" type="file" multiple style="display:none;" />
+        <div id="grnAttachmentError" class="grn-attachment-error"></div>
+        <div id="grnAttachmentFileList" class="grn-attachment-file-list"></div>
+        <div class="grn-attachment-footer">
+            <button type="button" class="btn btn-light" onclick="CloseGRNAttachmentPanel();">Close</button>
+            <button type="button" class="btn btn-primary" onclick="SaveGRNAttachmentPanel();">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="grnAttachmentViewer" class="grn-viewer-overlay">
+    <div class="grn-viewer-modal">
+        <div class="grn-viewer-topbar">
+            <div class="grn-viewer-fileinfo">
+                <span id="grnViewerCounter" class="grn-viewer-counter"></span>
+                <span id="grnViewerFileName" class="grn-viewer-filename"></span>
+            </div>
+            <div class="grn-viewer-actions">
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="GRNViewerPrev();">Prev</button>
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="GRNViewerNext();">Next</button>
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="GRNViewerZoomOut();">-</button>
+                <span id="grnViewerZoomLabel" class="grn-viewer-zoom-label">100%</span>
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="GRNViewerZoomIn();">+</button>
+                <button type="button" class="btn btn-sm btn-outline-light" onclick="GRNViewerResetZoom();">Reset</button>
+                <button id="grnViewerModeButton" type="button" class="btn btn-sm btn-outline-light" onclick="ToggleGRNViewerMode();">Grid</button>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="CloseGRNAttachmentViewer();"></button>
+            </div>
+        </div>
+        <div class="grn-viewer-content-wrap">
+            <button type="button" class="grn-viewer-nav grn-viewer-nav-left" onclick="GRNViewerPrev();">&#8249;</button>
+            <div id="grnViewerSingle" class="grn-viewer-single">
+                <img id="grnViewerImage" class="grn-viewer-image" alt="Attachment preview" />
+                <div id="grnViewerNoPreview" class="grn-viewer-no-preview">
+                    <div class="grn-viewer-no-preview-title">Preview not available</div>
+                    <a id="grnViewerDownloadLink" class="btn btn-primary" target="_blank" download>Download</a>
+                </div>
+            </div>
+            <div id="grnViewerGrid" class="grn-viewer-grid"></div>
+            <button type="button" class="grn-viewer-nav grn-viewer-nav-right" onclick="GRNViewerNext();">&#8250;</button>
+        </div>
+        <div id="grnViewerThumbStrip" class="grn-viewer-thumbstrip"></div>
+    </div>
+</div>
+
+<style>
+    body.grn-attachment-open .modal-backdrop.show {
+        z-index: 1035 !important;
+    }
+
+    body.grn-attachment-open #modalItemTracking {
+        z-index: 1040 !important;
+    }
+
+    body.grn-attachment-open #modalItemTracking .modal-dialog {
+        position: relative;
+        z-index: 1041 !important;
+    }
+
+    .grn-attachment-overlay,
+    .grn-viewer-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000 !important;
+    }
+
+    .grn-attachment-overlay {
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(4px);
+    }
+
+    .grn-attachment-panel {
+        width: min(680px, calc(100vw - 32px));
+        max-height: calc(100vh - 40px);
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+        z-index: 2001;
+    }
+
+    .grn-attachment-header,
+    .grn-attachment-footer,
+    .grn-viewer-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+    }
+
+    .grn-attachment-header {
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .grn-attachment-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .grn-attachment-meta,
+    .grn-attachment-hint {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .grn-attachment-dropzone {
+        margin: 16px 18px 8px;
+        padding: 18px;
+        border: 2px dashed #93c5fd;
+        border-radius: 14px;
+        background: #eff6ff;
+        text-align: center;
+    }
+
+    .grn-attachment-dropzone.dragover {
+        border-color: #2563eb;
+        background: #dbeafe;
+    }
+
+    .grn-attachment-error {
+        min-height: 18px;
+        margin: 0 18px;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .grn-attachment-file-list {
+        margin: 8px 18px 18px;
+        overflow-y: auto;
+        max-height: 360px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #f9fafb;
+    }
+
+    .grn-attachment-empty {
+        padding: 24px;
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .grn-attachment-file-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #ffffff;
+    }
+
+    .grn-attachment-file-row:last-child {
+        border-bottom: none;
+    }
+
+    .grn-attachment-file-main {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .grn-attachment-file-badge,
+    .grn-attachment-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .grn-attachment-file-badge {
+        background: #dbeafe;
+        color: #1d4ed8;
+        text-transform: uppercase;
+    }
+
+    .grn-attachment-count {
+        background: #dbeafe;
+        color: #1d4ed8;
+        margin-left: 6px;
+    }
+
+    .grn-attachment-file-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #111827;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .grn-attachment-file-meta {
+        display: block;
+        font-size: 11px;
+        color: #6b7280;
+    }
+
+    .grn-viewer-overlay {
+        z-index: 2010 !important;
+        background: rgba(2, 6, 23, 0.92);
+        backdrop-filter: blur(8px);
+    }
+
+    .grn-viewer-modal {
+        width: min(1200px, calc(100vw - 24px));
+        height: min(92vh, 900px);
+        background: #020617;
+        border-radius: 18px;
+        color: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 32px 120px rgba(0, 0, 0, 0.45);
+        position: relative;
+        z-index: 2011;
+    }
+
+    .grn-viewer-topbar {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .grn-viewer-fileinfo,
+    .grn-viewer-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .grn-viewer-counter {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #1d4ed8;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .grn-viewer-filename {
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .grn-viewer-zoom-label {
+        min-width: 48px;
+        text-align: center;
+        font-size: 12px;
+        color: #cbd5e1;
+    }
+
+    .grn-viewer-content-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        min-height: 0;
+    }
+
+    .grn-viewer-single,
+    .grn-viewer-grid {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .grn-viewer-single {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 72px;
+        overflow: auto;
+    }
+
+    .grn-viewer-image {
+        max-width: 100%;
+        max-height: 100%;
+        display: none;
+        transform-origin: center center;
+        border-radius: 12px;
+    }
+
+    .grn-viewer-no-preview {
+        display: none;
+        text-align: center;
+    }
+
+    .grn-viewer-no-preview-title {
+        margin-bottom: 12px;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .grn-viewer-grid {
+        display: none;
+        padding: 18px;
+        overflow: auto;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .grn-viewer-grid-card {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.9);
+        padding: 14px;
+        cursor: pointer;
+    }
+
+    .grn-viewer-grid-card.active {
+        border-color: #60a5fa;
+        box-shadow: inset 0 0 0 1px #60a5fa;
+    }
+
+    .grn-viewer-grid-thumb {
+        height: 120px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(30, 41, 59, 0.95);
+        overflow: hidden;
+    }
+
+    .grn-viewer-grid-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .grn-viewer-grid-name {
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .grn-viewer-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border: none;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.8);
+        color: #f8fafc;
+        font-size: 28px;
+        line-height: 1;
+        z-index: 1;
+    }
+
+    .grn-viewer-nav-left {
+        left: 14px;
+    }
+
+    .grn-viewer-nav-right {
+        right: 14px;
+    }
+
+    .grn-viewer-thumbstrip {
+        display: flex;
+        gap: 10px;
+        padding: 14px 18px 18px;
+        overflow-x: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(15, 23, 42, 0.72);
+    }
+
+    .grn-viewer-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        flex: 0 0 auto;
+        overflow: hidden;
+        border: 2px solid transparent;
+        background: rgba(30, 41, 59, 0.95);
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .grn-viewer-thumb.active {
+        border-color: #60a5fa;
+    }
+
+    .grn-viewer-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    @*@media (max-width: 767px) {
+        .grn-viewer-modal {
+            width: calc(100vw - 12px);
+            height: calc(100vh - 12px);
+            border-radius: 12px;
+        }
+
+        .grn-viewer-single {
+            padding: 16px 48px;
+        }
+
+        .grn-viewer-actions {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }*@
+    }
+</style>
 
 @Scripts.Render("~/bundles/jquery")
 

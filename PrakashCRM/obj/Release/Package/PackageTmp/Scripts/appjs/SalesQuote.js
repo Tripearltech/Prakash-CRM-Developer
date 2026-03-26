@@ -2603,7 +2603,7 @@ function EditSQProd(Line_No, ProdTR) {
     } else {
         $("#chkDropShipment").prop('checked', false);
     }
-    if (isChkCommissionChecked == " ") {
+    if (isChkCommissionChecked == "" || isChkCommissionChecked == " ") {
         $('#chkIsCommission').prop('checked', false);
         $('#chkIsCommission').change();
         $('#txtSalesPrice').prop('readonly', false);
