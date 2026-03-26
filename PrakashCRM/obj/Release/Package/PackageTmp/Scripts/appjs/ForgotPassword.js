@@ -1,7 +1,6 @@
 ﻿$(document).ready(function () {
 
-    var portalUrl = $('#getSPPortalUrl').val();
-    var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
+    var requestPasswordResetUrl = $('#requestPasswordResetUrl').val();
 
     $('#invalidMsg').hide();
     $('#invalidForgotPassMsg').hide();
@@ -25,49 +24,38 @@
 
         $('#divImage').show();
 
-        if ($('#forgotEmail').val() != "") {
-
-            $.get(apiUrl + 'GetByEmail?email=' + $('#forgotEmail').val(), function (data) {
-
-                if (data.Company_E_Mail != null && data.No != null && data.Role) {
-
-                    $.get(
-                        apiUrl + 'ForgotPassword?email=' + data.Company_E_Mail + '&userNo=' + data.No + '&role=' + data.Role + '&portalUrl=' + portalUrl ,
-                        function (data) {
-                            $('#divImage').hide();
-                            if (sessionStorage.getItem('#modal') !== 'true') {
-                                $('#modal').css('display', 'block');
-
-                                //then the modal will be set true in the current session due to which the modal won't
-
-                                //reappear on the refresh, we need to reload the page in a new tab to make the modal
-
-                                //reappear.
-
-                                sessionStorage.setItem('#ad_modal', 'true');
-                            }
-                            $('#btnForgotPass').prop('disabled', true);
-                        }
-                    );
-                }
-                else {
-
+        if ($('#forgotEmail').val() !== "") {
+            $.ajax({
+                url: requestPasswordResetUrl,
+                type: 'POST',
+                data: { email: $('#forgotEmail').val() },
+                success: function (data) {
                     $('#divImage').hide();
-                    var msg = "Please Enter Email ID Of Registered User.";
-                    ShowErrMsg(msg);
 
-                    $('#forgotEmail').val('');
-                    $('#forgotEmail').focus();
+                    if (data && data.Success) {
+                        if (sessionStorage.getItem('#modal') !== 'true') {
+                            $('#modal').css('display', 'block');
+                            sessionStorage.setItem('#ad_modal', 'true');
+                        }
+
+                        $('#btnForgotPass').prop('disabled', true);
+                    }
+                    else {
+                        ShowErrMsg(data && data.Message ? data.Message : 'Please Enter Email ID Of Registered User.');
+                        $('#forgotEmail').val('');
+                        $('#forgotEmail').focus();
+                    }
+                },
+                error: function () {
+                    $('#divImage').hide();
+                    ShowErrMsg('Unable to process password reset right now.');
                 }
-
             });
-
         }
         else {
 
             $('#divImage').hide();
-            var msg = "Please Enter Email ID.";
-            ShowErrMsg(msg);
+            ShowErrMsg('Please Enter Email ID.');
 
         }
 

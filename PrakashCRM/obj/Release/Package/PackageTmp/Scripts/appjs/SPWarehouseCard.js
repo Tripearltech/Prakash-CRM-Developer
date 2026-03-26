@@ -2,83 +2,13 @@
 
 var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
 
-var filter = "";
-var orderBy = 5;
-var orderDir = "asc";
-var deletedEntries = [];
-var itemTrackingTransportQtyByLine = {};
-var transportQtySavedByLine = {};
-var transportQtyDirtyByLine = {};
-
-function initializeTransportQtyState() {
-    $("input[id^='txtTransportQty_']").each(function () {
-        var lineNo = (this.id || '').split('_')[1] || '';
-        if (!lineNo) return;
-
-        var qty = parseFloat($(this).val());
-        if (isNaN(qty)) qty = 0;
-
-        transportQtySavedByLine[lineNo] = qty;
-        transportQtyDirtyByLine[lineNo] = false;
-    });
-}
-
-function validateTransportQtySavedStatus() {
-    var invalidLineNo = '';
-    $("input[id^='txtTransportQty_']").each(function () {
-        var lineNo = (this.id || '').split('_')[1] || '';
-        if (lineNo && transportQtyDirtyByLine[lineNo] === true) {
-            invalidLineNo = lineNo;
-            $(this).focus();
-            return false;
-        }
-    });
-
-    if (invalidLineNo) {
-        var productNo = $('#txtTransportQty_' + invalidLineNo).closest('tr').find('td').eq(1).text().trim() || '';
-        ShowErrMsg('Transport Qty. on Item Tracking Lines and Transport Qty. in Product details for "' + productNo + '" does not match.');
-        return false;
-    }
-
-    return true;
-}
-
-function encodeHtml(value) {
-    return $('<div/>').text(value == null ? '' : value).html();
-}
-
-function getItemTrackingSourceParams(documentType) {
-    switch ((documentType || '').trim()) {
-        case 'Purchase Order':
-            return { sourceType: 39, sourceSubtype: '1' };
-        case 'Sales Return':
-            return { sourceType: 37, sourceSubtype: '5' };
-        case 'Sales Order':
-            return { sourceType: 37, sourceSubtype: '1' };
-        case 'Transfer Order':
-            return { sourceType: 5741, sourceSubtype: '1' };
-        default:
-            return { sourceType: '', sourceSubtype: '' };
-    }
-}
-
-function sanitizeVehicleNo(v) {
-    v = (v === undefined || v === null) ? '' : ('' + v);
-    // Alphanumeric only (no spaces/special characters), max 10
-    return v.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 10);
-}
-
-function getVehicleNo() {
-    var $el = $('#txtVehicleNo');
-    if ($el.length === 0) return '';
-    var clean = sanitizeVehicleNo($el.val());
-    if ($el.val() !== clean) $el.val(clean);
-    return clean;
-}
-
 $(document).ready(function () {
 
     initializeTransportQtyState();
+    // Call AutoCompleteDropDownFunction
+    UnloadingVendorDropDown();
+    LoadingVendorDropDown();
+    BindTransporter();
 
     var doctype = $("#hfDocumentType").val();
     if (doctype == "Sales Order") {
@@ -165,38 +95,39 @@ $(document).ready(function () {
         var name = $.trim($('#txtWarehouseCPersonName').val());
         var licenseno = $.trim($('#txtWarehouseCPersonLicenseNo').val());
         var phoneno = $.trim($('#txtWarehouseCPersonMobile').val());
-        var transportContect = $("#hfTransporterContactNo").val();
+        var jobTitle = $.trim($('#txtWarehouseCPersonJobTitle').val()) || 'Driver';
         $('#btnAddWarehouseContactSpinner').show();
         $('#lblWarehouseContactMsg').hide().text('');
 
-        //ResolveWarehouseVendorCompanyNo(function (companyno) {
-        //    if (!companyno) {
-        //        $('#btnAddWarehouseContactSpinner').hide();
-        //        $('#lblWarehouseContactMsg').text('Please select transporter before adding contact person.').css('color', 'red').show();
-        //        return;
-        //    }
-
-        SaveNewDriver(name, licenseno, phoneno, transportContect, function (isSuccess) {
-            $('#btnAddWarehouseContactSpinner').hide();
-
-            if (!isSuccess) {
-                $('#lblWarehouseContactMsg').text('Unable to add contact person. Please try again.').css('color', 'red').show();
+        ResolveWarehouseVendorCompanyNo(function (companyno) {
+            if (!companyno) {
+                $('#btnAddWarehouseContactSpinner').hide();
+                $('#lblWarehouseContactMsg').text('Please select transporter before adding contact person.').css('color', 'red').show();
                 return;
             }
 
-            $('#hfVendorCompanyNo').val(transportContect);
-            $('#txtDirverName').val(name);
-            $('#txtDirverLicenseNo').val(licenseno);
-            $('#txtDirverMobileNo').val(phoneno);
-            $('#hfDriverflag').val(true);
-            BindDrivers(transportContect, "company");
+            SaveNewDriver(name, licenseno, phoneno, companyno, jobTitle, function (isSuccess) {
+                $('#btnAddWarehouseContactSpinner').hide();
 
-            $('#lblWarehouseContactMsg').text('Contact Person Added Successfully').css('color', 'green').show();
+                if (!isSuccess) {
+                    $('#lblWarehouseContactMsg').text('Unable to add contact person. Please try again.').css('color', 'red').show();
+                    return;
+                }
 
-            window.setTimeout(function () {
-                ResetWarehouseContactPersonDetails();
-                $('#modalAddWarehouseContactPerson').modal('hide');
-            }, 500);
+                $('#hfVendorCompanyNo').val(companyno);
+                $('#txtDirverName').val(name);
+                $('#txtDirverLicenseNo').val(licenseno);
+                $('#txtDirverMobileNo').val(phoneno);
+                $('#hfDriverflag').val(true);
+                BindDrivers(companyno, "company");
+
+                $('#lblWarehouseContactMsg').text('Contact Person Added Successfully').css('color', 'green').show();
+
+                window.setTimeout(function () {
+                    ResetWarehouseContactPersonDetails();
+                    $('#modalAddWarehouseContactPerson').css('display', 'none');
+                }, 500);
+            });
         });
     });
 });
@@ -472,6 +403,64 @@ function ShowWarehouseItemTracking(lineNo, itemNo) {
         error: function () {
             ShowErrMsg("Error loading item tracking data. Please try again.");
         }
+    });
+
+    return false;
+}
+
+function AcceptCurrentWarehouseTask() {
+
+    var acceptedBy = ($('#lblAcceptedBy').text() || '').trim();
+    if (acceptedBy !== '') {
+        ShowActionMsg('Task already accepted.');
+        return false;
+    }
+
+    var documentNo = ($('#lnlDocumentNo').text() || '').trim();
+    var documentType = ($('#lblDocumentType').text() || '').trim();
+    var systemId = ($('#hfSystemId').val() || '').trim();
+    var loggedInUser = ($('#hfSPNo').val() || '').trim();
+    var hasPendingDropShipment = ($('#hfHasPendingDropShipment').val() || '').trim();
+
+    if (hasPendingDropShipment === 'Yes') {
+        ShowErrMsg('Not accept ' + documentNo + ' task due to Drop Shipment.');
+        return false;
+    }
+
+    if (systemId === '' || documentType === '' || loggedInUser === '') {
+        ShowErrMsg('Unable to accept the current task. Please reload the page and try again.');
+        return false;
+    }
+
+    var isAccept = confirm('Are you sure you want to Accept it?');
+    if (!isAccept) {
+        return false;
+    }
+
+    $('#btnAcceptTask').hide();
+    $('#btnAcceptSpinner').show();
+
+    var acceptSystemId = systemId + ',' + documentType;
+    $.post(
+        apiUrl + 'AcceptTaskOfWarehouse?systemids=' + encodeURIComponent(acceptSystemId) + '&AcceptedBy=' + encodeURIComponent(loggedInUser),
+        function (data) {
+            $('#btnAcceptSpinner').hide();
+
+            if (data) {
+                ShowActionMsg('Task Accepted Successfully');
+                window.setTimeout(function () {
+                    window.location.href = '/SPWarehouse/WarehouseCard?No=' + encodeURIComponent(documentNo) + '&DocumentType=' + encodeURIComponent(documentType);
+                }, 1000);
+            }
+            else {
+                $('#btnAcceptTask').show();
+                ShowErrMsg('Task accept failed. Please try again.');
+            }
+        }
+    ).fail(function () {
+        $('#btnAcceptSpinner').hide();
+        $('#btnAcceptTask').show();
+        ShowErrMsg('Error while accepting task. Please try again.');
     });
 
     return false;
@@ -806,7 +795,7 @@ function SetDriverDetail(name, licenseno, phoneno) {
 
 }
 
-function SaveNewDriver(name, licenseno, phoneno, companyno, onComplete) {
+function SaveNewDriver(name, licenseno, phoneno, companyno, jobTitle, onComplete) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
 
@@ -816,7 +805,7 @@ function SaveNewDriver(name, licenseno, phoneno, companyno, onComplete) {
     }
 
     $.post(
-        apiUrl + 'SaveNewDriver?Name=' + encodeURIComponent(name) + '&Registration_Number=' + encodeURIComponent(licenseno) + '&Mobile_Phone_No=' + encodeURIComponent(phoneno) + '&Company_No=' + encodeURIComponent(companyno) + '&Type=' + "Person" + '&JobTitle=' + $("#txtWarehouseCPersonJobTitle").val(),
+        apiUrl + 'SaveNewDriver?Name=' + encodeURIComponent(name) + '&Registration_Number=' + encodeURIComponent(licenseno) + '&Mobile_Phone_No=' + encodeURIComponent(phoneno) + '&Company_No=' + encodeURIComponent(companyno) + '&Type=' + encodeURIComponent('Person') + '&JobTitle=' + encodeURIComponent(jobTitle || 'Driver'),
         function (data) {
             if (data) {
 
@@ -942,15 +931,17 @@ function SetLoaingUnloading() {
 function SaveTransportQty(lineNo, itemNo, btn) {
     $('#lblMsg').html('').css('color', 'red').hide();
 
+    var doctype = $('#lblDocumentType').text().trim();
+    var qtyFieldLabel = doctype === "Purchase Order" ? "Qty to Receive" : "Transport Qty";
+
     if ($('#lblAcceptedBy')[0].innerHTML == "") {
-        alert('Please Accept The Task First Then You Can Update Transport Qty...!!!');
+        alert('Please Accept The Task First Then You Can Update ' + qtyFieldLabel + '...!!!');
         return false;
     }
 
-    var doctype = $('#lblDocumentType').text().trim();
     var documentno = $('#lnlDocumentNo').text().trim();
-    if (doctype !== "Sales Order" && doctype !== "Sales Return") {
-        ShowErrMsg('Transport Qty update is allowed only for Sales Order and Sales Return.');
+    if (doctype !== "Sales Order" && doctype !== "Sales Return" && doctype !== "Purchase Order" && doctype !== "Transfer Order") {
+        ShowErrMsg(qtyFieldLabel + ' update is allowed only for Sales Order, Sales Return, Purchase Order and Transfer Order.');
         return false;
     }
 
@@ -960,15 +951,15 @@ function SaveTransportQty(lineNo, itemNo, btn) {
     var transportQtyNumber = parseFloat(transportqty);
 
     if (transportqty === '') {
-        ShowErrMsg('Please enter Transport Qty.');
+        ShowErrMsg('Please enter ' + qtyFieldLabel + '.');
         return false;
     }
     if (isNaN(transportQtyNumber)) {
-        ShowErrMsg('Please enter valid Transport Qty.');
+        ShowErrMsg('Please enter valid ' + qtyFieldLabel + '.');
         return false;
     }
     if (!isNaN(baseQty) && transportQtyNumber > baseQty) {
-        ShowErrMsg('Transport Qty cannot be greater than Qty.');
+        ShowErrMsg(qtyFieldLabel + ' cannot be greater than Qty.');
         return false;
     }
 
@@ -977,23 +968,20 @@ function SaveTransportQty(lineNo, itemNo, btn) {
     $btn.prop('disabled', true);
     $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Save');
 
-    $.post('/SPWarehouse/UpdateTransportQty?doctype=' + encodeURIComponent(doctype)
-        + '&documentno=' + encodeURIComponent(documentno)
-        + '&lineno=' + encodeURIComponent(lineNo)
-        + '&transportqty=' + encodeURIComponent(transportqty),
+    $.post('/SPWarehouse/UpdateTransportQty?doctype=' + encodeURIComponent(doctype) + '&documentno=' + encodeURIComponent(documentno) + '&lineno=' + encodeURIComponent(lineNo) + '&transportqty=' + encodeURIComponent(transportqty),
         function (data) {
             $btn.prop('disabled', false).html(oldHtml);
             if (data === true || data === "true") {
                 transportQtySavedByLine[lineNo] = transportQtyNumber;
                 transportQtyDirtyByLine[lineNo] = false;
-                ShowActionMsg('Product ' + itemNo + ' transport qty updated successfully.');
+                ShowActionMsg('Product ' + itemNo + ' ' + qtyFieldLabel.toLowerCase() + ' updated successfully.');
             } else {
-                ShowErrMsg('Unable to update Transport Qty for product ' + itemNo + '.');
+                ShowErrMsg('Unable to update ' + qtyFieldLabel + ' for product ' + itemNo + '.');
             }
         }).fail(function () {
             transportQtyDirtyByLine[lineNo] = true;
             $btn.prop('disabled', false).html(oldHtml);
-            ShowErrMsg('Error while updating Transport Qty for product ' + itemNo + '.');
+            ShowErrMsg('Error while updating ' + qtyFieldLabel + ' for product ' + itemNo + '.');
         });
 
     return false;
@@ -1033,18 +1021,22 @@ function SaveTransporter() {
     $('#lblMsg').html('').css('color', 'red').hide();
 
     if ($('#lblAcceptedBy')[0].innerHTML == "") {
+        $('#btnSaveSpinner').hide();
         alert('Please Accept The Task First Then You Can Map the Details...!!!');
         return false;
     }
     if (!validateTransportQtyAgainstMTS()) {
+        $('#btnSaveSpinner').hide();
         return false;
     }
 
     if (!validateTransportQtySavedStatus()) {
+        $('#btnSaveSpinner').hide();
         return false;
     }
 
     if (!validateItemTrackingVsProductTransportQty()) {
+        $('#btnSaveSpinner').hide();
         return false;
     }
     //if ((!transporterCode || transporterCode === "") && (!vehicleno || vehicleno === "")) {
@@ -1075,6 +1067,7 @@ function SaveTransporter() {
 
     if ((!transporterCode && !vehicleno) ||
         (transporterCode.trim() === "" && vehicleno.trim() === "")) {
+        $('#btnSaveSpinner').hide();
         $('#lblMsg').html('Please enter Transporter Code or Vehicle Number before saving.').show();
         return false;
     }
@@ -1102,24 +1095,7 @@ function SaveTransporter() {
     }
 
     if (systemId.length > 0) {
-        var saveUrl = apiUrl + 'ClosedTaskOfWarehouse?doctype=' + encodeURIComponent(doctype)
-            + '&transporterCode=' + encodeURIComponent(transporterCode)
-            + '&systemids=' + encodeURIComponent(systemId)
-            + '&lrno=' + encodeURIComponent(lrno)
-            + '&lrdate=' + encodeURIComponent(lrdate)
-            + '&drivername=' + encodeURIComponent(drivername)
-            + '&driverlicenseno=' + encodeURIComponent(driverlicenseno)
-            + '&drivermobileno=' + encodeURIComponent(drivermobileno)
-            + '&vehicleno=' + encodeURIComponent(vehicleno)
-            + '&loadingcharges=' + encodeURIComponent(loadingcharges)
-            + '&unloadingcharges=' + encodeURIComponent(unloadingcharges)
-            + '&transporteramount=' + encodeURIComponent(transporteramount)
-            + '&remarks=' + encodeURIComponent(remarks)
-            + '&isclosed=' + encodeURIComponent(isclosed)
-            + '&selectedExisting=' + encodeURIComponent(createDriver)
-            + '&vendorcompanyNo=' + encodeURIComponent(vendorcompanyNo)
-            + '&loadingvendor=' + encodeURIComponent(loadingVendor)
-            + '&unloadingvendor=' + encodeURIComponent(unloadingVendor);
+        var saveUrl = apiUrl + 'ClosedTaskOfWarehouse?doctype=' + encodeURIComponent(doctype) + '&transporterCode=' + encodeURIComponent(transporterCode) + '&systemids=' + encodeURIComponent(systemId) + '&lrno=' + encodeURIComponent(lrno) + '&lrdate=' + encodeURIComponent(lrdate) + '&drivername=' + encodeURIComponent(drivername) + '&driverlicenseno=' + encodeURIComponent(driverlicenseno) + '&drivermobileno=' + encodeURIComponent(drivermobileno) + '&vehicleno=' + encodeURIComponent(vehicleno) + '&loadingcharges=' + encodeURIComponent(loadingcharges) + '&unloadingcharges=' + encodeURIComponent(unloadingcharges) + '&transporteramount=' + encodeURIComponent(transporteramount) + '&remarks=' + encodeURIComponent(remarks) + '&isclosed=' + encodeURIComponent(isclosed) + '&selectedExisting=' + encodeURIComponent(createDriver) + '&vendorcompanyNo=' + encodeURIComponent(vendorcompanyNo) + '&loadingvendor=' + encodeURIComponent(loadingVendor) + '&unloadingvendor=' + encodeURIComponent(unloadingVendor);
 
         $.post(saveUrl, function (data) {
             $('#btnSaveSpinner').hide();
@@ -1225,6 +1201,79 @@ function SaveAndCloseTransporter() {
     }
 }
 
+var filter = "";
+var orderBy = 5;
+var orderDir = "asc";
+var deletedEntries = [];
+var itemTrackingTransportQtyByLine = {};
+var transportQtySavedByLine = {};
+var transportQtyDirtyByLine = {};
+
+function initializeTransportQtyState() {
+    $("input[id^='txtTransportQty_']").each(function () {
+        var lineNo = (this.id || '').split('_')[1] || '';
+        if (!lineNo) return;
+
+        var qty = parseFloat($(this).val());
+        if (isNaN(qty)) qty = 0;
+
+        transportQtySavedByLine[lineNo] = qty;
+        transportQtyDirtyByLine[lineNo] = false;
+    });
+}
+
+function validateTransportQtySavedStatus() {
+    var invalidLineNo = '';
+    $("input[id^='txtTransportQty_']").each(function () {
+        var lineNo = (this.id || '').split('_')[1] || '';
+        if (lineNo && transportQtyDirtyByLine[lineNo] === true) {
+            invalidLineNo = lineNo;
+            $(this).focus();
+            return false;
+        }
+    });
+
+    if (invalidLineNo) {
+        var productNo = $('#txtTransportQty_' + invalidLineNo).closest('tr').find('td').eq(1).text().trim() || '';
+        ShowErrMsg('Transport Qty. on Item Tracking Lines and Transport Qty. in Product details for "' + productNo + '" does not match.');
+        return false;
+    }
+
+    return true;
+}
+
+function encodeHtml(value) {
+    return $('<div/>').text(value == null ? '' : value).html();
+}
+
+function getItemTrackingSourceParams(documentType) {
+    switch ((documentType || '').trim()) {
+        case 'Purchase Order':
+            return { sourceType: 39, sourceSubtype: '1' };
+        case 'Sales Return':
+            return { sourceType: 37, sourceSubtype: '5' };
+        case 'Sales Order':
+            return { sourceType: 37, sourceSubtype: '1' };
+        case 'Transfer Order':
+            return { sourceType: 5741, sourceSubtype: '1' };
+        default:
+            return { sourceType: '', sourceSubtype: '' };
+    }
+}
+
+function sanitizeVehicleNo(v) {
+    v = (v === undefined || v === null) ? '' : ('' + v);
+    // Alphanumeric only (no spaces/special characters), max 10
+    return v.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().substring(0, 10);
+}
+
+function getVehicleNo() {
+    var $el = $('#txtVehicleNo');
+    if ($el.length === 0) return '';
+    var clean = sanitizeVehicleNo($el.val());
+    if ($el.val() !== clean) $el.val(clean);
+    return clean;
+}
 function validateForm() {
 
     $('#lblMsg').html('');
@@ -1297,35 +1346,48 @@ function validateForm() {
     return true;
 }
 
-function UnloadingVendorDropDown() {
+function BindVendorAutoComplete(selector, hiddenField, type) {
+
     if (typeof ($.fn.autocomplete) === 'undefined') return;
 
-    $('#txtUnLoadingVendor').autocomplete({
+    var $input = $(selector);
+
+    $input.autocomplete({
         serviceUrl: '/SPWarehouse/GetloadingAndUnloadingDropDown',
         paramName: "prefix",
-        minChars: 2,
-        noCache: true,
+
+        minChars: 2,              
+        //deferRequestBy: 100,  
+        noCache: false,
+
         ajaxSettings: {
             type: "POST"
         },
+
         params: {
-            type: "unloading"
+            type: type
         },
+
+        beforeRender: function () {
+            $("#globalLoader").show();
+        },
+
+        onHide: function () {
+            $("#globalLoader").hide();
+        },
+
         onSelect: function (suggestion) {
-            $("#hfUnLoadingVendorNo").val(suggestion.data);
-            $("#txtUnLoadingVendor").val(suggestion.value);
+            $(hiddenField).val(suggestion.data);
+            $input.val(suggestion.value);
         },
-        onShow: function () {
-            setTimeout(() => {
-                $input.focus();
-            }, 10);
-        },
+
         transformResult: function (response) {
-            var json;
+
+            let json;
             try {
-                json = $.parseJSON(response);
+                json = typeof response === "string" ? JSON.parse(response) : response;
             } catch (e) {
-                console.error("Invalid JSON response", response);
+                console.error("Invalid JSON", response);
                 return { suggestions: [] };
             }
 
@@ -1337,53 +1399,13 @@ function UnloadingVendorDropDown() {
                     };
                 })
             };
-        },
-
+        }
     });
+} 
+function UnloadingVendorDropDown() {
+    BindVendorAutoComplete('#txtUnLoadingVendor', '#hfUnLoadingVendorNo', 'unloading');
 }
 
 function LoadingVendorDropDown() {
-
-    if (typeof ($.fn.autocomplete) === 'undefined') return;
-    $('#txtLoadingVendor').autocomplete({
-        serviceUrl: '/SPWarehouse/GetloadingAndUnloadingDropDown',
-        paramName: "prefix",
-        minChars: 2,
-        noCache: true,
-        ajaxSettings: {
-            type: "POST"
-        },
-        params: {
-            type: "loading"
-        },
-        onSelect: function (suggestion) {
-            $("#hfLoadingVendorNo").val(suggestion.data);
-            $("#txtLoadingVendor").val(suggestion.value);
-        },
-        onShow: function () {
-            setTimeout(() => {
-                $input.focus();
-            }, 10);
-        },
-        transformResult: function (response) {
-            var json;
-            try {
-                json = $.parseJSON(response);
-            } catch (e) {
-                console.error("Invalid JSON response", response);
-                return { suggestions: [] };
-            }
-
-            return {
-                suggestions: $.map(json, function (item) {
-                    return {
-                        value: item.Name,
-                        data: item.No
-                    };
-                })
-
-            };
-        },
-
-    });
+    BindVendorAutoComplete('#txtLoadingVendor', '#hfLoadingVendorNo', 'loading');
 }
