@@ -1,0 +1,156 @@
+﻿
+@{
+    ViewBag.Title = "UserRoleRelationList";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .EditRoleCls, .DeleteRoleCls:hover {
+        cursor: pointer;
+    }
+
+    .table-responsive-custom {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    #dataList {
+        width: 100% !important;
+        table-layout: auto;
+    }
+
+        #dataList th,
+        #dataList td {
+            white-space: nowrap;
+        }
+</style>
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">User Role Relation</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-2">
+                    <button id="btnNew" class="btn btn-primary mb-3 mb-lg-0" type="button">
+                        <i class='bx bxs-plus-square'></i>&nbsp;New
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="dataList" class="display responsive nowrap" style="width:70%" align="left">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th scope="col">User Relation Role ID</th>
+                            <th scope="col">User Security IDy</th>
+                            <th scope="col">User Name</th>
+                            <th scope="col">Role ID</th>
+                            <th scope="col">Role Name</th>
+                            <th scope="col">Full Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+                <input id="hdnRoleNo" style="display:none" />
+                <input id="hdnRoleName" style="display:none" />
+                <input id="hdnRoleCount" style="display:none" />
+                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                <div id="orderInfo"></div>
+            </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalDelRole" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete User Role Relation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete it?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnDelYes" class="btn btn-primary">Yes</button>
+                <button type="button" id="btnDelNo" class="btn btn-secondary">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="modalDelMsg" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete User Role Relation</h5>
+                <button id="btnCloseDelMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <center>
+                    <img src="~/Layout/assets/images/appImages/Icon-1.png" />
+                    <br />
+                    Deleted Successfully.
+                </center>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/UserRoleRelationList.js"></script>
+@*<script>
+        $(document).ready(function () {
+
+            $('#btnNew').click(function () {
+                window.location.replace('@Url.Action("Role", "SPRoles")');
+            });
+
+        });
+    </script>*@

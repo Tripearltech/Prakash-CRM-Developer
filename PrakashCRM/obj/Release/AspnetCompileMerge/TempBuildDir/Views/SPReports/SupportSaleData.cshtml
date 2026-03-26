@@ -1,0 +1,82 @@
+﻿
+@{
+    ViewBag.Title = "BusinessTypesSalesPerformance";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPReports/SupportSaleData"> Reports </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Support SaleData
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input type="date" id="FromDate" class="form-control" placeholder="From Date" />
+                            <p id="Fdatevalidate" style="color:red"></p>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" id="ToDate" class="form-control" placeholder="To Date" />
+                            <p id="Tdatevalidate" style="color:red"></p>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="SearchBtn" class="btn btn-primary">Search</button>
+                            <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                <i class="bx bx-rotate-right "></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <table class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Customer</th>
+                                            <th scope="col">Contact</th>
+                                            <th scope="col">Product</th>
+                                            <th scope="col">Salesperson</th>
+                                            <th scope="col">Support Salesperson</th>
+                                            <th scope="col">Managed By</th>
+                                            <th scope="col">Total Sales</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblSupportSaleData">
+                                    </tbody>
+                                    <tbody id="tblSupportRepotingSaleData">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/reportjs/SupportSaleData.js"></script>

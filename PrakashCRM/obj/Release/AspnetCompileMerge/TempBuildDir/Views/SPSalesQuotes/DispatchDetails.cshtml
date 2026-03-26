@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Title = "DispatchDetails";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPSalesQuotes/DispatchDetails"> SalesQuotes</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Dispatch Details
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div>
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <input type="date" id="FromDate" class="form-control" placeholder="From Date" />
+                            <p id="Fdatevalidate" style="color:red"></p>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" id="ToDate" class="form-control" placeholder="To Date" />
+                            <p id="Tdatevalidate" style="color:red"></p>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" class="form-control" id="TxtSearch" placeholder="Document no" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="SearchBtn" class="btn btn-primary">Search</button>
+                            <button id="btnClearFilter" class="btn btn-primary" type="button">
+                                <i class="bx bx-rotate-right "></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="table-responsive">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <table class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Invoice No</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Customer No</th>
+                                            <th scope="col">Customer Name</th>
+                                            <th scope="col">Vehicle No</th>
+                                            <th scope="col">LRNo</th>
+                                            <th scope="col">SalesQuoteNo</th>
+                                            <th scope="col">OrderDetails</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblDispatchDetails">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="DetailsModal" tableindex="-1" aria-labelledby="DetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Details</h5>
+            </div>
+            <div class="modal-body" style="max-height:450px; overflow-y:auto;">
+                <table class="table mb-0 table-striped">
+                    <thead class="sticky-top bg-white" style="top: -20px;">
+                        <tr>
+                            <th scope="col">Itemno</th>
+                            <th scope="col">Invoice Qty</th>
+                            <th scope="col">Total Qty</th>
+                            <th scope="col">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbleOrderDetails"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SalesQtDispatchDetails.js"></script>

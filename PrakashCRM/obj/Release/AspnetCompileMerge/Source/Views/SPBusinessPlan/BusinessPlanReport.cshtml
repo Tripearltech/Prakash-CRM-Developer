@@ -1,0 +1,272 @@
+﻿@model PrakashCRM.Data.Models.SPSalespersonDropDwon
+@{
+    ViewBag.Title = "BusinessPlanReport";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Business Report</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="row g-1">
+                    <div class="col-12">
+                        <div class="filter-box row g-3 align-items-center">
+
+                            <!-- Single Year Dropdown -->
+                            <div class="col-md-2">
+                                <select class="form-select" placeholder="Year" id="ddlYear">
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <input type="hidden" id="hdnddlSalesPerson" value="@Model.Sales_Person" />
+                                @Html.DropDownListFor(model => model.Sales_Person, Enumerable.Empty<SelectListItem>(), new { @id = "txtddlSalesPerson", @class = "form-select" })
+                                <label id="lblDepartmentMsg" style="color:red;display:none"></label>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-center gap-2">
+
+                                <button type="button" id="btnSearch" class="btn btn-primary">Search</button>
+                                <button id="btnClearFilter" class="btn btn-primary" type="button"> Refresh</button>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <select class="form-select me-2" id="bpExportType" style="max-width: 420px; min-width: 120px;">
+                                        <option value="">--Select--</option>
+                                        <option value="Excel">Excel</option>
+                                        <option value="PDF">PDF</option>
+                                    </select>
+                                    <button class="btn btn-danger" id="bpBtnExport">Export</button>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-2">
+
+                            <table class="table mt-2 mb-0 table-striped">
+                                <thead>
+                                    <tr class="border-top">
+                                        <th scope="col">Sales Person</th>
+                                        <th scope="col">Demand Qty</th>
+                                        <th scope="col">Target Qty</th>
+                                        <th scope="col">Sales Qty</th>
+                                        <th scope="col">Sales Percentage(Qty)</th>
+                                        <th scope="col">Target Amount</th>
+                                        <th scope="col">Sales Amount</th>
+                                        <th scope="col">Sales Percentage(Amount)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tblbusinessreport">
+                                </tbody>
+                                <tbody id="tblbusinessallreport">
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toolbar">
+        <div class=" text-end g-3">
+            <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+        </div>
+    </div>
+
+    <div class="modal fade" id="DetailsModal" tableindex="-1" aria-labelledby="DetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">SalesPerson Details</h5>
+                </div>
+                <div class="modal-body" style="max-height:450px; overflow-y:auto;">
+                    <table class="table mb-0 table-striped">
+                        <thead class="sticky-top bg-white" style="top: -20px;">
+                            <tr>
+                                <th></th>
+                                <th scope="col"> Customer Name</th>
+                                <th scope="col"> Item Name</th>
+                                <th scope="col"> Demand Quantity</th>
+                                <th scope="col"> Target Quantity</th>
+                                <th scope="col"> Sales Quantity</th>
+                                <th scope="col"> Sales Percentage(Qty)</th>
+                                <th scope="col"> Target Amount</th>
+                                <th scope="col"> Sales Percentage(Amt)</th>
+                                <th scope="col">Sales % (Amount)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblSPDetails"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="bpDemandSelectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" id="bpDemandSelectHeader">
+                    <h5 class="modal-title">Select View</h5>
+                    <button type="button" id="bpBtnCloseDemandModalIcon" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height:60vh; overflow-y:auto;">
+                    <div id="bpDemandSelectControls">
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="mb-2">
+                                    <input type="radio" class="flat" name="bpDemandView" id="bpViewC" value="customer" checked="" required /> Customer
+                                    <br>
+                                    <input type="radio" class="flat" name="bpDemandView" id="bpViewP" value="product" style="margin-top:20px" /> Product
+                                </p>
+                                <button class="btn btn-primary w-100" id="bpBtnShowDemandDetail">Show</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div id="bpDvCustDetails" style="display:none">
+                            <h2 id="bpCustHeader"></h2>
+                            <table>
+                                <tr>
+                                    <td>Customer</td>
+                                    <td>
+                                        <input type="text" id="bpCustSearch" class="form-control td-space" style="width:400px;height:30px" />
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm td-space" id="bpBtnCustSearch">Search</button>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table class="table table-striped jambo_table bulk_action" style="margin-top:5px">
+                                <thead>
+                                    <tr class="headings">
+                                        <th class="column-title">No</th>
+                                        <th class="column-title">Customer Name</th>
+                                        <th class="column-title" id="bpCustMetricHeader"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bpTblCustAgg"></tbody>
+                            </table>
+                        </div>
+
+                        <div id="bpDvProdDetails" style="display:none">
+                            <h2 id="bpProdHeader"></h2>
+                            <table>
+                                <tr>
+                                    <td>Product</td>
+                                    <td>
+                                        <input type="text" id="bpProdSearch" class="form-control td-space" style="width:400px;height:30px" />
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm td-space" id="bpBtnProdSearch">Search</button>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table class="table table-striped jambo_table bulk_action" style="margin-top:5px">
+                                <thead>
+                                    <tr class="headings">
+                                        <th class="column-title">No</th>
+                                        <th class="column-title">Product Name</th>
+                                        <th class="column-title" id="bpProdMetricHeader"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bpTblProdAgg"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="bpBtnCloseDemandModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="bpDemandDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="bpDemandDetailsTitle" class="modal-title"></h5>
+                    <div class="d-flex gap-2">
+                        <button id="bpBtnBackDemand" type="button" class="btn btn-danger">Back</button>
+                        <button id="bpBtnCloseDemand" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+                <div class="modal-body" style="max-height:60vh; overflow-y:auto;">
+                    <div class="row g-2 align-items-center mb-3">
+                        <div class="col-auto">
+                            <span id="bpDetailsSearchLabel">Customer</span>
+                        </div>
+                        <div class="col">
+                            <input type="text" id="bpDetailsSearchText" class="form-control" placeholder="" />
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-primary" id="bpDetailsBtnSearch">Search</button>
+                        </div>
+                        <div class="col-auto">Export</div>
+                        <div class="col-auto">
+                            <select class="form-select" id="bpDetailsExportType" style="min-width:140px;">
+                                <option value="">--Select--</option>
+                                <option value="Excel">Excel</option>
+                                <option value="PDF">PDF</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-primary" id="bpDetailsBtnExport">Export</button>
+                        </div>
+                    </div>
+
+                    <table class="table table-striped jambo_table bulk_action" style="margin-top:5px">
+                        <thead>
+                            <tr>
+                                <th style="width:70px;">No</th>
+                                <th id="bpDetailsNameHeader">Customer Name</th>
+                                <th id="bpDetailsMetricHeader" style="width:160px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="bpTblDemandDetails"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class='loader' id='divImage' style="display:none">
+        <!-- MODAL CONTENT -->
+        <div class='loader-content'>
+            <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+        </div>
+    </div>
+    <div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color:red">Error</h5>
+                    <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="color:red" align="center">
+                    <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                    <br /><br />
+                    <h6 id="modalErrDetails" style="color:red"></h6>
+                </div>
+            </div>
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    <script src="~/Layout/assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/appjs/BusinessPlanReport.js"></script>
