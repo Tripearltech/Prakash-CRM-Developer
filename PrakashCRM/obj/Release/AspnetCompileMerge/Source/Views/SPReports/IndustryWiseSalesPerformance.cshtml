@@ -1,0 +1,56 @@
+﻿@{
+    ViewBag.Title = "IndustryWiseSalesPerformance";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPReports/BusinessTypeSalesPerfomance"> Reports </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Industry Wise Sales Performance
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+    <div class="card">
+        <div class="card-body">
+            <div class="">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <table class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+
+                                            <th scope="col">Industry Wise Sales Performance</th>
+                                            <th scope="col">Number Of Customers</th>
+                                            <th scope="col">Sales In Cr</th>
+                                            <th scope="col">%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblIndustryWiseSalesPerformanceDetails">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/reportjs/IndustryWiseSalesPerformance.js"></script>

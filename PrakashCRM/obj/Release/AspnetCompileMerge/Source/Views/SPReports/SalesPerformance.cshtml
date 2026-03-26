@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "SalesPerformance";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPReports/TaskPerformance">Sales Performance</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Sales Performance
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <table class="table mb-0 table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Branch Name</th>
+                                            <th scope="col">Annual Target</th>
+                                            <th scope="col">June Target</th>
+                                            <th scope="col">June Sales </th>
+                                            <th scope="col">June % </th>
+                                            <th scope="col">Up to June Sales</th>
+                                            <th scope="col">Annual %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblSalesPerformanceBranch">
+                                    </tbody>
+                                    @*<tbody id="tblemployeeTaskPerformance">
+                                    </tbody>*@
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="DetailsModal" tableindex="-1" aria-labelledby="DetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sales Performance</h5>
+            </div>
+            <div class="modal-body" style="max-height:450px; overflow-y:auto;">
+                <table class="table mb-0 table-striped">
+                    <thead class="sticky-top bg-white" style="top: -20px;">
+                        <tr>
+                            <th scope="col">Product Name</th>
+                            <th scope="col">Annual Target</th>
+                            <th scope="col">June Target</th>
+                            <th scope="col">June Sales </th>
+                            <th scope="col">June % </th>
+                            <th scope="col">Up to June Sales</th>
+                            <th scope="col">Annual %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbleSalesPerformanceProduct"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/reportjs/SalesPerformance.js"></script>
