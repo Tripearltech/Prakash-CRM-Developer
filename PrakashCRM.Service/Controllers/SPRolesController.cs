@@ -50,8 +50,10 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             List<SPRoleList> roles = new List<SPRoleList>();
-            if (filter == null)
-                filter = "";
+            if (string.IsNullOrEmpty(filter))
+                filter = "IsActive eq true";
+            else
+                filter += " and IsActive eq true";
 
             var result = (dynamic)null;
 

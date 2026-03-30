@@ -37,7 +37,7 @@
                                 @Html.DropDownListFor(model => model.Type, Enumerable.Empty<SelectListItem>(), new { @id = "ddlType", @class = "form-select" })
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">From Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <label class="form-label">From Employee Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 @Html.TextBoxFor(model => model.From_Code, new { @class = "form-control", @id = "hdnFromCode", style = "display:none" })
                                 @Html.TextBoxFor(model => model.Employee_No, new { @class = "form-control", @id = "txtEmpNo", style = "display:none" })
                                 <input type="hidden" id="hfEmployee_No" value="@ViewBag.Employee_No" />

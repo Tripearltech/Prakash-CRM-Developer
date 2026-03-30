@@ -133,21 +133,7 @@ namespace PrakashCRM.Controllers
 
             return Json(spNoCode, JsonRequestBehavior.AllowGet);
 
-            //spNoCode.Add(new SPNoCodeForNotif
-            //    {
-            //        No = "E0150",
-            //        PCPL_Employee_Code = "AA"
-            //    }
-            //);
-
-            //spNoCode.Add(new SPNoCodeForNotif
-            //{
-            //    No = "E0160",
-            //    PCPL_Employee_Code = "BB"
-            //}
-            //);
-
-            //return Json(spNoCode, JsonRequestBehavior.AllowGet);
+         
         }
 
         public async Task<JsonResult> GetSalespersonDetails(string FromCode)

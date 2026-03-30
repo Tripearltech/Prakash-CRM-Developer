@@ -3,6 +3,18 @@
   "WorkspaceRootPath": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|c:\\project\\prakashcrm_salesperson\\prakash-crm-developer\\prakashcrm\\views\\spnotification\\notification.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|solutionrelative:prakashcrm\\views\\spnotification\\notification.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|c:\\project\\prakashcrm_salesperson\\prakash-crm-developer\\prakashcrm\\scripts\\appjs\\spwarehousecard.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|solutionrelative:prakashcrm\\scripts\\appjs\\spwarehousecard.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{09B6685A-6FB9-4C7A-A77F-1EB12B15CDDE}|PrakashCRM.Service\\PrakashCRM.Service.csproj|C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\prakashcrm.service\\controllers\\spgrncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{09B6685A-6FB9-4C7A-A77F-1EB12B15CDDE}|PrakashCRM.Service\\PrakashCRM.Service.csproj|solutionrelative:prakashcrm.service\\controllers\\spgrncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\prakashcrm\\views\\spwarehouse\\warehousecard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|solutionrelative:prakashcrm\\views\\spwarehouse\\warehousecard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -15,20 +27,8 @@
       "RelativeMoniker": "D:0:0:{09B6685A-6FB9-4C7A-A77F-1EB12B15CDDE}|PrakashCRM.Service\\PrakashCRM.Service.csproj|solutionrelative:prakashcrm.service\\controllers\\spwarehousecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\prakashcrm\\scripts\\appjs\\spwarehousecard.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|solutionrelative:prakashcrm\\scripts\\appjs\\spwarehousecard.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{BF410FDF-E32A-4445-8BBE-BDDCD0671C34}|PrakashCRM.Data\\PrakashCRM.Data.csproj|C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\prakashcrm.data\\models\\spwarehouse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF410FDF-E32A-4445-8BBE-BDDCD0671C34}|PrakashCRM.Data\\PrakashCRM.Data.csproj|solutionrelative:prakashcrm.data\\models\\spwarehouse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{09B6685A-6FB9-4C7A-A77F-1EB12B15CDDE}|PrakashCRM.Service\\PrakashCRM.Service.csproj|C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\prakashcrm.service\\controllers\\spgrncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{09B6685A-6FB9-4C7A-A77F-1EB12B15CDDE}|PrakashCRM.Service\\PrakashCRM.Service.csproj|solutionrelative:prakashcrm.service\\controllers\\spgrncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\prakashcrm\\scripts\\appjs\\spgrncard.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A555291F-813A-48D3-A1BC-F48BCD76928E}|PrakashCRM\\PrakashCRM.csproj|solutionrelative:prakashcrm\\scripts\\appjs\\spgrncard.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,8 +38,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 178,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Notification.cshtml",
+              "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Views\\SPNotification\\Notification.cshtml",
+              "RelativeDocumentMoniker": "PrakashCRM\\Views\\SPNotification\\Notification.cshtml",
+              "ToolTip": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Views\\SPNotification\\Notification.cshtml",
+              "RelativeToolTip": "PrakashCRM\\Views\\SPNotification\\Notification.cshtml",
+              "ViewState": "AgIAABoAAAAAAAAAAAAEwC8AAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-27T09:26:20.635Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
@@ -58,33 +71,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "WarehouseCard.cshtml",
               "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Views\\SPWarehouse\\WarehouseCard.cshtml",
               "RelativeDocumentMoniker": "PrakashCRM\\Views\\SPWarehouse\\WarehouseCard.cshtml",
               "ToolTip": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Views\\SPWarehouse\\WarehouseCard.cshtml",
               "RelativeToolTip": "PrakashCRM\\Views\\SPWarehouse\\WarehouseCard.cshtml",
-              "ViewState": "AgIAAEkBAAAAAAAAAAAWwFkBAAAqAAAAAAAAAA==",
+              "ViewState": "AgIAAEkBAAAAAAAAAAAWwGEBAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-20T10:41:08.743Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-20T10:41:08.743Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "SPGRNController.cs",
               "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM.Service\\Controllers\\SPGRNController.cs",
               "RelativeDocumentMoniker": "PrakashCRM.Service\\Controllers\\SPGRNController.cs",
               "ToolTip": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM.Service\\Controllers\\SPGRNController.cs",
               "RelativeToolTip": "PrakashCRM.Service\\Controllers\\SPGRNController.cs",
-              "ViewState": "AgIAANADAAAAAAAAAAAQwPYDAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAANADAAAAAAAAAAAQwNwDAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-19T13:33:30.142Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-19T13:33:30.142Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "SPWarehouseController.cs",
               "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM.Service\\Controllers\\SPWarehouseController.cs",
               "RelativeDocumentMoniker": "PrakashCRM.Service\\Controllers\\SPWarehouseController.cs",
@@ -97,20 +108,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "SPWarehouseCard.js",
               "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Scripts\\appjs\\SPWarehouseCard.js",
               "RelativeDocumentMoniker": "PrakashCRM\\Scripts\\appjs\\SPWarehouseCard.js",
               "ToolTip": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Scripts\\appjs\\SPWarehouseCard.js",
               "RelativeToolTip": "PrakashCRM\\Scripts\\appjs\\SPWarehouseCard.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAH4FAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2026-03-19T10:37:49.246Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "SPWarehouseController.cs",
               "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Controllers\\SPWarehouseController.cs",
               "RelativeDocumentMoniker": "PrakashCRM\\Controllers\\SPWarehouseController.cs",
@@ -123,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "SPWarehouse.cs",
               "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM.Data\\Models\\SPWarehouse.cs",
               "RelativeDocumentMoniker": "PrakashCRM.Data\\Models\\SPWarehouse.cs",
@@ -131,20 +142,7 @@
               "RelativeToolTip": "PrakashCRM.Data\\Models\\SPWarehouse.cs",
               "ViewState": "AgIAAKUBAAAAAAAAAAAzwLMBAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-20T10:40:55.833Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "SPGRNCard.js",
-              "DocumentMoniker": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Scripts\\appjs\\SPGRNCard.js",
-              "RelativeDocumentMoniker": "PrakashCRM\\Scripts\\appjs\\SPGRNCard.js",
-              "ToolTip": "C:\\Project\\PrakashCRM_SalesPerson\\Prakash-CRM-Developer\\PrakashCRM\\Scripts\\appjs\\SPGRNCard.js",
-              "RelativeToolTip": "PrakashCRM\\Scripts\\appjs\\SPGRNCard.js",
-              "ViewState": "AgIAANECAAAAAAAAAAAkwOwCAAAhAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-03-20T06:22:08.994Z"
+              "WhenOpened": "2026-03-20T10:40:55.833Z"
             }
           ]
         },

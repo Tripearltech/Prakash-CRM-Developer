@@ -151,15 +151,6 @@ C:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\Prak
 C:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Debug\PrakashC.3DFDDAF9.Up2Date
 C:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.dll
 C:\Project\PrakashCRM_SalesPerson\Azures-Code - backup item price change-03\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.pdb
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\PrakashCRM.Data.dll
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\PrakashCRM.Data.pdb
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\Newtonsoft.Json.dll
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\Newtonsoft.Json.xml
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.csproj.AssemblyReference.cache
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.csproj.CoreCompileInputs.cache
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashC.3DFDDAF9.Up2Date
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.dll
-C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.pdb
 C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Debug\PrakashCRM.Data.dll
 C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Debug\PrakashCRM.Data.pdb
 C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\bin\Debug\Newtonsoft.Json.dll
@@ -169,3 +160,12 @@ C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Debu
 C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Debug\PrakashC.3DFDDAF9.Up2Date
 C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.dll
 C:\Project\PrakashCRM_SalesPerson\Prakash-CRM-Developer\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\PrakashCRM.Data.pdb
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\Newtonsoft.Json.dll
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\bin\Debug\Newtonsoft.Json.xml
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.csproj.AssemblyReference.cache
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.csproj.CoreCompileInputs.cache
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashC.3DFDDAF9.Up2Date
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.dll
+C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM.Data\obj\Debug\PrakashCRM.Data.pdb

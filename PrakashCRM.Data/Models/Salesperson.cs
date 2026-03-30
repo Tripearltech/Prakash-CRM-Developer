@@ -74,6 +74,7 @@ namespace PrakashCRM.Data.Models
         public string Message { get; set; }
         public string UserNo { get; set; }
         public string Email { get; set; }
+        public string ResetLinkText { get; set; }
     }
 
 
@@ -412,6 +413,7 @@ namespace PrakashCRM.Data.Models
         public string Status { get; set; }
 
         public bool PCPL_Enable_OTP_On_Login { get; set; }
+        public bool OTPEmailSent { get; set; } 
     }
 
     public class ContactNoOTPForLoginProfile : ContactNoOTPForLogin
