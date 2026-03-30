@@ -30,6 +30,11 @@ namespace PrakashCRM.Service.Controllers
             return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
         }
 
+        private static string EscapeODataValue(string value)
+        {
+            return (value ?? string.Empty).Replace("'", "''");
+        }
+
         [Route("GetAllSPEmployeeCode")]
         public List<SPNoCodeForNotif> GetAllSPEmployeeCode()
         {
@@ -61,7 +66,7 @@ namespace PrakashCRM.Service.Controllers
 
             if (result.Result.Item1.value.Count > 0)
                 user = result.Result.Item1.value[0];
-            
+
             return user;
         }
 
@@ -76,7 +81,8 @@ namespace PrakashCRM.Service.Controllers
             if (isEdit)
             {
                 requestNotification.Type = NotifType;
-                result = ac.PatchItem("NotificationsListDotNetAPI", requestNotification, responseNotification, "Type='" + NotifType + "',Employee_No='" + NotifEmployee_No + "'");
+                requestNotification.Employee_No = NotifEmployee_No;
+                result = ac.PatchItem("NotificationsListDotNetAPI", requestNotification, responseNotification, "Type='" + EscapeODataValue(NotifType) + "',Employee_No='" + EscapeODataValue(NotifEmployee_No) + "'");
             }
             else
                 result = ac.PostItem("NotificationsListDotNetAPI", requestNotification, responseNotification);
@@ -129,16 +135,16 @@ namespace PrakashCRM.Service.Controllers
         }
 
         [Route("GetNotificationFromTypeAndEmpNo")]
-        public SPNotification GetNotificationFromTypeAndEmpNo(string Type, string Employee_Name)
+        public SPNotification GetNotificationFromTypeAndEmpNo(string Type, string Employee_No)
         {
             API ac = new API();
             SPNotification notification = new SPNotification();
 
-            var result = ac.GetData<SPNotification>("NotificationsListDotNetAPI", "Type eq '" + Type + "' and Employee_Name eq '" + Employee_Name + "'");
+            var result = ac.GetData<SPNotification>("NotificationsListDotNetAPI", "Type eq '" + EscapeODataValue(Type) + "' and Employee_No eq '" + EscapeODataValue(Employee_No) + "'");
 
             if (result.Result.Item1.value.Count > 0)
                 notification = result.Result.Item1.value[0];
-            
+
             return notification;
         }
 
@@ -147,9 +153,9 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             List<SPProfile> users = new List<SPProfile>();
-            
+
             var result = ac.GetData<SPProfile>("EmployeesDotNetAPI", "");
-            
+
             if (result.Result.Item1.value.Count > 0)
                 users = result.Result.Item1.value;
 
@@ -180,7 +186,7 @@ namespace PrakashCRM.Service.Controllers
                         .Where(value => !string.IsNullOrWhiteSpace(value))).Trim(), normalizedName, StringComparison.OrdinalIgnoreCase))
                     ?? (users.Count == 1 ? users[0] : user);
             }
-            
+
             return user;
         }
     }

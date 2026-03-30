@@ -130,7 +130,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     rowData = rowData + "</tr>";
 
                     $('#tableBody').append(rowData);
-                    
+
                 });
                 if (firsload == 1) {
                     pageMe();
@@ -215,13 +215,13 @@ function pageMe() {
 
     var curr = 0;
     var skip = 0, top = $('#ddlRecPerPage').val();
-    
+
     while (numPages > curr && (settings.hidePageNumbers == false)) {
         $('<li id="pg' + (curr + 1) + '" class="pg"><a href="#" skip=' + skip + ' top=' + top + ' class="page_link">' + (curr + 1) + '</a></li>').appendTo(pager);
         skip = skip + parseInt($('#ddlRecPerPage').val());
         curr++;
     }
-    
+
     if (settings.showPrevNext) {
         $('<li><a href="#" class="next_link">»</a></li>').appendTo(pager);
     }
@@ -298,7 +298,7 @@ function pageMe() {
         $('.page_link').removeClass("active");
 
         currpg1.addClass("active");
-        
+
         children.css('display', 'none').slice(startAt, endOn).show();
 
         if (page >= 1) {
@@ -328,9 +328,9 @@ function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.fileName != "") {
-                    
+
                     window.location.href = "/SPNotification/Download?file=" + data.fileName;
                 }
             },
