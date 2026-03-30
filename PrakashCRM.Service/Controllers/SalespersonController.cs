@@ -263,6 +263,7 @@ namespace PrakashCRM.Service.Controllers
 
             string securePortalUrl = BuildSecurePortalUrl(portalUrl);
             string resetUrl = securePortalUrl + "Account/ResetForgotPassword?token=" + Uri.EscapeDataString(token.Token);
+            string resetLinkText = "Reset Password";
 
             EmailService emailService = new EmailService();
 
@@ -274,7 +275,8 @@ namespace PrakashCRM.Service.Controllers
             sbMailBody.Append("<p>User Email: " + email + "</p>");
             sbMailBody.Append("<p>User Role: " + role + "</p>");
             sbMailBody.Append("<p>&nbsp;</p>");
-            sbMailBody.Append("<p>Reset Password Link : </p><a target='_self' href='" + resetUrl + "'>" + resetUrl + "</a>");
+            sbMailBody.Append("<p>Click below to reset your password:</p>");
+            sbMailBody.Append("<p><a target='_self' href='" + resetUrl + "'>" + resetLinkText + "</a></p>");
             sbMailBody.Append("<p>This link will expire in " + GetPasswordResetTokenExpiryMinutes() + " minutes and can be used only once.</p>");
             sbMailBody.Append("<p>&nbsp;</p>");
             sbMailBody.Append("<p>Warm Regards,</p>");
@@ -287,6 +289,7 @@ namespace PrakashCRM.Service.Controllers
             result.Message = "Reset password link sent.";
             result.UserNo = userNo;
             result.Email = email;
+            result.ResetLinkText = resetLinkText;
 
             return result;
         }
@@ -1213,5 +1216,38 @@ namespace PrakashCRM.Service.Controllers
             return departments;
         }
 
+        // SendOtpEmail before login
+
+        //[HttpGet]
+        //[Route("SendOtpEmail")]
+        //public bool SendOtpEmail(string email, string firstName, string lastName, string generatedOtp, string adminContactNo)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(generatedOtp))
+        //            return false;
+
+        //        string displayName = ((firstName ?? "") + " " + (lastName ?? "")).Trim();
+        //        if (string.IsNullOrWhiteSpace(displayName))
+        //            displayName = "User";
+
+        //        StringBuilder sbMailBody = new StringBuilder();
+        //        sbMailBody.Append("<p>Hi " + System.Web.HttpUtility.HtmlEncode(displayName) + ",</p>");
+        //        sbMailBody.Append("<p>Your OTP to log in to the <strong>Prakash CRM Portal</strong> is <strong>" + System.Web.HttpUtility.HtmlEncode(generatedOtp) + "</strong>.</p>");
+        //        sbMailBody.Append("<p>Please do not share this OTP with another person.</p>");
+        //        if (!string.IsNullOrWhiteSpace(adminContactNo))
+        //            sbMailBody.Append("<p>If you did not attempt to log in, contact admin immediately at <strong>" + System.Web.HttpUtility.HtmlEncode(adminContactNo) + "</strong>.</p>");
+        //        sbMailBody.Append("<p>Warm Regards,</p>");
+        //        sbMailBody.Append("<p>Support Team</p>");
+
+        //        EmailService emailService = new EmailService();
+        //        emailService.SendEmailTo(email.Trim(), sbMailBody.ToString(), "Login OTP - PrakashCRM");
+        //        return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
     }
 }

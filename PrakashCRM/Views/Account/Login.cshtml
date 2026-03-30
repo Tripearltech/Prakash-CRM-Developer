@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     Layout = null;
 }
 
@@ -187,6 +186,32 @@
                 intervalID = setInterval(Timer, 1000);
             }
 
+            var otpModalElement = document.getElementById('OTPmodal');
+            var otpModalInstance = otpModalElement ? new bootstrap.Modal(otpModalElement) : null;
+
+            function hideOtpModal() {
+                if (otpModalInstance) {
+                    otpModalInstance.hide();
+                }
+                else {
+                    $('#OTPmodal').hide();
+                }
+            }
+
+            function showOtpModal() {
+                if (otpModalInstance) {
+                    otpModalInstance.show();
+                }
+                else {
+                    $('#OTPmodal').show();
+                }
+            }
+
+            $('#OTPmodal').on('hidden.bs.modal', function () {
+                $('#btnLoginSpinner').hide();
+                $('#InvalidOTPMsg').hide();
+            });
+
             // Function to stop setInterval call
             function stopTimer() {
 
@@ -239,7 +264,7 @@
                             {
                                 //$('#hfUserContactNo').val(data);
                                 $('#divImage').hide();
-                                $('#OTPmodal').css('display', 'block');
+                                showOtpModal();
                                 $('#hfSPNo').val(data.No);
                                 $('#hfUserContactNo').val(data.Phone_No_2);
                                 startTimer();
@@ -293,6 +318,7 @@
                     }
                     else {
                         $('#divImage').hide();
+                        $('#btnLoginSpinner').hide();
 
                         $('#InvalidOTPMsg').css('display', 'block');
                         $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').val("");
@@ -320,6 +346,7 @@
                             $('#lblMinutes').text("01");
                             minutes = 1;
                             seconds = 60;
+                            showOtpModal();
                             startTimer();
                         }
                         else {
@@ -335,7 +362,7 @@
 
         function GetAdminContact() {
 
-            var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
+            var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/'.
 
             $.get(apiUrl + 'GetAdminContactNo', function (data) {
 

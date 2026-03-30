@@ -7,6 +7,467 @@
     var doc = Convert.ToString(docimp);
 }
 
+<style>
+    body.grn-attachment-open .modal-backdrop.show {
+        z-index: 1035 !important;
+    }
+
+    body.grn-attachment-open #modalItemTracking {
+        z-index: 1040 !important;
+    }
+
+    body.grn-attachment-open #modalItemTracking .modal-dialog {
+        position: relative;
+        z-index: 1041 !important;
+    }
+
+    .grn-attachment-overlay,
+    .grn-viewer-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000 !important;
+    }
+
+    .grn-attachment-overlay {
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(4px);
+    }
+
+    .grn-attachment-panel {
+        width: min(760px, calc(100vw - 28px));
+        max-height: calc(100vh - 36px);
+        background: #ffffff;
+        border-radius: 22px;
+        box-shadow: 0 30px 90px rgba(79, 70, 229, 0.16), 0 18px 48px rgba(15, 23, 42, 0.16);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+        z-index: 2001;
+    }
+
+    .grn-attachment-header,
+    .grn-attachment-footer,
+    .grn-viewer-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+    }
+
+    .grn-attachment-header {
+        border-bottom: 1px solid #ececf4;
+        padding: 18px 18px 12px;
+    }
+
+    .grn-attachment-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2px;
+    }
+
+    .grn-attachment-title-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #7c3aed;
+    }
+
+    .grn-attachment-title {
+        font-size: 17px;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .grn-attachment-meta,
+    .grn-attachment-hint {
+        font-size: 12px;
+        color: #9ca3af;
+    }
+
+    .grn-attachment-dropzone {
+        margin: 18px 12px 12px;
+        padding: 28px 20px 26px;
+        border: 3px dashed #7c3aed;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #f3f0ff 0%, #f5f3ff 100%);
+        text-align: center;
+    }
+
+    .grn-attachment-dropzone.dragover {
+        border-color: #6d28d9;
+        background: #ede9fe;
+        transform: scale(0.995);
+    }
+
+    .grn-attachment-upload-icon {
+        color: #7c3aed;
+        margin-bottom: 10px;
+    }
+
+    .grn-attachment-dropzone-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+
+    .grn-attachment-browse-link {
+        border: none;
+        background: transparent;
+        padding: 0;
+        color: #7c3aed;
+        font-weight: 800;
+    }
+
+    .grn-attachment-error {
+        min-height: 18px;
+        margin: 0 18px;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .grn-attachment-file-list {
+        margin: 8px 0 0;
+        overflow-y: auto;
+        max-height: 360px;
+        border-top: 1px solid #ececf4;
+        background: #ffffff;
+    }
+
+    .grn-attachment-empty {
+        padding: 42px 24px 36px;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .grn-attachment-file-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #ffffff;
+    }
+
+    .grn-attachment-file-row:last-child {
+        border-bottom: none;
+    }
+
+    .grn-attachment-file-main {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .grn-attachment-file-badge,
+    .grn-attachment-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .grn-attachment-file-badge {
+        background: #ede9fe;
+        color: #7c3aed;
+        text-transform: uppercase;
+    }
+
+    .grn-attachment-count {
+        background: #ede9fe;
+        color: #7c3aed;
+        margin-left: 6px;
+    }
+
+    .grn-attachment-file-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1f2937;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .grn-attachment-file-meta {
+        display: block;
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    .grn-attachment-footer {
+        justify-content: flex-end;
+        padding: 16px 18px 18px;
+        border-top: 1px solid #ececf4;
+        background: #ffffff;
+    }
+
+    .grn-attachment-cancel-btn,
+    .grn-attachment-save-btn {
+        border: none;
+        border-radius: 14px;
+        padding: 12px 26px;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .grn-attachment-cancel-btn {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .grn-attachment-save-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+        color: #ffffff;
+        box-shadow: 0 14px 30px rgba(124, 58, 237, 0.24);
+    }
+
+    .grn-attachment-save-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .grn-viewer-overlay {
+        z-index: 2010 !important;
+        background: rgba(2, 6, 23, 0.92);
+        backdrop-filter: blur(8px);
+    }
+
+    .grn-viewer-modal {
+        width: min(1200px, calc(100vw - 24px));
+        height: min(92vh, 900px);
+        background: #020617;
+        border-radius: 18px;
+        color: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 32px 120px rgba(0, 0, 0, 0.45);
+        position: relative;
+        z-index: 2011;
+    }
+
+    .grn-viewer-topbar {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .grn-viewer-fileinfo,
+    .grn-viewer-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .grn-viewer-counter {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #1d4ed8;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .grn-viewer-filename {
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .grn-viewer-zoom-label {
+        min-width: 48px;
+        text-align: center;
+        font-size: 12px;
+        color: #cbd5e1;
+    }
+
+    .grn-viewer-content-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        min-height: 0;
+    }
+
+    .grn-viewer-single,
+    .grn-viewer-grid {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .grn-viewer-single {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 72px;
+        overflow: auto;
+    }
+
+    .grn-viewer-image {
+        max-width: 100%;
+        max-height: 100%;
+        display: none;
+        transform-origin: center center;
+        border-radius: 12px;
+    }
+
+    .grn-viewer-no-preview {
+        display: none;
+        text-align: center;
+    }
+
+    .grn-viewer-no-preview-title {
+        margin-bottom: 12px;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .grn-viewer-grid {
+        display: none;
+        padding: 18px;
+        overflow: auto;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .grn-viewer-grid-card {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.9);
+        padding: 14px;
+        cursor: pointer;
+    }
+
+    .grn-viewer-grid-card.active {
+        border-color: #60a5fa;
+        box-shadow: inset 0 0 0 1px #60a5fa;
+    }
+
+    .grn-viewer-grid-thumb {
+        height: 120px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(30, 41, 59, 0.95);
+        overflow: hidden;
+    }
+
+    .grn-viewer-grid-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .grn-viewer-grid-name {
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .grn-viewer-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border: none;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.8);
+        color: #f8fafc;
+        font-size: 28px;
+        line-height: 1;
+        z-index: 1;
+    }
+
+    .grn-viewer-nav-left {
+        left: 14px;
+    }
+
+    .grn-viewer-nav-right {
+        right: 14px;
+    }
+
+    .grn-viewer-thumbstrip {
+        display: flex;
+        gap: 10px;
+        padding: 14px 18px 18px;
+        overflow-x: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(15, 23, 42, 0.72);
+    }
+
+    .grn-viewer-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        flex: 0 0 auto;
+        overflow: hidden;
+        border: 2px solid transparent;
+        background: rgba(30, 41, 59, 0.95);
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .grn-viewer-thumb.active {
+        border-color: #60a5fa;
+    }
+
+    .grn-viewer-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    @*@media (max-width: 767px) {
+        .grn-viewer-modal {
+            width: calc(100vw - 12px);
+            height: calc(100vh - 12px);
+            border-radius: 12px;
+        }
+
+        .grn-viewer-single {
+            padding: 16px 48px;
+        }
+
+        .grn-viewer-actions {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }*@
+    }
+</style>
+
 <div class="page-content">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
@@ -486,22 +947,34 @@
     <div class="grn-attachment-panel">
         <div class="grn-attachment-header">
             <div>
-                <div class="grn-attachment-title">Line Attachments</div>
+                <div class="grn-attachment-title-wrap">
+                    <span class="grn-attachment-title-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    </span>
+                    <div class="grn-attachment-title">Attachments</div>
+                </div>
                 <div id="grnAttachmentMeta" class="grn-attachment-meta"></div>
             </div>
             <button type="button" class="btn-close" aria-label="Close" onclick="CloseGRNAttachmentPanel();"></button>
         </div>
         <div id="grnAttachmentDropZone" class="grn-attachment-dropzone">
-            <div><strong>Files drag and drop kijiye</strong> ya browse kijiye</div>
-            <div class="grn-attachment-hint">Multiple files supported. Ye attachment panel abhi UI-only mode mein hai.</div>
-            <button type="button" class="btn btn-outline-primary btn-sm" onclick="OpenGRNAttachmentFilePicker();">Browse Files</button>
+            <div class="grn-attachment-upload-icon">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"></path><path d="M7 9l5-5 5 5"></path><path d="M20 16.58A5 5 0 0 1 18 20H6a5 5 0 0 1-2-3.42"></path></svg>
+            </div>
+            <div class="grn-attachment-dropzone-title">Drag &amp; drop or <button type="button" class="grn-attachment-browse-link" onclick="OpenGRNAttachmentFilePicker(); return false;">Browse</button></div>
+            <div class="grn-attachment-hint">Images, PDF, Word, Excel · Multiple files allowed</div>
         </div>
         <input id="grnAttachmentFileInput" type="file" multiple style="display:none;" />
         <div id="grnAttachmentError" class="grn-attachment-error"></div>
         <div id="grnAttachmentFileList" class="grn-attachment-file-list"></div>
         <div class="grn-attachment-footer">
-            <button type="button" class="btn btn-light" onclick="CloseGRNAttachmentPanel();">Close</button>
-            <button type="button" class="btn btn-primary" onclick="SaveGRNAttachmentPanel();">Save</button>
+            <button type="button" class="grn-attachment-cancel-btn" onclick="CloseGRNAttachmentPanel();">Cancel</button>
+            <button type="button" class="grn-attachment-save-btn" onclick="SaveGRNAttachmentPanel();">
+                <span class="grn-attachment-save-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </span>
+                Save ( <span id="grnAttachmentSaveCount">0</span> )
+            </button>
         </div>
     </div>
 </div>
@@ -539,394 +1012,6 @@
         <div id="grnViewerThumbStrip" class="grn-viewer-thumbstrip"></div>
     </div>
 </div>
-
-<style>
-    body.grn-attachment-open .modal-backdrop.show {
-        z-index: 1035 !important;
-    }
-
-    body.grn-attachment-open #modalItemTracking {
-        z-index: 1040 !important;
-    }
-
-    body.grn-attachment-open #modalItemTracking .modal-dialog {
-        position: relative;
-        z-index: 1041 !important;
-    }
-
-    .grn-attachment-overlay,
-    .grn-viewer-overlay {
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000 !important;
-    }
-
-    .grn-attachment-overlay {
-        background: rgba(15, 23, 42, 0.45);
-        backdrop-filter: blur(4px);
-    }
-
-    .grn-attachment-panel {
-        width: min(680px, calc(100vw - 32px));
-        max-height: calc(100vh - 40px);
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        position: relative;
-        z-index: 2001;
-    }
-
-    .grn-attachment-header,
-    .grn-attachment-footer,
-    .grn-viewer-topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 14px 18px;
-    }
-
-    .grn-attachment-header {
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .grn-attachment-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #111827;
-    }
-
-    .grn-attachment-meta,
-    .grn-attachment-hint {
-        font-size: 12px;
-        color: #6b7280;
-    }
-
-    .grn-attachment-dropzone {
-        margin: 16px 18px 8px;
-        padding: 18px;
-        border: 2px dashed #93c5fd;
-        border-radius: 14px;
-        background: #eff6ff;
-        text-align: center;
-    }
-
-    .grn-attachment-dropzone.dragover {
-        border-color: #2563eb;
-        background: #dbeafe;
-    }
-
-    .grn-attachment-error {
-        min-height: 18px;
-        margin: 0 18px;
-        color: #dc2626;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .grn-attachment-file-list {
-        margin: 8px 18px 18px;
-        overflow-y: auto;
-        max-height: 360px;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        background: #f9fafb;
-    }
-
-    .grn-attachment-empty {
-        padding: 24px;
-        text-align: center;
-        color: #6b7280;
-        font-size: 13px;
-    }
-
-    .grn-attachment-file-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 14px;
-        border-bottom: 1px solid #e5e7eb;
-        background: #ffffff;
-    }
-
-    .grn-attachment-file-row:last-child {
-        border-bottom: none;
-    }
-
-    .grn-attachment-file-main {
-        min-width: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-    }
-
-    .grn-attachment-file-badge,
-    .grn-attachment-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 28px;
-        height: 28px;
-        padding: 0 8px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .grn-attachment-file-badge {
-        background: #dbeafe;
-        color: #1d4ed8;
-        text-transform: uppercase;
-    }
-
-    .grn-attachment-count {
-        background: #dbeafe;
-        color: #1d4ed8;
-        margin-left: 6px;
-    }
-
-    .grn-attachment-file-name {
-        display: block;
-        font-size: 13px;
-        font-weight: 600;
-        color: #111827;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .grn-attachment-file-meta {
-        display: block;
-        font-size: 11px;
-        color: #6b7280;
-    }
-
-    .grn-viewer-overlay {
-        z-index: 2010 !important;
-        background: rgba(2, 6, 23, 0.92);
-        backdrop-filter: blur(8px);
-    }
-
-    .grn-viewer-modal {
-        width: min(1200px, calc(100vw - 24px));
-        height: min(92vh, 900px);
-        background: #020617;
-        border-radius: 18px;
-        color: #f8fafc;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 32px 120px rgba(0, 0, 0, 0.45);
-        position: relative;
-        z-index: 2011;
-    }
-
-    .grn-viewer-topbar {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .grn-viewer-fileinfo,
-    .grn-viewer-actions {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .grn-viewer-counter {
-        padding: 4px 10px;
-        border-radius: 999px;
-        background: #1d4ed8;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .grn-viewer-filename {
-        font-size: 14px;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .grn-viewer-zoom-label {
-        min-width: 48px;
-        text-align: center;
-        font-size: 12px;
-        color: #cbd5e1;
-    }
-
-    .grn-viewer-content-wrap {
-        position: relative;
-        flex: 1;
-        display: flex;
-        align-items: stretch;
-        min-height: 0;
-    }
-
-    .grn-viewer-single,
-    .grn-viewer-grid {
-        flex: 1;
-        min-height: 0;
-    }
-
-    .grn-viewer-single {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px 72px;
-        overflow: auto;
-    }
-
-    .grn-viewer-image {
-        max-width: 100%;
-        max-height: 100%;
-        display: none;
-        transform-origin: center center;
-        border-radius: 12px;
-    }
-
-    .grn-viewer-no-preview {
-        display: none;
-        text-align: center;
-    }
-
-    .grn-viewer-no-preview-title {
-        margin-bottom: 12px;
-        font-size: 15px;
-        font-weight: 700;
-    }
-
-    .grn-viewer-grid {
-        display: none;
-        padding: 18px;
-        overflow: auto;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 14px;
-    }
-
-    .grn-viewer-grid-card {
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.9);
-        padding: 14px;
-        cursor: pointer;
-    }
-
-    .grn-viewer-grid-card.active {
-        border-color: #60a5fa;
-        box-shadow: inset 0 0 0 1px #60a5fa;
-    }
-
-    .grn-viewer-grid-thumb {
-        height: 120px;
-        margin-bottom: 10px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(30, 41, 59, 0.95);
-        overflow: hidden;
-    }
-
-    .grn-viewer-grid-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .grn-viewer-grid-name {
-        font-size: 12px;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .grn-viewer-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 44px;
-        height: 44px;
-        border: none;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.8);
-        color: #f8fafc;
-        font-size: 28px;
-        line-height: 1;
-        z-index: 1;
-    }
-
-    .grn-viewer-nav-left {
-        left: 14px;
-    }
-
-    .grn-viewer-nav-right {
-        right: 14px;
-    }
-
-    .grn-viewer-thumbstrip {
-        display: flex;
-        gap: 10px;
-        padding: 14px 18px 18px;
-        overflow-x: auto;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(15, 23, 42, 0.72);
-    }
-
-    .grn-viewer-thumb {
-        width: 72px;
-        height: 72px;
-        border-radius: 12px;
-        flex: 0 0 auto;
-        overflow: hidden;
-        border: 2px solid transparent;
-        background: rgba(30, 41, 59, 0.95);
-        color: #cbd5e1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    .grn-viewer-thumb.active {
-        border-color: #60a5fa;
-    }
-
-    .grn-viewer-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    @*@media (max-width: 767px) {
-        .grn-viewer-modal {
-            width: calc(100vw - 12px);
-            height: calc(100vh - 12px);
-            border-radius: 12px;
-        }
-
-        .grn-viewer-single {
-            padding: 16px 48px;
-        }
-
-        .grn-viewer-actions {
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }*@
-    }
-</style>
 
 @Scripts.Render("~/bundles/jquery")
 

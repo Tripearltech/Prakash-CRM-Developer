@@ -1,5 +1,6 @@
 using PrakashCRM.Data.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Web;
@@ -11,7 +12,7 @@ namespace PrakashCRM.Service.Controllers
     public class GRNDocumentAttachmentController : ApiController
     {
         [HttpPost]
-        [Route("upload")]
+        [Route("Upload")]
         public IHttpActionResult Upload()
         {
             try
@@ -32,6 +33,7 @@ namespace PrakashCRM.Service.Controllers
 
                 var lotNo = httpRequest.Form["lotNo"];
                 var itemNo = httpRequest.Form["itemNo"];
+                var fileName = httpRequest.Form["FileName"];
 
                 if (string.IsNullOrWhiteSpace(lotNo))
                 {
@@ -43,27 +45,53 @@ namespace PrakashCRM.Service.Controllers
                     return BadRequest("itemNo must be provided in the form data.");
                 }
 
-                byte[] bytes;
-                using (var ms = new MemoryStream())
+                if (string.IsNullOrWhiteSpace(fileName))
                 {
-                    file.InputStream.CopyTo(ms);
-                    bytes = ms.ToArray();
+                    return BadRequest("FileName must be provided in the form data.");
                 }
 
-                var base64 = Convert.ToBase64String(bytes);
+                var responses = new List<FileUploadResponse>();
 
-                var response = new FileUploadResponse
+                for (var index = 0; index < httpRequest.Files.Count; index++)
                 {
-                    FileName = Path.GetFileNameWithoutExtension(file.FileName),
-                    FileExtension = Path.GetExtension(file.FileName),
-                    ContentType = file.ContentType,
-                    Size = file.ContentLength,
-                    Base64 = base64,
-                    LotNo = lotNo,
-                    ItemNo = itemNo
-                };
+                    var currentFile = httpRequest.Files[index];
 
-                return Ok(response);
+                    if (currentFile == null || currentFile.ContentLength == 0)
+                    {
+                        return BadRequest("One or more provided files are empty.");
+                    }
+
+                    byte[] bytes;
+                    using (var ms = new MemoryStream())
+                    {
+                        currentFile.InputStream.CopyTo(ms);
+                        bytes = ms.ToArray();
+                    }
+
+                    var base64 = Convert.ToBase64String(bytes);
+                    var normalizedFileName = Path.GetFileName(fileName);
+                    var resolvedExtension = Path.GetExtension(currentFile.FileName);
+                    if (string.IsNullOrWhiteSpace(resolvedExtension))
+                    {
+                        resolvedExtension = Path.GetExtension(normalizedFileName);
+                    }
+
+                    SaveAttachmentFile(bytes, lotNo, itemNo, normalizedFileName);
+
+                    responses.Add(new FileUploadResponse
+                    {
+                        FileName = Path.GetFileNameWithoutExtension(normalizedFileName),
+                        FileExtension = resolvedExtension,
+                        ContentType = currentFile.ContentType,
+                        Size = currentFile.ContentLength,
+                        Base64 = base64,
+                        LotNo = lotNo,
+                        ItemNo = itemNo,
+                        IsUploaded = true
+                    });
+                }
+
+                return Ok(responses);
             }
             catch (Exception ex)
             {
@@ -73,6 +101,44 @@ namespace PrakashCRM.Service.Controllers
                     details = ex.Message
                 });
             }
+        }
+
+        private static void SaveAttachmentFile(byte[] fileBytes, string lotNo, string itemNo, string fileName)
+        {
+            var rootPath = HttpContext.Current.Server.MapPath("~/GRNDocumentAttachment");
+            var safeItemNo = SanitizePathSegment(itemNo);
+            var safeLotNo = SanitizePathSegment(lotNo);
+            var safeFileName = SanitizeFileName(fileName);
+
+            var targetDirectory = Path.Combine(rootPath, safeItemNo, safeLotNo);
+            Directory.CreateDirectory(targetDirectory);
+
+            var targetFilePath = Path.Combine(targetDirectory, safeFileName);
+            File.WriteAllBytes(targetFilePath, fileBytes);
+        }
+
+        private static string SanitizePathSegment(string value)
+        {
+            var input = string.IsNullOrWhiteSpace(value) ? "blank" : value.Trim();
+
+            foreach (var invalidChar in Path.GetInvalidFileNameChars())
+            {
+                input = input.Replace(invalidChar, '_');
+            }
+
+            return input;
+        }
+
+        private static string SanitizeFileName(string value)
+        {
+            var input = string.IsNullOrWhiteSpace(value) ? "attachment" : Path.GetFileName(value.Trim());
+
+            foreach (var invalidChar in Path.GetInvalidFileNameChars())
+            {
+                input = input.Replace(invalidChar, '_');
+            }
+
+            return input;
         }
     }
  }

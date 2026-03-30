@@ -1,11 +1,31 @@
 ﻿var filter = "";
 var orderBy = 2;
 var orderDir = "asc";
+
+function escapeNotificationFilterValue(value) {
+    return ((value || '').toString()).replace(/'/g, "''");
+}
+
+function getNotificationListFilter(includeStatus) {
+    var selectedFromName = ($('#ddlFromCode').val() || '').toString().trim();
+    var filterParts = [];
+
+    if (selectedFromName !== '' && selectedFromName !== 'All') {
+        filterParts.push("Employee_Name eq '" + escapeNotificationFilterValue(selectedFromName) + "'");
+    }
+
+    if (includeStatus) {
+        filterParts.push("IsActive eq " + JSON.parse($('#ddlStatus').val()));
+    }
+
+    return filterParts.join(' and ');
+}
+
 $(document).ready(function () {
 
     BindFromCode();
 
-    filter = "IsActive eq " + JSON.parse($('#ddlStatus').val());
+    filter = getNotificationListFilter(true);
 
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
@@ -15,24 +35,14 @@ $(document).ready(function () {
 
     $('#ddlFromCode').change(function () {
 
-        if ($('#ddlFromCode').val() == "All") {
-            filter = "IsActive eq " + JSON.parse($('#ddlStatus').val());
-        }
-        else {
-            filter = "From_Code eq \'" + $('#ddlFromCode').val() + "\' and IsActive eq " + JSON.parse($('#ddlStatus').val());
-        }
+        filter = getNotificationListFilter(true);
 
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     });
 
     $('#ddlStatus').change(function () {
 
-        if ($('#ddlFromCode').val() == "All") {
-            filter = "IsActive eq " + JSON.parse($('#ddlStatus').val());
-        }
-        else {
-            filter = "From_Code eq \'" + $('#ddlFromCode').val() + "\' and IsActive eq " + JSON.parse($('#ddlStatus').val());
-        }
+        filter = getNotificationListFilter(true);
 
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
@@ -40,12 +50,7 @@ $(document).ready(function () {
 
     $('#btnExport').click(function () {
 
-        if ($('#ddlFromCode').val() == "All") {
-            filter = "";
-        }
-        else {
-            filter = "From_Code eq \'" + $('#ddlFromCode').val() + "\'";
-        }
+        filter = getNotificationListFilter(false);
 
         exportGridData(0, 0, 0, orderBy, orderDir, filter);
     });
@@ -74,31 +79,27 @@ $(document).ready(function () {
 
 function BindFromCode() {
 
-    $.ajax(
-        {
-            url: '/SPNotification/GetAllSPNoCodeForDDL',
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (data) {
-                
-                if (data.length > 0) {
+    $.ajax({
+        url: '/SPNotification/GetAllSPNoCodeForDDL',
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
 
-                    var FromCodeOpt = "<option value='All'>All</option>";
+            if (data.length > 0) {
 
-                    $.each(data, function (i, data) {
-                        FromCodeOpt += "<option value=\"" + data.PCPL_Employee_Code + "\">" + data.PCPL_Employee_Code + "</option>";
-                    });
+                var FromCodeOpt = "<option value='All'>All</option>";
 
-                    $('#ddlFromCode').append(FromCodeOpt);
+                $.each(data, function (i, item) {
+                    FromCodeOpt += "<option value=\"" + item.FullName + "\">" + item.FullName + "</option>";
+                });
 
-
-                }
-            },
-            error: function (data1) {
-                //alert(data1);
+                $('#ddlFromCode').append(FromCodeOpt);
             }
+        },
+        error: function (data1) {
+            console.log(data1);
         }
-    );
+    });
 }
 
 
@@ -106,14 +107,15 @@ var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPNotification/';
+    var encodedFilter = encodeURIComponent(filter || '');
 
-    $.get(apiUrl + 'GetApiRecordsCount?filter=' + filter + '&apiEndPointName=NotificationsListDotNetAPI', function (data) {
+    $.get(apiUrl + 'GetApiRecordsCount?filter=' + encodedFilter + '&apiEndPointName=NotificationsListDotNetAPI', function (data) {
         $('#hdnNotifSetupCount').val(data);
     });
 
     $.ajax(
         {
-            url: '/SPNotification/GetNotificationSetupListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
+            url: '/SPNotification/GetNotificationSetupListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + encodedFilter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
@@ -123,12 +125,12 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td><td><a href='/SPNotification/Notification?Type=" + item.Type + "&Employee_No=" + item.Employee_No + "'><i class='bx bxs-edit'></i></a></td><td>" + item.Type + "</td><td>" + item.From_Code + "</td><td>" + item.To_E_mail + "</td><td>" + item.CC_E_mail + "</td><td>" + item.BCC_E_mail + "</td>";
+                    var rowData = "<tr><td></td><td><a href='/SPNotification/Notification?Type=" + item.Type + "&Employee_No=" + item.Employee_No + "'><i class='bx bxs-edit'></i></a></td><td>" + item.Type + "</td><td>" + item.Employee_Name + "</td><td>" + item.To_E_mail + "</td><td>" + item.CC_E_mail + "</td><td>" + item.BCC_E_mail + "</td>";
 
                     rowData = rowData + "</tr>";
 
                     $('#tableBody').append(rowData);
-                    
+
                 });
                 if (firsload == 1) {
                     pageMe();
@@ -213,13 +215,13 @@ function pageMe() {
 
     var curr = 0;
     var skip = 0, top = $('#ddlRecPerPage').val();
-    
+
     while (numPages > curr && (settings.hidePageNumbers == false)) {
         $('<li id="pg' + (curr + 1) + '" class="pg"><a href="#" skip=' + skip + ' top=' + top + ' class="page_link">' + (curr + 1) + '</a></li>').appendTo(pager);
         skip = skip + parseInt($('#ddlRecPerPage').val());
         curr++;
     }
-    
+
     if (settings.showPrevNext) {
         $('<li><a href="#" class="next_link">»</a></li>').appendTo(pager);
     }
@@ -296,7 +298,7 @@ function pageMe() {
         $('.page_link').removeClass("active");
 
         currpg1.addClass("active");
-        
+
         children.css('display', 'none').slice(startAt, endOn).show();
 
         if (page >= 1) {
@@ -318,15 +320,17 @@ function pageMe() {
 };
 
 function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
+    var encodedFilter = encodeURIComponent(filter || '');
+
     $.ajax(
         {
-            url: '/SPNotification/ExportListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
+            url: '/SPNotification/ExportListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + encodedFilter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.fileName != "") {
-                    
+
                     window.location.href = "/SPNotification/Download?file=" + data.fileName;
                 }
             },

@@ -144,7 +144,13 @@ namespace PrakashCRM.Controllers
 
         private static void SetUnauthorizedResult(ActionExecutingContext filterContext)
         {
-            if (filterContext?.HttpContext?.Request?.IsAjaxRequest() == true)
+            var request = filterContext?.HttpContext?.Request;
+            var isAjaxLikeRequest = request != null &&
+                (request.IsAjaxRequest()
+                || string.Equals(request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase)
+                || ((request.Headers["Accept"] ?? string.Empty).IndexOf("application/json", StringComparison.OrdinalIgnoreCase) >= 0));
+
+            if (isAjaxLikeRequest)
             {
                 filterContext.Result = new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
                 return;

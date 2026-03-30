@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.IO;
+using System.Net;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -263,11 +264,7 @@ namespace PrakashCRM.Controllers
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPGRN/";
 
-            apiUrl = apiUrl + "GetGRNLineItemTrackingForPopup?DocumentType=" + HttpUtility.UrlEncode(DocumentType)
-                + "&DocumentNo=" + HttpUtility.UrlEncode(DocumentNo)
-                + "&LineNo=" + HttpUtility.UrlEncode(LineNo)
-                + "&sourceType=" + HttpUtility.UrlEncode(sourceType)
-                + "&sourceSubtype=" + HttpUtility.UrlEncode(sourceSubtype);
+            apiUrl = apiUrl + "GetGRNLineItemTrackingForPopup?DocumentType=" + HttpUtility.UrlEncode(DocumentType) + "&DocumentNo=" + HttpUtility.UrlEncode(DocumentNo) + "&LineNo=" + HttpUtility.UrlEncode(LineNo) + "&sourceType=" + HttpUtility.UrlEncode(sourceType) + "&sourceSubtype=" + HttpUtility.UrlEncode(sourceSubtype);
 
             HttpClient client = new HttpClient();
             List<SPGRNLineItemTracking> spGRNLineItemTracking = new List<SPGRNLineItemTracking>();
@@ -365,7 +362,99 @@ namespace PrakashCRM.Controllers
             return msg;
         }
 
+        // GRN Item Tracking Line Upload Attachment Document
+        [HttpPost]
+        public async Task<ActionResult> UploadGRNDocumentAttachment(string lotNo, string itemNo,string FileName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(lotNo))
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    return Json(new { error = "lotNo is required." });
+                }
 
+                if (string.IsNullOrWhiteSpace(itemNo))
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    return Json(new { error = "itemNo is required." });
+                }
+
+                if (string.IsNullOrWhiteSpace(FileName))
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    return Json(new { error = "FileName is required." });
+                }
+
+                if (Request.Files.Count == 0)
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    return Json(new { error = "At least one file is required." });
+                }
+
+                string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "GRNDocumentAttachment/Upload";
+                HttpPostedFileBase postedFile = null;
+
+                for (int index = 0; index < Request.Files.Count; index++)
+                {
+                    if (Request.Files[index] != null && Request.Files[index].ContentLength > 0)
+                    {
+                        postedFile = Request.Files[index];
+                        break;
+                    }
+                }
+
+                if (postedFile == null)
+                {
+                    Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    return Json(new { error = "A valid file is required." });
+                }
+
+                using (HttpClient client = new HttpClient())
+                using (MultipartFormDataContent multipartContent = new MultipartFormDataContent())
+                {
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                    client.BaseAddress = new Uri(apiUrl);
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    multipartContent.Add(new StringContent(lotNo), "lotNo");
+                    multipartContent.Add(new StringContent(itemNo), "itemNo");
+                    multipartContent.Add(new StringContent(FileName), "FileName");
+
+                    if (postedFile.InputStream.CanSeek)
+                    {
+                        postedFile.InputStream.Position = 0;
+                    }
+
+                    StreamContent fileContent = new StreamContent(postedFile.InputStream);
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(string.IsNullOrWhiteSpace(postedFile.ContentType)
+                        ? "application/octet-stream"
+                        : postedFile.ContentType);
+
+                    multipartContent.Add(fileContent, "files", Path.GetFileName(postedFile.FileName));
+
+                    HttpResponseMessage response = await client.PostAsync(apiUrl, multipartContent);
+                    string responseData = await response.Content.ReadAsStringAsync();
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Response.StatusCode = (int)response.StatusCode;
+                        return Json(new { error = responseData });
+                    }
+
+                    return Content(responseData, "application/json");
+                }
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return Json(new
+                {
+                    error = "Upload failed while forwarding the document.",
+                    details = ex.Message
+                });
+            }
+        }
 
     }
 }

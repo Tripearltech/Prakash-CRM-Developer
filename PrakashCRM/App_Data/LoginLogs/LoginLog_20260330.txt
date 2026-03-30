@@ -1,0 +1,7 @@
+DateTime: 2026-03-30 11:13:45
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44368/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false}
+------------------------------------------------------------------------------------------------------------------------

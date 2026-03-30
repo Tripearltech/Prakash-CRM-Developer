@@ -4,6 +4,7 @@ using PrakashCRM.Service.Classes;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -20,6 +21,54 @@ namespace PrakashCRM.Controllers
 
     public class AccountController : Controller
     {
+        private void LogLoginRequestResponseToFile(string actionName, object requestPayload, string responseBody, HttpStatusCode? statusCode = null, string requestUrl = null)
+        {
+            try
+            {
+                string logDirectory = "";
+
+                if (System.Web.HttpContext.Current != null)
+                {
+                    if (System.Web.HttpContext.Current.Server != null)
+                        logDirectory = System.Web.HttpContext.Current.Server.MapPath("~/App_Data/LoginLogs");
+                }
+
+                if (string.IsNullOrWhiteSpace(logDirectory))
+                {
+                    string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    logDirectory = Path.Combine(baseDirectory, "App_Data", "LoginLogs");
+                }
+
+                if (!Directory.Exists(logDirectory))
+                    Directory.CreateDirectory(logDirectory);
+
+                string filePath = Path.Combine(logDirectory, "LoginLog_" + DateTime.Now.ToString("yyyyMMdd") + ".txt");
+                string requestJson = requestPayload != null ? JsonConvert.SerializeObject(requestPayload) : "";
+                string logText = "DateTime: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine
+                    + "Action: " + (actionName ?? "") + Environment.NewLine
+                    + "RequestUrl: " + (requestUrl ?? "") + Environment.NewLine
+                    + "RequestPayload: " + requestJson + Environment.NewLine
+                    + "StatusCode: " + (statusCode.HasValue ? ((int)statusCode.Value).ToString() : "") + Environment.NewLine
+                    + "ResponseBody: " + (responseBody ?? "") + Environment.NewLine
+                    + new string('-', 120) + Environment.NewLine;
+
+                System.IO.File.AppendAllText(filePath, logText);
+            }
+            catch
+            {
+            }
+        }
+
+        private object BuildLoginRequestLogPayload(string email, string pass, string adminContactNo)
+        {
+            return new
+            {
+                email = email,
+                pass = string.IsNullOrWhiteSpace(pass) ? "" : "****",
+                adminContactNo = adminContactNo
+            };
+        }
+
         private async Task LogLoginActivity(string traceId, string description, string spCode)
         {
             try
@@ -148,6 +197,7 @@ namespace PrakashCRM.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     jsonData = await response.Content.ReadAsStringAsync();
+                    LogLoginRequestResponseToFile("CheckLoginAndSendOTP", BuildLoginRequestLogPayload(email, pass, adminContactNo), jsonData, response.StatusCode, apiUrl);
                     contactNoOTPForLogin = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactNoOTPForLogin>(jsonData);
 
                     if (contactNoOTPForLogin.No != null)
@@ -190,12 +240,15 @@ namespace PrakashCRM.Controllers
                 }
                 else
                 {
+                    jsonData = await response.Content.ReadAsStringAsync();
+                    LogLoginRequestResponseToFile("CheckLoginAndSendOTP", BuildLoginRequestLogPayload(email, pass, adminContactNo), jsonData, response.StatusCode, apiUrl);
                     await LogLoginActivity("LOGIN_FAIL", "Login Failed", "System");
                     await LogLoginSiteError("LOGIN_FAIL", "Login API failed", ((int)response.StatusCode).ToString(), "CheckEmailPassForOTP returned non-success status");
                 }
 
                 if (contactNoOTPForLogin == null || string.IsNullOrWhiteSpace(contactNoOTPForLogin.No))
                 {
+                    LogLoginRequestResponseToFile("CheckLoginAndSendOTP", BuildLoginRequestLogPayload(email, pass, adminContactNo), JsonConvert.SerializeObject(contactNoOTPForLoginRes), response.StatusCode, apiUrl);
                     await LogLoginActivity("LOGIN_FAIL", "Login Failed", "System");
                     await LogLoginSiteError("LOGIN_FAIL", "Invalid login credentials", "401", "Login failed due to invalid credentials or user not found");
                 }
@@ -204,6 +257,7 @@ namespace PrakashCRM.Controllers
             }
             catch (Exception ex)
             {
+                LogLoginRequestResponseToFile("CheckLoginAndSendOTP", BuildLoginRequestLogPayload(email, pass, adminContactNo), ex.ToString(), HttpStatusCode.InternalServerError, Request != null ? Request.RawUrl : "");
                 await LogLoginActivity("LOGIN_EXCEPTION", "Login Failed - Exception", "System");
                 await LogLoginSiteError("LOGIN_EXCEPTION", "Exception in CheckLoginAndSendOTP", "500", ex.Message);
                 return Json(new ContactNoOTPForLogin(), JsonRequestBehavior.AllowGet);
@@ -289,49 +343,36 @@ namespace PrakashCRM.Controllers
             }
             string generatedOTP = res.ToString();
 
+            bool smsDelivered = false;
+            bool emailDelivered = false;
+
             string smsApiUrl = ConfigurationManager.AppSettings["SMSApiUrl"].ToString();
             string smsFromMobile = ConfigurationManager.AppSettings["SMSFromMobile"].ToString();
             string smsFromPass = ConfigurationManager.AppSettings["SMSFromPass"].ToString();
             string smsFromSenderId = ConfigurationManager.AppSettings["SMSFromSenderId"].ToString();
             string smsToMobile = contactNoOTPForLogin.Phone_No_2;
-            //var parameters = new Dictionary<string, string> {
-            //        { "mobile", smsFromMobile },
-            //        { "pass", smsFromPass },
-            //        { "senderid", smsFromSenderId},
-            //        { "to", smsToMobile },
-            //        { "msg","Quote no " + generatedOTP + " of 123.59 has been approved. Click on https://www.google.com for further details." },
-            //        { "templateid", "1207161552588210502" }
-            //    };
 
-            var parameters = new Dictionary<string, string> {
-                    { "mobile", smsFromMobile },
-                    { "pass", smsFromPass },
-                    { "senderid", smsFromSenderId},
-                    { "to", smsToMobile },
-                    { "msg","Your OTP to log in to the PCAPL Web Portal is " + generatedOTP + ". Please do not share this OTP with anyone. If you did not attempt to log in, call " + adminContactNo + " immediately." },
-                    { "templateid", "1207173708488227586" }
-                };
-
-            var encodedContent = new FormUrlEncodedContent(parameters);
-            var response1 = await client1.PostAsync(smsApiUrl, encodedContent).ConfigureAwait(false);
-            if (response1.StatusCode == HttpStatusCode.OK)
+            if (!string.IsNullOrWhiteSpace(smsToMobile))
             {
-                // Do something with response. Example get content:
-                // var responseContent = await response.Content.ReadAsStringAsync ().ConfigureAwait (false);
+                var parameters = new Dictionary<string, string> {
+                        { "mobile", smsFromMobile },
+                        { "pass", smsFromPass },
+                        { "senderid", smsFromSenderId},
+                        { "to", smsToMobile },
+                        { "msg","Your OTP to log in to the PCAPL Web Portal is " + generatedOTP + ". Please do not share this OTP with anyone. If you did not attempt to log in, call " + adminContactNo + " immediately." },
+                        { "templateid", "1207173708488227586" }
+                    };
 
+                var encodedContent = new FormUrlEncodedContent(parameters);
+                var response1 = await client1.PostAsync(smsApiUrl, encodedContent).ConfigureAwait(false);
+                smsDelivered = response1.StatusCode == HttpStatusCode.OK;
+            }
+
+            //  emailDelivered = SendOtpEmail(contactNoOTPForLogin, generatedOTP, adminContactNo);   //SendOtpEmail funcanality
+
+            if (smsDelivered || emailDelivered)
+            {
                 HttpClient client2 = new HttpClient();
-                //ContactNoOTPForLogin contactNoOTPForLoginForUpdate = new ContactNoOTPForLogin();
-
-                //contactNoOTPForLoginForUpdate.No = contactNoOTPForLogin.No;
-                //contactNoOTPForLoginForUpdate.PCPL_OTP = generatedOTP;
-                //contactNoOTPForLoginForUpdate.Phone_No_2 = contactNoOTPForLogin.Phone_No_2;
-                //contactNoOTPForLoginForUpdate.First_Name = contactNoOTPForLogin.First_Name;
-                //contactNoOTPForLoginForUpdate.Last_Name = contactNoOTPForLogin.Last_Name;
-                //contactNoOTPForLoginForUpdate.Company_E_Mail = contactNoOTPForLogin.Company_E_Mail;
-                //contactNoOTPForLoginForUpdate.Job_Title = contactNoOTPForLogin.Job_Title;
-                //contactNoOTPForLoginForUpdate.Mobile_Phone_No = contactNoOTPForLogin.Mobile_Phone_No;
-                //contactNoOTPForLoginForUpdate.Salespers_Purch_Code = contactNoOTPForLogin.Salespers_Purch_Code;
-
                 ContactNoOTPForLoginUpdate contactNoOTPForLoginForUpdate = new ContactNoOTPForLoginUpdate();
 
                 contactNoOTPForLoginForUpdate.PCPL_OTP = generatedOTP;
@@ -358,8 +399,13 @@ namespace PrakashCRM.Controllers
                 if (response2.IsSuccessStatusCode)
                 {
                     var data = await response2.Content.ReadAsStringAsync();
-                    contactNoOTPForLoginRes = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactNoOTPForLogin>(data);
+                    contactNoOTPForLoginRes = Newtonsoft.Json.JsonConvert.DeserializeObject<ContactNoOTPForLogin>(data) ?? new ContactNoOTPForLogin();
                 }
+
+                contactNoOTPForLoginRes.No = contactNoOTPForLoginRes.No ?? contactNoOTPForLogin.No;
+                contactNoOTPForLoginRes.Company_E_Mail = contactNoOTPForLogin.Company_E_Mail;
+                contactNoOTPForLoginRes.Phone_No_2 = contactNoOTPForLogin.Phone_No_2;
+                contactNoOTPForLoginRes.OTPEmailSent = emailDelivered;
             }
 
             return contactNoOTPForLoginRes;
@@ -389,10 +435,13 @@ namespace PrakashCRM.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     jsonData = await response.Content.ReadAsStringAsync();
+                    LogLoginRequestResponseToFile("CheckLogin", new { SPNo = SPNo, OTP = string.IsNullOrWhiteSpace(OTP) ? "" : "****", ContactNo = ContactNo }, jsonData, response.StatusCode, apiUrl);
                     loggedInUserProfile = Newtonsoft.Json.JsonConvert.DeserializeObject<LoggedInUserProfile>(jsonData);
                 }
                 else
                 {
+                    jsonData = await response.Content.ReadAsStringAsync();
+                    LogLoginRequestResponseToFile("CheckLogin", new { SPNo = SPNo, OTP = string.IsNullOrWhiteSpace(OTP) ? "" : "****", ContactNo = ContactNo }, jsonData, response.StatusCode, apiUrl);
                     await LogLoginActivity("LOGIN_OTP_FAIL", "Login Failed - OTP validation API failed", "System");
                     await LogLoginSiteError("LOGIN_OTP_FAIL", "OTP validation API failed", ((int)response.StatusCode).ToString(), "GetByNoOTP returned non-success status");
                 }
@@ -424,11 +473,15 @@ namespace PrakashCRM.Controllers
                         Session["SPCodesOfReportingPersonUser"] = SPCodesOfReportingPersonUser;
                     else
                         Session["SPCodesOfReportingPersonUser"] = "";
+                    // otp boolian enable hone par  ye right update hota hai 
+                    RoleWiseMenuRightsResponse menu = await GetRolewiseMenuRight(loggedInUserProfile.No);
+                    Session["RoleWiseMenuData"] = menu;
 
                     await LogLoginActivity("LOGIN_SUCCESS", "Login Success", loggedInUserProfile.Salespers_Purch_Code);
                 }
                 else
                 {
+                    LogLoginRequestResponseToFile("CheckLogin", new { SPNo = SPNo, OTP = string.IsNullOrWhiteSpace(OTP) ? "" : "****", ContactNo = ContactNo }, JsonConvert.SerializeObject(loggedInUserProfile), response.StatusCode, apiUrl);
                     await LogLoginActivity("LOGIN_OTP_FAIL", "Login Failed - Invalid OTP", "System");
                     await LogLoginSiteError("LOGIN_OTP_FAIL", "Invalid OTP during login", "401", "OTP did not match or user profile was not returned");
                 }
@@ -437,6 +490,7 @@ namespace PrakashCRM.Controllers
             }
             catch (Exception ex)
             {
+                LogLoginRequestResponseToFile("CheckLogin", new { SPNo = SPNo, OTP = string.IsNullOrWhiteSpace(OTP) ? "" : "****", ContactNo = ContactNo }, ex.ToString(), HttpStatusCode.InternalServerError, Request != null ? Request.RawUrl : "");
                 await LogLoginActivity("LOGIN_OTP_EXCEPTION", "Login Failed - OTP Exception", "System");
                 await LogLoginSiteError("LOGIN_OTP_EXCEPTION", "Exception in CheckLogin", "500", ex.Message);
                 return "";
@@ -738,5 +792,39 @@ namespace PrakashCRM.Controllers
                 Path = "/"
             });
         }
+        //SendOtpEmail funcanality
+        //private bool SendOtpEmail(ContactNoOTPForLogin contactNoOTPForLogin, string generatedOTP, string adminContactNo)
+        //{
+        //    try
+        //    {
+        //        if (contactNoOTPForLogin == null || string.IsNullOrWhiteSpace(contactNoOTPForLogin.Company_E_Mail))
+        //            return false;
+
+        //        string serviceApiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"];
+        //        if (string.IsNullOrWhiteSpace(serviceApiUrl))
+        //            return false;
+
+        //        string apiUrl = serviceApiUrl.TrimEnd('/') + "/Salesperson/SendOtpEmail" + "?email=" + Uri.EscapeDataString(contactNoOTPForLogin.Company_E_Mail ?? "") + "&firstName=" + Uri.EscapeDataString(contactNoOTPForLogin.First_Name ?? "") + "&lastName=" + Uri.EscapeDataString(contactNoOTPForLogin.Last_Name ?? "") + "&generatedOtp=" + Uri.EscapeDataString(generatedOTP ?? "") + "&adminContactNo=" + Uri.EscapeDataString(adminContactNo ?? "");
+
+        //        using (HttpClient client = new HttpClient())
+        //        {
+        //            client.DefaultRequestHeaders.Accept.Clear();
+        //            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+        //            HttpResponseMessage response = client.GetAsync(apiUrl).GetAwaiter().GetResult();
+        //            if (!response.IsSuccessStatusCode)
+        //                return false;
+
+        //            string payload = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        //            bool emailSent;
+        //            return bool.TryParse(payload, out emailSent) && emailSent;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
     }
 }

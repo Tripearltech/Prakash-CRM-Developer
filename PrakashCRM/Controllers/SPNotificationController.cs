@@ -29,18 +29,23 @@ namespace PrakashCRM.Controllers
         {
             SPNotification notification = new SPNotification();
 
+            if (!string.IsNullOrWhiteSpace(Type) && !string.IsNullOrWhiteSpace(Employee_No))
+            {
+                Session["NotificationType"] = Type;
+                Session["NotificationEmpNo"] = Employee_No;
+                Session["isNotificationEdit"] = true;
+            }
+            else if (Session["NotificationType"] == null || Session["NotificationEmpNo"] == null)
+            {
+                Session["isNotificationEdit"] = false;
+            }
+
             if (Type != "" || Employee_No != "" || Session["NotificationType"] != null || Session["NotificationEmpNo"] != null)
             {
-                if (Session["NotificationType"] == null)
-                    Session["NotificationType"] = Type;
-
-                if (Session["NotificationEmpNo"] == null)
-                    Session["NotificationEmpNo"] = Employee_No;
-
                 Task<SPNotification> task = Task.Run<SPNotification>(async () => await GetNotificationForEdit(Session["NotificationType"].ToString(), Session["NotificationEmpNo"].ToString()));
                 notification = task.Result;
                 Session["isNotificationEdit"] = true;
-                
+
             }
 
             if (notification != null)
@@ -57,14 +62,16 @@ namespace PrakashCRM.Controllers
 
             string NotifType = "";
             string NotifEmployee_No = "";
-            if (Convert.ToBoolean(Session["isNotificationEdit"]) == true)
+            var isNotificationEdit = Session["isNotificationEdit"] != null && Convert.ToBoolean(Session["isNotificationEdit"]);
+
+            if (isNotificationEdit)
             {
                 NotifType = Session["NotificationType"].ToString();
                 NotifEmployee_No = Session["NotificationEmpNo"].ToString();
-                apiUrl = apiUrl + "Notification?isEdit=true&NotifType=" + NotifType + "&NotifEmployee_No=" + NotifEmployee_No;
+                apiUrl = apiUrl + "Notification?isEdit=true&NotifType=" + HttpUtility.UrlEncode(NotifType) + "&NotifEmployee_No=" + HttpUtility.UrlEncode(NotifEmployee_No);
             }
             else
-                apiUrl = apiUrl + "Notification?isEdit=false&NotifType=" + NotifType + "&NotifEmployee_No=" + NotifEmployee_No;
+                apiUrl = apiUrl + "Notification?isEdit=false&NotifType=" + HttpUtility.UrlEncode(NotifType) + "&NotifEmployee_No=" + HttpUtility.UrlEncode(NotifEmployee_No);
 
             SPNotification resNotification = new SPNotification();
 
@@ -91,7 +98,7 @@ namespace PrakashCRM.Controllers
                 resNotification = Newtonsoft.Json.JsonConvert.DeserializeObject<SPNotification>(data);
             }
 
-            if (resNotification != null && Convert.ToBoolean(Session["isNotificationEdit"]) == true)
+            if (resNotification != null && isNotificationEdit)
                 Session["NotificationAction"] = "Notification Setup Updated";
             else if (resNotification != null)
                 Session["NotificationAction"] = "Notification Setup Saved";
@@ -133,21 +140,7 @@ namespace PrakashCRM.Controllers
 
             return Json(spNoCode, JsonRequestBehavior.AllowGet);
 
-            //spNoCode.Add(new SPNoCodeForNotif
-            //    {
-            //        No = "E0150",
-            //        PCPL_Employee_Code = "AA"
-            //    }
-            //);
 
-            //spNoCode.Add(new SPNoCodeForNotif
-            //{
-            //    No = "E0160",
-            //    PCPL_Employee_Code = "BB"
-            //}
-            //);
-
-            //return Json(spNoCode, JsonRequestBehavior.AllowGet);
         }
 
         public async Task<JsonResult> GetSalespersonDetails(string FromCode)
@@ -227,7 +220,7 @@ namespace PrakashCRM.Controllers
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPNotification/";
 
-            apiUrl = apiUrl + "GetNotificationFromTypeAndEmpNo?Type=" + Type + "&Employee_No=" + Employee_No;
+            apiUrl = apiUrl + "GetNotificationFromTypeAndEmpNo?Type=" + HttpUtility.UrlEncode(Type) + "&Employee_No=" + HttpUtility.UrlEncode(Employee_No);
 
             HttpClient client = new HttpClient();
             SPNotification notification = new SPNotification();
@@ -249,7 +242,7 @@ namespace PrakashCRM.Controllers
                 ViewBag.Type = notification.Type;
                 ViewBag.FromCode = notification.From_Code;
                 ViewBag.Employee_No = notification.Employee_No;
-                
+
             }
 
             return notification;
@@ -300,7 +293,7 @@ namespace PrakashCRM.Controllers
             }
 
             DataTable dt = ToDataTable(notifications);
- 
+
             string fileName = "NotificationSetupList.xlsx";
             string fullPath = Path.Combine(Server.MapPath("~/temp"), fileName);
             using (XLWorkbook wb = new XLWorkbook())

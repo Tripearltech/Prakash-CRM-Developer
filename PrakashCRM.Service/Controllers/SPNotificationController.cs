@@ -13,6 +13,28 @@ namespace PrakashCRM.Service.Controllers
     [RoutePrefix("api/SPNotification")]
     public class SPNotificationController : ApiController
     {
+        private static string BuildNotificationFullName(SPProfile profile)
+        {
+            if (profile == null)
+                return string.Empty;
+
+            return string.Join(" ", new[] { profile.First_Name, profile.Middle_Name, profile.Last_Name }
+                .Where(value => !string.IsNullOrWhiteSpace(value))).Trim();
+        }
+
+        private static string NormalizeNotificationUserName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return string.Empty;
+
+            return string.Join(" ", name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)).Trim();
+        }
+
+        private static string EscapeODataValue(string value)
+        {
+            return (value ?? string.Empty).Replace("'", "''");
+        }
+
         [Route("GetAllSPEmployeeCode")]
         public List<SPNoCodeForNotif> GetAllSPEmployeeCode()
         {
@@ -23,6 +45,13 @@ namespace PrakashCRM.Service.Controllers
 
             if (result.Result.Item1.value.Count > 0)
                 spNoCode = result.Result.Item1.value;
+
+            spNoCode = spNoCode.Select(x =>
+            {
+                x.FullName = string.Join(" ", new[] { x.First_Name, x.Middle_Name, x.Last_Name }
+                                        .Where(n => !string.IsNullOrWhiteSpace(n)));
+                return x;
+            }).ToList();
 
             return spNoCode;
         }
@@ -37,7 +66,7 @@ namespace PrakashCRM.Service.Controllers
 
             if (result.Result.Item1.value.Count > 0)
                 user = result.Result.Item1.value[0];
-            
+
             return user;
         }
 
@@ -52,7 +81,8 @@ namespace PrakashCRM.Service.Controllers
             if (isEdit)
             {
                 requestNotification.Type = NotifType;
-                result = ac.PatchItem("NotificationsListDotNetAPI", requestNotification, responseNotification, "Type='" + NotifType + "',Employee_No='" + NotifEmployee_No + "'");
+                requestNotification.Employee_No = NotifEmployee_No;
+                result = ac.PatchItem("NotificationsListDotNetAPI", requestNotification, responseNotification, "Type='" + EscapeODataValue(NotifType) + "',Employee_No='" + EscapeODataValue(NotifEmployee_No) + "'");
             }
             else
                 result = ac.PostItem("NotificationsListDotNetAPI", requestNotification, responseNotification);
@@ -98,7 +128,7 @@ namespace PrakashCRM.Service.Controllers
             else
                 result = ac.GetData1<SPNotification>("NotificationsListDotNetAPI", filter, skip, top, orderby);
 
-            if (result.Result.Item1.value.Count > 0)
+            if (result.Result?.Item1?.value?.Count > 0)
                 notifications = result.Result.Item1.value;
 
             return notifications;
@@ -110,11 +140,11 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             SPNotification notification = new SPNotification();
 
-            var result = ac.GetData<SPNotification>("NotificationsListDotNetAPI", "Type eq '" + Type + "' and Employee_No eq '" + Employee_No + "'");
+            var result = ac.GetData<SPNotification>("NotificationsListDotNetAPI", "Type eq '" + EscapeODataValue(Type) + "' and Employee_No eq '" + EscapeODataValue(Employee_No) + "'");
 
             if (result.Result.Item1.value.Count > 0)
                 notification = result.Result.Item1.value[0];
-            
+
             return notification;
         }
 
@@ -123,9 +153,9 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             List<SPProfile> users = new List<SPProfile>();
-            
+
             var result = ac.GetData<SPProfile>("EmployeesDotNetAPI", "");
-            
+
             if (result.Result.Item1.value.Count > 0)
                 users = result.Result.Item1.value;
 
@@ -137,15 +167,26 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             SPProfile user = new SPProfile();
-            if (Name != null || Name != "") {
-                string[] name = Name.Split(' ');
 
-                var result = ac.GetData<SPProfile>("EmployeesDotNetAPI", "First_Name eq '" + name[0] + "' and Last_Name eq '" + name[1] + "'");
+            var normalizedName = NormalizeNotificationUserName(Name);
+            if (string.IsNullOrWhiteSpace(normalizedName))
+                return user;
 
-                if (result.Result.Item1.value.Count > 0)
-                    user = result.Result.Item1.value[0];
+            var firstName = normalizedName.Split(' ').FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(firstName))
+                return user;
+
+            var result = ac.GetData<SPProfile>("EmployeesDotNetAPI", "First_Name eq '" + firstName.Replace("'", "''") + "'");
+            var users = result?.Result.Item1?.value;
+
+            if (users != null && users.Count > 0)
+            {
+                user = users.FirstOrDefault(x => string.Equals(BuildNotificationFullName(x), normalizedName, StringComparison.OrdinalIgnoreCase))
+                    ?? users.FirstOrDefault(x => string.Equals(string.Join(" ", new[] { x.First_Name, x.Last_Name }
+                        .Where(value => !string.IsNullOrWhiteSpace(value))).Trim(), normalizedName, StringComparison.OrdinalIgnoreCase))
+                    ?? (users.Count == 1 ? users[0] : user);
             }
-            
+
             return user;
         }
     }

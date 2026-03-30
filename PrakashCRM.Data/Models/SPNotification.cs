@@ -12,6 +12,7 @@ namespace PrakashCRM.Data.Models
         public string Type { get; set; }
 
         public string Employee_No { get; set; }
+        public string Employee_Name { get; set; }
 
         public string From_Code { get; set; }
 
@@ -59,5 +60,9 @@ namespace PrakashCRM.Data.Models
         public string No { get; set; }
 
         public string PCPL_Employee_Code { get; set; }
+        public string First_Name { get; set; }
+        public string Middle_Name { get; set; }
+        public string Last_Name { get; set; }
+        public string FullName { get; set; }
     }
 }

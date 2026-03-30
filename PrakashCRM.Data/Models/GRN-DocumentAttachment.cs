@@ -24,5 +24,7 @@ namespace PrakashCRM.Data.Models
         public string LotNo { get; set; } = string.Empty;
 
         public string ItemNo { get; set; } = string.Empty;
+
+        public bool IsUploaded { get; set; }
     }
 }
