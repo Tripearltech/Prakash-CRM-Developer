@@ -77,6 +77,8 @@ namespace PrakashCRM.Controllers
 
                 SPSiteActivity activity = new SPSiteActivity
                 {
+                    Activity_User_Name = ResolveLoggedInUserName(),
+                    Activity_Date = DateTime.Now.ToString("dd-MM-yyyy"),
                     Module_Name = "Account",
                     Trace_Id = string.IsNullOrWhiteSpace(traceId) ? "LOGIN" : traceId,
                     IP_Address = Request != null ? (Request.ServerVariables["HTTP_X_FORWARDED_FOR"] ?? Request.ServerVariables["REMOTE_ADDR"]) : "",
@@ -104,6 +106,27 @@ namespace PrakashCRM.Controllers
             catch
             {
             }
+        }
+
+        private string ResolveLoggedInUserName()
+        {
+            string firstName = Session["loggedInUserFName"] == null ? string.Empty : Session["loggedInUserFName"].ToString().Trim();
+            string lastName = Session["loggedInUserLName"] == null ? string.Empty : Session["loggedInUserLName"].ToString().Trim();
+            string fullName = string.Join(" ", new[] { firstName, lastName }.Where(value => !string.IsNullOrWhiteSpace(value)));
+
+            if (!string.IsNullOrWhiteSpace(fullName))
+                return fullName;
+
+            if (Session["loggedInUserEmail"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserEmail"].ToString()))
+                return Session["loggedInUserEmail"].ToString().Trim();
+
+            if (Session["loggedInUserSPCode"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserSPCode"].ToString()))
+                return Session["loggedInUserSPCode"].ToString().Trim();
+
+            if (Session["loggedInUserNo"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserNo"].ToString()))
+                return Session["loggedInUserNo"].ToString().Trim();
+
+            return "System";
         }
 
         private async Task LogLoginSiteError(string traceId, string description, string statusCode = "500", string exceptionMessage = "")

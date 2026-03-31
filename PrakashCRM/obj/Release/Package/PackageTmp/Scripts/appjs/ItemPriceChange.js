@@ -230,7 +230,7 @@ $(document).ready(function () {
                         "<td><input type='text' class='form-control purchase-days' inputmode='days' placeholder='Enter the Days'></td>" +
                         "<td><input type='text' class='form-control price-new' inputmode='decimal' placeholder='Enter new price'></td>" +
                         "<td><input type='text' class='form-control discount' inputmode='decimal' placeholder='Enter the Discount'></td>" +
-                        "<td class='current-price'>" + item.PCPL_MRP_Price + "</td><td class='previous-price'>" + item.PCPL_Previous_Price + "</td>" +
+                        "<td class='current-price'>" + item.PCPL_Purchase_Cost + "</td><td class='previous-price'>" + item.PCPL_Previous_Price + "</td>" +
                         "<td class='checkbox-cell'>" + "<label class='custom-check readonly-check'>" + "<input type='checkbox' class='priceChangeChk readonly' " + checkedAttr + ">" + "<span class='checkmark'></span>" + "</label>" + "</td></tr>";
 
                     TROptsArr.push(rowHtml);
@@ -530,15 +530,6 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
     var newPriceVal = (newPrice !== undefined && newPrice !== null && (('' + newPrice).trim() !== '')) ? Number(newPrice) : null;
 
     function proceedWithChoice(changePrevious) {
-        var newCurrent;
-        if (discountVal !== null && !isNaN(discountVal) && newPriceVal !== null && !isNaN(newPriceVal)) {
-            newCurrent = newPriceVal - discountVal;
-        } else if (newPriceVal !== null && !isNaN(newPriceVal)) {
-            newCurrent = newPriceVal;
-        } else {
-            newCurrent = currentPrice;
-        }
-
         var prevToSend = null;
         if (changePrevious) {
             prevToSend = currentPrice;
@@ -546,7 +537,6 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
 
         // update UI immediately
         if (changePrevious) $tr.find('.previous-price').text(prevToSend);
-        $tr.find('.current-price').text(newCurrent);
 
         // build payload
         var payload = {
@@ -558,7 +548,7 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
             if (!isNaN(pd)) payload.PCPL_Purchase_Days = Math.round(pd);
         }
         if (discountVal !== null && !isNaN(discountVal)) payload.PCPL_Discount = discountVal;
-        if (!isNaN(newCurrent)) payload.PCPL_MRP_Price = Math.round(newCurrent);
+        if (newPriceVal !== null && !isNaN(newPriceVal)) payload.PCPL_MRP_Price = Math.round(newPriceVal);
         if (prevToSend !== null) payload.PCPL_Previous_Price = Math.round(prevToSend);
 
         updatePackingStylePrice(payload).done(function (data) {
@@ -566,7 +556,6 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
             dfd.resolve(data);
         }).fail(function (xhr) {
             // revert UI changes on failure
-            $tr.find('.current-price').text(currentPrice);
             $tr.find('.previous-price').text(previousPrice);
             var msg = 'Update failed!';
             if (xhr && xhr.responseText) {

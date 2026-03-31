@@ -1021,22 +1021,18 @@ function SaveTransporter() {
     $('#lblMsg').html('').css('color', 'red').hide();
 
     if ($('#lblAcceptedBy')[0].innerHTML == "") {
-        $('#btnSaveSpinner').hide();
         alert('Please Accept The Task First Then You Can Map the Details...!!!');
         return false;
     }
     if (!validateTransportQtyAgainstMTS()) {
-        $('#btnSaveSpinner').hide();
         return false;
     }
 
     if (!validateTransportQtySavedStatus()) {
-        $('#btnSaveSpinner').hide();
         return false;
     }
 
     if (!validateItemTrackingVsProductTransportQty()) {
-        $('#btnSaveSpinner').hide();
         return false;
     }
     //if ((!transporterCode || transporterCode === "") && (!vehicleno || vehicleno === "")) {
@@ -1067,7 +1063,6 @@ function SaveTransporter() {
 
     if ((!transporterCode && !vehicleno) ||
         (transporterCode.trim() === "" && vehicleno.trim() === "")) {
-        $('#btnSaveSpinner').hide();
         $('#lblMsg').html('Please enter Transporter Code or Vehicle Number before saving.').show();
         return false;
     }

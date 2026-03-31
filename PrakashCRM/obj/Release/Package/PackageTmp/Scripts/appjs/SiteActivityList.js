@@ -1,8 +1,16 @@
 ﻿/* start pagination filter code */
 var filter = "";
-var orderBy = 2;
+var orderBy = 1;
 var orderDir = "desc";
 var allOpenFilter = "";
+
+function htmlEncode(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return $('<div/>').text(value).html();
+}
 
 $(document).ready(function () {
 
@@ -52,7 +60,7 @@ $(document).ready(function () {
 
         filter = "";
         $('ul.pager li').remove();
-        orderBy = 2;
+        orderBy = 1;
         orderDir = "desc";
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     });
@@ -84,7 +92,7 @@ $(document).ready(function () {
     $('#dataList th').click(function () {
         var table = $(this).parents('table').eq(0)
 
-        if (this.cellIndex > 1) {
+        if (this.cellIndex > 0 && this.cellIndex < 10) {
             orderBy = parseInt(this.cellIndex);
             this.asc = (this.asc === undefined) ? false : !this.asc;
 
@@ -121,7 +129,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td><td>" + item.Module_Name + "</td><td>" + item.Trace_Id + "</td><td>" + item.IP_Address + "</td><td>" + item.Browser + "</td><td>" + item.Description + "</td><td>" + item.Web_URL + "</td><td>" + item.Device_Name + "</td></tr>";
+                    var rowData = "<tr><td></td><td>" + htmlEncode(item.Activity_Date) + "</td><td>" + htmlEncode(item.Activity_User_Name) + "</td><td>" + htmlEncode(item.Module_Name) + "</td><td>" + htmlEncode(item.Trace_Id) + "</td><td>" + htmlEncode(item.IP_Address) + "</td><td>" + htmlEncode(item.Browser) + "</td><td>" + htmlEncode(item.Description) + "</td><td>" + htmlEncode(item.Web_URL) + "</td><td>" + htmlEncode(item.Device_Name) + "</td></tr>";
                     $('#tableBody').append(rowData);
                     // loop and do whatever with data
 
@@ -155,13 +163,13 @@ function dataTableFunction(orderBy, orderDir) {
     });
 
     if (orderDir == "asc") {
-        $('#dataList th:lt(2)').removeClass("sorting_asc").removeClass("sorting_disabled");
-        $('#dataList th:gt(1)').removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th:lt(1)').removeClass("sorting_asc").removeClass("sorting_disabled");
+        $('#dataList th').slice(1, 10).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_desc").addClass("sorting_asc");
     }
     if (orderDir == "desc") {
-        $('#dataList th:lt(2)').removeClass("sorting_desc").removeClass("sorting_disabled");
-        $('#dataList th:gt(1)').removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th:lt(1)').removeClass("sorting_desc").removeClass("sorting_disabled");
+        $('#dataList th').slice(1, 10).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_asc").addClass("sorting_desc");
     }
 }

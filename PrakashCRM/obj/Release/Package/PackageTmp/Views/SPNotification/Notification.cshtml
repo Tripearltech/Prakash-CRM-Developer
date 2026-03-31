@@ -37,7 +37,7 @@
                                 @Html.DropDownListFor(model => model.Type, Enumerable.Empty<SelectListItem>(), new { @id = "ddlType", @class = "form-select" })
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">From Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <label class="form-label">From Employee Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 @Html.TextBoxFor(model => model.From_Code, new { @class = "form-control", @id = "hdnFromCode", style = "display:none" })
                                 @Html.TextBoxFor(model => model.Employee_No, new { @class = "form-control", @id = "txtEmpNo", style = "display:none" })
                                 <input type="hidden" id="hfEmployee_No" value="@ViewBag.Employee_No" />
@@ -46,21 +46,21 @@
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">From Name<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                @Html.TextBoxFor(model => model.From_Name, new { @class = "form-control", @id = "txtFromName", @readonly="readonly" })
+                                @Html.TextBoxFor(model => model.From_Name, new { @class = "form-control", @id = "txtFromName", @readonly = "readonly" })
                                 @Html.ValidationMessageFor(model => model.From_Name, null, new { style = "color:red" })
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">From Email<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 @Html.TextBoxFor(model => model.From_E_mail, new { @class = "form-control", @id = "txtFromEmail", @readonly = "readonly" })
                                 @Html.ValidationMessageFor(model => model.From_E_mail, null, new { style = "color:red" })
-                                
+
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">From Mobile No<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 @Html.TextBoxFor(model => model.From_Mobile_No, new { @class = "form-control", @id = "txtFromMobile", @readonly = "readonly" })
                                 @Html.ValidationMessageFor(model => model.From_Mobile_No, null, new { style = "color:red" })
-                                
+
                             </div>
                         </div>
                         <hr />
@@ -69,58 +69,58 @@
                                 <label class="form-label">To Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 @Html.TextBoxFor(model => model.To_Name, new { @class = "form-control", @id = "txtToName", @disabled = "disabled" })
                                 @Html.ValidationMessageFor(model => model.To_Name, null, new { style = "color:red" })
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">To Email<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 @Html.TextAreaFor(model => model.To_E_mail, new { @class = "form-control", @id = "txtToEmail", @rows = 3, cols = 35, @readonly = "readonly" })
                                 @Html.ValidationMessageFor(model => model.To_E_mail, null, new { style = "color:red" })
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">To Mobile No</label>
                                 @Html.TextAreaFor(model => model.To_Mobile_No, new { @class = "form-control", @id = "txtToMobile", @rows = 3, cols = 35, @readonly = "readonly" })
-                                
+
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Cc Name</label>
                                 @Html.TextBoxFor(model => model.CC_Name, new { @class = "form-control", @id = "txtCcName", @disabled = "disabled" })
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Cc Email</label>
                                 @Html.TextAreaFor(model => model.CC_E_mail, new { @class = "form-control", @id = "txtCcEmail", @rows = 3, cols = 35, @readonly = "readonly" })
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Cc Mobile No</label>
                                 @Html.TextAreaFor(model => model.CC_Mobile_No, new { @class = "form-control", @id = "txtCcMobile", @rows = 3, cols = 35, @readonly = "readonly" })
-                                
+
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Bcc Name</label>
                                 @Html.TextBoxFor(model => model.BCC_Name, new { @class = "form-control", @id = "txtBccName", @disabled = "disabled" })
-                                
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Bcc Email</label>
                                 @Html.TextAreaFor(model => model.BCC_E_mail, new { @class = "form-control", @id = "txtBccEmail", @rows = 3, cols = 35, @readonly = "readonly" })
-                               
+
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Bcc Mobile No</label>
                                 @Html.TextAreaFor(model => model.BCC_Mobile_No, new { @class = "form-control", @id = "txtBccMobile", @rows = 3, cols = 35, @readonly = "readonly" })
-                                
+
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-2">
                                 @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" }) Active
-                                
+
                             </div>
                         </div>
                     </div>

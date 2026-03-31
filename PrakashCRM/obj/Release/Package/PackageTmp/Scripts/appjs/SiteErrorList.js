@@ -4,6 +4,14 @@ var orderBy = 1;
 var orderDir = "asc";
 var allOpenFilter = "";
 
+function htmlEncode(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return $('<div/>').text(value).html();
+}
+
 $(document).ready(function () {
 
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
@@ -85,7 +93,7 @@ $(document).ready(function () {
         var table = $(this).parents('table').eq(0)
 
         this.asc = !this.asc;
-        if (this.cellIndex > 0 && this.cellIndex < 7) {
+        if (this.cellIndex > 0 && this.cellIndex < 10) {
             orderBy = parseInt(this.cellIndex);
             orderDir = "asc";
 
@@ -127,7 +135,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td><td>" + item.Error_Code + "</td><td>" + item.Exception_Message + "</td><td>" + item.Source + "</td><td>" + item.IP_Address + "</td><td>" + item.Browser + "</td><td>" + (item.Description || "") + "</td><td align='center'><input type='hidden' id='hfweburl" + index + "' value='" + item.Web_URL + "' /><input type='hidden' id='hfExcStackTrace" + index + "' value='" + item.Exception_Stack_Trace + "' /><a class='ViewErrorDetailsCls' onclick='ViewException(\"" + index + "\")'><i class='bx bx-show'></i></a></td></tr>";
+                    var rowData = "<tr><td></td><td>" + htmlEncode(item.CurrentDateTime) + "</td><td>" + htmlEncode(item.UserID) + "</td><td>" + htmlEncode(item.Error_Code) + "</td><td>" + htmlEncode(item.Exception_Message) + "</td><td>" + htmlEncode(item.Source) + "</td><td>" + htmlEncode(item.IP_Address) + "</td><td>" + htmlEncode(item.Browser) + "</td><td>" + htmlEncode(item.Description || "") + "</td><td align='center'><input type='hidden' id='hfweburl" + index + "' value='" + htmlEncode(item.Web_URL) + "' /><input type='hidden' id='hfExcStackTrace" + index + "' value='" + htmlEncode(item.Exception_Stack_Trace) + "' /><a class='ViewErrorDetailsCls' onclick='ViewException(\"" + index + "\")'><i class='bx bx-show'></i></a></td></tr>";
                     $('#tableBody').append(rowData);
                     // loop and do whatever with data
 
@@ -162,14 +170,12 @@ function dataTableFunction(orderBy, orderDir) {
 
     if (orderDir == "asc") {
         $('#dataList th:lt(1)').removeClass("sorting_asc").removeClass("sorting_disabled");
-        $('#dataList th:gt(6)').removeClass("sorting_asc").removeClass("sorting_disabled");
-        $('#dataList th').slice(1, 7).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(1, 10).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_desc").addClass("sorting_asc");
     }
     if (orderDir == "desc") {
         $('#dataList th:lt(1)').removeClass("sorting_desc").removeClass("sorting_disabled");
-        $('#dataList th:gt(6)').removeClass("sorting_desc").removeClass("sorting_disabled");
-        $('#dataList th').slice(1, 7).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(1, 10).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_asc").addClass("sorting_desc");
     }
 }

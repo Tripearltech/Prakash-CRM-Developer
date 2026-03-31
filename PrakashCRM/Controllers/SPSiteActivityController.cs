@@ -39,22 +39,31 @@ namespace PrakashCRM.Controllers
 
             switch (orderBy)
             {
+                case 1:
+                    orderByField = "Activity_Date " + orderDir;
+                    break;
                 case 2:
-                    orderByField = "Trace_Id " + orderDir;
+                    orderByField = "Activity_User_Name " + orderDir;
                     break;
                 case 3:
-                    orderByField = "IP_Address " + orderDir;
+                    orderByField = "Module_Name " + orderDir;
                     break;
                 case 4:
-                    orderByField = "Browser " + orderDir;
+                    orderByField = "Trace_Id " + orderDir;
                     break;
                 case 5:
-                    orderByField = "Description " + orderDir;
+                    orderByField = "IP_Address " + orderDir;
                     break;
                 case 6:
-                    orderByField = "Web_URL " + orderDir;
+                    orderByField = "Browser " + orderDir;
                     break;
                 case 7:
+                    orderByField = "Description " + orderDir;
+                    break;
+                case 8:
+                    orderByField = "Web_URL " + orderDir;
+                    break;
+                case 9:
                     orderByField = "Device_Name " + orderDir;
                     break;
             }
@@ -85,24 +94,55 @@ namespace PrakashCRM.Controllers
 
             switch (orderBy)
             {
+                case 1:
+                    orderByField = "Activity_Date " + orderDir;
+                    break;
                 case 2:
-                    orderByField = "Trace_Id " + orderDir;
+                    orderByField = "Activity_User_Name " + orderDir;
                     break;
                 case 3:
-                    orderByField = "IP_Address " + orderDir;
+                    orderByField = "Module_Name " + orderDir;
                     break;
                 case 4:
-                    orderByField = "Browser " + orderDir;
+                    orderByField = "Trace_Id " + orderDir;
                     break;
                 case 5:
-                    orderByField = "Description " + orderDir;
+                    orderByField = "IP_Address " + orderDir;
                     break;
                 case 6:
-                    orderByField = "Web_URL " + orderDir;
+                    orderByField = "Browser " + orderDir;
                     break;
                 case 7:
+                    orderByField = "Description " + orderDir;
+                    break;
+                case 8:
+                    orderByField = "Web_URL " + orderDir;
+                    break;
+                case 9:
                     orderByField = "Device_Name " + orderDir;
                     break;
+            }
+
+            if (top <= 0)
+            {
+                using (HttpClient countClient = new HttpClient())
+                {
+                    string countApiUrl = apiUrl + "GetApiRecordsCount?apiEndPointName=SiteActivitiesListDotNetAPI&filter=" + filter;
+                    countClient.BaseAddress = new Uri(countApiUrl);
+                    countClient.DefaultRequestHeaders.Accept.Clear();
+                    countClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                    HttpResponseMessage countResponse = await countClient.GetAsync(countApiUrl);
+                    if (countResponse.IsSuccessStatusCode)
+                    {
+                        var countData = await countResponse.Content.ReadAsStringAsync();
+                        int totalRecords;
+                        if (int.TryParse(countData, out totalRecords) && totalRecords > 0)
+                        {
+                            top = totalRecords;
+                        }
+                    }
+                }
             }
 
             apiUrl = apiUrl + "GetSiteActivity?SPCode=" + Session["loggedInUserSPCode"].ToString() + "&skip=" + skip + "&top=" + top + "&orderby=" + orderByField + "&filter=" + filter;
@@ -120,14 +160,80 @@ namespace PrakashCRM.Controllers
                 var data = await response.Content.ReadAsStringAsync();
                 siteactivity = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SPSiteActivity>>(data);
             }
-            DataTable dt = ToDataTable(siteactivity);
 
             //Name of File  
             string fileName = "SiteActivityList.xlsx";
             string fullPath = Path.Combine(Server.MapPath("~/temp"), fileName);
             using (XLWorkbook wb = new XLWorkbook())
             {
-                wb.Worksheets.Add(dt);
+                var worksheet = wb.Worksheets.Add("Site Activity List");
+
+                worksheet.Cell(1, 1).Value = "Site Activity List";
+                worksheet.Range(1, 1, 1, 11).Merge();
+                worksheet.Cell(1, 1).Style.Font.Bold = true;
+                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                worksheet.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#D9EAF7");
+
+                worksheet.Cell(2, 1).Value = "Generated On";
+                worksheet.Cell(2, 2).Value = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
+                worksheet.Range(2, 1, 2, 2).Style.Font.Bold = true;
+
+                string[] headers = new[]
+                {
+                    "Activity Date",
+                    "Activity User Name",
+                    "Module Name",
+                    "Trace Id",
+                    "IP Address",
+                    "Browser",
+                    "Description",
+                    "Web URL",
+                    "Device Name",
+                    "Company Code",
+                    "MAC Address"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cell(4, i + 1).Value = headers[i];
+                }
+
+                var headerRange = worksheet.Range(4, 1, 4, headers.Length);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+                headerRange.Style.Font.FontColor = XLColor.White;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                int row = 5;
+                foreach (var item in siteactivity)
+                {
+                    worksheet.Cell(row, 1).Value = item.Activity_Date ?? string.Empty;
+                    worksheet.Cell(row, 2).Value = item.Activity_User_Name ?? string.Empty;
+                    worksheet.Cell(row, 3).Value = item.Module_Name ?? string.Empty;
+                    worksheet.Cell(row, 4).Value = item.Trace_Id ?? string.Empty;
+                    worksheet.Cell(row, 5).Value = item.IP_Address ?? string.Empty;
+                    worksheet.Cell(row, 6).Value = item.Browser ?? string.Empty;
+                    worksheet.Cell(row, 7).Value = item.Description ?? string.Empty;
+                    worksheet.Cell(row, 8).Value = item.Web_URL ?? string.Empty;
+                    worksheet.Cell(row, 9).Value = item.Device_Name ?? string.Empty;
+                    worksheet.Cell(row, 10).Value = item.Company_Code ?? string.Empty;
+                    worksheet.Cell(row, 11).Value = item.MAC_Address ?? string.Empty;
+                    row++;
+                }
+
+                var dataRange = worksheet.Range(4, 1, Math.Max(row - 1, 4), headers.Length);
+                dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+                worksheet.Range(5, 7, Math.Max(row - 1, 5), 11).Style.Alignment.WrapText = true;
+
+                worksheet.SheetView.FreezeRows(4);
+                worksheet.Columns().AdjustToContents();
+                worksheet.Column(7).Width = 35;
+                worksheet.Column(8).Width = 45;
+                worksheet.Column(11).Width = 24;
 
                 using (var exportData = new MemoryStream())
                 {

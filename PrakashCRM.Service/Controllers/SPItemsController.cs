@@ -76,8 +76,8 @@ namespace PrakashCRM.Service.Controllers
                 PCPL_Purchase_Days = model.PCPL_Purchase_Days,
                 PCPL_Discount = model.PCPL_Discount,
                 PCPL_MRP_Price = mrpPriceToUpdate,
-                PCPL_Purchase_Cost = null,
-                PCPL_Previous_Price = model.PCPL_Previous_Price
+                //PCPL_Purchase_Cost = null,
+                //PCPL_Previous_Price = model.PCPL_Previous_Price
             };
 
             var responseMU = new SPItemPackingStyleDetails();
@@ -115,10 +115,10 @@ namespace PrakashCRM.Service.Controllers
                 patchObj["PCPL_Discount"] = requestModel.PCPL_Discount.Value;
             if (requestModel.PCPL_MRP_Price.HasValue)
                 patchObj["PCPL_MRP_Price"] = requestModel.PCPL_MRP_Price.Value;
-            if (requestModel.PCPL_Purchase_Cost.HasValue)
-                patchObj["PCPL_Purchase_Cost"] = requestModel.PCPL_Purchase_Cost.Value;
-            if (requestModel.PCPL_Previous_Price.HasValue)
-                patchObj["PCPL_Previous_Price"] = requestModel.PCPL_Previous_Price.Value;
+            //if (requestModel.PCPL_Purchase_Cost.HasValue)
+            //    patchObj["PCPL_Purchase_Cost"] = requestModel.PCPL_Purchase_Cost.Value;
+            //if (requestModel.PCPL_Previous_Price.HasValue)
+            //    patchObj["PCPL_Previous_Price"] = requestModel.PCPL_Previous_Price.Value;
 
             request.Content = new StringContent(patchObj.ToString(), Encoding.UTF8, "application/json");
 
