@@ -20,6 +20,35 @@ namespace PrakashCRM.Service.Classes
 {
     public class API
     {
+        private const string ServiceSiteErrorUserId = "System";
+
+        private class LegacySiteActivityPayload
+        {
+            public string Module_Name { get; set; }
+            public string Trace_Id { get; set; }
+            public string IP_Address { get; set; }
+            public string Browser { get; set; }
+            public string Description { get; set; }
+            public string Web_URL { get; set; }
+            public string Company_Code { get; set; }
+            public string MAC_Address { get; set; }
+            public string Device_Name { get; set; }
+        }
+
+        private class LegacySiteErrorPayload
+        {
+            public string UserID { get; set; }
+            public string CurrentDateTime { get; set; }
+            public string Error_Code { get; set; }
+            public string Exception_Message { get; set; }
+            public string Exception_Stack_Trace { get; set; }
+            public string Source { get; set; }
+            public string IP_Address { get; set; }
+            public string Browser { get; set; }
+            public string Description { get; set; }
+            public string Web_URL { get; set; }
+        }
+
         private static readonly SemaphoreSlim AccessTokenSemaphore;
         private static AccessToken _accessToken;
         private readonly string _clientId;
@@ -908,6 +937,8 @@ namespace PrakashCRM.Service.Classes
 
             string actionDescription = string.IsNullOrWhiteSpace(Description) ? "Accessed" : Description;
             string actionUser = string.IsNullOrWhiteSpace(User) ? "System" : User;
+            siteActivity.Activity_User_Name = actionUser;
+            siteActivity.Activity_Date = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
             siteActivity.Description = "Record " + actionDescription + " By " + actionUser;
             if (siteActivity.Description.Length > 100)
                 siteActivity.Description = siteActivity.Description.Substring(0, 100);
@@ -941,12 +972,48 @@ namespace PrakashCRM.Service.Classes
             //    siteActivity = Newtonsoft.Json.JsonConvert.DeserializeObject<SiteActivity>(data1);
             //}
 
-            var result = ac.PostItem("SiteActivitiesListDotNetAPI", siteActivity, siteActivity);
+            var saveResult = ac.SaveSiteActivity(siteActivity).Result;
 
-            if (result.Result.Item1 != null)
-                siteActivity = result.Result.Item1;
+            if (saveResult.Item1 != null)
+                siteActivity = saveResult.Item1;
 
             return siteActivity;
+        }
+
+        public async Task<(SPSiteActivity, errorDetails)> SaveSiteActivity(SPSiteActivity requestModel)
+        {
+            var primaryResult = await PostItem("SiteActivitiesListDotNetAPI", requestModel, requestModel);
+            if (primaryResult.Item2 != null && primaryResult.Item2.isSuccess)
+                return primaryResult;
+
+            bool hasExtendedActivityFields = !string.IsNullOrWhiteSpace(requestModel.Activity_User_Name) ||
+                                             !string.IsNullOrWhiteSpace(requestModel.Activity_Date);
+
+            if (hasExtendedActivityFields)
+                return primaryResult;
+
+            var legacyRequest = new LegacySiteActivityPayload
+            {
+                Module_Name = requestModel.Module_Name,
+                Trace_Id = requestModel.Trace_Id,
+                IP_Address = requestModel.IP_Address,
+                Browser = requestModel.Browser,
+                Description = requestModel.Description,
+                Web_URL = requestModel.Web_URL,
+                Company_Code = requestModel.Company_Code,
+                MAC_Address = requestModel.MAC_Address,
+                Device_Name = requestModel.Device_Name
+            };
+
+            var legacyResponse = new LegacySiteActivityPayload();
+            var legacyResult = await PostItem("SiteActivitiesListDotNetAPI", legacyRequest, legacyResponse);
+
+            if (legacyResult.Item2 != null && legacyResult.Item2.isSuccess)
+            {
+                return (requestModel, legacyResult.Item2);
+            }
+
+            return (primaryResult.Item1, primaryResult.Item2 ?? legacyResult.Item2);
         }
 
         public SPSiteError PostSiteError(Exception ex)
@@ -954,6 +1021,8 @@ namespace PrakashCRM.Service.Classes
             API ac = new API();
 
             SPSiteError siteError = new SPSiteError();
+            siteError.UserID = ServiceSiteErrorUserId;
+            siteError.CurrentDateTime = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
             siteError.Error_Code = ""; //ex.ErrorCode.ToString();
             siteError.Exception_Message = ex.Message.ToString();
             siteError.Exception_Stack_Trace = ex.StackTrace.ToString();
@@ -964,10 +1033,10 @@ namespace PrakashCRM.Service.Classes
             siteError.Description = "Type: " + ex.GetType().ToString() + "Method Name: " + ex.TargetSite + "Current Exception: " + ex.InnerException;
             siteError.Web_URL = getWebURL();
 
-            var result = ac.PostItem("SiteErrorsListDotNetAPI", siteError, siteError);
+            var saveResult = ac.SaveSiteError(siteError).Result;
 
-            if (result.Result.Item1 != null)
-                siteError = result.Result.Item1;
+            if (saveResult.Item1 != null)
+                siteError = saveResult.Item1;
 
             //HttpClient client = new HttpClient();
 
@@ -1002,6 +1071,8 @@ namespace PrakashCRM.Service.Classes
             API ac = new API();
 
             SPSiteError siteError = new SPSiteError();
+            siteError.UserID = ServiceSiteErrorUserId;
+            siteError.CurrentDateTime = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
             siteError.Error_Code = Code;
             siteError.Exception_Message = Message;
             siteError.Exception_Stack_Trace = RequestURL;
@@ -1012,12 +1083,49 @@ namespace PrakashCRM.Service.Classes
             siteError.Description = string.IsNullOrWhiteSpace(Description) ? ("TraceId: " + Guid.NewGuid().ToString("N")) : Description;
             siteError.Web_URL = getWebURL();
 
-            var result = ac.PostItem("SiteErrorsListDotNetAPI", siteError, siteError);
+            var saveResult = ac.SaveSiteError(siteError).Result;
 
-            if (result.Result.Item1 != null)
-                siteError = result.Result.Item1;
+            if (saveResult.Item1 != null)
+                siteError = saveResult.Item1;
 
             return siteError;
+        }
+
+        public async Task<(SPSiteError, errorDetails)> SaveSiteError(SPSiteError requestModel)
+        {
+            if (requestModel != null)
+            {
+                requestModel.UserID = string.IsNullOrWhiteSpace(requestModel.UserID) ? ServiceSiteErrorUserId : requestModel.UserID;
+                requestModel.CurrentDateTime = string.IsNullOrWhiteSpace(requestModel.CurrentDateTime) ? DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss") : requestModel.CurrentDateTime;
+            }
+
+            var primaryResult = await PostItem("SiteErrorsListDotNetAPI", requestModel, requestModel);
+            if (primaryResult.Item2 != null && primaryResult.Item2.isSuccess)
+                return primaryResult;
+
+            var legacyRequest = new LegacySiteErrorPayload
+            {
+                UserID = requestModel.UserID,
+                CurrentDateTime = requestModel.CurrentDateTime,
+                Error_Code = requestModel.Error_Code,
+                Exception_Message = requestModel.Exception_Message,
+                Exception_Stack_Trace = requestModel.Exception_Stack_Trace,
+                Source = requestModel.Source,
+                IP_Address = requestModel.IP_Address,
+                Browser = requestModel.Browser,
+                Description = requestModel.Description,
+                Web_URL = requestModel.Web_URL
+            };
+
+            var legacyResponse = new LegacySiteErrorPayload();
+            var legacyResult = await PostItem("SiteErrorsListDotNetAPI", legacyRequest, legacyResponse);
+
+            if (legacyResult.Item2 != null && legacyResult.Item2.isSuccess)
+            {
+                return (requestModel, legacyResult.Item2);
+            }
+
+            return (primaryResult.Item1, primaryResult.Item2 ?? legacyResult.Item2);
         }
     }
 }

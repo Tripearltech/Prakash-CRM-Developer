@@ -80,6 +80,16 @@ namespace PrakashCRM.Controllers
                     siteError.Web_URL = Request.Url != null ? Request.Url.PathAndQuery : "";
                 }
 
+                if (string.IsNullOrWhiteSpace(siteError.UserID))
+                {
+                    siteError.UserID = ResolveLoggedInUserName();
+                }
+
+                if (string.IsNullOrWhiteSpace(siteError.CurrentDateTime))
+                {
+                    siteError.CurrentDateTime = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
+                }
+
                 using (HttpClient client = new HttpClient())
                 {
                     client.BaseAddress = new Uri(apiUrl);
@@ -112,15 +122,6 @@ namespace PrakashCRM.Controllers
             if (string.IsNullOrWhiteSpace(message))
                 return false;
 
-            if (errorCode.Equals("ACTION_ERR", StringComparison.OrdinalIgnoreCase))
-                return false;
-
-            if (source.StartsWith("Client Save", StringComparison.OrdinalIgnoreCase) ||
-                source.StartsWith("Client Update", StringComparison.OrdinalIgnoreCase) ||
-                source.StartsWith("Client Edit", StringComparison.OrdinalIgnoreCase) ||
-                source.StartsWith("Login Action", StringComparison.OrdinalIgnoreCase))
-                return false;
-
             string normalizedMessage = message.ToLowerInvariant();
             string[] ignoredPrefixes = new[]
             {
@@ -142,6 +143,10 @@ namespace PrakashCRM.Controllers
                     return false;
             }
 
+            if (errorCode.Equals("ACTION_ERR", StringComparison.OrdinalIgnoreCase) &&
+                source.StartsWith("Login Action", StringComparison.OrdinalIgnoreCase))
+                return false;
+
             return true;
         }
 
@@ -154,24 +159,30 @@ namespace PrakashCRM.Controllers
             switch (orderBy)
             {
                 case 1:
-                    orderByField = "Error_Code " + orderDir;
+                    orderByField = "CurrentDateTime " + orderDir;
                     break;
                 case 2:
-                    orderByField = "Exception_Message " + orderDir;
+                    orderByField = "UserID " + orderDir;
                     break;
                 case 3:
-                    orderByField = "Source " + orderDir;
+                    orderByField = "Error_Code " + orderDir;
                     break;
                 case 4:
-                    orderByField = "IP_Address " + orderDir;
+                    orderByField = "Exception_Message " + orderDir;
                     break;
                 case 5:
-                    orderByField = "Browser " + orderDir;
+                    orderByField = "Source " + orderDir;
                     break;
                 case 6:
-                    orderByField = "Description " + orderDir;
+                    orderByField = "IP_Address " + orderDir;
                     break;
                 case 7:
+                    orderByField = "Browser " + orderDir;
+                    break;
+                case 8:
+                    orderByField = "Description " + orderDir;
+                    break;
+                case 9:
                     orderByField = "Exception_Stack_Trace " + orderDir;
                     break;
             }
@@ -205,26 +216,54 @@ namespace PrakashCRM.Controllers
             switch (orderBy)
             {
                 case 1:
-                    orderByField = "Error_Code " + orderDir;
+                    orderByField = "CurrentDateTime " + orderDir;
                     break;
                 case 2:
-                    orderByField = "Exception_Message " + orderDir;
+                    orderByField = "UserID " + orderDir;
                     break;
                 case 3:
-                    orderByField = "Source " + orderDir;
+                    orderByField = "Error_Code " + orderDir;
                     break;
                 case 4:
-                    orderByField = "IP_Address " + orderDir;
+                    orderByField = "Exception_Message " + orderDir;
                     break;
                 case 5:
-                    orderByField = "Browser " + orderDir;
+                    orderByField = "Source " + orderDir;
                     break;
                 case 6:
-                    orderByField = "Description " + orderDir;
+                    orderByField = "IP_Address " + orderDir;
                     break;
                 case 7:
+                    orderByField = "Browser " + orderDir;
+                    break;
+                case 8:
+                    orderByField = "Description " + orderDir;
+                    break;
+                case 9:
                     orderByField = "Exception_Stack_Trace " + orderDir;
                     break;
+            }
+
+            if (top <= 0)
+            {
+                using (HttpClient countClient = new HttpClient())
+                {
+                    string countApiUrl = apiUrl + "GetApiRecordsCount?apiEndPointName=SiteErrorsListDotNetAPI&filter=" + filter;
+                    countClient.BaseAddress = new Uri(countApiUrl);
+                    countClient.DefaultRequestHeaders.Accept.Clear();
+                    countClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    HttpResponseMessage countResponse = await countClient.GetAsync(countApiUrl);
+                    if (countResponse.IsSuccessStatusCode)
+                    {
+                        var countData = await countResponse.Content.ReadAsStringAsync();
+                        int totalRecords;
+                        if (int.TryParse(countData, out totalRecords) && totalRecords > 0)
+                        {
+                            top = totalRecords;
+                        }
+                    }
+                }
             }
 
             apiUrl = apiUrl + "GetSiteError?skip=" + skip + "&top=" + top + "&orderby=" + orderByField + "&filter=" + filter;
@@ -242,14 +281,79 @@ namespace PrakashCRM.Controllers
                 var data = await response.Content.ReadAsStringAsync();
                 siteerror = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SPSiteError>>(data);
             }
-            DataTable dt = ToDataTable(siteerror);
 
             //Name of File  
             string fileName = "SiteErrorList.xlsx";
             string fullPath = Path.Combine(Server.MapPath("~/temp"), fileName);
             using (XLWorkbook wb = new XLWorkbook())
             {
-                wb.Worksheets.Add(dt);
+                var worksheet = wb.Worksheets.Add("Site Error List");
+
+                worksheet.Cell(1, 1).Value = "Site Error List";
+                worksheet.Range(1, 1, 1, 10).Merge();
+                worksheet.Cell(1, 1).Style.Font.Bold = true;
+                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
+                worksheet.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                worksheet.Cell(1, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#D9EAF7");
+
+                worksheet.Cell(2, 1).Value = "Generated On";
+                worksheet.Cell(2, 2).Value = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
+                worksheet.Range(2, 1, 2, 2).Style.Font.Bold = true;
+
+                string[] headers = new[]
+                {
+                    "Date & Time",
+                    "User Name",
+                    "Error Code",
+                    "Exception Message",
+                    "Source",
+                    "IP Address",
+                    "Browser",
+                    "Description",
+                    "Exception Trace",
+                    "Web URL"
+                };
+
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cell(4, i + 1).Value = headers[i];
+                }
+
+                var headerRange = worksheet.Range(4, 1, 4, headers.Length);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+                headerRange.Style.Font.FontColor = XLColor.White;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                int row = 5;
+                foreach (var item in siteerror)
+                {
+                    worksheet.Cell(row, 1).Value = item.CurrentDateTime ?? string.Empty;
+                    worksheet.Cell(row, 2).Value = item.UserID ?? string.Empty;
+                    worksheet.Cell(row, 3).Value = item.Error_Code ?? string.Empty;
+                    worksheet.Cell(row, 4).Value = item.Exception_Message ?? string.Empty;
+                    worksheet.Cell(row, 5).Value = item.Source ?? string.Empty;
+                    worksheet.Cell(row, 6).Value = item.IP_Address ?? string.Empty;
+                    worksheet.Cell(row, 7).Value = item.Browser ?? string.Empty;
+                    worksheet.Cell(row, 8).Value = item.Description ?? string.Empty;
+                    worksheet.Cell(row, 9).Value = item.Exception_Stack_Trace ?? string.Empty;
+                    worksheet.Cell(row, 10).Value = item.Web_URL ?? string.Empty;
+                    row++;
+                }
+
+                var dataRange = worksheet.Range(4, 1, Math.Max(row - 1, 4), headers.Length);
+                dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                dataRange.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
+                worksheet.Range(5, 4, Math.Max(row - 1, 5), 10).Style.Alignment.WrapText = true;
+
+                worksheet.SheetView.FreezeRows(4);
+                worksheet.Columns().AdjustToContents();
+                worksheet.Column(4).Width = 40;
+                worksheet.Column(8).Width = 30;
+                worksheet.Column(9).Width = 50;
+                worksheet.Column(10).Width = 45;
 
                 using (var exportData = new MemoryStream())
                 {
@@ -299,6 +403,27 @@ namespace PrakashCRM.Controllers
             }
             //put a breakpoint here and check datatable
             return dataTable;
+        }
+
+        private string ResolveLoggedInUserName()
+        {
+            string firstName = Session["loggedInUserFName"] == null ? string.Empty : Session["loggedInUserFName"].ToString().Trim();
+            string lastName = Session["loggedInUserLName"] == null ? string.Empty : Session["loggedInUserLName"].ToString().Trim();
+            string fullName = string.Join(" ", new[] { firstName, lastName }.Where(value => !string.IsNullOrWhiteSpace(value)));
+
+            if (!string.IsNullOrWhiteSpace(fullName))
+                return fullName;
+
+            if (Session["loggedInUserEmail"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserEmail"].ToString()))
+                return Session["loggedInUserEmail"].ToString().Trim();
+
+            if (Session["loggedInUserSPCode"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserSPCode"].ToString()))
+                return Session["loggedInUserSPCode"].ToString().Trim();
+
+            if (Session["loggedInUserNo"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserNo"].ToString()))
+                return Session["loggedInUserNo"].ToString().Trim();
+
+            return "Guest User";
         }
         
     }

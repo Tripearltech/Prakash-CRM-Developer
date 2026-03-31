@@ -144,6 +144,16 @@ $(document).ready(function () {
     });
 
     $('#ddlIncoTerms').change(function () {
+        var selectedIncoTermCode = ($('#ddlIncoTerms').val() || '').toString().trim().toUpperCase();
+        var selectedIncoTermText = ($('#ddlIncoTerms option:selected').text() || '').toString().trim().toUpperCase();
+        var isPaidIncoTerm = selectedIncoTermCode == "CFR"
+            || selectedIncoTermCode == "CIF"
+            || selectedIncoTermCode == "DELIVERED"
+            || selectedIncoTermText == "EX-FACTORY - LOCAL FREIGHT PAID"
+            || selectedIncoTermText == "EX-WAREHOUSE - LOCAL FREIGHT PAID";
+        var isToPayIncoTerm = selectedIncoTermCode == "EXF"
+            || selectedIncoTermCode == "EXW"
+            || selectedIncoTermCode == "FOB";
 
         $('#ddlTransportMethod').prop('disabled', false);
         $('#txtLineDetailsIncoTerms').val($('#ddlIncoTerms option:selected').text());
@@ -152,12 +162,12 @@ $(document).ready(function () {
         $('#txtTransportCost').val("0");
         $('#txtInsurance').val("0");
 
-        if ($('#ddlIncoTerms').val() == "CFR" || $('#ddlIncoTerms').val() == "CIF" || $('#ddlIncoTerms').val() == "DELIVERED") {
+        if (isPaidIncoTerm) {
             $('#btnShowTPDet').css('display', 'block');
             $('#ddlTransportMethod').val("PAID");
             $('#ddlTransportMethod').prop('disabled', true);
         }
-        else if ($('#ddlIncoTerms').val() == "EXF" || $('#ddlIncoTerms').val() == "EXW" || $('#ddlIncoTerms').val() == "FOB") {
+        else if (isToPayIncoTerm) {
             $('#btnShowTPDet').css('display', 'none');
             $('#ddlTransportMethod').val("TOPAY");
             $('#ddlTransportMethod').prop('disabled', true);
@@ -1084,7 +1094,7 @@ $(document).ready(function () {
                 var NewBillToAddress = {};
 
                 NewBillToAddress.Customer_No = $('#hfCustomerNo').val();
-                NewBillToAddress.Code = $('#txtNewShiptoAddCode').val();
+               // NewBillToAddress.Code = $('#txtNewShiptoAddCode').val();
                 NewBillToAddress.Address = $('#txtNewShiptoAddress').val();
                 NewBillToAddress.Address_2 = $('#txtNewShiptoAddress2').val();
                 NewBillToAddress.Post_Code = $('#txtNewShiptoAddPostCode').val();
@@ -3260,7 +3270,7 @@ function CheckNewBilltoAddressValues() {
 
     var errMsg = "";
 
-    if ($('#txtNewShiptoAddCode').val() == "" || $('#txtNewShiptoAddress').val() == "" || $('#txtNewShiptoAddPostCode').val() == "" ||
+    if (/*$('#txtNewShiptoAddCode').val() == "" || */$('#txtNewShiptoAddress').val() == "" || $('#txtNewShiptoAddPostCode').val() == "" ||
         $('#ddlNewShiptoAddArea').val() == "-1" || $('#txtNewShiptoAddState').val() == "" || $('#txtNewShiptoAddGSTNo').val() == "") {
 
         errMsg = "Please Fill Details";
@@ -3639,7 +3649,7 @@ function ResetCPersonDetails() {
 
 function ResetNewBillToAddressDetails() {
 
-    $('#txtNewShiptoAddCode').val("");
+   // $('#txtNewShiptoAddCode').val("");
     $('#txtNewShiptoAddress').val("");
     $('#txtNewShiptoAddress2').val("");
     $('#txtNewShiptoAddPostCode').val("");

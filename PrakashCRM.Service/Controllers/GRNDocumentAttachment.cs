@@ -69,18 +69,18 @@ namespace PrakashCRM.Service.Controllers
                     }
 
                     var base64 = Convert.ToBase64String(bytes);
-                    var normalizedFileName = Path.GetFileName(fileName);
+                    var responsesFIleName = Path.GetFileName(fileName);
                     var resolvedExtension = Path.GetExtension(currentFile.FileName);
                     if (string.IsNullOrWhiteSpace(resolvedExtension))
                     {
-                        resolvedExtension = Path.GetExtension(normalizedFileName);
+                        resolvedExtension = Path.GetExtension(responsesFIleName);
                     }
 
-                    SaveAttachmentFile(bytes, lotNo, itemNo, normalizedFileName);
+                    SaveAttachmentFile(bytes, lotNo, itemNo, responsesFIleName);
 
                     responses.Add(new FileUploadResponse
                     {
-                        FileName = Path.GetFileNameWithoutExtension(normalizedFileName),
+                        FileName = Path.GetFileNameWithoutExtension(responsesFIleName),
                         FileExtension = resolvedExtension,
                         ContentType = currentFile.ContentType,
                         Size = currentFile.ContentLength,

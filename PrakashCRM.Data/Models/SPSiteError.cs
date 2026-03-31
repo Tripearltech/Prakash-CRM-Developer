@@ -9,6 +9,8 @@ namespace PrakashCRM.Data.Models
 {
     public class SPSiteError
     {
+        public string UserID { get; set; }
+        public string CurrentDateTime { get; set; }
         public string Error_Code { get; set; }
         public string Exception_Message { get; set; }
         public string Exception_Stack_Trace { get; set; }

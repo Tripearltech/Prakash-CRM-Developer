@@ -256,20 +256,22 @@ $('#btnSave').click(function () {
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
-                    // role-wise menu rights JSON ko alag hidden field me store karo
                     $('#hdnRolewiseMenuRightsJson').val(JSON.stringify(data || {}));
+
+                    try {
+                        window.roleMenu = data || {};
+                        if (typeof window.renderDynamicMenu === 'function') {
+                            window.renderDynamicMenu();
+                        }
+                        $(document).trigger('roleMenuDataUpdated', [data || {}]);
+                    } catch (e) { }
                 },
                 complete: function () {
                     setSaveInProgress(false);
                 }
                 ,
                 error: function (xhr) {
-                    // keep existing saved rights list intact; just surface an error
-                    // (avoid breaking Save/Delete flow)
-                    // optional: xhr.responseText contains error details
                     $('#hdnRolewiseMenuRightsJson').val('{}');
-                    if (typeof ShowErrMsg === 'function')
-                        ShowErrMsg('Role-wise menu rights load failed');
                 }
             });
         },

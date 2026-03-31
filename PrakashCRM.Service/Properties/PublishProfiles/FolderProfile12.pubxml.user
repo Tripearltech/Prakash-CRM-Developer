@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Project\PublishFile\LocalPublish\LocalPublishAPI</_PublishTargetUrl>
-    <History>True|2026-03-25T13:12:32.0164765Z||;</History>
+    <History>True|2026-03-31T05:00:13.1398298Z||;True|2026-03-25T18:42:32.0164765+05:30||;</History>
     <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
@@ -50,16 +50,16 @@
       <publishTime>10/10/2025 18:20:37</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Data.dll">
-      <publishTime>03/25/2026 18:41:16</publishTime>
+      <publishTime>03/31/2026 10:29:50</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Data.pdb">
-      <publishTime>03/25/2026 18:41:16</publishTime>
+      <publishTime>03/31/2026 10:29:50</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Service.dll">
-      <publishTime>03/25/2026 18:42:29</publishTime>
+      <publishTime>03/31/2026 10:29:51</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Service.pdb">
-      <publishTime>03/25/2026 18:42:29</publishTime>
+      <publishTime>03/31/2026 10:29:51</publishTime>
     </File>
     <File Include="bin/roslyn/csc.exe">
       <publishTime>10/10/2025 18:20:37</publishTime>
@@ -386,7 +386,7 @@
       <publishTime>01/27/2026 21:08:49</publishTime>
     </File>
     <File Include="Global.asax">
-      <publishTime>01/08/2026 21:51:47</publishTime>
+      <publishTime>03/26/2026 14:35:20</publishTime>
     </File>
     <File Include="Scripts/bootstrap.bundle.js">
       <publishTime>10/10/2025 18:20:27</publishTime>
@@ -473,7 +473,7 @@
       <publishTime>01/08/2026 16:25:47</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>03/25/2026 18:42:30</publishTime>
+      <publishTime>03/25/2026 23:44:33</publishTime>
     </File>
   </ItemGroup>
 </Project>

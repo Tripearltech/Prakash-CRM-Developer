@@ -17,5 +17,7 @@ namespace PrakashCRM.Data.Models
         public string Company_Code { get; set; }
         public string MAC_Address { get; set; }
         public string Device_Name { get; set; }
+        public string Activity_User_Name { get; set; }
+        public string Activity_Date { get; set; }
     }
 }

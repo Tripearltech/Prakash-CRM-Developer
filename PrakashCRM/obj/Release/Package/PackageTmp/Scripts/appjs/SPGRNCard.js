@@ -2,13 +2,15 @@
 
 $(document).ready(function () {
 
+    InitializeGRNAttachmentUi();
+
     $('.datepicker').pickadate({
         selectMonths: true,
         selectYears: true,
         format: 'dd-mm-yyyy'
     });
     ShowHideFields($('#lblDocumentType').html());
-    $('.btn-close').click(function () {
+    $('#modalItemTracking .btn-close').click(function () {
         $('#modalItemTracking').css('display', 'none');
     });
 
@@ -320,6 +322,8 @@ function validateForm() {
 
 var deletedEntries = [];
 function DeleteItemTrackingInGrid(button) {
+    var $row = $(button).closest('tr');
+    var rowKey = ResolveGRNAttachmentRowKey($row);
     var entryNo = $(button).closest('tr').find('td').eq(0).text().trim();
 
     var deletePayload = {
@@ -345,12 +349,13 @@ function DeleteItemTrackingInGrid(button) {
     });
 
     // remove row from DOM
-    $(button).closest('tr').remove();
+    $row.remove();
+    delete grnAttachmentStore[rowKey];
     UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
 
     // if no rows left, show "No Records Found"
     if ($('#tbItemTrackingLines .itemtrackingtr').length === 0) {
-        $('#tbItemTrackingLines').append("<tr><td colspan=8>No Records Found</td></tr>");
+        $('#tbItemTrackingLines').append("<tr><td colspan=9>No Records Found</td></tr>");
     }
 }
 
@@ -391,29 +396,32 @@ function ShowItemTracking(lineNo, itemno) {
                 if (documentType == "Transfer Order" || documentType == "Sales Return") {
                     if (data && data.length > 0) {
                         $.each(data, function (index, item) {
-                            rowData = `<tr class='itemtrackingtr'><td style='display: none;'>${item.Entry_No}</td><td>${lineNo}</td><td>${item.Item_No}</td><td><input type='text' name='txtLotNo_${index + 1}' value='${item.Lot_No}' class='form-control' disabled /></td><td><input type='text' name='txtQtyToHandle_${index + 1}' value='${item.Qty_to_Handle_Base}' class='form-control' /></td><td><input type='text' name='txtExpDate_${index + 1}' value='${item.Expiration_Date}' class='form-control' disabled /></td><td>${item.Quantity}</td><td></td>
+                            var attachmentKey = BuildGRNAttachmentRowKey(item.Entry_No, lineNo, item.Item_No);
+                            rowData = `<tr class='itemtrackingtr' data-attachment-key='${attachmentKey}'><td style='display: none;'>${item.Entry_No}</td><td>${lineNo}</td><td>${item.Item_No}</td><td><input type='text' name='txtLotNo_${index + 1}' value='${item.Lot_No}' class='form-control' disabled /></td><td><input type='text' name='txtQtyToHandle_${index + 1}' value='${item.Qty_to_Handle_Base}' class='form-control' /></td><td><input type='text' name='txtExpDate_${index + 1}' value='${item.Expiration_Date}' class='form-control' disabled /></td><td>${item.Quantity}</td><td class='grn-attachment-cell'>${GetGRNAttachmentButtonHtml(attachmentKey, false)}</td><td></td>
                             </tr>`;
                             $('#tbItemTrackingLines').append(rowData);
                         });
                     } else {
-                        rowData = "<tr><td colspan=8>No Records Found</td></tr>";
+                        rowData = "<tr><td colspan=9>No Records Found</td></tr>";
                         $('#tbItemTrackingLines').append(rowData);
                     }
                 } else if (documentType == "Purchase Order") {
-                    rowData = `<tr class='itemtrackingtr'>
-                        <td style='display: none;'>0</td><td>${lineNo}</td><td>${itemno}</td><td><input type='text' name='txtLotNo_0' value='' class='form-control'/></td><td><input type='text' name='txtQtyToHandle_0' value='0' class='form-control' /></td><td><input type='text' name='txtExpDate_0' value='' class='form-control datepicker'/></td><td>0</td><td><button type="button" class="btn btn-primary btn-sm radius-30 px-4" onclick="AddItemTrackingInGrid();">Add</button></td>
+                    var draftAttachmentKey = BuildGRNAttachmentRowKey('0', lineNo, itemno, 'template');
+                    rowData = `<tr class='itemtrackingtr' data-attachment-key='${draftAttachmentKey}'>
+                        <td style='display: none;'>0</td><td>${lineNo}</td><td>${itemno}</td><td><input type='text' name='txtLotNo_0' value='' class='form-control'/></td><td><input type='text' name='txtQtyToHandle_0' value='0' class='form-control' /></td><td><input type='text' name='txtExpDate_0' value='' class='form-control datepicker'/></td><td>0</td><td class='grn-attachment-cell'>${GetGRNAttachmentButtonHtml(draftAttachmentKey, true)}</td><td><button type="button" class="btn btn-primary btn-sm radius-30 px-4" onclick="AddItemTrackingInGrid();">Add</button></td>
                     </tr>`;
                     $('#tbItemTrackingLines').append(rowData);
 
                     if (data && data.length > 0) {
                         $.each(data, function (index, item) {
-                            rowData = `<tr class='itemtrackingtr'><td style='display: none;'>${item.Entry_No}</td><td>${lineNo}</td><td>${item.Item_No}</td><td><input type='text' name='txtLotNo_${index + 1}' value='${item.Lot_No}' class='form-control'/></td><td><input type='text' name='txtQtyToHandle_${index + 1}' value='${item.Qty_to_Handle_Base}' class='form-control' /></td><td><input type='text' name='txtExpDate_${index + 1}' value='${item.Expiration_Date}' class='form-control datepicker' /></td><td>${item.Quantity}</td><td><button type="button" class="btn btn-primary btn-sm radius-30 px-4" onclick="DeleteItemTrackingInGrid(this)">Delete</button></td>
+                            var purchaseAttachmentKey = BuildGRNAttachmentRowKey(item.Entry_No, lineNo, item.Item_No);
+                            rowData = `<tr class='itemtrackingtr' data-attachment-key='${purchaseAttachmentKey}'><td style='display: none;'>${item.Entry_No}</td><td>${lineNo}</td><td>${item.Item_No}</td><td><input type='text' name='txtLotNo_${index + 1}' value='${item.Lot_No}' class='form-control'/></td><td><input type='text' name='txtQtyToHandle_${index + 1}' value='${item.Qty_to_Handle_Base}' class='form-control' /></td><td><input type='text' name='txtExpDate_${index + 1}' value='${item.Expiration_Date}' class='form-control datepicker' /></td><td>${item.Quantity}</td><td class='grn-attachment-cell'>${GetGRNAttachmentButtonHtml(purchaseAttachmentKey, false)}</td><td><button type="button" class="btn btn-primary btn-sm radius-30 px-4" onclick="DeleteItemTrackingInGrid(this)">Delete</button></td>
                             </tr>`;
                             $('#tbItemTrackingLines').append(rowData);
                         });
                     }
                 } else {
-                    rowData = "<tr><td colspan=8>No Records Found</td></tr>";
+                    rowData = "<tr><td colspan=9>No Records Found</td></tr>";
                     $('#tbItemTrackingLines').append(rowData);
                 }
 
@@ -435,6 +443,8 @@ function ShowItemTracking(lineNo, itemno) {
                 $(document).off('input', '#tbItemTrackingLines input[name^="txtQtyToHandle"]').on('input', '#tbItemTrackingLines input[name^="txtQtyToHandle"]', function () {
                     UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
                 });
+
+                UpdateGRNAttachmentButtons();
             },
             error: function () {
                 ShowErrMsg("Error loading item tracking data. Please try again.");
@@ -509,7 +519,7 @@ function SaveGRNItemTracking() {
         var isZeroIndexRow = /_0$/.test(qtyInputName);
         var qtytohandle = parseFloat($tds.eq(4).find('input').val()) || 0;
         var expdate = $tds.eq(5).find('input').val() || "";
-        var isTemplateRow = (($tds.eq(7).find('button').attr('onclick') || '').indexOf('AddItemTrackingInGrid') !== -1);
+        var isTemplateRow = (($tds.eq(8).find('button').attr('onclick') || '').indexOf('AddItemTrackingInGrid') !== -1);
 
         if (!lineno) {
             return;
@@ -524,19 +534,19 @@ function SaveGRNItemTracking() {
         if (qtytohandle <= 0) {
             return;
         }
-            var reservationEntryforGRNObject = {};
+        var reservationEntryforGRNObject = {};
 
-            reservationEntryforGRNObject.DocumentType = documenttype;
-            reservationEntryforGRNObject.OrderNo = orderno;
-            reservationEntryforGRNObject.LocationCode = locationcode;
-            reservationEntryforGRNObject.LineNo = lineno;
-            reservationEntryforGRNObject.ItemNo = itemno;
-            reservationEntryforGRNObject.LotNo = lotno;
-            reservationEntryforGRNObject.Qty = qtytohandle;
-            reservationEntryforGRNObject.ExpirationDate = expdate;
-            reservationEntryforGRNObject.EntryNo = entryno;
+        reservationEntryforGRNObject.DocumentType = documenttype;
+        reservationEntryforGRNObject.OrderNo = orderno;
+        reservationEntryforGRNObject.LocationCode = locationcode;
+        reservationEntryforGRNObject.LineNo = lineno;
+        reservationEntryforGRNObject.ItemNo = itemno;
+        reservationEntryforGRNObject.LotNo = lotno;
+        reservationEntryforGRNObject.Qty = qtytohandle;
+        reservationEntryforGRNObject.ExpirationDate = expdate;
+        reservationEntryforGRNObject.EntryNo = entryno;
 
-            reservationEntryforGRN.push(reservationEntryforGRNObject);
+        reservationEntryforGRN.push(reservationEntryforGRNObject);
     });
     if (invalidQtyLineNo !== "") {
         ShowErrMsg("0 and negative quantity are not allowed in tracking lines.");
@@ -572,6 +582,8 @@ function SaveGRNItemTracking() {
 function AddItemTrackingInGrid() {
     $('#tbItemTrackingLines tr:contains("No Records Found")').remove();
     var firstRow = $('#tbItemTrackingLines tr').first();
+    // declaration the variable item tracking Document attcement
+    var sourceAttachmentKey = ResolveGRNAttachmentRowKey(firstRow);
     var entryno = firstRow.find('td').eq(0).text().trim()
     let originalBalance = parseFloat($('#txtbalanceQty').data('original')) || 0;
     let totalQty = parseFloat($('#txttotalQty').val()) || 0;
@@ -590,7 +602,20 @@ function AddItemTrackingInGrid() {
     }
     var expDate = firstRow.find('input[name^="txtExpDate"]').val();
     var newIndex = $('#tbItemTrackingLines tr').length;
-    var newRow = `<tr class='itemtrackingtr'><td style='display: none;'>${entryno}</td><td>${lineno}</td><td>${itemNo}</td><td><input type="text" name="txtLotNo_${newIndex}" value="${lotNo}" class="form-control"></td><td><input type="text" name="txtQtyToHandle_${newIndex}" value="${qty}" class="form-control"></td><td><input type="text" name="txtExpDate_${newIndex}" value="${expDate}" class="form-control datepicker"></td><td>${qty}</td><td><button type="button" class="btn btn-primary btn-sm radius-30 px-4 btn-delete-itemtracking" onclick="DeleteItemTrackingInGrid();">Delete</button></td>
+    var newAttachmentbutton = BuildGRNAttachmentRowKey(entryno, lineno, itemNo, 'draft-' + NextGRNAttachmentId());
+
+    // Document Attachement code
+    if (sourceAttachmentKey && grnAttachmentStore[sourceAttachmentKey]) {
+        grnAttachmentStore[newAttachmentbutton] = CloneGRNAttachmentFiles(grnAttachmentStore[sourceAttachmentKey]);
+        delete grnAttachmentStore[sourceAttachmentKey];
+
+        if (grnAttachmentState.rowKey === sourceAttachmentKey) {
+            grnAttachmentState.rowKey = newAttachmentbutton;
+            grnAttachmentState.files = CloneGRNAttachmentFiles(grnAttachmentStore[newAttachmentbutton]);
+        }
+    }
+
+    var newRow = `<tr class='itemtrackingtr' data-attachment-key='${newAttachmentbutton}'><td style='display: none;'>${entryno}</td><td>${lineno}</td><td>${itemNo}</td><td><input type="text" name="txtLotNo_${newIndex}" value="${lotNo}" class="form-control"></td><td><input type="text" name="txtQtyToHandle_${newIndex}" value="${qty}" class="form-control"></td><td><input type="text" name="txtExpDate_${newIndex}" value="${expDate}" class="form-control datepicker"></td><td>${qty}</td><td class='grn-attachment-cell'>${GetGRNAttachmentButtonHtml(newAttachmentbutton, false)}</td><td><button type="button" class="btn btn-primary btn-sm radius-30 px-4" onclick="DeleteItemTrackingInGrid(this)">Delete</button></td>
     </tr>`;
     $('#tbItemTrackingLines').append(newRow);
 
@@ -605,9 +630,11 @@ function AddItemTrackingInGrid() {
     $(document).off('input', '#tbItemTrackingLines input[name^="txtQtyToHandle"]').on('input', '#tbItemTrackingLines input[name^="txtQtyToHandle"]', function () {
         UpdateItemTrackingTotals($('#txtbalanceQty').data('original'));
     });
+
+    UpdateGRNAttachmentButtons();
 }
 
-// Create Make/Mgf function 
+// Create Make/Mfg function 
 function ManufacturerAutocompleteAPI(LineDetailsLineNo) {
     if (typeof ($.fn.autocomplete) === 'undefined') return;
 
@@ -756,3 +783,647 @@ function ValidateGRNData() {
 
     return true;
 }
+//Start Function
+// Create the GRN Document Attchment Function 
+var grnAttachmentStore = {};
+var grnAttachmentState = {rowKey: '', rowContext: null, files: [], viewerFiles: [], viewerIndex: 0, viewerZoom: 1, viewerMode: 'single'};
+var grnAttachmentIdSeed = 0;
+
+function InitializeGRNAttachmentUi() {
+    var $overlay = $('#grnAttachmentOverlay');
+    if (!$overlay.length || $overlay.data('initialized')) {
+        return;
+    }
+
+    $overlay.data('initialized', true);
+
+    $('#grnAttachmentDropZone').on('click', function (e) {
+        if ($(e.target).closest('button').length > 0) {
+            return;
+        }
+        OpenGRNAttachmentFilePicker();
+    });
+
+    $('#grnAttachmentFileInput').on('change', function () {
+        HandleGRNAttachmentFiles(this.files);
+        this.value = '';
+    });
+
+    $('#grnAttachmentDropZone').on('dragover', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass('dragover');
+    });
+
+    $('#grnAttachmentDropZone').on('dragleave', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragover');
+    });
+
+    $('#grnAttachmentDropZone').on('drop', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragover');
+        var files = e.originalEvent && e.originalEvent.dataTransfer ? e.originalEvent.dataTransfer.files : null;
+        HandleGRNAttachmentFiles(files);
+    });
+
+    $overlay.on('click', function (e) {
+        if (e.target === this) {
+            CloseGRNAttachmentPanel();
+        }
+    });
+
+    $('#grnAttachmentViewer').on('click', function (e) {
+        if (e.target === this) {
+            CloseGRNAttachmentViewer();
+        }
+    });
+
+    $(document).on('keydown.grnAttachmentViewer', function (e) {
+        if ($('#grnAttachmentViewer').css('display') === 'none') {
+            return;
+        }
+
+        if (e.key === 'ArrowRight') {
+            GRNViewerNext();
+        }
+        else if (e.key === 'ArrowLeft') {
+            GRNViewerPrev();
+        }
+        else if (e.key === 'Escape') {
+            CloseGRNAttachmentViewer();
+        }
+    });
+}
+
+function NextGRNAttachmentId() {
+    grnAttachmentIdSeed += 1;
+    return 'grn-att-' + new Date().getTime() + '-' + grnAttachmentIdSeed;
+}
+function CloneGRNAttachmentFiles(files) {
+    return $.map(files || [], function (file) {
+        return $.extend({}, file);
+    });
+}
+
+function EncodeGRNAttachmentValue(value) {
+    return $('<div/>').text(value || '').html();
+}
+
+function GetGRNAttachmentExtension(fileName) {
+    if (!fileName || fileName.indexOf('.') === -1) {
+        return '';
+    }
+
+    return fileName.split('.').pop().toLowerCase();
+}
+
+function IsGRNAttachmentImage(ext) {
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].indexOf((ext || '').toLowerCase()) >= 0;
+}
+
+function FormatGRNAttachmentSize(size) {
+    var fileSize = parseFloat(size) || 0;
+    var units = ['B', 'KB', 'MB', 'GB'];
+    var unitIndex = 0;
+
+    while (fileSize >= 1024 && unitIndex < units.length - 1) {
+        fileSize = fileSize / 1024;
+        unitIndex += 1;
+    }
+
+    var formatted = unitIndex === 0 ? fileSize.toFixed(0) : fileSize.toFixed(fileSize >= 10 ? 1 : 2);
+    return formatted + ' ' + units[unitIndex];
+}
+
+function GetCurrentGRNAttachmentDocumentContext() {
+    return {
+        documentType: ($('#lblDocumentType').text() || '').trim(),
+        documentNo: ($('#lblDocumentNo').text() || '').trim()
+    };
+}
+
+function BuildGRNAttachmentRowKey(entryNo, lineNo, itemNo, fallbackKey) {
+    var context = GetCurrentGRNAttachmentDocumentContext();
+    var cleanEntryNo = (entryNo || '').toString().trim();
+    if (cleanEntryNo !== '' && cleanEntryNo !== '0') {
+        return ['entry', context.documentType, context.documentNo, lineNo, cleanEntryNo].join('|');
+    }
+
+    return ['draft', context.documentType, context.documentNo, lineNo, itemNo, fallbackKey || NextGRNAttachmentId()].join('|');
+}
+
+function IsGRNTemplateTrackingRow($row) {
+    var $actionButton = $row.find('td').eq(8).find('button');
+    return ($actionButton.attr('onclick') || '').indexOf('AddItemTrackingInGrid') !== -1;
+}
+
+function ResolveGRNAttachmentRowKey($row) {
+    var existingKey = ($row.attr('data-attachment-key') || '').trim();
+    if (existingKey !== '') {
+        return existingKey;
+    }
+
+    var $cells = $row.find('td');
+    var entryNo = ($cells.eq(0).text() || '').trim();
+    var lineNo = ($cells.eq(1).text() || '').trim();
+    var itemNo = ($cells.eq(2).text() || '').trim();
+    var fallbackKey = IsGRNTemplateTrackingRow($row) ? 'template' : NextGRNAttachmentId();
+    var rowKey = BuildGRNAttachmentRowKey(entryNo, lineNo, itemNo, fallbackKey);
+
+    $row.attr('data-attachment-key', rowKey);
+    return rowKey;
+}
+
+function GetGRNAttachmentRowContext($row) {
+    var $cells = $row.find('td');
+    var lotNo = $.trim($cells.eq(3).find('input').val() || $cells.eq(3).text() || '');
+
+    return {
+        entryNo: ($cells.eq(0).text() || '').trim(), lineNo: ($cells.eq(1).text() || '').trim(), itemNo: ($cells.eq(2).text() || '').trim(), lotNo: lotNo, rowKey: ResolveGRNAttachmentRowKey($row)
+    };
+}
+
+function GetGRNAttachmentCount(rowKey) {
+    return (grnAttachmentStore[rowKey] || []).length;
+}
+
+function GetGRNAttachmentButtonHtml(rowKey, disabled) {
+
+    var count = GetGRNAttachmentCount(rowKey);
+    var iconColor = disabled ? '#141517' : (count > 0 ? '#0d6efd' : '#6c757d');
+    var countMarkup = count > 0 ? '<span class="badge bg-primary ms-1">' + count + '</span>' : '';
+
+        // this enable the variable attement button has been disable 
+    var disabledClass = disabled ? 'disabled' : '';
+    var disabledAttr = disabled ? 'disabled' : '';
+
+    return '<button type="button" ' + "" + ' class="btn btn-link p-0 d-inline-flex align-items-center ' + "" + '" ' + ' title="Line attachments" onclick="OpenGRNAttachmentPanel(this)">' + GetGRNAttachmentPaperclipSvg(iconColor) + countMarkup + '</button>';
+}
+// SVG Icon
+function GetGRNAttachmentPaperclipSvg(color) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" ' + 'stroke="' + color + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" ' + 'class="me-1">' + '<path d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78l8.49-8.49a3.5 3.5 0 114.95 4.95l-8.49 8.49a1.5 1.5 0 11-2.12-2.12l7.78-7.78"/>' + '</svg>';
+}
+
+function UpdateGRNAttachmentButtons() {
+    $('#tbItemTrackingLines .itemtrackingtr').each(function () {
+        var $row = $(this);
+        var $attachmentCell = $row.find('td').eq(7);
+        if (!$attachmentCell.length) {
+            return;
+        }
+
+        var rowKey = ResolveGRNAttachmentRowKey($row);
+        $attachmentCell.html(GetGRNAttachmentButtonHtml(rowKey, IsGRNTemplateTrackingRow($row)));
+    });
+}
+
+function OpenGRNAttachmentPanel(button) {
+    var $row = $(button).closest('tr');
+    if (!$row.length || IsGRNTemplateTrackingRow($row)) {
+        return;
+    }
+
+    var context = GetGRNAttachmentRowContext($row);
+    // Add the validation for GRN Item tracking Document Attachment
+    if (!context.lotNo) {
+        ShowErrMsg("Please enter Lot No. before Click attachment button.");
+        $row.find('td').eq(3).find('input[name^="txtLotNo"]').focus();
+        return;
+    }
+
+    grnAttachmentState.rowKey = context.rowKey;
+    grnAttachmentState.rowContext = context;
+    grnAttachmentState.files = CloneGRNAttachmentFiles(grnAttachmentStore[context.rowKey]);
+
+    $('#grnAttachmentError').text('');
+    $('body').addClass('grn-attachment-open');
+    $('#grnAttachmentOverlay').css('display', 'flex');
+    RenderGRNAttachmentFileList();
+}
+
+function CloseGRNAttachmentPanel() {
+    $('#grnAttachmentOverlay').hide();
+    $('#grnAttachmentError').text('');
+    SetGRNAttachmentSaveState(false); // call Save Function
+    grnAttachmentState.rowKey = '';
+    grnAttachmentState.rowContext = null;
+    grnAttachmentState.files = [];
+    if ($('#grnAttachmentViewer').css('display') === 'none') {
+        $('body').removeClass('grn-attachment-open');
+    }
+}
+
+async function SaveGRNAttachmentPanel() {
+    if (!grnAttachmentState.rowKey) {
+        CloseGRNAttachmentPanel();
+        return;
+    }
+
+    var currentContext = RefreshGRNAttachmentRowContext(grnAttachmentState.rowKey);
+    if (!currentContext || !currentContext.itemNo) {
+        $('#grnAttachmentError').text('Unable to resolve the selected row for attachment upload.');
+        return;
+    }
+
+    if (!currentContext.lotNo) {
+        $('#grnAttachmentError').text('Lot No is required before saving attachments.');
+        return;
+    }
+
+    try {
+        SetGRNAttachmentSaveState(true);
+        $('#grnAttachmentError').text('');
+
+        var pendingFiles = $.grep(grnAttachmentState.files, function (file) {
+            return !file.isUploaded && file.rawFile;
+        });
+
+        if (pendingFiles.length > 0) {
+            var uploadedFiles = await UploadGRNAttachmentFiles(pendingFiles, currentContext);
+
+            $.each(pendingFiles, function (index, pendingFile) {
+                var uploadedFile = uploadedFiles[index] || {};
+                pendingFile.isUploaded = true;
+                pendingFile.rawFile = null;
+                pendingFile.base64 = uploadedFile.Base64 || '';
+                pendingFile.contentType = uploadedFile.ContentType || pendingFile.contentType || '';
+                pendingFile.fileExtension = uploadedFile.FileExtension || pendingFile.fileExtension || '';
+                pendingFile.serverFileName = uploadedFile.FileName || '';
+                pendingFile.lotNo = uploadedFile.LotNo || currentContext.lotNo;
+                pendingFile.itemNo = uploadedFile.ItemNo || currentContext.itemNo;
+            });
+        }
+
+        if (grnAttachmentState.files.length > 0) {
+            grnAttachmentStore[grnAttachmentState.rowKey] = CloneGRNAttachmentFiles(grnAttachmentState.files);
+        }
+        else {
+            delete grnAttachmentStore[grnAttachmentState.rowKey];
+        }
+
+        UpdateGRNAttachmentButtons();
+        ShowActionMsg(pendingFiles.length > 0 ? pendingFiles.length + ' attachment(s) uploaded successfully.' : 'Attachment list updated successfully.');
+        CloseGRNAttachmentPanel();
+    }
+    catch (error) {
+        $('#grnAttachmentError').text(error && error.message ? error.message : 'Unable to save attachments.');
+    }
+    finally {
+        SetGRNAttachmentSaveState(false);
+    }
+}
+
+function OpenGRNAttachmentFilePicker() {
+    $('#grnAttachmentFileInput').trigger('click');
+}
+
+function HandleGRNAttachmentFiles(fileList) {
+    if (!fileList || !fileList.length) {
+        return;
+    }
+
+    var mappedFiles = $.map(fileList, function (file) {
+        return {
+            id: NextGRNAttachmentId(),
+            name: file.name,
+            size: file.size || 0,
+            ext: GetGRNAttachmentExtension(file.name),
+            url: window.URL ? window.URL.createObjectURL(file) : '',
+            uploadedAt: new Date().toLocaleString('en-IN'),
+            rawFile: file,
+            isUploaded: false,
+            base64: '',
+            contentType: file.type || '',
+            fileExtension: GetGRNAttachmentExtension(file.name) ? '.' + GetGRNAttachmentExtension(file.name) : '',
+            serverFileName: '',
+            lotNo: '',
+            itemNo: ''
+        };
+    });
+
+    grnAttachmentState.files = grnAttachmentState.files.concat(mappedFiles);
+    $('#grnAttachmentError').text('');
+    RenderGRNAttachmentFileList();
+}
+
+function RemoveGRNAttachmentFile(fileId) {
+    grnAttachmentState.files = $.grep(grnAttachmentState.files, function (file) {
+        return file.id !== fileId;
+    });
+
+    RenderGRNAttachmentFileList();
+}
+
+function RenderGRNAttachmentFileList() {
+    var context = grnAttachmentState.rowContext;
+    var fileCount = grnAttachmentState.files.length;
+    var metaParts = [];
+
+    if (context) {
+        metaParts.push('Line ' + (context.lineNo || ''));
+        if (context.itemNo) {
+            metaParts.push(context.itemNo);
+        }
+        if (context.lotNo) {
+            metaParts.push('Lot ' + context.lotNo);
+        }
+    }
+    metaParts.push(fileCount + ' file' + (fileCount === 1 ? '' : 's'));
+
+    $('#grnAttachmentMeta').text(metaParts.join(' • '));
+    $('#grnAttachmentSaveCount').text(fileCount);
+
+    var $list = $('#grnAttachmentFileList');
+    $list.empty();
+
+    if (fileCount === 0) {
+        $list.append('<div class="grn-attachment-empty">No attachments yet. Upload files above.</div>');
+        return;
+    }
+
+    $.each(grnAttachmentState.files, function (index, file) {
+        var previewMarkup = IsGRNAttachmentImage(file.ext)
+            ? '<img src="' + EncodeGRNAttachmentValue(file.url) + '" alt="' + EncodeGRNAttachmentValue(file.name) + '" style="width:44px;height:44px;object-fit:cover;border-radius:10px;cursor:pointer;" onclick="OpenGRNAttachmentViewer(' + index + ')">'
+            : '<div class="grn-attachment-file-badge" style="cursor:pointer;" onclick="OpenGRNAttachmentViewer(' + index + ')">' + EncodeGRNAttachmentValue((file.ext || 'file').toUpperCase()) + '</div>';
+
+        var uploadStatus = file.isUploaded ? 'Uploaded' : 'Pending upload';
+        var rowHtml = '<div class="grn-attachment-file-row">' + '<div class="grn-attachment-file-main">' + previewMarkup + '<div style="min-width:0;">' + '<span class="grn-attachment-file-name" title="' + EncodeGRNAttachmentValue(file.name) + '">' + EncodeGRNAttachmentValue(file.name) + '</span>' + '<span class="grn-attachment-file-meta">' + EncodeGRNAttachmentValue(FormatGRNAttachmentSize(file.size)) + ' • ' + EncodeGRNAttachmentValue(file.uploadedAt) + ' • ' + EncodeGRNAttachmentValue(uploadStatus) + '</span>' + '</div>' + '</div>' + '<div class="d-flex align-items-center gap-2">' + '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="OpenGRNAttachmentViewer(' + index + ')">View</button>' + '<button type="button" class="btn btn-sm btn-outline-danger" onclick="RemoveGRNAttachmentFile(\'' + EncodeGRNAttachmentValue(file.id) + '\')">Remove</button>' + '</div>' + '</div>';
+
+        $list.append(rowHtml);
+    });
+}
+
+function FindGRNAttachmentRowByKey(rowKey) {
+    return $('#tbItemTrackingLines .itemtrackingtr').filter(function () {
+        return ($(this).attr('data-attachment-key') || '').trim() === rowKey;
+    }).first();
+}
+
+function RefreshGRNAttachmentRowContext(rowKey) {
+    var $row = FindGRNAttachmentRowByKey(rowKey);
+    if (!$row.length) {
+        return grnAttachmentState.rowContext;
+    }
+
+    var context = GetGRNAttachmentRowContext($row);
+    grnAttachmentState.rowContext = context;
+    return context;
+}
+
+function SetGRNAttachmentSaveState(isSaving) {
+    var $saveButton = $('.grn-attachment-save-btn');
+    $saveButton.prop('disabled', isSaving);
+    $saveButton.css('opacity', isSaving ? '0.75' : '1');
+}
+
+async function UploadGRNAttachmentFiles(files, context) {
+    var uploadUrl = '/SPGRN/UploadGRNDocumentAttachment';
+    var uploadedFiles = [];
+
+    if (typeof window.FormData === 'undefined') {
+        throw new Error('This browser does not support file uploads. Please use a modern browser.');
+    }
+
+    for (var index = 0; index < files.length; index += 1) {
+        var file = files[index];
+        var formData = new FormData();
+
+        formData.append('files', file.rawFile, file.name);
+        formData.append('lotNo', context.lotNo || '');
+        formData.append('itemNo', context.itemNo || '');
+        formData.append('FileName', file.name || '');
+
+        var responseBody = await UploadGRNAttachmentRequest(uploadUrl, formData);
+        var currentUploadedFiles = $.isArray(responseBody) ? responseBody : [responseBody];
+
+        if (!currentUploadedFiles.length || !currentUploadedFiles[0]) {
+            throw new Error('Attachment upload response was empty.');
+        }
+
+        uploadedFiles.push(currentUploadedFiles[0]);
+    }
+
+    return uploadedFiles;
+}
+
+function UploadGRNAttachmentRequest(uploadUrl, formData) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: uploadUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            cache: false,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr) {
+                if (xhr && xhr.status === 401) {
+                    reject(new Error('Session expired. Please login again.'));
+                    return;
+                }
+
+                var responseText = xhr && xhr.responseText ? xhr.responseText : '';
+                if (responseText.indexOf('<!DOCTYPE html') >= 0 || responseText.indexOf('<html') >= 0) {
+                    reject(new Error('Upload request was redirected. Please refresh the page and login again.'));
+                    return;
+                }
+
+                var responseJson = xhr && xhr.responseJSON ? xhr.responseJSON : null;
+                if (!responseJson && responseText) {
+                    try {
+                        responseJson = JSON.parse(responseText);
+                    }
+                    catch (e) {
+                        responseJson = null;
+                    }
+                }
+
+                var errorMessage = responseJson && (responseJson.Message || responseJson.message || responseJson.error || responseJson.details)
+                    ? (responseJson.Message || responseJson.message || responseJson.error || responseJson.details)
+                    : (responseText || 'Attachment upload failed.');
+
+                reject(new Error(errorMessage));
+            }
+        });
+    });
+}
+
+function OpenGRNAttachmentViewer(index) {
+    if (!grnAttachmentState.files.length) {
+        return;
+    }
+
+    grnAttachmentState.viewerFiles = CloneGRNAttachmentFiles(grnAttachmentState.files);
+    grnAttachmentState.viewerIndex = Math.max(0, Math.min(index || 0, grnAttachmentState.viewerFiles.length - 1));
+    grnAttachmentState.viewerZoom = 1;
+    grnAttachmentState.viewerMode = 'single';
+
+    $('#grnAttachmentViewer').css('display', 'flex');
+    $('body').addClass('grn-attachment-open');
+    RenderGRNAttachmentViewer();
+}
+
+function CloseGRNAttachmentViewer() {
+    $('#grnAttachmentViewer').hide();
+    grnAttachmentState.viewerFiles = [];
+    grnAttachmentState.viewerIndex = 0;
+    grnAttachmentState.viewerZoom = 1;
+    grnAttachmentState.viewerMode = 'single';
+
+    if ($('#grnAttachmentOverlay').css('display') === 'none') {
+        $('body').removeClass('grn-attachment-open');
+    }
+}
+
+function GRNViewerPrev() {
+    if (!grnAttachmentState.viewerFiles.length) {
+        return;
+    }
+
+    grnAttachmentState.viewerZoom = 1;
+    grnAttachmentState.viewerIndex = (grnAttachmentState.viewerIndex - 1 + grnAttachmentState.viewerFiles.length) % grnAttachmentState.viewerFiles.length;
+    RenderGRNAttachmentViewer();
+}
+
+function GRNViewerNext() {
+    if (!grnAttachmentState.viewerFiles.length) {
+        return;
+    }
+
+    grnAttachmentState.viewerZoom = 1;
+    grnAttachmentState.viewerIndex = (grnAttachmentState.viewerIndex + 1) % grnAttachmentState.viewerFiles.length;
+    RenderGRNAttachmentViewer();
+}
+
+function GRNViewerZoomIn() {
+    UpdateGRNAttachmentViewerZoom(0.25);
+}
+
+function GRNViewerZoomOut() {
+    UpdateGRNAttachmentViewerZoom(-0.25);
+}
+
+function GRNViewerResetZoom() {
+    grnAttachmentState.viewerZoom = 1;
+    ApplyGRNAttachmentViewerZoom();
+}
+
+function ToggleGRNViewerMode() {
+    grnAttachmentState.viewerMode = grnAttachmentState.viewerMode === 'single' ? 'grid' : 'single';
+    RenderGRNAttachmentViewer();
+}
+
+function UpdateGRNAttachmentViewerZoom(delta) {
+    grnAttachmentState.viewerZoom = Math.max(0.25, Math.min(4, grnAttachmentState.viewerZoom + delta));
+    ApplyGRNAttachmentViewerZoom();
+}
+
+function ApplyGRNAttachmentViewerZoom() {
+    $('#grnViewerImage').css('transform', 'scale(' + grnAttachmentState.viewerZoom + ')');
+    $('#grnViewerZoomLabel').text(Math.round(grnAttachmentState.viewerZoom * 100) + '%');
+}
+
+function RenderGRNAttachmentViewer() {
+    var files = grnAttachmentState.viewerFiles;
+    var total = files.length;
+    var file = total > 0 ? files[grnAttachmentState.viewerIndex] : null;
+    var isSingleMode = grnAttachmentState.viewerMode === 'single';
+    var hasImagePreview = file && IsGRNAttachmentImage(file.ext);
+
+    $('#grnViewerCounter').text(total > 0 ? (grnAttachmentState.viewerIndex + 1) + ' / ' + total : '');
+    $('#grnViewerFileName').text(file ? file.name : '');
+    $('#grnViewerDownloadLink').attr('href', file ? file.url : '#').attr('download', file ? file.name : '');
+    $('#grnViewerModeButton').text(isSingleMode ? 'Grid' : 'Single');
+
+    $('#grnViewerSingle').toggle(isSingleMode);
+    $('#grnViewerGrid').css('display', isSingleMode ? 'none' : 'grid');
+    $('#grnViewerThumbStrip').toggle(isSingleMode && total > 1);
+    $('.grn-viewer-nav').toggle(total > 1 && isSingleMode);
+    $('#grnViewerZoomLabel').toggle(isSingleMode && hasImagePreview);
+    $('#grnViewerZoomLabel').prev('button').toggle(isSingleMode && hasImagePreview);
+    $('#grnViewerZoomLabel').next('button').toggle(isSingleMode && hasImagePreview);
+    $('#grnViewerModeButton').prev('button').toggle(isSingleMode && hasImagePreview);
+
+    if (isSingleMode && file) {
+        if (hasImagePreview) {
+            $('#grnViewerImage').attr('src', file.url).show();
+            $('#grnViewerNoPreview').hide();
+            ApplyGRNAttachmentViewerZoom();
+        }
+        else {
+            $('#grnViewerImage').hide().attr('src', '');
+            $('#grnViewerNoPreview').show();
+            $('#grnViewerZoomLabel').text('100%');
+        }
+
+        RenderGRNAttachmentViewerThumbStrip();
+    }
+    else {
+        $('#grnViewerImage').hide().attr('src', '');
+        $('#grnViewerNoPreview').hide();
+    }
+
+    if (!isSingleMode) {
+        RenderGRNAttachmentViewerGrid();
+    }
+}
+
+function RenderGRNAttachmentViewerThumbStrip() {
+    var $strip = $('#grnViewerThumbStrip');
+    $strip.empty();
+
+    $.each(grnAttachmentState.viewerFiles, function (index, file) {
+        var thumbHtml = IsGRNAttachmentImage(file.ext)
+            ? '<img src="' + EncodeGRNAttachmentValue(file.url) + '" alt="' + EncodeGRNAttachmentValue(file.name) + '">'
+            : EncodeGRNAttachmentValue((file.ext || 'FILE').toUpperCase());
+        var $thumb = $('<div class="grn-viewer-thumb"></div>');
+        $thumb.toggleClass('active', index === grnAttachmentState.viewerIndex);
+        $thumb.html(thumbHtml);
+        $thumb.on('click', function () {
+            grnAttachmentState.viewerIndex = index;
+            grnAttachmentState.viewerZoom = 1;
+            RenderGRNAttachmentViewer();
+        });
+        $strip.append($thumb);
+    });
+}
+
+function RenderGRNAttachmentViewerGrid() {
+    var $grid = $('#grnViewerGrid');
+    $grid.empty();
+
+    $.each(grnAttachmentState.viewerFiles, function (index, file) {
+        var thumbHtml = IsGRNAttachmentImage(file.ext)
+            ? '<img src="' + EncodeGRNAttachmentValue(file.url) + '" alt="' + EncodeGRNAttachmentValue(file.name) + '">'
+            : '<div class="grn-attachment-file-badge" style="width:72px;height:72px;font-size:14px;">' + EncodeGRNAttachmentValue((file.ext || 'FILE').toUpperCase()) + '</div>';
+        var cardHtml = '<div class="grn-viewer-grid-thumb">' + thumbHtml + '</div>'
+            + '<div class="grn-viewer-grid-name" title="' + EncodeGRNAttachmentValue(file.name) + '">' + EncodeGRNAttachmentValue(file.name) + '</div>';
+        var $card = $('<div class="grn-viewer-grid-card"></div>');
+        $card.toggleClass('active', index === grnAttachmentState.viewerIndex);
+        $card.html(cardHtml);
+        $card.on('click', function () {
+            grnAttachmentState.viewerIndex = index;
+            grnAttachmentState.viewerMode = 'single';
+            grnAttachmentState.viewerZoom = 1;
+            RenderGRNAttachmentViewer();
+        });
+        $grid.append($card);
+    });
+}
+
+function GetGRNAttachmentPaperclipSvg(color) {
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        + '<path d="M8.75 12.25L14.9 6.1C16.27 4.73 18.5 4.73 19.87 6.1C21.24 7.47 21.24 9.7 19.87 11.07L11.07 19.87C8.91 22.03 5.42 22.03 3.26 19.87C1.1 17.71 1.1 14.22 3.26 12.06L11.72 3.6" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<path d="M7.54 16.4L15.96 7.98" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/>'
+        + '</svg>';
+}
+// End Function
