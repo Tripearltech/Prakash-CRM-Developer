@@ -73,7 +73,7 @@ $(document).ready(function () {
                 
                 switch ($('#ddlOperator').val()) {
                     case 'Equal':
-                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT" && $('#ddlField').val() != "Remaining_Amount") {
+                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST" && $('#ddlField').val() != "Remaining_Amount") {
                             filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                         }
                         else {
@@ -81,7 +81,7 @@ $(document).ready(function () {
                         }
                         break;
                     case 'Not Equal':
-                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT" && $('#ddlField').val() != "Remaining_Amount") {
+                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST" && $('#ddlField').val() != "Remaining_Amount") {
                             filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
                         }
                         else {
@@ -140,7 +140,7 @@ $(document).ready(function () {
             if ($('#ddlField').val() != "Closed") {
                 switch ($('#ddlOperator').val()) {
                     case 'Equal':
-                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT" && $('#ddlField').val() != "Remaining_Amount") {
+                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST" && $('#ddlField').val() != "Remaining_Amount") {
                             filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                         }
                         else {
@@ -148,7 +148,7 @@ $(document).ready(function () {
                         }
                         break;
                     case 'Not Equal':
-                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT" && $('#ddlField').val() != "Remaining_Amount") {
+                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST" && $('#ddlField').val() != "Remaining_Amount") {
                             filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
                         }
                         else {
@@ -253,8 +253,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
 
-                    var rowData = "<tr><td></td><td>" + item.No + "</td><td>" + item.Posting_Date + "</td><td>" + item.Due_Date + "</td><td align='right'>" + commaSeparateNumber(item.Amount.toFixed(2)) + "</td><td align='right'>" + commaSeparateNumber(item.Amount_Including_VAT.toFixed(2)) + "</td><td align='right'>" + commaSeparateNumber(item.Remaining_Amount.toFixed(2)) + "</td><td>";
-
+                    var rowData = "<tr><td></td><td>" + item.No + "</td><td>" + item.Sell_to_Customer_No + "</td><td>" + item.Sell_to_Customer_Name + "</td><td>" + item.Posting_Date + "</td><td>" + item.Due_Date + "</td><td>" + commaSeparateNumber(item.Amount.toFixed(2)) + "</td><td>" + commaSeparateNumber(item.PCPL_Amount_Including_GST.toFixed(2)) + "</td><td>" + commaSeparateNumber(item.Remaining_Amount.toFixed(2)) + "</td><td>"
                     if (item.Closed == "true") {
                         rowData = rowData + "<span class='badge bg-success'>Paid</span>";
                     }

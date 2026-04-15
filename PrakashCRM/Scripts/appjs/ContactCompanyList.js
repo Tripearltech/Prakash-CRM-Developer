@@ -640,6 +640,8 @@ function showPopup(popuptype) {
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    showPageDataLoader();
+
     $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=ContactDotNetAPI&type=Company&filter=' + filter, function (data) {
         $('#hdnCCompanyCount').val(data);
     });
@@ -692,6 +694,9 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                hidePageDataLoader();
             },
             error: function () {
                 alert("error");

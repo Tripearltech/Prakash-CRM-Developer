@@ -41,6 +41,7 @@
                                 <div class="col">
                                     <select id="ddlFinancialYear" class="form-select"></select>
                                 </div>
+                                <label class="col-form-label">Status:</label>
                                 <div class="col">
                                     <select id="ddlStatus" class="form-select">
                                         <option value="-1">All</option>
@@ -60,8 +61,8 @@
                                 </div>
                                 <div class="col">
                                     <select id="ddlField" class="form-select">
-                                        <option value="-1">---Select---</option>
-                                        <option value="Customer_Name">Customer Name</option>
+                                        @*<option value="-1" selected hidden>---Select---</option>*@
+                                        <option value="Customer_Name" selected >Customer Name</option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -74,7 +75,7 @@
                                         <option value="Ends With">Ends With</option>
                                         <option value="Contains" selected>Contains</option>
                                         @*<option value="Less Than">Less Than</option>
-                                        <option value="Greater Than">Greater Than</option>*@
+                                            <option value="Greater Than">Greater Than</option>*@
                                     </select>
                                 </div>
                                 <div class="col">
@@ -158,30 +159,9 @@
                             <th>Action</th>
                             <th>Remarks</th>
                         </tr>
-                        @*<tr>
-                        <th></th>
-                        <th>Customer</th>
-                        <th>Total Target</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>*@
                     </thead>
                     <tbody id="tableBody">
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th></th>
-                            <th>Customer</th>
-                            <th>Total<br />Demand Qty</th>
-                            <th>Total<br />Target Qty</th>
-                            <th>Total<br />Achieved Qty</th>
-                            <th>Total<br />Demand Qty</th>
-                            <th>Total<br />Target Qty</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                            <th>Remarks</th>
-                        </tr>
-                    </tfoot>
                 </table>
                 <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
                 <input id="hdnContactCount" style="display:none" />
@@ -259,9 +239,9 @@
 @Scripts.Render("~/bundles/jquery")
 <script src="~/Scripts/appjs/BusinessPlanContactList.js"></script>
 <script>
-    function CreateBusinessPlan(CustomerNo, CustomerName, PlanYear) {
+    function CreateBusinessPlan(CustomerNo, CustomerName, PlanYear, ContactNo) {
 
-        window.location.replace('@Url.Action("BusinessPlan", "SPBusinessPlan")?CustomerNo=' + CustomerNo + '&CustomerName=' + CustomerName + '&PlanYear=' + PlanYear);
+        window.location.replace('@Url.Action("BusinessPlan", "SPBusinessPlan")?CustomerNo=' + CustomerNo + '&CustomerName=' + CustomerName + '&ContactNo=' + ContactNo + '&PlanYear=' + PlanYear);
 
     }
 </script>

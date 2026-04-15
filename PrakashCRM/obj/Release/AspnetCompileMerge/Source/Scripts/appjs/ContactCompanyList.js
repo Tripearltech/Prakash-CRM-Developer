@@ -1,14 +1,13 @@
 ﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
-var custVendorPortalUrl = $('#getCustVendorPortalUrl').val();
 
 /* start pagination filter code */
 var filter = "";
 var orderBy = 4;
 var orderDir = "asc";
+
 $(document).ready(function () {
-
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
-
+    $('#ddlField').val("Name");
     $('#ddlRecPerPage').change(function () {
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     });
@@ -121,63 +120,61 @@ $(document).ready(function () {
         if (!$('#chkEmail,#chkWhatsApp').is(':checked')) {
             $('#lblOptErr').css('display', 'block');
         }
-        else if ($('#ddlItems').val() == "-1")
-        {
+        else if ($('#ddlItems').val() == "-1") {
             $('#lblProdErr').css('display', 'block');
         }
         else {
             //var flag = confirm('Are you sure you want to send?');
             //if (flag) {
             $('#lblProdErr').css('display', 'none');
-                var isEmail = false, isWhatsApp = false, ToEmail = "", ToWhatsApp = "", subject = "", isCOA = false, selectedLocation = ""; 
-                var availStock = 0;
-                //var selectedOpt = "";
-                //var emailOrWhatsApp = "";
-                if ($('#chkEmail').is(':checked')) {
-                    isEmail = true;
-                    ToEmail = $('#txtItemSpecMSDSCOAEmail').val();
-                    //selectedOpt = "Email";
-                    //emailOrWhatsApp = $('#txtItemSpecMSDSCOAEmail').val();
-                }
+            var isEmail = false, isWhatsApp = false, ToEmail = "", ToWhatsApp = "", subject = "", isCOA = false, selectedLocation = "";
+            var availStock = 0;
+            //var selectedOpt = "";
+            //var emailOrWhatsApp = "";
+            if ($('#chkEmail').is(':checked')) {
+                isEmail = true;
+                ToEmail = $('#txtItemSpecMSDSCOAEmail').val();
+                //selectedOpt = "Email";
+                //emailOrWhatsApp = $('#txtItemSpecMSDSCOAEmail').val();
+            }
 
-                if ($('#chkWhatsApp').is(':checked'))
-                {
-                    isWhatsApp = true;
-                    ToWhatsApp = $('#txtItemSpecMSDSCOAMobile').val();
-                }
+            if ($('#chkWhatsApp').is(':checked')) {
+                isWhatsApp = true;
+                ToWhatsApp = $('#txtItemSpecMSDSCOAMobile').val();
+            }
 
-                //else {
-                //    selectedOpt = "WhatsApp";
-                //    emailOrWhatsApp = $('#txtItemSpecMSDSCOAMobile').val();
-                //}
-                
+            //else {
+            //    selectedOpt = "WhatsApp";
+            //    emailOrWhatsApp = $('#txtItemSpecMSDSCOAMobile').val();
+            //}
 
-                if ($('#hdnItemSpecMSDSCOA').val() == "COA") {
-                    isCOA = true;
-                    selectedLocation = $('#ddlLocations option:selected').text();
-                    availStock = $('#lblCOAProdTotalStock').text();
-                }
 
-                var selectedProd = $('#ddlItems option:selected').text();
+            if ($('#hdnItemSpecMSDSCOA').val() == "COA") {
+                isCOA = true;
+                selectedLocation = $('#ddlLocations option:selected').text();
+                availStock = $('#lblCOAProdTotalStock').text();
+            }
 
-                var BodyText = $('.ck-content > p').text();
-                var path = $('#lblItemSpecMSDSCOAPath').text();
-                
-                subject = $('#hdnModalTitle').val();
+            var selectedProd = $('#ddlItems option:selected').text();
 
-                $.post(
-                    apiUrl + 'SendItemSpecMSDSCOA?isEmail=' + isEmail + '&ToEmail=' + ToEmail + '&isWhatsApp=' + isWhatsApp + '&ToWhatsApp=' + ToWhatsApp + '&Subject=' + subject + '&BodyText=' + BodyText + '&SelectedProd=' + selectedProd + '&isCOA=' + isCOA + '&SelectedLocation=' + selectedLocation + '&availStock=' + availStock + '&Path=' + path,
-                    function (data) {
-                        if (data) {
+            var BodyText = $('.ck-content > p').text();
+            var path = $('#lblItemSpecMSDSCOAPath').text();
 
-                            //var actionMsg = subject + ' Successfully';
-                            //ShowActionMsg(actionMsg);
-                            $('#modalItemSpecMSDSCOA').css('display', 'none');
-                            $('#modalMSDSItemSpecMsg').css('display', 'block');
+            subject = $('#hdnModalTitle').val();
 
-                        }
+            $.post(
+                apiUrl + 'SendItemSpecMSDSCOA?isEmail=' + isEmail + '&ToEmail=' + ToEmail + '&isWhatsApp=' + isWhatsApp + '&ToWhatsApp=' + ToWhatsApp + '&Subject=' + subject + '&BodyText=' + BodyText + '&SelectedProd=' + selectedProd + '&isCOA=' + isCOA + '&SelectedLocation=' + selectedLocation + '&availStock=' + availStock + '&Path=' + path,
+                function (data) {
+                    if (data) {
+
+                        //var actionMsg = subject + ' Successfully';
+                        //ShowActionMsg(actionMsg);
+                        $('#modalItemSpecMSDSCOA').css('display', 'none');
+                        $('#modalMSDSItemSpecMsg').css('display', 'block');
+
                     }
-                );
+                }
+            );
             /*}*/
         }
     });
@@ -188,7 +185,7 @@ $(document).ready(function () {
 
     });
 
-    
+
     $('#btnSendMsg').click(function () {
 
         var checkboxes = $('input[type=checkbox]');
@@ -215,10 +212,17 @@ $(document).ready(function () {
 
             });
 
-            $('.modal-title').text('SMS/WhatsApp');
+            $('#modalSendMsg .modal-title').text('SMS/WhatsApp');
             ItemSpecMobile = ItemSpecMobile.slice(0, -1);
             $('#txtMsgMobile').val(ItemSpecMobile);
         }
+    });
+
+    $(document).on('click', '.js-view-contact', function (e) {
+        e.preventDefault();
+        var companyNo = $(this).attr('data-company-no') || '';
+        var companyName = $(this).attr('data-company-name') || '';
+        ViewContactPerson(companyNo, companyName);
     });
 
     $('#chkEmail').change(function () {
@@ -256,7 +260,7 @@ $(document).ready(function () {
         $('#modalContacts').css('display', 'none');
     });
 
-    $('#ddlItems').on('change',function () {
+    $('#ddlItems').on('change', function () {
         //$('#lblItemSpecMSDSCOAPath').text('D:/ProductFiles/' + $('#ddlItems').val() + '.pdf');
         if ($('#hdnModalTitle').val() == "COA Document") {
             $('#dvCOADetails').css('display', 'block');
@@ -296,7 +300,7 @@ $(document).ready(function () {
                     $('#tblBatchWiseQtyDetails').append(TRProdQty);
 
                 }
-                
+
             });
 
             //$.ajax(
@@ -332,7 +336,7 @@ $(document).ready(function () {
         else {
             $('#lblItemSpecMSDSCOAPath').text('D:/TestFile.pdf');
         }
-        
+
     });
 
     $('#chkSMS1').change(function () {
@@ -415,20 +419,19 @@ $(document).ready(function () {
             //var ContactPersonEmail = "";
             var FeedbackMobile = "";
             var ContactName = "";
-            var ContactAddress = ""; 
+            var ContactAddress = "";
             var ContactNo = "";
             let FeedbackEmailToCC = new Array();
             var EmailFlag = true;
             var i = 0;
-            
+
             $('#tableBody input[type=checkbox]:checked').each(function () {
 
                 var row = $(this).closest("tr")[0];
                 /*FeedbackMobile += row.cells[7].innerHTML + ",";*/
                 FeedbackMobile += row.cells[12].innerHTML + ",";
 
-                if (row.cells[9].innerHTML != "")
-                {
+                if (row.cells[9].innerHTML != "") {
 
                     if (row.cells[5].innerHTML != "") {
 
@@ -464,7 +467,7 @@ $(document).ready(function () {
                         else {
                             ContactAddress += row.cells[9].innerHTML + ";";
                         }
-                        
+
                         ContactNo += row.cells[4].innerHTML + ";";
                     }
                 }
@@ -488,7 +491,7 @@ $(document).ready(function () {
                 const ContactAddresses = ContactAddress.split(';');
                 const ContactNos = ContactNo.split(';');
                 const FeedbackMobiles = FeedbackMobile.split(',');
-                
+
                 if (!EmailFlag) {
 
                     var msg = "Please select contact only which have Email ID";
@@ -496,9 +499,9 @@ $(document).ready(function () {
 
                 }
                 else {
-                    
+
                     var flag;
-                    
+
                     for (var a = 0; a < FeedbackEmailToCC.length; a++) {
                         $.post(
                             apiUrl + 'SendFeedbackFormLink?contactCompanyNo=' + ContactNos[a] + '&ToCCEmail=' + FeedbackEmailToCC[a] + '&contactName=' + ContactNames[a] + '&contactMobileNo=' + FeedbackMobiles[a] +
@@ -513,7 +516,7 @@ $(document).ready(function () {
                             }
                         );
                     }
-                    
+
                     //if (flag) {
 
                     //var actionMsg = "Feedback Form Link Sent Successfully";
@@ -551,26 +554,26 @@ function showPopup(popuptype) {
 
         $('#modalItemSpecMSDSCOA').css('display', 'block');
         if (popuptype == "ItemSpecification") {
-            $('.modal-title').text('Item Specification Sheet');
+            $('#modalItemSpecMSDSCOA .modal-title').text('Item Specification Sheet');
             $('#hdnModalTitle').val('Item Specification Sheet');
             $('#dvCOALocations').css('display', 'none');
             $('#hdnItemSpecMSDSCOA').val('ItemSpecification');
         }
         if (popuptype == "MSDS") {
-            $('.modal-title').text('MSDS Sheet');
+            $('#modalItemSpecMSDSCOA .modal-title').text('MSDS Sheet');
             $('#hdnModalTitle').val('Item Specification - MSDS Sheet');
             $('#dvCOALocations').css('display', 'none');
             $('#hdnItemSpecMSDSCOA').val('MSDS');
         }
         if (popuptype == "COA") {
-            $('.modal-title').text('COA Document');
+            $('#modalItemSpecMSDSCOA .modal-title').text('COA Document');
             $('#hdnModalTitle').val('COA Document');
             $('#dvCOALocations').css('display', 'block');
             $('#hdnItemSpecMSDSCOA').val('COA');
         }
-        
+
         $('#chkEmail').attr('checked', true).change();
-        
+
         var ItemSpecEmail = "";
         var ItemSpecMobile = "";
 
@@ -653,10 +656,19 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td><td><input type='checkbox' class='form-check-input' /></td><td><a href='/SPContacts/CompanyContactCard?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td><td align='center'><a class='ViewContactCls' onclick='ViewContactPerson(\"" + item.No +
-                        "\",\"" + item.Name + "\")'><i class='bx bx-show'></i></a></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
-                        "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + item.Mobile_Phone_No + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
+                    //var rowData = "<tr><td></td><td><input type='checkbox' class='form-check-input' /></td><td><a href='/SPContacts/CompanyContactCard?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td><td align='center'><a class='ViewContactCls' onclick='ViewContactPerson(\"" + item.No +
+                    //    "\",\"" + item.Name + "\")'><i class='bx bx-show'></i></a></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
+                    //    "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + (item.Mobile_Phone_No || "N/A") + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
+                    //    "</td><td>" + item.GST_Registration_No + "</td><td>" + item.P_A_N_No + "</td>";
+                    const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
+                    const itemNameAttr = escapeHtmlAttr(item.Name);
+                    const itemNoAttr = escapeHtmlAttr(item.No);
+                    var rowData = `<tr><td></td><td><input type='checkbox' class='form-check-input' /></td><td><a href='/SPContacts/CompanyContactCard?No=` + item.No + `'><i class='bx bxs-edit'></i></a></td><td data-item="${itemJson}"><div class='dropdown ms-auto'><div class='cursor-pointer text-dark font-24 dropdown-toggle dropdown-toggle-nocaret' data-bs-toggle='dropdown'><i class='bx bx-dots-horizontal-rounded text-option'></i></div>` +
+                        `<div class='dropdown-menu dropdown-menu-end'><a class='dropdown-item' onclick='DailyVisit(${itemJson})' href='javaScript:;'  style='cursor:pointer'>Daily Visit Plan</a><a class='dropdown-item' onclick='BusinessPlan(${itemJson})'  href='javaScript:;'  style='cursor:pointer'>Bussines Plan</a>` +
+                        `<a class='dropdown-item' style='cursor:pointer' onclick='SalesQuotes(${itemJson})'>Sales Quotes</a></div></div></td><td align='center'><a class='ViewContactCls js-view-contact' data-company-no='${itemNoAttr}' data-company-name='${itemNameAttr}' href='javascript:;'><i class='bx bx-show'></i></a></td><td>` + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
+                        "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + (item.Mobile_Phone_No || "N/A") + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
                         "</td><td>" + item.GST_Registration_No + "</td><td>" + item.P_A_N_No + "</td>";
+
 
                     if (item.PCPL_Feedback_Status == "Not Initiated") {
                         rowData += "<td><span class='badge bg-danger'>Not Initiated</span></td></tr>";
@@ -669,7 +681,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     }
 
                     $('#tableBody').append(rowData);
-                    
+
                 });
                 if (firsload == 1) {
                     pageMe();
@@ -702,13 +714,13 @@ function dataTableFunction(orderBy, orderDir) {
     if (orderDir == "asc") {
         $('#dataList th:lt(4)').removeClass("sorting_asc").removeClass("sorting_disabled");
         $('#dataList th:gt(13)').removeClass("sorting_asc").removeClass("sorting_disabled");
-        $('#dataList th').slice(4,14).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(4, 14).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_desc").addClass("sorting_asc");
     }
     if (orderDir == "desc") {
         $('#dataList th:lt(4)').removeClass("sorting_desc").removeClass("sorting_disabled");
         $('#dataList th:gt(13)').removeClass("sorting_desc").removeClass("sorting_disabled");
-        $('#dataList th').slice(4,14).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(4, 14).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_asc").addClass("sorting_desc");
     }
 }
@@ -756,13 +768,13 @@ function pageMe() {
 
     var curr = 0;
     var skip = 0, top = $('#ddlRecPerPage').val();
-    
+
     while (numPages > curr && (settings.hidePageNumbers == false)) {
         $('<li id="pg' + (curr + 1) + '" class="pg"><a href="#" skip=' + skip + ' top=' + top + ' class="page_link">' + (curr + 1) + '</a></li>').appendTo(pager);
         skip = skip + parseInt($('#ddlRecPerPage').val());
         curr++;
     }
-    
+
     if (settings.showPrevNext) {
         $('<li><a href="#" class="next_link">»</a></li>').appendTo(pager);
     }
@@ -839,7 +851,7 @@ function pageMe() {
         $('.page_link').removeClass("active");
 
         currpg1.addClass("active");
-        
+
         children.css('display', 'none').slice(startAt, endOn).show();
 
         if (page >= 1) {
@@ -867,9 +879,9 @@ function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.fileName != "") {
-                    
+
                     window.location.href = "/SPContacts/Download?file=" + data.fileName;
                 }
             },
@@ -882,7 +894,7 @@ function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
 }
 
 function ViewContactPerson(itemNo, itemName) {
-    
+
     $.ajax(
         {
             url: '/SPContacts/GetAllContactsOfCompanyForPopup?No=' + itemNo,
@@ -901,8 +913,8 @@ function ViewContactPerson(itemNo, itemName) {
                 }
 
                 $('#tbContacts').append(rowData);
-                
-                $('.modal-title').text(itemName + '\'s Contact Person');
+
+                $('#modalContacts .modal-title').text(getSafeText(itemName) + '\'s Contact Person');
                 $('#modalContacts').css('display', 'block');
                 $('#dvContacts').css('display', 'block');
             },
@@ -943,4 +955,316 @@ function ShowErrMsg(errMsg) {
 
 }
 
+
 /* end pagination filter code */
+
+//sales quotes
+
+function SalesQuotes(item) {
+    currentCompanyName = getSafeText(item && item.Name);
+    $('#quotesModal .modal-title').text(getCurrentCompanyLabel() + ' - Sales Quotes');
+    var no = item.No;
+    BindContactSQ("", "", no);
+    $("#CompanyNo").val(no);
+}
+
+function BindContactSQ(FromDate, ToDate, No) {
+
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
+    if (No == "") {
+        No = $("#CompanyNo").val();
+    }
+    $('#btnSQListSpinner').show();
+    $.get(apiUrl + 'GetContactSalesQuotes?CCompanyNo=' + No + '&FromDate=' + FromDate + '&ToDate=' + ToDate, function (data) {
+
+        if (data != null) {
+
+            var i;
+            var TROpts = "";
+
+            $('#tblContactSQ').empty();
+            $('#quotesModal .modal-title').text(getCurrentCompanyLabel() + ' - Sales Quotes');
+            $('#quotesModal').modal('show');
+            if (data.length > 0) {
+
+                for (i = 0; i < data.length; i++) {
+
+                    TROpts += "<tr><td>" + data[i].No + "</td ><td>" + data[i].Order_Date + "</td><td>" + data[i].Sell_to_Customer_Name + "</td>" +
+                        "<td>" + data[i].Payment_Terms_Code + "</td>";
+
+                    if (data[i].TPTPL_Schedule_status == "Pending") {
+                        TROpts += "<td><span class='badge bg-danger'>" + data[i].TPTPL_Schedule_status + "</span></td>";
+                    }
+                    else if (data[i].TPTPL_Schedule_status == "Partial") {
+                        TROpts += "<td><span class='badge bg-info text-dark'>" + data[i].TPTPL_Schedule_status + "</span></td>";
+                    }
+                    else if (data[i].TPTPL_Schedule_status == "Completed") {
+                        TROpts += "<td><span class='badge bg-success' title='Schedule completed'>" + data[i].TPTPL_Schedule_status + "</span></td>";
+                    }
+
+                    TROpts += "<td><a onclick='ShowSQProds(\"" + data[i].No + "\")'><i class='bx bx-show'></i></a></td></tr>";
+                }
+                $('#tblContactSQ').append(TROpts);
+            }
+            else {
+                $('#tblContactSQ').append("<tr><td colspan=6 align='center'>No Records</td></tr>");
+
+            }
+            $('#btnSQListSpinner').hide();
+
+        }
+    });
+
+}
+
+$('#txtSQListToDate').change(function () {
+
+    if ($('#txtSQListFromDate').val() == null || $('#txtSQListFromDate').val() == "") {
+        $('#lblSQListFDateMsg').css('display', 'block');
+        $('#txtSQListToDate').val("");
+    }
+    else {
+        $('#lblSQListFDateMsg').css('display', 'none');
+        var fromDate = $('#txtSQListFromDate').val();
+        var toDate = $('#txtSQListToDate').val();
+        BindContactSQ(fromDate, toDate, "");
+    }
+
+});
+
+$('#btnSQListShowAll').click(function () {
+
+    $('#txtSQListFromDate, #txtSQListToDate').val("");
+    BindContactSQ("", "", "");
+});
+
+function ShowSQProds(SQNo) {
+
+    $.ajax(
+        {
+            url: '/SPSalesQuotes/GetSalesLineItems?DocumentNo=' + SQNo,
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (data) {
+
+                $('#lblSQNo').text(SQNo);
+                $('#tblContactSQProds').empty();
+                var rowData = "";
+
+                if (data != null && data != "") {
+                    $.each(data, function (index, item) {
+                        rowData = "<tr><td>" + item.No + "</td><td>" + item.Description + "</td><td>" + item.Quantity + "</td><td>" + item.PCPL_Packing_Style_Code + "</td><td>" +
+                            item.Unit_of_Measure_Code + "</td><td>" + item.PCPL_MRP + "</td><td>" + item.Unit_Price + "</td>";
+
+                        if (item.Drop_Shipment == true) {
+                            rowData += "<td>Yes</td>";
+                        }
+                        else {
+                            rowData += "<td>No</td>";
+                        }
+
+                        /*rowData += "<td>" + item.PCPL_Vendor_Name + "</td></tr>";*/
+
+                        rowData += "</tr>";
+
+                        $('#tblContactSQProds').append(rowData);
+                    });
+                }
+                else {
+                    rowData = "<tr><td colspan=9>No Records Found</td></tr>";
+                    $('#tbSQProduct').append(rowData);
+                }
+
+                $('#modalSQProds').css('display', 'block');
+                $('#dvSQProds').css('display', 'block');
+            },
+            error: function () {
+                alert("error");
+            }
+        }
+    );
+
+}
+
+$('.btn-close').click(function () {
+
+    $('#modalSQProds').css('display', 'none');
+    $('#dvSQProds').css('display', 'none');
+
+});
+
+//business plan
+function BindFinancialYear() {
+    $('#ddlFinancialYear').empty();
+    let currentDate = new Date();
+    let currentYear = currentDate.getFullYear();
+    let currentMonth = currentDate.getMonth();
+
+    var yearOpts = "";
+    yearOpts += "<option value='-1'>---Select---</option>";
+    var prevFinancialYear = (currentYear - 1) + '-' + currentYear;
+    var currFinancialYear = currentYear + '-' + (currentYear + 1);
+
+    if (currentMonth <= 2) {
+        /*yearOpts += "<option value='" + (currentYear - 1) + '-' + currentYear + "'>" + (currentYear - 1) + '-' + currentYear + "</option>";*/
+        yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
+    }
+
+    yearOpts += "<option value='" + currFinancialYear + "'>" + currFinancialYear + "</option>";
+
+    $('#ddlFinancialYear').append(yearOpts);
+
+    if (currentMonth <= 2) {
+        $('#ddlFinancialYear').val(prevFinancialYear);
+    }
+    else {
+        $('#ddlFinancialYear').val(currFinancialYear);
+    }
+
+    $('#lblPrevFinancialYear').text(prevFinancialYear);
+    $('#lblFinancialYear').text(currFinancialYear);
+
+    //filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "'";
+
+    BindContactBusinessPlan($('#ddlFinancialYear').val(), "");
+}
+
+
+function BusinessPlan(item) {
+    //$("#CompanyNo").val('');
+    currentCompanyName = getSafeText(item && item.Name);
+    $('#businessplanModal .modal-title').text(getCurrentCompanyLabel() + ' - Business Plan');
+    var no = item.No;
+
+    $("#CompanyNo").val(no);
+    BindFinancialYear();
+    /*  BindContactBusinessPlan($('#ddlFinancialYear').val(), no);*/
+    /*  var num = $("#CompanyNo").val(no);*/
+
+}
+
+function BindContactBusinessPlan(PlanYear, No) {
+
+    if (No == "") {
+        No = $("#CompanyNo").val();
+    }
+    $.get('/SPContacts/GetContactBusinessPlan?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&CCompanyNo=' + No + '&PlanYear=' + PlanYear, function (data) {
+
+        $('#lblDetailsYearGrid').text(PlanYear);
+
+        const PlanYear_ = PlanYear.split('-');
+        $('#lblDetailsPrevYear').text((parseInt(PlanYear_[0]) - 1) + "-" + PlanYear_[0]);
+
+        var TROpts = "";
+        var i;
+        $('#tblDetailsContactBusinessPlan').empty();
+        $('#businessplanModal .modal-title').text(getCurrentCompanyLabel() + ' - Business Plan');
+        $('#businessplanModal').modal('show');
+
+        if (data.length > 0) {
+
+            for (i = 0; i < data.length; i++) {
+
+                TROpts += "<tr><td hidden>" + data[i].Product_No + "</td><td>" + data[i].Product_Name + "</td><td>" + data[i].Pre_Year_Demand.toFixed(3) + "</td><td>" + data[i].Pre_Year_Target.toFixed(3) + "</td><td>" +
+                    data[i].Last_year_Sale_Qty.toFixed(3) + "</td><td>" + data[i].Last_year_Sale_Amount.toFixed(2) + "</td>" +
+                    "<td>" + data[i].Demand.toFixed(3) + "</td><td>" + data[i].Target.toFixed(3) + "</td><td>" + data[i].Average_Price.toFixed(2) + "</td><td>" +
+                    data[i].PCPL_Target_Revenue.toFixed(2) + "</td></tr>";
+
+            }
+
+        }
+        else {
+            TROpts += "<tr><td colspan='10'>No Data Found</td></tr>";
+        }
+
+        $('#tblDetailsContactBusinessPlan').append(TROpts);
+
+    });
+
+}
+
+
+
+//daily visit 
+function DailyVisit(item) {
+    currentCompanyName = getSafeText(item && item.Name);
+    $('#DetailsModal .modal-title').text(getCurrentCompanyLabel() + ' - Daily Visit Plan');
+    var no = item.No;
+    $("#CompanyNo").val(no);
+    BindContactDailyVisit("", "", no);
+}
+function BindContactDailyVisit(FromDate, ToDate, No) {
+
+    if (No == "") {
+        No = $("#CompanyNo").val();
+    }
+    $('#btnDailyVisitListSpinner').show();
+    $.get('/SPContacts/GetContactDailyVisits?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&FromDate=' + FromDate + '&ToDate=' + ToDate + '&CCompanyNo=' + No, function (data) {
+
+        var TROpts = "";
+        var i;
+        $('#tblContactDailyVisit').empty();
+        $('#DetailsModal .modal-title').text(getCurrentCompanyLabel() + ' - Daily Visit Plan');
+        $('#DetailsModal').modal('show');
+        if (data.length > 0) {
+
+            for (i = 0; i < data.length; i++) {
+
+                TROpts += "<tr><td>" + data[i].Date + "</td><td>" + data[i].Visit_Name + "</td><td>" + data[i].Visit_SubType_Name + "</td><td>" + data[i].Contact_Company_Name +
+                    "</td><td>" + data[i].Contact_Person_Name + "</td><td>" + data[i].Event_Name + "</td><td>" + data[i].Topic_Name + "</td><td>" + data[i].Mode_of_Visit +
+                    "</td><td>" + data[i].Feedback + "</td></tr>";
+
+            }
+
+        }
+        else {
+            TROpts += "<tr><td colspan='9'>No Data Found</td></tr>";
+        }
+
+        $('#tblContactDailyVisit').append(TROpts);
+        $('#btnDailyVisitListSpinner').hide();
+
+    });
+
+}
+
+$('#txtDailyVisitTDate').change(function () {
+
+    if ($('#txtDailyVisitFDate').val() == null || $('#txtDailyVisitFDate').val() == "") {
+        $('#lblDailyVisitFDateMsg').css('display', 'block');
+        $('#txtDailyVisitTDate').val("");
+    }
+    else {
+        $('#lblDailyVisitFDateMsg').css('display', 'none');
+        var fromDate = $('#txtDailyVisitFDate').val();
+        var toDate = $('#txtDailyVisitTDate').val();
+        BindContactDailyVisit(fromDate, toDate, "");
+    }
+
+});
+
+$('#btnDailyVisitShowAll').click(function () {
+
+    $('#txtDailyVisitFDate, #txtDailyVisitTDate').val("");
+    BindContactDailyVisit("", "", "");
+});
+var custVendorPortalUrl = $('#getCustVendorPortalUrl').val();
+var currentCompanyName = "";
+
+function getSafeText(value) {
+    if (value === null || value === undefined) return "";
+    return (value + "").trim();
+}
+
+function getCurrentCompanyLabel() {
+    return getSafeText(currentCompanyName) || "Selected Company";
+}
+
+function escapeHtmlAttr(value) {
+    return (value === null || value === undefined ? '' : (value + ''))
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}

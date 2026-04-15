@@ -64,6 +64,17 @@ namespace PrakashCRM.Service.Controllers
             return "";
         }
 
+        private static string RemoveApprovalLinkSection(string template)
+        {
+            if (string.IsNullOrWhiteSpace(template))
+                return template;
+
+            return System.Text.RegularExpressions.Regex.Replace(
+                template,
+                "(?is)<tr[^>]*>\\s*<td[^>]*colspan=\"4\"[^>]*>\\s*<b>\\s*<a[^>]*>\\s*Send\\s+Quote\\s+Confirmation\\s*</a>\\s*</b>\\s*</td>\\s*</tr>",
+                "");
+        }
+
         private static (string Name, string Email, string Phone) TryGetSalespersonContact(API ac, string salesPersonCode)
         {
             try
@@ -506,7 +517,7 @@ namespace PrakashCRM.Service.Controllers
                     requestSQHeader.PCPL_Job_to_Code = salesQuoteDetails.JobtoCode == "-1" ? "" : salesQuoteDetails.JobtoCode;
                     requestSQHeader.PCPL_IsInquiry = false;
                     requestSQHeader.WorkDescription = string.IsNullOrEmpty(salesQuoteDetails.JustificationDetails) ? "" : salesQuoteDetails.JustificationDetails;
-                    requestSQHeader.PCPL_Target_Date = string.IsNullOrEmpty(salesQuoteDetails.TargetDate) ? "1900-01-01" : salesQuoteDetails.TargetDate;
+                    requestSQHeader.PCPL_Target_Date = string.IsNullOrEmpty(salesQuoteDetails.TargetDate) ? null : salesQuoteDetails.TargetDate;
 
                     // Set approval status
                     if (salesQuoteDetails.ApprovalFor == "Negative Credit Limit")
@@ -538,7 +549,7 @@ namespace PrakashCRM.Service.Controllers
                         requestSQHeader.PCPL_Approver = "";
                         requestSQHeader.PCPL_Status = "Approved";
                         requestSQHeader.PCPL_ApprovalFor = "";
-                        requestSQHeader.PCPL_Submitted_On = "1900-01-01";
+                        requestSQHeader.PCPL_Submitted_On = null;
                         requestSQHeader.PCPL_ApproverHOD = "";
                     }
 
@@ -563,7 +574,7 @@ namespace PrakashCRM.Service.Controllers
                     reqSQHeaderWithCustTemplateCode.PCPL_IsInquiry = false;
                     reqSQHeaderWithCustTemplateCode.Sell_to_Customer_Templ_Code = salesQuoteDetails.CustomerTemplateCode;
                     reqSQHeaderWithCustTemplateCode.WorkDescription = string.IsNullOrEmpty(salesQuoteDetails.JustificationDetails) ? "" : salesQuoteDetails.JustificationDetails;
-                    reqSQHeaderWithCustTemplateCode.PCPL_Target_Date = string.IsNullOrEmpty(salesQuoteDetails.TargetDate) ? "1900-01-01" : salesQuoteDetails.TargetDate;
+                    reqSQHeaderWithCustTemplateCode.PCPL_Target_Date = string.IsNullOrEmpty(salesQuoteDetails.TargetDate) ? null : salesQuoteDetails.TargetDate;
 
                     // Set approval status
                     if (salesQuoteDetails.ApprovalFor == "Negative Credit Limit")
@@ -596,7 +607,7 @@ namespace PrakashCRM.Service.Controllers
                         reqSQHeaderWithCustTemplateCode.PCPL_Approver = "";
                         reqSQHeaderWithCustTemplateCode.PCPL_Status = "Approved";
                         reqSQHeaderWithCustTemplateCode.PCPL_ApprovalFor = "";
-                        reqSQHeaderWithCustTemplateCode.PCPL_Submitted_On = "1900-01-01";
+                        reqSQHeaderWithCustTemplateCode.PCPL_Submitted_On = null;
                         reqSQHeaderWithCustTemplateCode.PCPL_ApproverHOD = "";
                     }
 
@@ -667,6 +678,7 @@ namespace PrakashCRM.Service.Controllers
                         reqSQLine.PCPL_Margin_Percent = product.PCPL_Margin_Percent;
                         reqSQLine.PCPL_Interest = product.PCPL_Interest;
                         reqSQLine.PCPL_Interest_Rate = product.PCPL_Interest_Rate;
+                        reqSQLine.PCPL_Purchase_Cost = product.PCPL_Purchase_Cost;
                         reqSQLine.PCPL_Total_Cost = product.PCPL_Total_Cost;
                         reqSQLine.Delivery_Date = product.Delivery_Date;
                         reqSQLine.Drop_Shipment = product.Drop_Shipment;
@@ -706,6 +718,7 @@ namespace PrakashCRM.Service.Controllers
                         reqSQLiquidLine.PCPL_Margin_Percent = product.PCPL_Margin_Percent;
                         reqSQLiquidLine.PCPL_Interest = product.PCPL_Interest;
                         reqSQLiquidLine.PCPL_Interest_Rate = product.PCPL_Interest_Rate;
+                        reqSQLiquidLine.PCPL_Purchase_Cost = product.PCPL_Purchase_Cost;
                         reqSQLiquidLine.PCPL_Total_Cost = product.PCPL_Total_Cost;
                         reqSQLiquidLine.Delivery_Date = product.Delivery_Date;
                         reqSQLiquidLine.Drop_Shipment = product.Drop_Shipment;
@@ -771,6 +784,16 @@ namespace PrakashCRM.Service.Controllers
                     }
 
                     responseSQHeader.errorDetails = inquiryStatusPatchResult.Result.Item2;
+                }
+
+                if (!Convert.ToBoolean(salesQuoteDetails.IsSQEdit))
+                {
+                    NotificationService notificationService = new NotificationService();
+                    notificationService.RecordSalesQuoteStatus(
+                        responseSQHeader.No,
+                        responseSQHeader.PCPL_Status,
+                        salesQuoteDetails.SalespersonCode,
+                        responseSQHeader.Sell_to_Customer_Name);
                 }
 
                 // Send email only if all operations succeeded and approval is required
@@ -1004,7 +1027,7 @@ namespace PrakashCRM.Service.Controllers
                     requestSQHeaderUpdate.PCPL_Approver = "";
                     requestSQHeaderUpdate.PCPL_Status = "Approved";
                     requestSQHeaderUpdate.PCPL_ApprovalFor = "";
-                    requestSQHeaderUpdate.PCPL_Submitted_On = "1900-01-01";
+                    requestSQHeaderUpdate.PCPL_Submitted_On = null;
                     requestSQHeaderUpdate.PCPL_ApproverHOD = "";
                 }
 
@@ -1052,6 +1075,7 @@ namespace PrakashCRM.Service.Controllers
                         reqSQLineUpdate.PCPL_Margin_Percent = product.PCPL_Margin_Percent;
                         reqSQLineUpdate.PCPL_Interest = product.PCPL_Interest;
                         reqSQLineUpdate.PCPL_Interest_Rate = product.PCPL_Interest_Rate;
+                        reqSQLineUpdate.PCPL_Purchase_Cost = product.PCPL_Purchase_Cost;
                         reqSQLineUpdate.PCPL_Total_Cost = product.PCPL_Total_Cost;
                         reqSQLineUpdate.Delivery_Date = product.Delivery_Date;
                         reqSQLineUpdate.Drop_Shipment = product.Drop_Shipment;
@@ -1085,6 +1109,7 @@ namespace PrakashCRM.Service.Controllers
                         reqSQLiquidLineUpdate.PCPL_Margin_Percent = product.PCPL_Margin_Percent;
                         reqSQLiquidLineUpdate.PCPL_Interest = product.PCPL_Interest;
                         reqSQLiquidLineUpdate.PCPL_Interest_Rate = product.PCPL_Interest_Rate;
+                        reqSQLiquidLineUpdate.PCPL_Purchase_Cost = product.PCPL_Purchase_Cost;
                         reqSQLiquidLineUpdate.PCPL_Total_Cost = product.PCPL_Total_Cost;
                         reqSQLiquidLineUpdate.Delivery_Date = product.Delivery_Date;
                         reqSQLiquidLineUpdate.Drop_Shipment = product.Drop_Shipment;
@@ -1434,6 +1459,12 @@ namespace PrakashCRM.Service.Controllers
                     ed = result.Result.Item2;
                     sqHeader.errorDetails = ed;
                     SQNos = SQNo + ",";
+
+                    if (ed != null && ed.isSuccess)
+                    {
+                        NotificationService notificationService = new NotificationService();
+                        notificationService.RecordSalesQuoteStatus(sqHeader.No, sqHeader.PCPL_Status, sqHeader.Salesperson_Code, sqHeader.Sell_to_Customer_Name);
+                    }
                 }
 
                 if (!sqHeader.errorDetails.isSuccess)
@@ -1593,7 +1624,7 @@ namespace PrakashCRM.Service.Controllers
                     string mailBody;
                     if (!string.IsNullOrWhiteSpace(template))
                     {
-                        mailBody = template;
+                        mailBody = RemoveApprovalLinkSection(template);
 
                         // For reject status mails, remove the "Approval For Quote - ..." header row from the template.
                         if (string.Equals((Action ?? "").Trim(), "Reject", StringComparison.OrdinalIgnoreCase))
@@ -1659,8 +1690,6 @@ namespace PrakashCRM.Service.Controllers
                         var fallbackBody = new StringBuilder();
                         fallbackBody.Append("<p>Hi,</p>");
                         fallbackBody.Append($"<p>{headingText}</p>");
-                        if (!string.IsNullOrWhiteSpace(statusLink))
-                            fallbackBody.Append("<p><a href='" + statusLink + "'>Open Sales Quote</a></p>");
                         mailBody = fallbackBody.ToString();
                     }
 
@@ -1940,9 +1969,6 @@ namespace PrakashCRM.Service.Controllers
                 }
 
             }
-
-            //SQNos = SQNos.Substring(0, SQNos.Length - 1);
-
             return resMsg;
 
         }
@@ -2262,6 +2288,12 @@ namespace PrakashCRM.Service.Controllers
                             response = "Error_:" + scheduleOrderRes.errorDetails.message;
 
                     }
+                }
+
+                if (!string.IsNullOrWhiteSpace(response) && !response.Contains("Error_:") && scheduleOrderRes.errorDetails != null && scheduleOrderRes.errorDetails.isSuccess)
+                {
+                    NotificationService notificationService = new NotificationService();
+                    notificationService.RecordOrderScheduled(scheduleOrderDetails.QuoteNo, response);
                 }
             }
 
@@ -2660,6 +2692,7 @@ namespace PrakashCRM.Service.Controllers
                             PCPL_Commission_Amount = SQLines[a].PCPL_Commission_Amount,
                             PCPL_Credit_Days = SQLines[a].PCPL_Credit_Days,
                             PCPL_Interest = SQLines[a].PCPL_Interest,
+                            PCPL_Purchase_Cost = SQLines[a].PCPL_Purchase_Cost,
                             PCPL_Commission_Payable = SQLines[a].PCPL_Commission_Payable,
                             PCPL_Commission_Payable_Name = SQLines[a].PCPL_Commission_Payable_Name,
                             TPTPL_Short_Closed = SQLines[a].TPTPL_Short_Closed,
@@ -3104,6 +3137,7 @@ namespace PrakashCRM.Service.Controllers
             SPInqNewJobtoAddressRes resNewJobtoAddress = new SPInqNewJobtoAddressRes();
             errorDetails ed = new errorDetails();
 
+            reqNewJobtoAddress.Code = string.IsNullOrWhiteSpace(reqNewJobtoAddress.Code) ? "" : reqNewJobtoAddress.Code.Trim();
             reqNewJobtoAddress.Address_2 = reqNewJobtoAddress.Address_2 == null || reqNewJobtoAddress.Address_2 == "" ? "" : reqNewJobtoAddress.Address_2;
             reqNewJobtoAddress.Job_to_GST_Customer_Type = "Registered";
 
@@ -4930,7 +4964,7 @@ namespace PrakashCRM.Service.Controllers
 
         [HttpGet]
         [Route("GetAvailableQuantity")]
-        public List<SPAvailableQuantity> GetAvailableQuantity(string ProdNo, string LocationCode)
+        public List<SPAvailableQuantity> GetAvailableQuantity(string ProdNo, string LocationCode, string PackingStyleCode = "")
         {
             API ac = new API();
             List<SPAvailableQuantity> availablequantity = new List<SPAvailableQuantity>();
@@ -4940,6 +4974,11 @@ namespace PrakashCRM.Service.Controllers
             if (!string.IsNullOrEmpty(ProdNo) && !string.IsNullOrEmpty(LocationCode))
             {
                 filter = "Item_No eq '" + ProdNo + "' and Location_Code eq '" + LocationCode + "' and Remaining_Quantity gt 0";
+
+                if (!string.IsNullOrWhiteSpace(PackingStyleCode) && PackingStyleCode != "-1")
+                {
+                    filter += " and PCPL_Packing_Style_Code eq '" + PackingStyleCode + "'";
+                }
             }
 
             var result = ac.GetData<SPAvailableQuantity>("ItemLedgerEntriesDotNetAPI", filter);

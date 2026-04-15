@@ -1,12 +1,18 @@
-﻿@model PrakashCRM.Data.Models.SPCustomerReport
+﻿@*@model PrakashCRM.Data.Models.SPCustomerReport*@
+
 @{
     ViewBag.Title = "OutstandingDetails";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
 }
 
 <style>
-    .clsPointer{
-        cursor:pointer;
+    .clsPointer {
+        cursor: pointer;
+    }
+
+    .toggle-icon {
+        font-size: 18px;
+        vertical-align: middle;
     }
 </style>
 
@@ -18,7 +24,7 @@
                     <li class="breadcrumb-item">
                         <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Outstanding Details</li>
+                    <li class="breadcrumb-item active" aria-current="page">Collection Report</li>
                 </ol>
             </nav>
         </div>
@@ -27,138 +33,144 @@
     <div class="card">
         <div class="card-body">
             <table class="table mb-0 table-striped">
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <input type="date" id="txtOutsFDate" class="form-control" placeholder="From Date">
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" id="btnGenerate" class="btn btn-primary">Generate</button>
+                            </div>
+                            <div class="col-md-7">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <thead>
                     <tr>
-                        <th scope="col">No</th>
                         <th></th>
-                        <th scope="col">SP Branch</th>
-                        <th scope="col">Col. Upto MTD-1 Date</th>
-                        <th scope="col">Date on Title - TD</th>
-                        <th scope="col">Total Collection</th>
-                        <th scope="col">Overdue CM-1</th>
-                        <th scope="col">1st-10th Due Cur. Month</th>
-                        <th scope="col">11th-20th Due Cur. Month</th>
-                        <th scope="col">21st-30th Due Cur. Month</th>
-                        <th scope="col">Total Due Cur. Month</th>
-                        <th scope="col">Achievement in %</th>
+                        <th class="left-align">Name of Customer</th>
+                        <th>Document No.</th>
+                        <th>Over Days</th>
+                        <th>Original Amount</th>
+                        <th>Received Amount</th>
+                        <th>Remaining Amount</th>
+                        <th>ACD</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tblrecivedData">
                     <tr>
                         <td></td>
-                        <td><a id="Branch1Rec" class="clsPointer"><i class="bx bx-plus-circle"></i></a></td>
-                        <td>AHMEDABAD</td>
-                        <td>10</td>
-                        <td>5</td>
-                        <td>15</td>
-                        <td>30</td>
-                        <td>30</td>
-                        <td>30</td>
-                        <td>30</td>
-                        <td>135</td>
-                        <td>11%</td>
-                    </tr>
-                    <tr id="Branch1SPRecs" style="display:none">
+                        <td class="left-align bold">Collection up to <span id="txtInvTDate"></span><span class="blue">(To Date)</span></td>
                         <td></td>
                         <td></td>
-                        <td>Salesperson</td>
-                        <td>10</td>
-                        <td>5</td>
-                        <td>15</td>
-                        <td>30</td>
-                        <td>30</td>
-                        <td>30</td>
-                        <td>30</td>
-                        <td>135</td>
-                        <td>11%</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td><a id="Branch2Rec" class="clsPointer"><i class="bx bx-plus-circle"></i></a></td>
-                        <td>BARODA</td>
-                        <td>15</td>
-                        <td>10</td>
-                        <td>25</td>
-                        <td>20</td>
-                        <td>10</td>
-                        <td>30</td>
-                        <td>40</td>
-                        <td>125</td>
-                        <td>20%</td>
-                    </tr>
-                    <tr id="Branch2SPRecs" style="display:none">
                         <td></td>
                         <td></td>
-                        <td>Salesperson</td>
-                        <td>15</td>
-                        <td>10</td>
-                        <td>25</td>
-                        <td>20</td>
-                        <td>10</td>
-                        <td>30</td>
-                        <td>40</td>
-                        <td>125</td>
-                        <td>20%</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td><a id="Branch3Rec" class="clsPointer"><i class="bx bx-plus-circle"></i></a></td>
-                        <td>SURAT</td>
-                        <td>5</td>
-                        <td>3</td>
-                        <td>8</td>
-                        <td>50</td>
-                        <td>20</td>
-                        <td>10</td>
-                        <td>25</td>
-                        <td>113</td>
-                        <td>7%</td>
-                    </tr>
-                    <tr id="Branch3SPRecs" style="display:none">
                         <td></td>
                         <td></td>
-                        <td>Salesperson</td>
-                        <td>5</td>
-                        <td>3</td>
-                        <td>8</td>
-                        <td>50</td>
-                        <td>20</td>
-                        <td>10</td>
-                        <td>25</td>
-                        <td>113</td>
-                        <td>7%</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3"><b>Grand Total</b></td>
-                        <td><b>30</b></td>
-                        <td><b>18</b></td>
-                        <td><b>48</b></td>
-                        <td><b>100</b></td>
-                        <td><b>60</b></td>
-                        <td><b>70</b></td>
-                        <td><b>95</b></td>
-                        <td><b>373</b></td>
-                        <td><b>13%</b></td>
+
                     </tr>
                 </tbody>
+                <tbody id="tblOutstanding"></tbody>
             </table>
+            <div id="acdModal" style="display:none; position:fixed; top:0; left:0; background:rgba(0,0,0,0.4); width:100%; height:100%;">
+                <div style="background:#fff; width:80%; margin:60px 60px 0 auto; padding:20px; border-radius:8px;">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 class="mb-1 logo-text" style="font-size:18px">
+                                            ACD Details (Last Six Months)
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="table-responsive" style="max-height:400px; overflow-y:auto;">
+                                        <table class="table mb-0 table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Bill No</th>
+                                                    <th>Posting Date</th>
+                                                    <th>Amount</th>
+                                                    <th>Due Date</th>
+                                                    <th>Recd Date</th>
+                                                    <th>Recd Amt</th>
+                                                    <th>ACD</th>
+                                                    <th>ADD</th>
+                                                    <th>Days</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="acdBody">
+                                                <!-- rows will load here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button class="btn btn-secondary mt-3" onclick="closeModal()">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 @Scripts.Render("~/bundles/jquery")
+
+<script src="~/Scripts/appjs/OutStandingDetails.js"></script>
+<!-- JS -->
 <script>
-    $(document).ready(function () {
-        $('#Branch1Rec').click(function () {
-            $('#Branch1SPRecs').toggle();
-        });
+    function openModal() {
+        document.getElementById('acdModal').style.display = 'block';
+    }
 
-        $('#Branch2Rec').click(function () {
-            $('#Branch2SPRecs').toggle();
-        });
+    function closeModal() {
+        document.getElementById('acdModal').style.display = 'none';
+    }
 
-        $('#Branch3Rec').click(function () {
-            $('#Branch3SPRecs').toggle();
-        });
-    });
+    window.onclick = function (event) {
+        const modal = document.getElementById('acdModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    function toggleDetails(element) {
+        const icon = element.querySelector('i');
+        const row = element.closest('tr');
+        let next = row.nextElementSibling;
+        const details = [];
+
+        // collect all detail rows until total-row
+        while (next && next.classList.contains('toggle-detail')) {
+            details.push(next);
+            next = next.nextElementSibling;
+        }
+
+        const isVisible = details.length && details[0].style.display !== 'none';
+        details.forEach(r => r.style.display = isVisible ? 'none' : '');
+
+        // switch icon dynamically
+        icon.classList.remove(isVisible ? 'bx-minus-circle' : 'bx-plus-circle');
+        icon.classList.add(isVisible ? 'bx-plus-circle' : 'bx-minus-circle');
+    }
+
+
+    function setCustomerTooltip(cell) {
+        let currentRow = cell.closest('tr');
+        while (currentRow && !currentRow.classList.contains('customer-row')) {
+            currentRow = currentRow.previousElementSibling;
+        }
+
+        let customerName = '';
+        if (currentRow) {
+            customerName = currentRow.querySelector('td.left-align')?.textContent?.trim() || '';
+        }
+
+        cell.title = customerName;
+    }
 </script>
-

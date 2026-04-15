@@ -15,7 +15,7 @@
                         <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="/SPVisitEntry/WeekPlanList"> Week Plan List </a>
+                        <a href="/SPVisitEntry/WeekPlan"> Week Plan List </a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
                         Week Plan
@@ -67,10 +67,10 @@
                             <div class="row mb-3">
                                 <!--<label class="col-sm-3 col-form-label">Financial Year<span class="required" style="color: red; margin-left: 2px">*</span></label>
                                 <div class="col-sm-9">-->
-                                                            @*<input type="text" class="form-control" />*@
-                                                            @*@Html.TextBoxFor(model => model.Week_Date, new { Value = Model.Week_Date, @id = "txtDate", @class = "form-control datepicker" })*@
-                                                            @*@Html.DropDownListFor(model => model.Week, Enumerable.Empty<SelectListItem>(), new { Value = Model.Week, @id = "ddlWeekNo", @class = "form-select" })*@
-                                                            <!--<select id="ddlFinancialYear" class="form-select"></select>
+                                @*<input type="text" class="form-control" />*@
+                                @*@Html.TextBoxFor(model => model.Week_Date, new { Value = Model.Week_Date, @id = "txtDate", @class = "form-control datepicker" })*@
+                                @*@Html.DropDownListFor(model => model.Week, Enumerable.Empty<SelectListItem>(), new { Value = Model.Week, @id = "ddlWeekNo", @class = "form-select" })*@
+                                <!--<select id="ddlFinancialYear" class="form-select"></select>
                                     <label id="lblFinancialYearMsg" style="color:red;display:none"></label>
                                 </div>-->
 
@@ -100,7 +100,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="row mb-3">
-                                
+
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -196,13 +196,13 @@
 
                         </div>
                         @*<div class="row g-3">
-                <div class="col-md-6">
-                    <button id="btnCustAdd" class="btn btn-primary">+</button>
-                </div>
-                <div class="col-md-6">
-                    <button id="btnCPersonAdd" class="btn btn-primary">+</button>
-                </div>
-            </div>*@
+                                <div class="col-md-6">
+                                    <button id="btnCustAdd" class="btn btn-primary">+</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button id="btnCPersonAdd" class="btn btn-primary">+</button>
+                                </div>
+                            </div>*@
                     </div>
                     <br />
                     <div class="row g-3">
@@ -218,98 +218,99 @@
                         </div>
                     </div>
                     <br /><br />
-                          <div id="dvProdDetails" style="display:none">
-                              <h6 class="mb-0 text-uppercase">Product Details</h6>
-                              <hr />
-                              <div class="row g-3">
-                                  <div class="col-md-4">
-                                      <label class="form-label">Product Name<span class="required" style="color: red; margin-left: 2px">*</span>&nbsp;&nbsp;<input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All</label>
-                                      <select id="ddlProductName" class="form-select">
-                                      </select>
-                                      <br />
-                                      <label id="lblProdMsg" class="form-label" style="color:red;display:none"></label>
-                                      @*@Html.DropDownListFor(model => model.Product_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlProductName", @class = "form-select" })*@
-                                  </div>
-                                  <div class="col-md-4">
-                                      <label class="form-label">Qty<span class="required" style="color: red; margin-left: 2px">*</span></label>
-                                      <input type="text" id="txtProdQty" class="form-control" />
-                                      <label id="lblProdQtyMsg" class="form-label" style="color:red"></label>
-                                      @*@Html.TextBoxFor(model => model.Quantity, new { @id = "txtProdQty", @class = "form-control" })*@
-                                  </div>
-                                  <div class="col-md-4">
-                                      <label class="form-label">UOM</label>
-                                      <input type="text" id="txtUOM" class="form-control" />
-                                      @*@Html.TextBoxFor(model => model.Unit_of_Measure, new { @id = "txtUOM", @class = "form-control" })*@
-                                  </div>
-                              </div>
-                              @*<div class="row g-3">
-                                    <div class="col-md-4">
-                                        <input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All Products
-                                    </div>
-                                    <div class="col-md-4">
-                                    </div>
-                                    <div class="col-md-4">
+                    <div id="dvProdDetails" style="display:none">
+                        <h6 class="mb-0 text-uppercase">Product Details</h6>
+                        <hr />
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Product Name<span class="required" style="color: red; margin-left: 2px">*</span>&nbsp;&nbsp;<input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All</label>
+                                @*<select id="ddlProductName" class="form-select"></select>*@
+                                <input id="ddlProductName" type="text" class="form-control" /><br />
+
+                                <br />
+                                <label id="lblProdMsg" class="form-label" style="color:red;display:none"></label>
+                                @*@Html.DropDownListFor(model => model.Product_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlProductName", @class = "form-select" })*@
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Qty<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                <input type="text" id="txtProdQty" class="form-control" />
+                                <label id="lblProdQtyMsg" class="form-label" style="color:red"></label>
+                                @*@Html.TextBoxFor(model => model.Quantity, new { @id = "txtProdQty", @class = "form-control" })*@
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">UOM</label>
+                                <input type="text" id="txtUOM" class="form-control" />
+                                @*@Html.TextBoxFor(model => model.Unit_of_Measure, new { @id = "txtUOM", @class = "form-control" })*@
+                            </div>
+                        </div>
+                        @*<div class="row g-3">
+                                <div class="col-md-4">
+                                    <input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All Products
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                </div>
+                            </div>
+                            <br />*@
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Competitor Name</label>
+                                <select class="form-select" id="ddlCompetitors" data-placeholder="---Select---" multiple>
+                                </select>
+                                @*@Html.DropDownListFor(model => model.Competitor_Name, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCompetitor", @class = "form-control" })*@
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-12" align="right">
+                                <br />
+                                <button type="button" id="btnSaveProd" class="btn btn-primary">Save Product</button>
+                            </div>
+                        </div>
+                        <br />
+                        <!-- -->
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12" align="center">
+                                        <table id="tblProdList" class="table mb-0 table-striped" style="display:none">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th hidden></th>
+                                                    <th scope="col" width="60%">Product Name</th>
+                                                    <th scope="col">Qty</th>
+                                                    <th scope="col">UOM</th>
+                                                    <th scope="col">Competitors</th>
+                                                    <th hidden></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblProducts">
+                                                @*<tr>
+                                                        <td>Product1</td>
+                                                        <td>15</td>
+                                                        <td>MTS</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Product2</td>
+                                                        <td>18</td>
+                                                        <td>MTS</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Product3</td>
+                                                        <td>20</td>
+                                                        <td>MTS</td>
+                                                    </tr>*@
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
-                                <br />*@
-                              <div class="row g-3">
-                                  <div class="col-md-12">
-                                      <label class="form-label">Competitor Name</label>
-                                      <select class="form-select" id="ddlCompetitors" data-placeholder="---Select---" multiple>
-                                      </select>
-                                      @*@Html.DropDownListFor(model => model.Competitor_Name, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCompetitor", @class = "form-control" })*@
-                                  </div>
-                              </div>
-                              <div class="row g-3">
-                                  <div class="col-md-12" align="right">
-                                      <br />
-                                      <button type="button" id="btnSaveProd" class="btn btn-primary">Save Product</button>
-                                  </div>
-                              </div>
-                              <br />
-                              <!-- -->
+                            </div>
+                        </div>
 
-                              <div class="row g-3">
-                                  <div class="col-md-12">
-                                      <div class="row mb-3">
-                                          <div class="col-sm-12" align="center">
-                                              <table id="tblProdList" class="table mb-0 table-striped" style="display:none">
-                                                  <thead>
-                                                      <tr>
-                                                          <th></th>
-                                                          <th hidden></th>
-                                                          <th scope="col" width="60%">Product Name</th>
-                                                          <th scope="col">Qty</th>
-                                                          <th scope="col">UOM</th>
-                                                          <th scope="col">Competitors</th>
-                                                          <th hidden></th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody id="tblProducts">
-                                                      @*<tr>
-                                    <td>Product1</td>
-                                    <td>15</td>
-                                    <td>MTS</td>
-                                </tr>
-                                <tr>
-                                    <td>Product2</td>
-                                    <td>18</td>
-                                    <td>MTS</td>
-                                </tr>
-                                <tr>
-                                    <td>Product3</td>
-                                    <td>20</td>
-                                    <td>MTS</td>
-                                </tr>*@
-                                                  </tbody>
-                                              </table>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-
-                              <!-- -->
-                          </div>
+                        <!-- -->
+                    </div>
 
                     <!-- -->
 
@@ -522,11 +523,15 @@
                 weekplan.Week_Plan_Date = $('#txtWeekDate').val();
                 weekplan.Visit_Type = $('#ddlType').val();
                 weekplan.Visit_Sub_Type = subTypeDetails[0];
+                if ($("#ddlCustomerName").val() != null) {
+                    const CompanyDetails_ = $('#ddlCustomerName').val().split('_');
+                    var CompanyNo = CompanyDetails_[0];
+                    weekplan.Contact_Company_No = CompanyNo;
+                }
+                else {
+                    weekplan.Contact_Company_No = "";
+                }
 
-                const CompanyDetails_ = $('#ddlCustomerName').val().split('_');
-                var CompanyNo = CompanyDetails_[0];
-
-                weekplan.Contact_Company_No = CompanyNo;
                 weekplan.Contact_Person_No = $('#ddlContactPerson').val();
                 weekplan.Event_No = $('#ddlEventName').val();
                 weekplan.Topic_Name = $('#txtTopicName').val();

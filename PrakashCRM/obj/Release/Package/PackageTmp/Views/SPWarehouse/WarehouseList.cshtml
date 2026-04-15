@@ -14,6 +14,25 @@
         color: red !important;
         font-weight: 500;
     }
+    /* 🔥 scroll container */
+    .table-scroll {
+        max-height: 650px;
+        overflow-y: auto;
+    }
+
+        /* 🔥 sticky header (FORCE FIX) */
+        .table-scroll thead th {
+            position: sticky !important;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+    /* 🔥 important for bootstrap conflict */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
 </style>
 <link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
 <div class="page-content">
@@ -51,6 +70,7 @@
                                         <option value="">All</option>
                                         <option value="Sales Order">Sales Order</option>
                                         <option value="Purchase Order">Purchase Order</option>
+                                        <option value="Purchase Return">Purchase Return</option>
                                         <option value="Transfer Order">Transfer Order</option>
                                         <option value="Sales Return">Sales Return</option>
                                     </select>
@@ -108,11 +128,28 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="table-responsive">
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <div class="table-responsive table-scroll">
                 <table id="dataList" class="display responsive nowrap warhouse" style="width:100%">
-                    <thead>
+                    <thead class="table-light">
+                            <tr>
+                                    <th></th>
+                                    <th>Order No</th>
+                                    <th>Shipment Date</th>
+                                    <th>Customer/Vendor Name</th>
+                                    <th>From Location</th>
+                                    <th>To Location</th>
+                                    <th>Document Type</th>
+                                    <th>Accepted By</th>
+                                    <th>Inco Term</th>
+                                    <th>From Address</th>
+                                    <th>To Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                            @*<tfoot>
                         <tr>
                             <th></th>
                             <th>Order No</th>
@@ -126,27 +163,10 @@
                             <th>From Address</th>
                             <th>To Address</th>
                         </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th></th>
-                            <th>Order No</th>
-                            <th>Shipment Date</th>
-                            <th>Customer/Vendor Name</th>
-                            <th>From Location</th>
-                            <th>To Location</th>
-                            <th>Document Type</th>
-                            <th>Accepted By</th>
-                            <th>Inco Term</th>
-                            <th>From Address</th>
-                            <th>To Address</th>
-                        </tr>
-                    </tfoot>
-                </table>
-                <input id="hdnWSITaskCount" style="display:none" />
-                <div id="orderInfo"></div>
+                    </tfoot>*@
+                        </table>
+                        <input id="hdnWSITaskCount" style="display:none" />
+                        <div id="orderInfo"></div>
             </div>
         </div>
     </div>

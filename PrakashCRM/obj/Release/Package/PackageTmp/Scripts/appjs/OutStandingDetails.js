@@ -1,28 +1,60 @@
 ﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPOutstandingPayment/';
+var isGenerateInProgress = false;
 
 $(document).ready(function () {
-    
-    //GenerateCustData();
-    BindOutstandingCustomerList();
+    if ($('#txtOutsFDate').val() === '') {
+        $('#txtOutsFDate').val(getTodayDate());
+    }
+
+    updateCollectionUptoDateLabel($('#txtOutsFDate').val());
+
+    $('#btnGenerate').on('click', function () {
+        GenerateCustData();
+    });
+
+    $('#txtOutsFDate').on('change', function () {
+        updateCollectionUptoDateLabel($(this).val());
+    });
+
+    setPageLoaderVisibility(true);
+    BindOutstandingCustomerList(true);
 });
 
-//function GenerateCustData() {
-//    $('#divImage').show();
-//    var fromDate = $('#txtOutsFDate').val();
-//    if (fromDate !== "" && toDate !== "") {
-//        $.post(apiUrl + 'GenerateCollData?FromDate=' + fromDate,
-//            function (data) {
-//                if (data) {
-//                    BindOutstandingCustomerList();
-//                }
-//            }
-//        );
-//    }
-//}
+function GenerateCustData() {
+    var fromDate = $('#txtOutsFDate').val();
 
-function BindOutstandingCustomerList() {
+    if (fromDate === '') {
+        if (typeof ShowErrMsg === 'function') {
+            ShowErrMsg('Please select from date');
+        }
+        return;
+    }
+
+    isGenerateInProgress = true;
+    setPageLoaderVisibility(true);
+    updateCollectionUptoDateLabel(fromDate);
+
+    $.post(apiUrl + 'GenerateCollData?FromDate=' + encodeURIComponent(fromDate))
+        .done(function (data) {
+            if (data === true || data === 'true') {
+                BindOutstandingCustomerList(true);
+            }
+            else {
+                isGenerateInProgress = false;
+                setPageLoaderVisibility(false);
+            }
+        })
+        .fail(function () {
+            isGenerateInProgress = false;
+            setPageLoaderVisibility(false);
+        });
+}
+
+function BindOutstandingCustomerList(hideLoaderOnComplete) {
+    var salespersonCode = $('#hdnLoggedInUserSPCode').val() || '';
+
     $.ajax({
-        url: '/SPOutstandingPayment/GetCustomerCollectionOut',
+        url: '/SPOutstandingPayment/GetCustomerCollectionOut?SPCode=' + encodeURIComponent(salespersonCode),
         type: 'GET',
         contentType: 'application/json',
         success: function (data) {
@@ -71,19 +103,76 @@ function BindOutstandingCustomerList() {
 
             html += `<tr class="total-row"><td></td><td class="left-align">Collection upto Date</td><td colspan="2"></td><td>${collectiondate.toFixed(2)}</td><td></td><td></td><td></td></tr>`;
 
-            let receivedRows = `<tr><td></td><td class="left-align bold">Collection up to <span id="txtInvTDate"></span><span class="blue">(To Date)</span></td><td></td><td></td><td></td><td>${totalReceivedAmount}</td><td></td><td></td></tr>`;
+            let receivedRows = `<tr><td></td><td class="left-align bold">Collection up to <span id="txtInvTDate"></span><span class="blue">(To Date)</span></td><td></td><td></td><td></td><td>${totalReceivedAmount.toFixed(2)}</td><td></td><td></td></tr>`;
             $("#tblOutstanding").append(html);
             $("#tblrecivedData").append(receivedRows);
+            updateCollectionUptoDateLabel($('#txtOutsFDate').val());
+        },
+        complete: function () {
+            if (hideLoaderOnComplete === true || isGenerateInProgress) {
+                isGenerateInProgress = false;
+                setPageLoaderVisibility(false);
+            }
         }
     });
 }
 
+function setPageLoaderVisibility(isVisible) {
+    $('#divImage').hide();
+    $('#btnGenerate').prop('disabled', isVisible === true);
+
+    if (typeof showPageDataLoader === 'function' && typeof hidePageDataLoader === 'function') {
+        if (isVisible === true) {
+            showPageDataLoader();
+        }
+        else {
+            hidePageDataLoader();
+        }
+    }
+}
+
+function updateCollectionUptoDateLabel(fromDate) {
+    var previousDate = getPreviousDate(fromDate);
+    $('#txtInvTDate').text(previousDate === '' ? '' : previousDate + ' ');
+}
+
+function getPreviousDate(fromDate) {
+    if (fromDate == null || fromDate === '') {
+        return '';
+    }
+
+    var dateParts = fromDate.split('-');
+
+    if (dateParts.length !== 3) {
+        return '';
+    }
+
+    var selectedDate = new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[2], 10));
+    selectedDate.setDate(selectedDate.getDate() - 1);
+
+    var day = selectedDate.getDate().toString().padStart(2, '0');
+    var month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+    var year = selectedDate.getFullYear();
+
+    return day + '-' + month + '-' + year;
+}
+
+function getTodayDate() {
+    var today = new Date();
+    var day = today.getDate().toString().padStart(2, '0');
+    var month = (today.getMonth() + 1).toString().padStart(2, '0');
+    var year = today.getFullYear();
+
+    return year + '-' + month + '-' + day;
+}
+
 function loadSixMonthData(customerNo) {
+    var salespersonCode = $('#hdnLoggedInUserSPCode').val() || '';
 
     $("#acdBody").html(`<tr><td colspan='19'>Loading...</td></tr>`);
 
     $.ajax({
-        url: '/SPOutstandingPayment/GetCustomerSexMonthData?customerNo=' + customerNo,
+        url: '/SPOutstandingPayment/GetCustomerSexMonthData?customerNo=' + encodeURIComponent(customerNo) + '&SPCode=' + encodeURIComponent(salespersonCode),
         type: 'GET',
         contentType: 'application/json',
         success: function (data) {

@@ -383,28 +383,24 @@ function BindFinancialYear() {
     let currentYear = currentDate.getFullYear();
     let currentMonth = currentDate.getMonth();
 
-    var yearOpts = "";
-    yearOpts += "<option value='-1'>---Select---</option>";
-    var prevFinancialYear = (currentYear - 1) + '-' + currentYear;
-    var currFinancialYear = currentYear + '-' + (currentYear + 1);
+    var yearOpts = "<option value='-1'>---Select---</option>";
 
-    if (currentMonth <= 2) {
-        /*yearOpts += "<option value='" + (currentYear - 1) + '-' + currentYear + "'>" + (currentYear - 1) + '-' + currentYear + "</option>";*/
-        yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
-    }
+    // FY Calculation (April–March)
+    let fyStartYear = currentMonth < 3 ? currentYear - 1 : currentYear;
 
+    var prevFinancialYear = (fyStartYear - 1) + '-' + fyStartYear;
+    var currFinancialYear = fyStartYear + '-' + (fyStartYear + 1);
+
+    // ✅ Always add both
+    yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
     yearOpts += "<option value='" + currFinancialYear + "'>" + currFinancialYear + "</option>";
 
-    $('#ddlFinancialYear').append(yearOpts);
+    $('#ddlFinancialYear').empty().append(yearOpts);
 
-    if (currentMonth <= 2) {
-        $('#ddlFinancialYear').val(prevFinancialYear);
-    }
-    else {
-        $('#ddlFinancialYear').val(currFinancialYear);
-    }
+    // ✅ Always default = current FY
+    $('#ddlFinancialYear').val(currFinancialYear);
 
-    filter = "PCPL_Plan_Year eq '" + $('#ddlFinancialYear').val() + "'";
+    var filter = "PCPL_Plan_Year eq '" + $('#ddlFinancialYear').val() + "'";
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 }
 

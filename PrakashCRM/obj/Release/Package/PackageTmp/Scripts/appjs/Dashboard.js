@@ -6,6 +6,101 @@ var filter = "";
 var orderBy = 3;
 var orderDir = "asc";
 
+var dashboardTableLoaderColumns = {
+    '#tableitemwisetotalqty': 5,
+    '#tableMarketUpdate': 4,
+    '#tbltodayvist': 5,
+    '#tblweeklytasklist': 5,
+    '#tblMonthlist': 4,
+    '#tblNonPerforminglist': 3,
+    '#tblDailyVisitsDetails': 4,
+    '#tableFeedbackBody': 2
+};
+
+function getDashboardTableLoaderRow(colspan) {
+    return "<tr class='dashboard-table-loader-row'><td colspan='" + colspan + "' class='dashboard-table-loader-cell'><span class='app-loader-spinner dashboard-table-loader__spinner' role='status' aria-label='Loading'></span></td></tr>";
+}
+
+function showDashboardTableLoader(tableBodySelector) {
+    var colspan = dashboardTableLoaderColumns[tableBodySelector];
+    if (!colspan) {
+        return;
+    }
+
+    $(tableBodySelector).html(getDashboardTableLoaderRow(colspan));
+}
+
+function isDashboardDataLoaderEnabled() {
+    return $('.dashboard-data-loader-page').length > 0
+        && typeof window.showPageDataLoader === 'function'
+        && typeof window.hidePageDataLoader === 'function';
+}
+
+function beginDashboardDataLoad() {
+    if (isDashboardDataLoaderEnabled()) {
+        window.showPageDataLoader();
+    }
+}
+
+function endDashboardDataLoad() {
+    if (isDashboardDataLoaderEnabled()) {
+        window.hidePageDataLoader();
+    }
+}
+
+function dashboardAjax(options) {
+    if (!isDashboardDataLoaderEnabled()) {
+        return $.ajax(options);
+    }
+
+    beginDashboardDataLoad();
+
+    var originalComplete = options.complete;
+    options.complete = function () {
+        endDashboardDataLoad();
+
+        if (typeof originalComplete === 'function') {
+            originalComplete.apply(this, arguments);
+        }
+    };
+
+    return $.ajax(options);
+}
+
+function dashboardGet(url, successCallback) {
+    if (!isDashboardDataLoaderEnabled()) {
+        return $.get(url, successCallback);
+    }
+
+    beginDashboardDataLoad();
+
+    var request = $.get(url, successCallback);
+    if (request && typeof request.always === 'function') {
+        request.always(endDashboardDataLoad);
+    } else {
+        endDashboardDataLoad();
+    }
+
+    return request;
+}
+
+function dashboardPost(url, successCallback) {
+    if (!isDashboardDataLoaderEnabled()) {
+        return $.post(url, successCallback);
+    }
+
+    beginDashboardDataLoad();
+
+    var request = $.post(url, successCallback);
+    if (request && typeof request.always === 'function') {
+        request.always(endDashboardDataLoad);
+    } else {
+        endDashboardDataLoad();
+    }
+
+    return request;
+}
+
 $(document).ready(function () {
 
     $('.datepicker').pickadate({
@@ -60,6 +155,8 @@ $(document).ready(function () {
 });
 
 function BindDailyVisitsDetails() {
+    showDashboardTableLoader('#tblDailyVisitsDetails');
+
     $.ajax({
         url: '/SPDashboard/DailyVisitsDetails',
         type: 'GET',
@@ -86,6 +183,8 @@ function BindDailyVisitsDetails() {
 }
 
 function BindFeedback() {
+
+    showDashboardTableLoader('#tableFeedbackBody');
 
     $.ajax(
         {
@@ -132,6 +231,8 @@ function BindFeedback() {
 
 function BindMarketUpdate() {
     var salesperson = $('#getLoggedInUserNo').val();
+
+    showDashboardTableLoader('#tableMarketUpdate');
 
     $.ajax({
         url: '/SPDashboard/GetMarketUpdateListData?_=' + new Date().getTime(),
@@ -415,6 +516,8 @@ function ShowPurchaseLines(Document_No) {
 // Non Performing Customers list
 function BindNonPerformingList() {
     var salesperson = $('#getLoggedInUserNo').val();
+    showDashboardTableLoader('#tblNonPerforminglist');
+
     $.ajax({
         url: '/SPDashboard/GetNonPerfomingCuslist?salesperson=' + $('#hdnLoggedInUserSPCode').val(),
         type: 'GET',
@@ -607,6 +710,8 @@ function BindCombinedData(fDate, tDate, year) {
     });
 }
 function BindTodaylist() {
+    showDashboardTableLoader('#tbltodayvist');
+
     $.ajax({
         url: '/SPDashboard/GetTodayVisit',
         type: 'GET',
@@ -632,6 +737,8 @@ function BindTodaylist() {
     });
 }
 function BindWeeklytasklist() {
+    showDashboardTableLoader('#tblweeklytasklist');
+
     $.ajax({
         url: '/SPDashboard/GetWeeklytask',
         type: 'GET',
@@ -657,6 +764,8 @@ function BindWeeklytasklist() {
     });
 }
 function BindMonthlyTask() {
+    showDashboardTableLoader('#tblMonthlist');
+
     $.ajax({
         url: '/SPDashboard/GetMonthlyTask',
         type: 'GET',
@@ -790,6 +899,8 @@ function SaleOrderList() {
     });
 }
 function Binditemwisetotalqty() {
+    showDashboardTableLoader('#tableitemwisetotalqty');
+
     $.ajax({
         url: '/SPDashboard/GetitemwisetotalqtyList',
         type: 'GET',
@@ -857,31 +968,55 @@ function BindFinancialYears() {
 
     var yearOpts = "";
     yearOpts += "<option value='-1'>---Select---</option>";
+
+    // Financial Years
+    var prev2FinancialYear = (currentYear - 2) + '-' + (currentYear - 1);
     var prevFinancialYear = (currentYear - 1) + '-' + currentYear;
     var currFinancialYear = currentYear + '-' + (currentYear + 1);
 
-    if (currentMonth <= 2) {
-        /*yearOpts += "<option value='" + (currentYear - 1) + '-' + currentYear + "'>" + (currentYear - 1) + '-' + currentYear + "</option>";*/
-        yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
-    }
-
+    // Append options
+    yearOpts += "<option value='" + prev2FinancialYear + "'>" + prev2FinancialYear + "</option>";
+    yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
     yearOpts += "<option value='" + currFinancialYear + "'>" + currFinancialYear + "</option>";
 
-    $('#ddlFinancialYear').append(yearOpts);
+    $('#ddlFinancialYear').empty().append(yearOpts);
 
+    // Default selection
     if (currentMonth <= 2) {
         $('#ddlFinancialYear').val(prevFinancialYear);
-    }
-    else {
+    } else {
         $('#ddlFinancialYear').val(currFinancialYear);
     }
 
+    // Labels
     $('#lblPrevFinancialYear').text(prevFinancialYear);
     $('#lblFinancialYear').text(currFinancialYear);
-    filter = $('#ddlFinancialYear').val();
 
+    var filter = $('#ddlFinancialYear').val();
     BindCombinedData("", "", filter);
 }
+
+$('#ddlFinancialYear').on('change', function () {
+
+    var fDate = $("#FromDate").val();
+    var tDate = $("#ToDate").val();
+    var year = $(this).val();
+
+    $("#Fdatevalidate").text("");
+    $("#Tdatevalidate").text("");
+
+    if (year === "" || year === "-1") {
+        return;
+    }
+
+    if (fDate !== "" && tDate !== "") {
+        BindCombinedData(fDate, tDate, year);
+        return;
+    }
+
+    BindCombinedData("", "", year);
+});
+
 $('#SearchBtn').on('click', function () {
 
     var fDate = $("#FromDate").val();

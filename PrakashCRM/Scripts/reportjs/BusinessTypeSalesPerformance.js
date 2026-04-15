@@ -5,6 +5,10 @@ $(document).ready(function () {
 
 function BusinessTypeList() {
     debugger
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetBusinessTypeSalesPerfomanceList',
         type: 'GET',
@@ -28,6 +32,11 @@ function BusinessTypeList() {
                 rowData = "<tr><td colspan='9' style='text-align:left;'>No Records Found</td></tr>";
             }
             $("#tblBusinessTypesSalesPerformanceDetails").append(rowData);
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
     });
 }

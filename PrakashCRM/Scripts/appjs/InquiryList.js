@@ -380,6 +380,10 @@ var dtable;
 
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     var apiUrl = $('#getServiceApiUrl').val() + 'SPInquiry/';
 
     var SPCode = "";
@@ -449,6 +453,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             },
             error: function () {
                 alert("error");

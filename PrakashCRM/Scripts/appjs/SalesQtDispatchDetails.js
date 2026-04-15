@@ -13,6 +13,9 @@ function DispatchDetails(fDate, tDate, txtSearch) {
     var fromDate = fDate;
     var toDate = tDate;
     var Search = txtSearch;
+
+    showPageDataLoader();
+
     $.ajax({
         url: '/SPSalesQuotes/GetDispatchDetails',
         type: 'GET',
@@ -38,7 +41,9 @@ function DispatchDetails(fDate, tDate, txtSearch) {
             }
             $('#tblDispatchDetails').append(rowData);
         },
-
+        complete: function () {
+            hidePageDataLoader();
+        }
     });
 
 }

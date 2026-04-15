@@ -32,6 +32,18 @@ File: app.css
 
 /* General */
 
+:root {
+	--app-viewport-height: 100vh;
+	--app-viewport-width: 100vw;
+	--app-viewport-zoom: 1;
+	--app-expanded-sidebar-width: 250px;
+	--app-collapsed-sidebar-width: 70px;
+	--app-shell-topbar-height: 60px;
+	--app-shell-footer-height: 44px;
+	--app-page-padding: 1.5rem;
+	--app-content-min-height: auto;
+}
+
 
 body {
 
@@ -47,6 +59,7 @@ body {
 
 
     overflow-x: hidden;
+	min-height: 100vh;
 
 	font-family: 'Roboto', sans-serif;
 
@@ -80,6 +93,8 @@ a {
 
 
 	position: relative;
+	min-height: var(--app-viewport-height);
+	--app-active-sidebar-width: var(--app-expanded-sidebar-width);
 
 
 }
@@ -91,10 +106,10 @@ a {
 .sidebar-wrapper {
 
 
-	width: 250px;
+	width: var(--app-expanded-sidebar-width);
 
 
-	height: 100%;
+	height: var(--app-viewport-height);
 
 
 	position: fixed;
@@ -130,10 +145,10 @@ a {
 .sidebar-header {
 
 
-	width: 250px;
+	width: var(--app-expanded-sidebar-width);
 
 
-	height: 60px;
+	height: var(--app-shell-topbar-height);
 
 
 	display: flex;
@@ -236,13 +251,13 @@ a {
 	top: 0;
 
 
-	left: 250px;
+	left: var(--app-active-sidebar-width);
 
 
 	right: 0;
 
 
-	height: 60px;
+	height: var(--app-shell-topbar-height);
 
 
 	background: #ffffff;
@@ -269,13 +284,13 @@ a {
 	width: 100%;
 
 
-	height: 60px;
+	height: var(--app-shell-topbar-height);
 
 
-	padding-left: 1.5rem;
+	padding-left: var(--app-page-padding);
 
 
-	padding-right: 1.5rem;
+	padding-right: var(--app-page-padding);
 
 
 }
@@ -284,16 +299,18 @@ a {
 .page-wrapper {
 
 
-	height: 100%;
+	height: auto;
+	min-height: calc(var(--app-viewport-height) - var(--app-shell-topbar-height));
 
 
-	margin-top: 60px;
+	margin-top: var(--app-shell-topbar-height);
 
 
-	margin-bottom: 30px;
+	margin-bottom: calc(var(--app-shell-footer-height) + 0.75rem);
 
 
-	margin-left: 250px;
+	margin-left: var(--app-active-sidebar-width);
+	overflow-x: hidden;
 
 
 }
@@ -302,9 +319,35 @@ a {
 .page-content {
 
 
-	padding: 1.5rem;
+	padding: var(--app-page-padding);
+	min-height: var(--app-content-min-height);
+	max-width: 100%;
 
 
+}
+
+.page-content .card,
+.page-content .table-responsive,
+.page-content .dataTables_wrapper,
+.page-content form {
+	max-width: 100%;
+}
+
+.page-content .table-responsive {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.page-content img,
+.page-content iframe,
+.page-content svg,
+.page-content canvas {
+	max-width: 100%;
+	height: auto;
+}
+
+[data-auto-scale-height] {
+	min-height: 0;
 }
 
 
@@ -314,7 +357,7 @@ a {
 	background: #ffffff;
 
 
-	left: 250px;
+	left: var(--app-active-sidebar-width);
 
 
 	right: 0;
@@ -339,6 +382,7 @@ a {
 
 
 	z-index: 3;
+	min-height: var(--app-shell-footer-height);
 
 
 }
@@ -347,7 +391,7 @@ a {
 .wrapper.toggled .topbar {
 
 
-	left: 70px;
+	left: var(--app-collapsed-sidebar-width);
 
 
 }
@@ -356,7 +400,7 @@ a {
 .wrapper.toggled .page-wrapper {
 
 
-	margin-left: 70px;
+	margin-left: var(--app-collapsed-sidebar-width);
 
 
 }
@@ -365,7 +409,7 @@ a {
 .wrapper.toggled .page-footer {
 
 
-	left: 70px;
+	left: var(--app-collapsed-sidebar-width);
 
 
 }
@@ -412,7 +456,7 @@ a {
 	padding: 10px;
 
 
-	margin-top: 60px;
+	margin-top: var(--app-shell-topbar-height);
 
 
 	-webkit-box-orient: vertical;
@@ -712,7 +756,7 @@ a {
 	.wrapper.toggled:not(.sidebar-hovered) .sidebar-wrapper {
 
 
-		width: 70px;
+		width: var(--app-collapsed-sidebar-width);
 
 
 	}
@@ -721,7 +765,7 @@ a {
 	.wrapper.toggled:not(.sidebar-hovered) .sidebar-wrapper .sidebar-header {
 
 
-		width: 70px;
+		width: var(--app-collapsed-sidebar-width);
 
 
 	}
@@ -748,7 +792,7 @@ a {
 	.wrapper.toggled:not(.sidebar-hovered) .sidebar-wrapper .sidebar-header {
 
 
-		width: 70px;
+		width: var(--app-collapsed-sidebar-width);
 
 
 	}
@@ -5360,6 +5404,15 @@ input::placeholder {
 @media screen and (max-width: 1024px) {
 
 
+	.wrapper {
+
+
+		--app-active-sidebar-width: 0px;
+
+
+	}
+
+
 	.topbar {
 
 
@@ -5658,7 +5711,7 @@ input::placeholder {
 		bottom: 0;
 
 
-		left: 250px;
+		left: var(--app-active-sidebar-width);
 
 
 		background: #000;

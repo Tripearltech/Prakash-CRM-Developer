@@ -70,7 +70,7 @@
     }
 </style>
 <link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
-<div class="page-content">
+<div class="page-content inquiry-list-page">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
             <nav aria-label="breadcrumb">
@@ -90,9 +90,11 @@
             <div class="row">
                 <div>
                     <div class="row g-3">
-                        <div class="col-md-1">
+                        <div class="col-auto">
                             <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
-                            <button id="btnCreateIQ" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                            <button id="btnCreateIQ" class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 px-3 py-2"
+                                    type="button"><i class='bx bxs-plus-square'></i><span>New</span>
+                            </button>
                         </div>
 
                         <div class="col-md-11">
@@ -167,7 +169,7 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-responsive" data-auto-scale-height="table" data-auto-scale-offset="32">
                 <table id="dataList" class="display responsive nowrap" style="width:100%">
                     <thead>
                         <tr>

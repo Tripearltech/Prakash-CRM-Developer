@@ -19,8 +19,27 @@ namespace PrakashCRM.Controllers
     [RedirectingAction]
     public class SPNotificationController : Controller
     {
+        private string CurrentUserNo
+        {
+            get
+            {
+                if (Session["loggedInUserNo"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserNo"].ToString()))
+                    return Session["loggedInUserNo"].ToString().Trim();
+
+                if (Session["loggedInUserSPCode"] != null && !string.IsNullOrWhiteSpace(Session["loggedInUserSPCode"].ToString()))
+                    return Session["loggedInUserSPCode"].ToString().Trim();
+
+                return string.Empty;
+            }
+        }
+
         // GET: SPNotification
         public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult UserNotifications()
         {
             return View();
         }
@@ -348,6 +367,86 @@ namespace PrakashCRM.Controllers
             }
             //put a breakpoint here and check datatable
             return dataTable;
+        }
+        // item price and bell icon Notification list
+        private async Task<SPUserNotificationFeedResponse> GetNotificationFeedFromService(string actionName, int skip, int top, bool includeRead, string category, string excludeCategory = "")
+        {
+            if (string.IsNullOrWhiteSpace(CurrentUserNo))
+                return new SPUserNotificationFeedResponse();
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPNotification/" + actionName + "?userNo=" + HttpUtility.UrlEncode(CurrentUserNo) + "&skip=" + skip + "&top=" + top + "&includeRead=" + includeRead.ToString().ToLowerInvariant() + "&category=" + HttpUtility.UrlEncode(category ?? string.Empty) + "&excludeCategory=" + HttpUtility.UrlEncode(excludeCategory ?? string.Empty);
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            if (!response.IsSuccessStatusCode)
+                return new SPUserNotificationFeedResponse();
+
+            var data = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<SPUserNotificationFeedResponse>(data) ?? new SPUserNotificationFeedResponse();
+        }
+
+
+        public async Task<JsonResult> GetUserNotifications(int top = 5, bool includeRead = true, int skip = 0, string category = "", string excludeCategory = "")
+        {
+            var notificationFeed = await GetNotificationFeedFromService("GetUserNotifications", skip, top, includeRead, category, excludeCategory);
+            return Json(notificationFeed, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<JsonResult> GetAllUserNotifications(int top = 50, bool includeRead = true, int skip = 0, string category = "", string excludeCategory = "")
+        {
+            var notificationFeed = await GetNotificationFeedFromService("GetAllUserNotifications", skip, top, includeRead, category, excludeCategory);
+            return Json(notificationFeed, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> MarkNotificationRead(string id)
+        {
+            if (string.IsNullOrWhiteSpace(CurrentUserNo) || string.IsNullOrWhiteSpace(id))
+                return Json(false, JsonRequestBehavior.AllowGet);
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPNotification/MarkNotificationRead?userNo=" + HttpUtility.UrlEncode(CurrentUserNo);
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+            var payload = new SPNotificationReadRequest { Id = id };
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(apiUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+                return Json(false, JsonRequestBehavior.AllowGet);
+
+            var data = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<bool>(data);
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> MarkAllNotificationsRead()
+        {
+            if (string.IsNullOrWhiteSpace(CurrentUserNo))
+                return Json(false, JsonRequestBehavior.AllowGet);
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPNotification/MarkAllNotificationsRead?userNo=" + HttpUtility.UrlEncode(CurrentUserNo);
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+            HttpResponseMessage response = await client.PostAsync(apiUrl, null);
+            if (!response.IsSuccessStatusCode)
+                return Json(false, JsonRequestBehavior.AllowGet);
+
+            var data = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<bool>(data);
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
     }
 }

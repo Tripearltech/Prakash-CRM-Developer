@@ -28,9 +28,10 @@ namespace PrakashCRM.Controllers
             return View();
         }
 
-        public ActionResult Inquiry(string CompanyNo = "")
+        public ActionResult Inquiry(string CompanyNo = "", string InquiryNo = "")
         {
             ViewData["CompanyNo"] = CompanyNo;
+            ViewBag.InquiryNo = InquiryNo;
             //SPInqHeaderDetails inqHeaderDetails = new SPInqHeaderDetails();
             //inqHeaderDetails.InquiryDate = DateTime.Now.ToString("dd-MM-yyyy");
             //return View(inqHeaderDetails);

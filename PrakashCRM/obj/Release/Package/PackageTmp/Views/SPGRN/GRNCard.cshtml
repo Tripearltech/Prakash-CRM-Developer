@@ -249,6 +249,27 @@
         justify-content: center;
     }
 
+    .grn-attachment-spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: currentColor;
+        border-radius: 50%;
+        display: inline-block;
+        animation: grn-attachment-spin 0.8s linear infinite;
+    }
+
+    .grn-attachment-spinner-dark {
+        border-color: rgba(107, 114, 128, 0.3);
+        border-top-color: #6b7280;
+    }
+
+    @@keyframes grn-attachment-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
     .grn-viewer-overlay {
         z-index: 2010 !important;
         background: rgba(2, 6, 23, 0.92);
@@ -332,6 +353,15 @@
         display: none;
         transform-origin: center center;
         border-radius: 12px;
+    }
+
+    .grn-viewer-pdf {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 12px;
+        display: none;
+        background: #ffffff;
     }
 
     .grn-viewer-no-preview {
@@ -465,10 +495,46 @@
             flex-wrap: wrap;
             justify-content: flex-end;
         }*@
+
+    .grn-card-page .grn-lines-table-wrapper {
+        overflow: auto;
+        max-width: 100%;
+    }
+
+    .grn-card-page .grn-line-input,
+    .grn-card-page .grn-line-select {
+        min-width: 6.5rem;
+        width: 100%;
+    }
+
+    .grn-card-page .grn-manufacturer-wrap {
+        min-width: 12rem;
+        width: min(100%, 16rem);
+    }
+
+    .grn-card-page .grn-qty-summary {
+        border: none;
+        background: transparent;
+        color: orangered;
+        font-weight: bold;
+        width: clamp(70px, 10vw, 96px);
+        text-align: center;
+    }
+
+    @@media (max-width: 991.98px) {
+        .grn-card-page .grn-line-input,
+        .grn-card-page .grn-line-select {
+            min-width: 5.75rem;
+        }
+
+        .grn-card-page .grn-manufacturer-wrap {
+            min-width: 10rem;
+            width: min(100%, 14rem);
+        }
     }
 </style>
 
-<div class="page-content">
+<div class="page-content grn-card-page">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
             <nav aria-label="breadcrumb">
@@ -737,7 +803,7 @@
 
                                 <div class="row g-3">
                                     <div class="col-md-12">
-                                        <div style="overflow-x: auto;">
+                                        <div class="grn-lines-table-wrapper" data-auto-scale-height="table" data-auto-scale-offset="32">
                                             <table class="table mb-0 table-striped nowrap">
                                                 <thead>
                                                     <tr>
@@ -797,7 +863,7 @@
                                                             <td>@line.Description</td>
                                                             <td id="qty_@line.LineNo">@line.Quantity</td>
                                                             <td>@line.UOMCode</td>
-                                                            <td><input type="text" id="txtQtyToReceive_@line.LineNo" name="txtQtyToReceive_@line.LineNo" value="@line.QtyToReceive" class="form-control" style="width:110px;" /></td>
+                                                            <td><input type="text" id="txtQtyToReceive_@line.LineNo" name="txtQtyToReceive_@line.LineNo" value="@line.QtyToReceive" class="form-control grn-line-input" /></td>
                                                             <td id="qtyrec_@line.LineNo">@line.QuantityReceived</td>
                                                             @*@if (Model.DocumentType == "Purchase Order")
                                                                 {
@@ -813,19 +879,19 @@
                                                             {
                                                                 <td>
                                                                     @{ var qcRemark = (line.QCRemarks ?? "").Trim(); }
-                                                                    <select name="txtQCRemarks_@line.LineNo" class="form-select" style="width:100px;">
+                                                                    <select name="txtQCRemarks_@line.LineNo" class="form-select grn-line-select">
                                                                         <option value="OK" @((qcRemark == "" || qcRemark == "OK" || qcRemark == "Ok" || qcRemark == "ok") ? "selected" : "")>Ok</option>
                                                                         <option value="Not OK" @((qcRemark == "Not OK" || qcRemark == "Not Ok" || qcRemark == "NOT OK") ? "selected" : "")>Not Ok</option>
                                                                     </select>
                                                                 </td>
                                                             }
-                                                            <td><input type="text" name="txtRejectQC_@line.LineNo" value="@line.RejectQC" class="form-control" style="width:110px;" /></td>
+                                                            <td><input type="text" name="txtRejectQC_@line.LineNo" value="@line.RejectQC" class="form-control grn-line-input" /></td>
                                                             @if (Model.DocumentType != "Transfer Order")
                                                             {
-                                                                <td><input type="text" name="txtBillOfEntryNo_@line.LineNo" value="@line.BillOfEntryNo" class="form-control" style="width:110px;" /></td>
-                                                                <td><input type="text" name="txtBillOfEntryDate_@line.LineNo" value="@line.BillOfEntryDate" class="form-control datepicker" style="width:110px;" /></td>
-                                                                <td><input type="text" name="txtRemarks_@line.LineNo" value="@line.Remarks" class="form-control" style="width:110px;" /></td>
-                                                                <td><input type="text" name="txtConcentrationRatePercent_@line.LineNo" value="@line.ConcentrationRatePercent" class="form-control" style="width:110px;" /></td>
+                                                                <td><input type="text" name="txtBillOfEntryNo_@line.LineNo" value="@line.BillOfEntryNo" class="form-control grn-line-input" /></td>
+                                                                <td><input type="text" name="txtBillOfEntryDate_@line.LineNo" value="@line.BillOfEntryDate" class="form-control datepicker grn-line-input" /></td>
+                                                                <td><input type="text" name="txtRemarks_@line.LineNo" value="@line.Remarks" class="form-control grn-line-input" /></td>
+                                                                <td><input type="text" name="txtConcentrationRatePercent_@line.LineNo" value="@line.ConcentrationRatePercent" class="form-control grn-line-input" /></td>
                                                             }
                                                             @if (Model.DocumentType != "Sales Return")
                                                             {
@@ -840,7 +906,7 @@
                                                             @if (Model.DocumentType == "Purchase Order")
                                                             {
                                                                 <td>
-                                                                    <div class="" id="spinnerId_@line.LineNo" style="width: 200px;">
+                                                                    <div class="grn-manufacturer-wrap" id="spinnerId_@line.LineNo">
                                                                         <span class="input-group-text" id="loader_@line.LineNo" style="display: none;">
                                                                             <span class="spinner-border spinner-border-sm text-primary"></span>
                                                                         </span>
@@ -929,12 +995,12 @@
             <div class="modal-footer d-flex justify-content-between align-items-center">
                 <div class="text-center flex-fill">
                     <label style="font-weight: bold;">Total QTY:</label>
-                    <input id="txttotalQty" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                    <input id="txttotalQty" readonly class="grn-qty-summary" />
                     <div id="lblItemTrackMsg" style="color:red; font-weight:bold; margin-top:4px;"></div>
                 </div>
                 <div class="text-center flex-fill">
                     <label style="font-weight: bold;">Balance QTY:</label>
-                    <input id="txtbalanceQty" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                    <input id="txtbalanceQty" readonly class="grn-qty-summary" />
                 </div>
                 <button id="btnSave" type="button" class="btn btn-primary ms-auto" onclick="SaveGRNItemTracking();">Save</button>
             </div>
@@ -970,6 +1036,7 @@
         <div class="grn-attachment-footer">
             <button type="button" class="grn-attachment-cancel-btn" onclick="CloseGRNAttachmentPanel();">Cancel</button>
             <button type="button" class="grn-attachment-save-btn" onclick="SaveGRNAttachmentPanel();">
+                <span id="grnAttachmentSaveLoader" class="grn-attachment-spinner" style="display:none;"></span>
                 <span class="grn-attachment-save-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                 </span>
@@ -1001,6 +1068,7 @@
             <button type="button" class="grn-viewer-nav grn-viewer-nav-left" onclick="GRNViewerPrev();">&#8249;</button>
             <div id="grnViewerSingle" class="grn-viewer-single">
                 <img id="grnViewerImage" class="grn-viewer-image" alt="Attachment preview" />
+                <iframe id="grnViewerPdf" class="grn-viewer-pdf" title="Attachment PDF preview"></iframe>
                 <div id="grnViewerNoPreview" class="grn-viewer-no-preview">
                     <div class="grn-viewer-no-preview-title">Preview not available</div>
                     <a id="grnViewerDownloadLink" class="btn btn-primary" target="_blank" download>Download</a>

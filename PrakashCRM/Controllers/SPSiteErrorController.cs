@@ -122,19 +122,19 @@ namespace PrakashCRM.Controllers
             if (string.IsNullOrWhiteSpace(message))
                 return false;
 
+            if (errorCode.Equals("ACTION_ERR", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            if (source.StartsWith("Client Save", StringComparison.OrdinalIgnoreCase) ||
+                source.StartsWith("Client Update", StringComparison.OrdinalIgnoreCase) ||
+                source.StartsWith("Client Edit", StringComparison.OrdinalIgnoreCase) ||
+                source.StartsWith("Login Action", StringComparison.OrdinalIgnoreCase))
+                return false;
+
             string normalizedMessage = message.ToLowerInvariant();
             string[] ignoredPrefixes = new[]
             {
-                "please ",
-                "select ",
-                "enter ",
-                "added successfully",
-                "updated successfully",
-                "saved successfully",
-                "sent successfully",
-                "invalid otp",
-                "invalid login",
-                "login failed"
+                "please ","select ","enter ","added successfully","updated successfully","saved successfully","sent successfully","invalid otp","invalid login","login failed"
             };
 
             for (int i = 0; i < ignoredPrefixes.Length; i++)
@@ -302,16 +302,7 @@ namespace PrakashCRM.Controllers
 
                 string[] headers = new[]
                 {
-                    "Date & Time",
-                    "User Name",
-                    "Error Code",
-                    "Exception Message",
-                    "Source",
-                    "IP Address",
-                    "Browser",
-                    "Description",
-                    "Exception Trace",
-                    "Web URL"
+                    "Date & Time","User Name","Error Code","Exception Message","Source","IP Address","Browser","Description","Exception Trace","Web URL"
                 };
 
                 for (int i = 0; i < headers.Length; i++)

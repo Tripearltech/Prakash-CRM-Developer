@@ -418,15 +418,25 @@ function BindYearOpt() {
 
         const d = new Date();
         let year = d.getFullYear();
-        //var YearOpt = year.toString() + "-" + (year + 1).toString().substring(2);
-        var YearOpt = year.toString() + "-" + (year + 1).toString();
+        let month = d.getMonth() + 1;
+
+        let fyStart, fyEnd;
+
+        if (month < 4) { 
+            fyStart = year - 1;
+            fyEnd = year;
+        } else {           
+            fyStart = year;
+            fyEnd = year + 1;
+        }
+
+        var YearOpt = fyStart.toString() + "-" + fyEnd.toString();
 
         $('#ddlYear').val(YearOpt);
-        filter = "Year eq \'" + $('#ddlYear').val() + "\'";
-
+        filter = "Year eq '" + YearOpt + "'";
     }
-
 }
+
 
 function ShowErrMsg(errMsg) {
 

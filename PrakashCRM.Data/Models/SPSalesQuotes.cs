@@ -704,6 +704,8 @@ namespace PrakashCRM.Data.Models
 
         public double PCPL_Basic_Price { get; set; }
 
+        public double PCPL_Purchase_Cost { get; set; }
+
         public double PCPL_MRP { get; set; }
 
         public double Total_Amount_Excl_VAT { get; set; }
@@ -789,6 +791,8 @@ namespace PrakashCRM.Data.Models
 
         //public double PCPL_Basic_Price { get; set; }
 
+        public double PCPL_Purchase_Cost { get; set; }
+
         public double PCPL_MRP { get; set; }
 
         public string Delivery_Date { get; set; }
@@ -863,6 +867,8 @@ namespace PrakashCRM.Data.Models
         public double PCPL_Interest_Rate { get; set; }
 
         //public double PCPL_Basic_Price { get; set; }
+
+        public double PCPL_Purchase_Cost { get; set; }
 
         public double PCPL_MRP { get; set; }
 
@@ -943,6 +949,8 @@ namespace PrakashCRM.Data.Models
 
         //public double PCPL_Basic_Price { get; set; }
 
+        public double PCPL_Purchase_Cost { get; set; }
+
         public double PCPL_MRP { get; set; }
 
         public string Delivery_Date { get; set; }
@@ -998,6 +1006,8 @@ namespace PrakashCRM.Data.Models
 
         public double PCPL_Interest_Rate { get; set; }
 
+        public double PCPL_Purchase_Cost { get; set; }
+
         public double PCPL_MRP { get; set; }
 
         public double PCPL_Total_Cost { get; set; }
@@ -1049,6 +1059,8 @@ namespace PrakashCRM.Data.Models
         public double PCPL_Interest { get; set; }
 
         public double PCPL_Interest_Rate { get; set; }
+
+        public double PCPL_Purchase_Cost { get; set; }
 
         public double PCPL_MRP { get; set; }
 
@@ -1831,6 +1843,7 @@ namespace PrakashCRM.Data.Models
         public string Quantity { get; set; }
         public string Item_No { get; set; }
         public string Location_Code { get; set; }
+        public string PCPL_Packing_Style_Code { get; set; }
         public string Cost_Amount_Actual { get; set; }
     }
     public class ReopenSalesQuoteRequest

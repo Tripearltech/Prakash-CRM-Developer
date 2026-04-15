@@ -44,6 +44,7 @@
                             </div>
                             <div class="col-md-7">
                                 <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                <input id="hdnLoggedInUserSPCode" value="@(Session["loggedInUserSPCode"] != null ? Session["loggedInUserSPCode"].ToString() : "")" style="display:none" />
                             </div>
                         </div>
                     </div>
@@ -63,7 +64,7 @@
                 <tbody id="tblrecivedData">
                     <tr>
                         <td></td>
-                        <td class="left-align bold">Collection up to <span id="txtInvTDate"></span><span class="blue">(To Date)</span></td>
+                        <td class="left-align bold">Collection To Date <span id="txtInvTDate"></span><span class="blue"></span></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -116,6 +117,11 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<div class='loader' id='divImage' style="display:none">
+    <div class='loader-content'>
+        <span class="app-loader-spinner" role="status" aria-label="Loading"></span>
     </div>
 </div>
 

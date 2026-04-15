@@ -12,7 +12,10 @@ function CustomerEntrypdfApi() {
 			alert("Please select a valid customer from the list.");
 			return;
 		}
-		$('#divImage').show();
+		$('#divImage').hide();
+		if (typeof showPageDataLoader === 'function') {
+			showPageDataLoader();
+		}
 
 		$.ajax({
 			type: "POST",
@@ -39,6 +42,11 @@ function CustomerEntrypdfApi() {
 					message = error;
 				}
 				alert("Error: " + message);
+			},
+			complete: function () {
+				if (typeof hidePageDataLoader === 'function') {
+					hidePageDataLoader();
+				}
 			}
 		});
 	});

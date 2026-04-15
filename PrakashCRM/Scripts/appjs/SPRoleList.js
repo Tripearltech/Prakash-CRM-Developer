@@ -183,6 +183,10 @@ $(document).ready(function () {
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCount?apiEndPointName=RolesListDotNetAPI&filter=' + filter, function (data) {
         $('#hdnRoleCount').val(data);
     });
@@ -219,6 +223,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
             },
             error: function () {
                 alert("error");
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             }
         }
     );

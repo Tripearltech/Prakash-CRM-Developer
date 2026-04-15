@@ -1,5 +1,4 @@
-﻿
-/* start pagination filter code */
+﻿/* start pagination filter code */
 var filter = "";
 var orderBy = 3;
 var orderDir = "asc";
@@ -125,7 +124,7 @@ $(document).ready(function () {
     $('#txtNewPassword').blur(function () {
         if ($('#txtNewPassword').val() != "") {
             var str = $('#txtNewPassword').val();
-            if (str.match(/[a-z]/g) && str.match(/[A-Z]/g) && str.match(/[0-9]/g) && str.match(/[^a-zA-Z\d]/g) && isValid(str) && str.length >= 8) {
+            if (isPasswordPolicyValid(str)) {
                 document.getElementById('lblMsg').innerText = "";
             }
             else {
@@ -151,36 +150,67 @@ $(document).ready(function () {
     });
 
     $('#btnUpdatePassword').click(function () {
+
         var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
-        if ($('#txtNewPassword').val() != "" && $('#txtConfirmPassword').val() != "" && $('#txtNewPassword').val() == $('#txtConfirmPassword').val()) {
-            $('#btnUpdatePassSpinner').show();
-            $.post(
-                apiUrl + 'UpdatePassword?email=' + $('#hfSPEmail').val() + '&userNo=' + $('#hfSPNo').val() + '&newPassword=' + $('#txtConfirmPassword').val(),
-                function (data) {
-                    if (data) {
-                        document.getElementById('lblMsg').innerText = "Password updated successfully.";
-                        $('#txtNewPassword').val('');
-                        $('#txtConfirmPassword').val('');
-                        $('#btnUpdatePassword').prop('disabled', true);
-                        $('#btnUpdatePassSpinner').hide();
-                    }
-                }
-            );
+        var newPassword = $('#txtNewPassword').val();
+        var confirmPassword = $('#txtConfirmPassword').val();
+
+        if (newPassword == "" || confirmPassword == "") {
+            $('#lblMsg').text("Please enter New Password and Confirm Password.");
+            $('#txtNewPassword').focus();
+            return;
         }
-        else {
-            var msg = "Please Enter New Password and Confirm New Password and both must be a same.";
-            document.getElementById('lblMsg').innerText = msg;
+
+        if (!isPasswordPolicyValid(newPassword)) {
+            $('#lblMsg').text("Password does not match the policy guidelines.");
+            $('#txtNewPassword').focus();
+            return;
+        }
+
+        if (newPassword != confirmPassword) {
+            $('#lblMsg').text("Please enter matching New Password and Confirm Password.");
             $('#txtConfirmPassword').focus();
+            return;
         }
+
+        $('#btnUpdatePassSpinner').show();
+
+        $.post(
+            apiUrl + 'UpdatePassword',
+            {
+                email: $('#hfSPEmail').val(),
+                userNo: $('#hfSPNo').val(),
+                newPassword: confirmPassword
+            },
+            function (data) {
+                if (data === true) {
+                    $('#lblMsg').text("Password updated successfully.");
+                    $('#txtNewPassword').val('');
+                    $('#txtConfirmPassword').val('');
+                    $('#btnUpdatePassword').prop('disabled', true);
+                }
+                $('#btnUpdatePassSpinner').hide();
+            }
+        );
     });
+
 
     $('.btn-close').click(function () {
         $('#modalPassword').css('display', 'none');
     });
 });
 
+function isPasswordPolicyValid(str) {
+    return !!str
+        && str.length >= 8
+        && /[a-z]/.test(str)
+        && /[A-Z]/.test(str)
+        && /[0-9]/.test(str)
+        && /[^a-zA-Z0-9]/.test(str);
+}
+
 function isValid(str) {
-    return /^(?=.*[!@$_])[a-zA-Z0-9!@$_]+$/.test(str);
+    return /^(?=.*[^a-zA-Z0-9]).+$/.test(str);
 }
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
@@ -204,7 +234,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
                     var rowData = "<tr><td></td><td><a href='/SalesPerson/SalesPersonCard?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td><td align='center'><a class='ViewChangePassCls' onclick='ChangePassword(\"" + item.No + "\",\"" + item.Company_E_Mail + "\")'><i class='bx bx-key'></i></a></td>" +
-                        "<td>" + item.No + "</td><td>" + item.PCPL_Employee_Code + "</td><td>" + item.First_Name + "</td><td>" + item.Last_Name + "</td><td>" + item.Company_E_Mail + "</td><td>" + item.Job_Title + "</td><td>" + item.Address + "</td>";
+                        "<td>" + item.No + "</td><td>" + item.PCPL_Employee_Code + "</td><td>" + item.First_Name + "</td><td>" + item.Last_Name + "</td><td>" + item.Company_E_Mail + "</td><td>" + item.Job_Title + "</td><td>" + item.Role + "</td><td>" + item.PCPL_Department_Name + "</td>";
 
                     if (item.PCPL_Enable_OTP_On_Login) {
                         rowData += "<td><span class='badge bg-primary'>Yes</span></td>";
@@ -250,13 +280,13 @@ function dataTableFunction(orderBy, orderDir) {
     if (orderDir == "asc") {
         $('#dataList th:lt(3)').removeClass("sorting_asc").removeClass("sorting_disabled");
         $('#dataList th:gt(9)').removeClass("sorting_asc").removeClass("sorting_disabled");
-        $('#dataList th').slice(3, 10).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(3, 11).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_desc").addClass("sorting_asc");
     }
     if (orderDir == "desc") {
         $('#dataList th:lt(3)').removeClass("sorting_desc").removeClass("sorting_disabled");
         $('#dataList th:gt(9)').removeClass("sorting_desc").removeClass("sorting_disabled");
-        $('#dataList th').slice(3, 10).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(3, 11).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_asc").addClass("sorting_desc");
     }
 }
@@ -457,7 +487,7 @@ function ClearCustomFilter() {
     $('#ddlField').val('-1');
     $('#ddlOperator').val('Contains');
     $('#txtSearch').val('');
-    
+
 }
 
 function ShowErrMsg(errMsg) {
@@ -474,4 +504,4 @@ function ShowErrMsg(errMsg) {
     });
 
 }
-/* end pagination filter code */
+/* end pagination filter code *//* end pagination filter code */

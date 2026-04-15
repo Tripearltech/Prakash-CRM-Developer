@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 using PrakashCRM.Data.Models;
 using System;
 using System.Configuration;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -28,8 +27,6 @@ namespace PrakashCRM.Filters
 
                 SPSiteError payload = new SPSiteError
                 {
-                    UserID = ResolveLoggedInUserName(filterContext.HttpContext),
-                    CurrentDateTime = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss"),
                     Error_Code = "MVC_ERR",
                     Exception_Message = filterContext.Exception.Message ?? "Unhandled exception",
                     Exception_Stack_Trace = filterContext.Exception.StackTrace ?? "",
@@ -73,30 +70,6 @@ namespace PrakashCRM.Filters
                 return "Medium";
 
             return "Warning";
-        }
-
-        private static string ResolveLoggedInUserName(HttpContextBase httpContext)
-        {
-            if (httpContext == null || httpContext.Session == null)
-                return "Guest User";
-
-            string firstName = httpContext.Session["loggedInUserFName"] == null ? string.Empty : httpContext.Session["loggedInUserFName"].ToString().Trim();
-            string lastName = httpContext.Session["loggedInUserLName"] == null ? string.Empty : httpContext.Session["loggedInUserLName"].ToString().Trim();
-            string fullName = string.Join(" ", new[] { firstName, lastName }.Where(value => !string.IsNullOrWhiteSpace(value)));
-
-            if (!string.IsNullOrWhiteSpace(fullName))
-                return fullName;
-
-            if (httpContext.Session["loggedInUserEmail"] != null && !string.IsNullOrWhiteSpace(httpContext.Session["loggedInUserEmail"].ToString()))
-                return httpContext.Session["loggedInUserEmail"].ToString().Trim();
-
-            if (httpContext.Session["loggedInUserSPCode"] != null && !string.IsNullOrWhiteSpace(httpContext.Session["loggedInUserSPCode"].ToString()))
-                return httpContext.Session["loggedInUserSPCode"].ToString().Trim();
-
-            if (httpContext.Session["loggedInUserNo"] != null && !string.IsNullOrWhiteSpace(httpContext.Session["loggedInUserNo"].ToString()))
-                return httpContext.Session["loggedInUserNo"].ToString().Trim();
-
-            return "Guest User";
         }
     }
 }

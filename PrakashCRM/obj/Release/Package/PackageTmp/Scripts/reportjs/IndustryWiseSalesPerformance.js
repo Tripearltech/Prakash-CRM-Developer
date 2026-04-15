@@ -5,6 +5,10 @@ $(document).ready(function () {
 
 function IndustryWiseList() {
     debugger
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetIndustryWiseSalesPerfomanceList',
         type: 'GET',
@@ -27,6 +31,11 @@ function IndustryWiseList() {
                 rowData = "<tr><td colspan='9' style='text-align:left;'>No Records Found</td></tr>";
             }
             $("#tblIndustryWiseSalesPerformanceDetails").append(rowData);
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
     });
 }

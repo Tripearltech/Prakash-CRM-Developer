@@ -424,7 +424,7 @@ $(document).ready(function () {
                 var NewDeliveryToAddress = {};
 
                 NewDeliveryToAddress.Customer_No = $('#hfCustomerNo').val();
-                NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
+               // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
                 NewDeliveryToAddress.Address = $('#txtNewJobtoAddress').val();
                 NewDeliveryToAddress.Address_2 = $('#txtNewJobtoAddress2').val();
                 NewDeliveryToAddress.Post_Code = $('#txtNewJobtoAddPostCode').val();
@@ -1503,7 +1503,7 @@ function CheckNewDeliverytoAddressValues() {
 
     var errMsg = "";
 
-    if ($('#txtNewJobtoAddCode').val() == "" || $('#txtNewJobtoAddress').val() == "" || $('#txtNewJobtoAddPostCode').val() == "" ||
+    if (/*$('#txtNewJobtoAddCode').val() == "" ||*/ $('#txtNewJobtoAddress').val() == "" || $('#txtNewJobtoAddPostCode').val() == "" ||
         $('#ddlNewJobtoAddArea').val() == "-1" || $('#txtNewJobtoAddState').val() == "" || $('#txtNewJobtoAddGSTNo').val() == "") {
 
         errMsg = "Please Fill Details";
@@ -1626,7 +1626,7 @@ function ResetNewBillToAddressDetails() {
 
 function ResetNewDeliveryToAddressDetails() {
 
-    $('#txtNewJobtoAddCode').val("");
+   // $('#txtNewJobtoAddCode').val("");
     $('#txtNewJobtoAddress').val("");
     $('#txtNewJobtoAddress2').val("");
     $('#txtNewJobtoAddPostCode').val("");

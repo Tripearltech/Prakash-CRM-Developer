@@ -1,16 +1,9 @@
-﻿
+﻿@model PrakashCRM.Data.Models.CustomerDropdown
 @{
     ViewBag.Title = "FeedbackList";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
 }
 
-<style>
-    .ViewFeedbackLinesCls:hover {
-        cursor: pointer;
-    }
-</style>
-
-<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
 <div class="page-content">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
@@ -25,166 +18,91 @@
         </div>
     </div>
     <hr />
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body">
-
-            <div class="row">
-                <div>
-                    <div class="row g-3">
-                        <div class="col-md-2">
-                            <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
-                        </div>
-
-                        <div class="col-md-10">
-                            <div class="row row-cols-auto g-3" style="float:right">
-                                <div class="col">
-                                    <label class="col-form-label">Filter:</label>
-                                </div>
-                                <div class="col">
-                                    <select id="ddlField" class="form-select">
-                                        <option value="-1">---Select---</option>
-                                        <option value="No">No</option>
-                                        <option value="Company_No">Customer No</option>
-                                        <option value="Company_Name">Customer Name</option>
-                                        <option value="Overall_Rating">Overall Rating</option>
-                                        <option value="Suggestion">Suggestion</option>
-                                    </select>
-                                </div>
-                                <div class="col">
-                                    <select id="ddlOperator" class="form-select">
-                                        <option value="-1">---Select---</option>
-                                        <option value="Equal">Equal</option>
-                                        <option value="Not Equal">Not Equal</option>
-                                        <option value="Starts With">Starts With</option>
-                                        <option value="Ends With">Ends With</option>
-                                        <option value="Contains" selected>Contains</option>
-                                    </select>
-                                </div>
-                                <div class="col">
-                                    <div class="position-relative">
-                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search Product..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i>Search</button>
-                                    &nbsp;
-                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
-                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
-                                    </button>
-                                </div>
-                                <div style="display:none" class="col">
-                                    <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
-                                </div>
-                            </div>
-                        </div>
-
+            <div class="row align-items-end g-3 mb-3 filter-bar">
+                <div class="col-md-2">
+                    <div class="" id="spinnerId" style="width: 200px;">
+                        <span class="input-group-text" id="loader" style="display: none;">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>
+                        </span>
+                        <input type="text" id="txtCustomer_Name" class="form-control" placeholder="Contact Company Name" value="@Model.Company_Name" />
                     </div>
+                    <input type="hidden" id="hfCustomerNo" name="" value="@Model.Company_No" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">From Date</label>
+                    <input type="date" id="txtFromDate" class="form-control" value="" />
+                    <span class="text-danger" id="Fdatevalidate"></span>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">To Date</label>
+                    <input type="date" id="txtToDate" class="form-control" value="" />
+                    <span class="text-danger" id="Tdatevalidate"></span>
+                </div>
+
+                <div class="col-md-4 d-flex justify-content-end gap-2">
+                    <button id="SearchBtn" class="btn btn-primary px-4">Search</button>
+                    <button id="btnClearFilter" class="btn btn-primary">
+                        <i class="bx bx-rotate-right"></i> Refresh
+                    </button>
+                    <button id="btnExport" class="btn btn-warning text-white px-4">Export</button>
                 </div>
             </div>
 
-            <!-- -->
-
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
             <div class="table-responsive">
-                <table id="dataList" class="display responsive nowrap" style="width:100%">
-                    <thead>
+                <table class="table table-striped align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th></th>
                             <th>No</th>
-                            <th>Customer No</th>
-                            <th>Customer Name</th>
+                            <th>Date</th>
+                            <th>Contact No.</th>
+                            <th>Contact Person</th>
+                            <th>Contact Company</th>
                             <th>Products</th>
                             <th>Overall Rating</th>
+                            <th>Comments</th>
                             <th>Suggestion</th>
-                            <th>Rating & Review</th>
+                            <th>Sales Person</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
+                    <tbody id="tblFeedBacklist">
+                        <!-- Dynamic rows -->
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th></th>
-                            <th>No</th>
-                            <th>Customer No</th>
-                            <th>Customer Name</th>
-                            <th>Products</th>
-                            <th>Overall Rating</th>
-                            <th>Suggestion</th>
-                            <th>Rating & Review</th>
-                        </tr>
-                    </tfoot>
                 </table>
-                <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
-                <input id="hdnFeedbackCount" style="display:none" />
-                <div id="orderInfo"></div>
-            </div>
-            <div>
-                <div class="row">
-                    <div>
-                        <div class="row g-3">
-
-                            <div class="col-md-12">
-                                <div class="row row-cols-auto g-3">
-                                    <div class="col">
-                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
-                                    </div>
-                                    <div class="col">
-                                        <select id="ddlRecPerPage" class="form-select">
-                                            <option value="10">10</option>
-                                            <option value="20">20</option>
-                                            <option value="30">30</option>
-                                        </select>
-                                    </div>
-                                    <div class="col">
-                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+
 </div>
-<div class="modal" id="modalFeedbackLines" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+
+<div class="modal fade" id="FeedbackLinesModal" tabindex="-1" aria-labelledby="FeedbackLinesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"></h5>
+                <h5 class="modal-title">Feedback Question</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div id="dvFeedbackLines" style="display:none">
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <div class="row mb-3">
-                                <div class="col-sm-12">
-                                    <table class="table mb-0 table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">Feedback Question No</th>
-                                                <th scope="col">Feedback Question</th>
-                                                <th scope="col">Rating</th>
-                                                <th scope="col">Comments</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tbFeedbackLines">
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="modal-body" style="max-height: 450px; overflow-y: auto;">
+                <table class="table mb-0 table-striped">
+                    <thead class="sticky-top bg-white" style="top: -20px;">
+                        <tr>
+                            <th scope="col">Feedback Question No.</th>
+                            <th scope="col">Feedback Question</th>
+                            <th scope="col">Rating</th>
+                            <th scope="col">Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblFeedbackLine"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
+
 @Scripts.Render("~/bundles/jquery")
 <script src="~/Scripts/appjs/SPFeedbackList.js"></script>

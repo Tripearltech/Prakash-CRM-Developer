@@ -1,0 +1,203 @@
+DateTime: 2026-04-05 11:43:58
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100059,"Identifier":"praduman.p@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:43:58
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"praduman.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:47:24
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100020,"Identifier":"prashant.s@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:47:24
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:54:35
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100007,"Identifier":"praduman.p@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:54:35
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"praduman.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:57:34
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100017,"Identifier":"praduman.p@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 11:57:34
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"praduman.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:02:14
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100017,"Identifier":"praduman.p@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:02:14
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"praduman.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:03:34
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100002,"Identifier":"praduman.p@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:03:34
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"praduman.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:09:55
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Exception","DurationMs":100072,"Identifier":"praduman.p@tripearltech.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:09:55
+Action: CheckLoginAndSendOTP
+RequestUrl: /Account/CheckLoginAndSendOTP
+RequestPayload: {"email":"praduman.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 500
+ResponseBody: System.Threading.Tasks.TaskCanceledException: A task was canceled.
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at System.Net.Http.HttpClient.<FinishSendAsyncBuffered>d__58.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at PrakashCRM.Controllers.AccountController.<CheckLoginAndSendOTP>d__24.MoveNext() in C:\Project\PrakashCRM_SalesPerson\Github-Code\PrakashCRM\Controllers\AccountController.cs:line 431
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:13:30
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"ValidateCredentials","DurationMs":3327,"Identifier":"invalid@example.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:13:30
+Action: CheckLoginAndSendOTP
+RequestUrl: DirectBC:CheckEmailPassForOTP
+RequestPayload: {"email":"invalid@example.com","pass":"","adminContactNo":null}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:13:30
+Action: CheckLoginAndSendOTP
+RequestUrl: DirectBC:CheckEmailPassForOTP
+RequestPayload: {"email":"invalid@example.com","pass":"","adminContactNo":null}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:15:33
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"ValidateCredentials","DurationMs":2530,"Identifier":"invalid@example.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:15:33
+Action: CheckLoginAndSendOTP
+RequestUrl: DirectBC:CheckEmailPassForOTP
+RequestPayload: {"email":"invalid@example.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:15:33
+Action: CheckLoginAndSendOTP
+RequestUrl: DirectBC:CheckEmailPassForOTP
+RequestPayload: {"email":"invalid@example.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-05 12:16:50
+Action: CheckLoginAndSendOTP_PERF
+RequestUrl: 
+RequestPayload: {"Stage":"Total","DurationMs":203805,"Identifier":"invalid@example.com"}
+StatusCode: 200
+ResponseBody: 
+------------------------------------------------------------------------------------------------------------------------

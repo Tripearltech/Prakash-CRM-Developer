@@ -1,12 +1,16 @@
 ﻿$(document).ready(function () {
-    /*    var table =*/
+    var $table = $('#tblList');
 
-    $('#tblList').DataTable({
+    if (!$table.length || !$.fn.DataTable) {
+        return;
+    }
 
-        responsive: true
-        /*buttons: ['copy', 'excel', 'pdf', 'print']*/
+    $table.DataTable({
+        responsive: true,
+        autoWidth: false
     });
 
-    //table.buttons().container()
-    //    .appendTo('#tblList_wrapper .col-md-6:eq(0)');
+    if (window.AutoScaleLayout && typeof window.AutoScaleLayout.scheduleUpdate === 'function') {
+        window.AutoScaleLayout.scheduleUpdate('common-list-table', 0);
+    }
 });

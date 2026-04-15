@@ -389,15 +389,24 @@ namespace PrakashCRM.Service.Controllers
             // Map PurchaseHeaderLines
             foreach (var purchaseLine in purchaseHeaderLines)
             {
+                string documentType = purchaseLine.DocumentType_Purchase_Header == "Return Order" ? "Purchase Return" : "Purchase Order";
+                string fromAddress = $"{purchaseLine.Name_Location}, {purchaseLine.Address_Location}, {purchaseLine.Address2_Location}, {purchaseLine.CityLocation}, {purchaseLine.PostCodeLocation}, {purchaseLine.CountryRegionCode_Location}";
+                string toAddress = $"{purchaseLine.ShiptoAddress}, {purchaseLine.ShiptoAddress2}, {purchaseLine.ShiptoCity}, {purchaseLine.ShiptoPostCode}, {purchaseLine.ShiptoCountryRegionCode}";
+
+                if (documentType == "Purchase Return")
+                {
+                    (fromAddress, toAddress) = (toAddress, fromAddress);
+                }
+
                 combinedList.Add(new SPWarehouseList
                 {
                     DocumentNo = purchaseLine.No_Purchase_Header ?? purchaseLine.No_PurchHeader,
                     ShipmentDate = purchaseLine.ShipmentDate_Purchase_Header,
                     CustomerVendorNo = "",
                     CustomerVendorName = purchaseLine.Name_Location,
-                    DocumentType = "Purchase Order",
-                    FromAddress = $"{purchaseLine.Name_Location}, {purchaseLine.Address_Location}, {purchaseLine.Address2_Location}, {purchaseLine.CityLocation}, {purchaseLine.PostCodeLocation}, {purchaseLine.CountryRegionCode_Location}",
-                    ToAddress = $"{purchaseLine.ShiptoAddress}, {purchaseLine.ShiptoAddress2}, {purchaseLine.ShiptoCity}, {purchaseLine.ShiptoPostCode}, {purchaseLine.ShiptoCountryRegionCode}",
+                    DocumentType = documentType,
+                    FromAddress = fromAddress,
+                    ToAddress = toAddress,
                     ItemNo = purchaseLine.No_Purchase_Line,
                     ItemDescription = purchaseLine.Description_Purchase_Line,
                     Qty = purchaseLine.Quantity_Purchase_Line,
@@ -417,8 +426,8 @@ namespace PrakashCRM.Service.Controllers
                     ToLocation = purchaseLine.LocationCode,
                     FromArea = purchaseLine.PCPLBuyfromArea,
                     ToArea = (string)purchaseLine.PCPL_Ship_to_Area,
-                    FrompurCity = purchaseLine.CityLocation,
-                    TopurCity = purchaseLine.ShiptoCity,
+                    FrompurCity = documentType == "Purchase Return" ? purchaseLine.ShiptoCity : purchaseLine.CityLocation,
+                    TopurCity = documentType == "Purchase Return" ? purchaseLine.CityLocation : purchaseLine.ShiptoCity,
                     Shipqty = purchaseLine.Quantity_Received,
 
                 });
@@ -579,7 +588,7 @@ namespace PrakashCRM.Service.Controllers
                 }
             }
 
-            else if (DocumentType == "Purchase Order")
+            else if (DocumentType == "Purchase Order" || DocumentType == "Purchase Return")
             {
                 result = ac.GetData<SPWarehousePurchaseHeaderLine>("Warehouse_Purchase_Details", "Order_No_Filter_FilterOnly eq '" + No + "'");
 
@@ -600,11 +609,23 @@ namespace PrakashCRM.Service.Controllers
 
                             sPWarehouseCard.CustomerVendorNo = ""; // or use another logic if needed
                             sPWarehouseCard.CustomerVendorName = purchaseLine.Name_Location;
-                            sPWarehouseCard.DocumentType = "Purchase Order";
-                            sPWarehouseCard.FromAddress = $"{purchaseLine.Name_Location}, {purchaseLine.Address_Location}, {purchaseLine.Address2_Location}, {purchaseLine.CityLocation}, {purchaseLine.PostCodeLocation}, {purchaseLine.CountryRegionCode_Location}";
-                            sPWarehouseCard.ToAddress = $"{purchaseLine.ShiptoAddress}, {purchaseLine.ShiptoAddress2}, {purchaseLine.ShiptoCity}, {purchaseLine.ShiptoPostCode}, {purchaseLine.ShiptoCountryRegionCode}";
-                            sPWarehouseCard.FromPincode = purchaseLine.PostCodeLocation;
-                            sPWarehouseCard.ToPincode = purchaseLine.ShiptoPostCode;
+                            sPWarehouseCard.DocumentType = purchaseLine.DocumentType_Purchase_Header == "Return Order" ? "Purchase Return" : "Purchase Order";
+
+                            if (sPWarehouseCard.DocumentType == "Purchase Return")
+                            {
+                                sPWarehouseCard.FromAddress = $"{purchaseLine.ShiptoAddress}, {purchaseLine.ShiptoAddress2}, {purchaseLine.ShiptoCity}, {purchaseLine.ShiptoPostCode}, {purchaseLine.ShiptoCountryRegionCode}";
+                                sPWarehouseCard.ToAddress = $"{purchaseLine.Name_Location}, {purchaseLine.Address_Location}, {purchaseLine.Address2_Location}, {purchaseLine.CityLocation}, {purchaseLine.PostCodeLocation}, {purchaseLine.CountryRegionCode_Location}";
+                                sPWarehouseCard.FromPincode = purchaseLine.ShiptoPostCode;
+                                sPWarehouseCard.ToPincode = purchaseLine.PostCodeLocation;
+                            }
+                            else
+                            {
+                                sPWarehouseCard.FromAddress = $"{purchaseLine.Name_Location}, {purchaseLine.Address_Location}, {purchaseLine.Address2_Location}, {purchaseLine.CityLocation}, {purchaseLine.PostCodeLocation}, {purchaseLine.CountryRegionCode_Location}";
+                                sPWarehouseCard.ToAddress = $"{purchaseLine.ShiptoAddress}, {purchaseLine.ShiptoAddress2}, {purchaseLine.ShiptoCity}, {purchaseLine.ShiptoPostCode}, {purchaseLine.ShiptoCountryRegionCode}";
+                                sPWarehouseCard.FromPincode = purchaseLine.PostCodeLocation;
+                                sPWarehouseCard.ToPincode = purchaseLine.ShiptoPostCode;
+                            }
+
                             sPWarehouseCard.TPTPLDropShipment = "No";
                             sPWarehouseCard.DropShipmentVendor = "";
                             sPWarehouseCard.AcceptedBy = purchaseLine.PCPLAcceptedbyName_Purchase_Header;
@@ -621,7 +642,7 @@ namespace PrakashCRM.Service.Controllers
                             sPWarehouseCard.FromArea = purchaseLine.PCPLBuyfromArea;
                             sPWarehouseCard.ToArea = purchaseLine.PCPL_Ship_to_Area;
 
-                            if (purchaseLine.LR_RR_Date != "0001-01-01")
+                            if (purchaseLine.LR_RR_Date != null)
                             {
                                 string[] plrdate = purchaseLine.LR_RR_Date.Split('-');
                                 sPWarehouseCard.LR_RR_Date = plrdate[2] + '-' + plrdate[1] + '-' + plrdate[0];
@@ -879,6 +900,7 @@ namespace PrakashCRM.Service.Controllers
                     break;
 
                 case "purchase order":
+                case "purchase return":
                     APIname = "APIMngt_updateTransporterdetailsPurchase";
                     break;
 
@@ -1058,7 +1080,7 @@ namespace PrakashCRM.Service.Controllers
                 {
                     if (systemidanddoctype[1].ToString() == "Sales Order" || systemidanddoctype[1].ToString() == "Sales Return")
                         sosystemids += systemidanddoctype[0] + "|";
-                    else if (systemidanddoctype[1].ToString() == "Purchase Order")
+                    else if (systemidanddoctype[1].ToString() == "Purchase Order" || systemidanddoctype[1].ToString() == "Purchase Return")
                         posystemids += systemidanddoctype[0] + "|";
                     else if (systemidanddoctype[1].ToString() == "Transfer Order")
                         tosystemids += systemidanddoctype[0] + "|";
@@ -1248,6 +1270,11 @@ namespace PrakashCRM.Service.Controllers
                 case "purchase order":
                     api_endpoint = "PurchaseOrderSubformAPI";
                     fieldWithValue = "DocumentType_Purchase_Header='Order',No_PurchHeader='" + saveDocNo + "',Line_No_=" + parsedLineNo;
+                    break;
+
+                case "purchase return":
+                    api_endpoint = "PurchaseOrderSubformAPI";
+                    fieldWithValue = "DocumentType_Purchase_Header='Return Order',No_PurchHeader='" + saveDocNo + "',Line_No_=" + parsedLineNo;
                     break;
 
                 case "transfer order":

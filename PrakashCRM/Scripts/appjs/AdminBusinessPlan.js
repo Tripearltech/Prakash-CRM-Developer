@@ -26,6 +26,7 @@ function bindAdminBusinessPlan(previousFinancialYear, currentFinancialYear) {
     debugger
     var apiUrl = $('#getServiceApiUrl').val() + 'SPAdminBusinessPlan/';
     $('#save-price').css('display', 'none');
+    showPageDataLoader();
     $.ajax(
         {
             url: `/SPAdminBusinessPlan/GetAdminBusinessPlanData?previousFinancialYear=${previousFinancialYear}&currentFinancialYear=${currentFinancialYear}`,
@@ -86,6 +87,9 @@ function bindAdminBusinessPlan(previousFinancialYear, currentFinancialYear) {
 
                 $('#save-price').css('display', 'block');
                 itemPriceListData = data;
+            },
+            complete: function () {
+                hidePageDataLoader();
             },
             error: function (error) {
                 console.log(error);

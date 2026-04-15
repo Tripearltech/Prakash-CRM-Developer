@@ -88,53 +88,67 @@
 
     $('#btnSavePass').click(function () {
 
-        if ($('#txtCurPass').val() == "" || $('#txtNewPass').val() == "" || $('#txtConfirmPass').val() == "") {
+        if ($('#txtCurPass').val() == "" ||
+            $('#txtNewPass').val() == "" ||
+            $('#txtConfirmPass').val() == "") {
 
-            var msg = "Please Fill Details";
-            ShowErrMsg(msg);
-
+            ShowErrMsg("Please Fill Details");
+            return;
         }
-        else {
-            alert($('#txtNewPass').val());
-            $('#divImage').show();
-            //$.get(apiUrl + 'GetPassByEmail?email=nishant.m@tripearltech.com', function (userPass) {
-            $.get(apiUrl + 'GetPassByEmail?email=' + $('#hfLoggedInUserEmail').val(), function (userPass) {
-                if (userPass == $('#txtCurPass').val()) {
-                    $.get(apiUrl + 'GetByEmail?email=' + $('#hfLoggedInUserEmail').val(), function (data) {
-                        if (data.Company_E_Mail != null && data.No != null) {
-                            //var newpass = encodeURIComponent($('#txtNewPass').val());
-                            $.get(apiUrl + "ChangePassword?email=" + data.Company_E_Mail + "&userNo=" + data.No + "&newPassword=" + $('#txtNewPass').val(),
-                                function (data) {
-                                    if (data) {
-                                        $('#divImage').hide();
 
-                                        if (sessionStorage.getItem('#modal') !== 'true') {
-                                            $('#modal').css('display', 'block');
+        if ($('#txtNewPass').val() !== $('#txtConfirmPass').val()) {
+            ShowErrMsg("New Password and Confirm Password do not match.");
+            return;
+        }
 
-                                            //then the modal will be set true in the current session due to which the modal won't
+        $('#divImage').show();
 
-                                            //reappear on the refresh, we need to reload the page in a new tab to make the modal
+        // 🔹 Get user details
+        $.get(apiUrl + 'GetByEmail?email=' + $('#hfLoggedInUserEmail').val(), function (data) {
 
-                                            //reappear.
-
-                                            sessionStorage.setItem('#ad_modal', 'true');
-                                        }
-                                        $('#btnSavePass').prop('disabled', true);
-                                    }
-                                }
-                            );
-                        }
-                    });
-                }
-                else {
-
-                    var msg = "Current Password Is Incorrect, Please Enter Correct Password.";
-                    ShowErrMsg(msg);
-
+            $.ajax({
+                url: apiUrl + 'ChangePassword?email=' + encodeURIComponent(data.Company_E_Mail) + '&userNo=' + encodeURIComponent(data.No) + '&role=' + encodeURIComponent(data.Role) + '&currentPassword=' + encodeURIComponent($('#txtCurPass').val()) + '&newPassword=' + encodeURIComponent($('#txtNewPass').val()),
+                type: 'POST',
+                success: function (response) {
                     $('#divImage').hide();
+                    
+                    if (response) {
+                        Lobibox.notify('success', {
+                            pauseDelayOnHover: true,
+                            continueDelayOnInactiveTab: false,
+                            position: 'top right',
+                            icon: 'bx bx-check-circle',
+                            msg: 'Password changed successfully!'
+                        });
+
+                        // Clear the fields
+                        $('#txtCurPass').val('');
+                        $('#txtNewPass').val('');
+                        $('#txtConfirmPass').val('');
+
+                        // Optionally redirect to login page after a delay
+                        setTimeout(function () {
+                            window.location.href = '/Account/Login';
+                        }, 2000);
+                    } else {
+                        Lobibox.notify('error', {
+                            pauseDelayOnHover: true,
+                            continueDelayOnInactiveTab: false,
+                            position: 'top right',
+                            icon: 'bx bx-x-circle',
+                            msg: 'Current password is incorrect. Please try again.'
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#divImage').hide();
+                    ShowErrMsg('An error occurred while changing password. Please try again.');
                 }
             });
-        }
+        }).fail(function () {
+            $('#divImage').hide();
+            ShowErrMsg('Unable to fetch user details. Please try again.');
+        });
     });
 
     $('#btnCancel').click(function () {
@@ -145,7 +159,7 @@
 });
 
 function isValid(str) {
-    return /^(?=.*[!@$_])[a-zA-Z0-9!@$_]+$/.test(str);
+    return /^(?=.*[^a-zA-Z0-9]).+$/.test(str);
 }
 
 function hideshowCurPass() {

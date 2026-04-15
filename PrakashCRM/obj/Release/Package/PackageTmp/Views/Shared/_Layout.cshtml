@@ -37,6 +37,14 @@
 
     <script src="~/Scripts/jquery-3.7.1.min.js"></script>
     <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/appjs/FormNavigationUtility.js"></script>
     @RenderSection("scripts", required: false)
+    <script>
+        $(function () {
+            if (window.FormNavigationUtility && typeof window.FormNavigationUtility.initialize === 'function') {
+                window.FormNavigationUtility.initialize();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1629,10 +1629,15 @@ namespace PrakashCRM.Controllers
 
             return Json(transporterRateList, JsonRequestBehavior.AllowGet);
         }
-        public async Task<JsonResult> GetAvailableQuantity(string ProdNo,string LocationCode)
+        public async Task<JsonResult> GetAvailableQuantity(string ProdNo, string LocationCode, string PackingStyleCode = "")
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPSalesQuotes/";
-            apiUrl = apiUrl + "GetAvailableQuantity?ProdNo=" + ProdNo + "&LocationCode=" + LocationCode;
+            apiUrl = apiUrl + "GetAvailableQuantity?ProdNo=" + HttpUtility.UrlEncode(ProdNo) + "&LocationCode=" + HttpUtility.UrlEncode(LocationCode);
+
+            if (!string.IsNullOrWhiteSpace(PackingStyleCode) && PackingStyleCode != "-1")
+            {
+                apiUrl += "&PackingStyleCode=" + HttpUtility.UrlEncode(PackingStyleCode);
+            }
 
             List<SPAvailableQuantity> availablequantity = new List<SPAvailableQuantity>();
 

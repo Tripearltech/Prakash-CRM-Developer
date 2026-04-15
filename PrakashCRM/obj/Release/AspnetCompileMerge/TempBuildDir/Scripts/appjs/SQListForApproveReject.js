@@ -1,7 +1,7 @@
 ﻿/* start pagination filter code */
 var filter = "";
 var orderBy = 3;
-var orderDir = "asc";
+var orderDir = "desc";
 var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
 
 $(document).ready(function () {
@@ -291,14 +291,14 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         /*"<td><a href='#'><i class='bx bx-message'></i></a></td><td><a href='#'><i class='bx bx-mail-send'></i></a></td><td><a href='#'><i class='bx bx-printer'></i></a></td>"*/
                         var rowData = "<tr><td></td>";
 
-                        if (item.PCPL_Status == "Approval pending from HOD" || item.PCPL_Status == "Approval pending from finance") {
-                            rowData += "<td><input type='checkbox' id=\"chk_" + item.No + "\" class='form-check-input'></td>";
-                        }
-                        else {
-                            rowData += "<td></td>";
-                        }
+                        //if (item.PCPL_Status == "Approval pending from HOD" || item.PCPL_Status == "Approval pending from finance") {
+                        //    rowData += "<td><input type='checkbox' id=\"chk_" + item.No + "\" class='form-check-input'></td>";
+                        //}
+                        //else {
+                        //    rowData += "<td></td>";
+                        //}
                         
-                        rowData += "<td><a style='cursor:pointer' onclick='ShowSQProduct(\"" + item.No + "\",\"" + item.PCPL_Status + "\")'><i class='bx bx-show'></i></a></td><td><a onclick='RedirectToSQCard(\"" + item.No + "\",\"" + item.TPTPL_Schedule_status + "\",\"" + item.PCPL_Status + "\",SQFor=\"ApproveReject\",LoggedInUserRole=\"" + $('#hdnLoggedInUserRole').val() + "\")' href='#'>" + item.No + "</a></td><td>" +
+                        rowData += "<td><a style='cursor:pointer' onclick='ShowSQProduct(\"" + item.No + "\",\"" + item.PCPL_Status + "\")'></a></td><td><a onclick='RedirectToSQCard(\"" + item.No + "\",\"" + item.TPTPL_Schedule_status + "\",\"" + item.PCPL_Status + "\",SQFor=\"ApproveReject\",LoggedInUserRole=\"" + $('#hdnLoggedInUserRole').val() + "\")' href='#'>" + item.No + "</a></td><td>" +
                             item.Order_Date + "</td><td>" + item.Sell_to_Customer_Name + "</td><td>" + item.Payment_Terms_Code + "</td><td hidden>" + item.PCPL_ApprovalFor + "</td>";
 
                         if (item.PCPL_Status == "Approval pending from HOD" || item.PCPL_Status == "Approval pending from finance") {

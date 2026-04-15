@@ -4,9 +4,24 @@ var orderBy = 4;
 var orderDir = "desc";
 var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
 
+function buildScheduleStatusFilter() {
+    var status = $('#ddlStatus').val();
+
+    if (!status || status === "-1") {
+        return "";
+    }
+
+    if (status === "PendingPartial") {
+        return "(TPTPL_Schedule_status eq 'Pending' or TPTPL_Schedule_status eq 'Partial')";
+    }
+
+    return "TPTPL_Schedule_status eq '" + status + "'";
+}
+
 $(document).ready(function () {
 
-    filter += "TPTPL_Schedule_status eq '" + $('#ddlStatus').val() + "'";
+    filter += buildScheduleStatusFilter();
+    applyNotificationQuoteFilter();
 
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
@@ -17,7 +32,7 @@ $(document).ready(function () {
     $('#hfIsScheduleOrder').val("false");
 
     $('#ddlField').change(function () {
-        
+
         if ($('#ddlField').val() == "Order_Date") {
             $('#ddlOperator').css('display', 'none');
             $('#dvtxtSearch').css('display', 'none');
@@ -38,12 +53,26 @@ $(document).ready(function () {
         ClearCustomFilter();
         filter = "";
 
-        if ($('#ddlStatus').val() != "-1") {
-            filter += "TPTPL_Schedule_status eq '" + $('#ddlStatus').val() + "'";
-        }
+        filter = buildScheduleStatusFilter();
 
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
+    });
+
+    $('#btnReopenSQ').click(function () {
+        // Filter list to show only those Sales Quotes where header Price Updated = true
+        // (This flag is expected to be maintained in BC based on line New Price <> 0)
+        ClearCustomFilter();
+
+        filter = buildScheduleStatusFilter();
+
+        if (filter != "") {
+            filter += " and IsPriceUpdated eq true";
+        } else {
+            filter = "IsPriceUpdated eq true";
+        }
+
+        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     });
 
     $('#btnSearch').click(function () {
@@ -61,9 +90,6 @@ $(document).ready(function () {
         }
         else {
 
-            //if ($('#ddlField').val() == "---Select---" || $('#ddlOperator').val() == "---Select---" || $('#txtSearch').val() == "") {
-            //    flag = false;
-            //}
 
             if ($('#ddlField').val() != "-1" && ($('#ddlOperator').val() == "-1" || $('#txtSearch').val() == "")) {
                 flag = false;
@@ -95,12 +121,6 @@ $(document).ready(function () {
                             filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                         }
 
-                        //if ($('#ddlField').val() != "Amount") {
-                        //    filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
-                        //}
-                        //else {
-                        //    filter = $('#ddlField').val() + ' eq ' + $('#txtSearch').val();
-                        //}
 
                         break;
                     case 'Not Equal':
@@ -152,13 +172,15 @@ $(document).ready(function () {
             }
         }
 
-        if ($('#ddlStatus').val() != "-1" && filter != "") {
-            filter += " and TPTPL_Schedule_status eq '" + $('#ddlStatus').val() + "'";
+        var statusFilter = buildScheduleStatusFilter();
+        if (statusFilter !== "") {
+            if (filter !== "") {
+                filter += " and " + statusFilter;
+            } else {
+                filter = statusFilter;
+            }
         }
-        else if ($('#ddlStatus').val() != "-1" && filter == "") {
-            filter += "TPTPL_Schedule_status eq '" + $('#ddlStatus').val() + "'";
-        }
-            
+
         if (flag == false) {
 
             var msg = "Please Fill All Filter Details";
@@ -174,12 +196,12 @@ $(document).ready(function () {
 
     $('#btnExport').click(function () {
 
-        
+
         if ($('#ddlField').val() == "Posting_Date" || $('#ddlField').val() == "Due_Date") {
             filter = $('#ddlField').val() + ' ge ' + $('#txtFromDate').val() + ' and ' + $('#ddlField').val() + ' le ' + $('#txtToDate').val();
         }
         else {
-            
+
             switch ($('#ddlOperator').val()) {
                 case 'Equal':
                     if ($('#ddlField').val() != "Amount") {
@@ -224,7 +246,7 @@ $(document).ready(function () {
         ClearCustomFilter();
 
         $('#ddlStatus').val("Pending");
-        filter = "TPTPL_Schedule_status eq '" + $('#ddlStatus').val() + "'";
+        filter = buildScheduleStatusFilter();
         $('ul.pager li').remove();
         orderBy = 4;
         orderDir = "desc";
@@ -252,32 +274,6 @@ $(document).ready(function () {
 
     $('#btnCloseModalSQ').click(function () {
 
-        //if ($('#hfIsScheduleOrder').val() == "true") {
-
-        //    if ($('#tblSchOrderProds').html().trim() != "") {
-
-        //        $('#tblSchOrderProds tr').each(function () {
-
-        //            var row = $(this)[0];
-        //            const prodDetails = row.cells[0].innerHTML.split('_');
-
-        //            $.post(apiUrl + 'UpdateScheduleQty?QuoteNo=' + $('#hfQuoteNo').val() + '&ProdLineNo=' + prodDetails[0] +
-        //                '&ScheduleQty=' + parseFloat(prodDetails[2]), function (data) {
-
-        //            });
-
-        //        });
-
-        //        $('#tblSchOrderProds').empty();
-        //        $('#tblSchOrderDetails').css('display', 'none');
-        //        $('.modal-footer').css('display', 'none');
-        //        $('#hfIsScheduleOrder').val("false");
-        //        $('#txtBalQty').prop('disabled', false);
-        //        $('#txtBalQty').val("");
-        //    }
-
-        //}
-
         $('#modalSQ').css('display', 'none');
         $('#dvSQScheOrder').css('display', 'none');
         $('#dvSQLineItems').css('display', 'none');
@@ -296,13 +292,13 @@ $(document).ready(function () {
 
             $('#lblSchOrderErrMsg').css('display', 'block');
             $('#lblSchOrderErrMsg').text("Please fill Product, User and Schedule Qty Details");
-            
+
         }
         else if (parseFloat($('#txtScheduleQty').val()) <= 0) {
 
             $('#lblSchOrderErrMsg').css('display', 'block');
             $('#lblSchOrderErrMsg').text("Please fill Schedule Qty > 0");
-            
+
         }
         else if (parseFloat($('#txtScheduleQty').val()) > $('#txtBalQty').val()) {
 
@@ -311,7 +307,7 @@ $(document).ready(function () {
 
         }
         else {
-            
+
             const prodDetails = $('#ddlSQProds').val().split('_');
             var firstRowDropShipmentStatus = prodDetails[3];
             var prodDropShipmentStatus = "";
@@ -321,10 +317,10 @@ $(document).ready(function () {
             else if (prodDetails[3] == "false") {
                 prodDropShipmentStatus = "No";
             }
-            
+
             $('#lblSchOrderErrMsg').text("");
             $('#lblSchOrderErrMsg').css('display', 'none');
-            
+
             var TROpts = "<tr><td hidden>" + $('#ddlSQProds').val() + "</td><td>" + $('#ddlSQProds option:selected').text() + "</td><td>" + $('#txtBalQty').val() + "</td><td>" + $('#txtScheduleQty').val() +
                 "</td><td>" + $('#txtSchRemarks').val() + "</td><td>" + prodDropShipmentStatus + "</td>";
 
@@ -365,31 +361,24 @@ $(document).ready(function () {
                 $.post(apiUrl + 'UpdateScheduleQty?QuoteNo=' + $('#hfQuoteNo').val() + '&ProdLineNo=' + prodDetails[0] +
                     '&ScheduleQty=' + parseFloat($('#txtScheduleQty').val()), function (data) {
 
-                });
+                    });
 
             }
             else {
 
                 /*if ($('#tblSchOrderProds tr:first').find("TD").eq(6).html() == prodDropShipmentStatus) {*/
 
-                    $('#lblSchOrderErrMsg').css('display', 'none');
-                    $('#tblSchOrderProds').append(TROpts);
-                    $('.modal-footer').css('display', 'block');
+                $('#lblSchOrderErrMsg').css('display', 'none');
+                $('#tblSchOrderProds').append(TROpts);
+                $('.modal-footer').css('display', 'block');
 
-                    $.post(apiUrl + 'UpdateScheduleQty?QuoteNo=' + $('#hfQuoteNo').val() + '&ProdLineNo=' + prodDetails[0] +
-                        '&ScheduleQty=' + parseFloat($('#txtScheduleQty').val()), function (data) {
+                $.post(apiUrl + 'UpdateScheduleQty?QuoteNo=' + $('#hfQuoteNo').val() + '&ProdLineNo=' + prodDetails[0] +
+                    '&ScheduleQty=' + parseFloat($('#txtScheduleQty').val()), function (data) {
 
                     });
-                /*}
-                else {
-
-                    $('#lblSchOrderErrMsg').css('display', 'block');
-                    $('#lblSchOrderErrMsg').text("Add All Products Either With Drop Shipment OR Without Drop Shipment");
-                    
-                }*/
 
             }
-            
+
             $('#ddlSQProds').val('-1');
             $('#txtBalQty').val("");
             $('#txtScheduleQty').val("");
@@ -417,45 +406,6 @@ $(document).ready(function () {
         $('#hfProdLocCode').val(SQProdDetails[4]);
 
     });
-
-    //$('#btnShowInvQty').click(function () {
-
-    //    alert("Inv Qty");
-    //    $('#modalSQ').css('display', 'none');
-    //    $('#dvSQScheOrder').css('display', 'none');
-    //    $('.modal-title').text("Lot No. Wise Qty");
-    //    $('#modalInvQty').css('display', 'block');
-
-    //    //url: '/SPSalesQuotes/GetInventoryDetails?ProdNo=' + $('#hfProdNo').val() + '&LocCode=' + $('#hfProdLocCode').val(),
-        
-    //    $.ajax(
-    //        {
-    //            url: '/SPSalesQuotes/GetInventoryDetails?ProdNo=' + $('#hfProdNo').val() + '&LocCode=' + $('#hfProdLocCode').val(),
-    //            type: 'GET',
-    //            contentType: 'application/json',
-    //            success: function (data) {
-
-    //                $('#tblInvDetails').empty();
-
-    //                var invDetailsTR = "";
-
-    //                for (var i = 0; i < data.length; i++) {
-
-    //                    invDetailsTR += "<tr><td hidden>" + data[i].ItemNo + "</td><td>" + data[i].ManufactureCode + "</td><td>" + data[i].LotNo + "</td><td>" + data[i].AvailableQty + "</td><td>" + data[i].RequestedQty + "</td><td><input id='" + data[i].LotNo + "_ReqQty' value='0' type='text' width='40%' /></td>" +
-    //                        "<td>" + data[i].UnitCost + "</td></tr>";
-
-    //                }
-
-    //                $('#tblInvDetails').append(invDetailsTR);
-
-    //            },
-    //            error: function () {
-    //                //alert("error");
-    //            }
-    //        }
-    //    );
-
-    //});
 
     $('#btnAddQty').click(function () {
 
@@ -486,27 +436,12 @@ $(document).ready(function () {
                 var row = $(this)[0];
                 if (parseInt($("#" + row.cells[2].innerHTML + "_ReqQty").val()) > 0) {
 
-                    //var ItemNo = row.cells[0].innerHTML;
-                    //var LotNo = row.cells[2].innerHTML;
-                    //var ReqQty = parseInt($("#" + row.cells[2].innerHTML + "_ReqQty").val());
-                    //var LocCode = prodDetails_[4];
-                    //var LocCode = $('#hfLocCode').val();
+                    var ItemNo = row.cells[0].innerHTML;
+                    var LotNo = row.cells[2].innerHTML;
+                    var ReqQty = parseInt($("#" + row.cells[2].innerHTML + "_ReqQty").val());
+                    var LocCode = $('#hfLocCode').val();
 
-                    //var TROpts = "<tr><td></td><td></td><td>" + ItemNo + "</td><td>" + LotNo + "</td><td>" + ReqQty + "</td><td>" + LocCode + "</td></tr>";
-
-                    //
-
-                    
-                    
-                    //$('#tblLotNoWiseQtyDetails tr').each(function () {
-
-                        //var row = $(this)[0];
-                        var ItemNo = row.cells[0].innerHTML;
-                        var LotNo = row.cells[2].innerHTML;
-                        var ReqQty = parseInt($("#" + row.cells[2].innerHTML + "_ReqQty").val());
-                        var LocCode = $('#hfLocCode').val();
-
-                        QtyTROpts += "<tr><td></td><td></td><td>" + ItemNo + "</td><td>" + LotNo + "</td><td>" + ReqQty + "</td><td>" + LocCode + "</td></tr>";
+                    QtyTROpts += "<tr><td></td><td></td><td>" + ItemNo + "</td><td>" + LotNo + "</td><td>" + ReqQty + "</td><td>" + LocCode + "</td></tr>";
 
                     //});
 
@@ -554,27 +489,7 @@ $(document).ready(function () {
 
     $('#btnScheduleOrder').click(function () {
 
-        /*var responseMsg = "Error : The sales Line is short Closed.";
-
-        var responseMsg = "SDOM00163";
-
-        if (responseMsg.includes("Error : ")) {
-
-            const errDetails = responseMsg.split(':');
-            $('#resMsg').text(errDetails[1].trim());
-            $('#resIcon').attr('src', '../Layout/assets/images/appImages/Icon-2.png');
-            $("#resOrderNo").text("");
-        }
-        else {
-
-            $("#resOrderNo").text("Order No : " + responseMsg);
-            $('#resMsg').text("Order Scheduled Successfully");
-            $('#resIcon').attr('src', '../Layout/assets/images/appImages/Icon-1.png');
-        }
-
-        $('#modalSchOrderMsg').css('display', 'block');*/
-
-        if ($('#txtScheduleDate').val() == "" || $('#txtExternalDocNo').val() == "") {
+        if ($('#txtScheduleDate').val() == "" || $('#txtExternalDocNo').val() == "" || $('#txtDocumentDate').val() == "") {
 
             $('#lblErrMsgDateDocNo').text("Please Fill Details");
             $('#lblErrMsgDateDocNo').css('display', 'block');
@@ -583,7 +498,7 @@ $(document).ready(function () {
         else {
 
             //
-            
+
             $('#lblErrMsgDateDocNo').text("");
             $('#lblErrMsgDateDocNo').css('display', 'none');
             $('#divImage').show();
@@ -592,234 +507,125 @@ $(document).ready(function () {
             var Err = "";
             var Cnt = 0;
 
-            $('#tblProdsForSchOrdr tr').each(function () {
+            var productDetails_ = [];
+            var invQtyDetails_ = [];
 
-                var prodDetails = $(this).find("TD").eq(0).html();
-                const prodDetails_ = prodDetails.split('_');
-                var prodNo = prodDetails_[1];
-                //
-                var balanceQty = $(this).find("TD").eq(4).html();
-                //
+            if ($('#tblProdsForSchOrdr tr').length > Cnt) {
 
-                if (parseFloat($("#" + prodNo + "_ScheduleQty").val()) <= 0) {
-
-                    Err = "Error";
-                    Cnt += 1;
-                }
-
-                if (parseFloat($("#" + prodNo + "_ScheduleQty").val()) > parseFloat(balanceQty)) {
-
-                    Err = "SchQtyGreaterErr";
-                    return false;
-                }
-
-            });
-
-            var productDetails_ = new Array();
-
-            if ($('#tblProdsForSchOrdr tr').length > Cnt)
-            {
-
-                if (Err == "SchQtyGreaterErr") {
-
-                    $('#lblSchOrdrMsg').text("Schedule qty should be less than or equal to balance qty");
-                    $('#lblSchOrdrMsg').css('color', 'red').css('display', 'block');
-
-                }
-                else {
-
-                    $('#lblSchOrdrMsg').text("");
-                    $('#lblSchOrdrMsg').css('display', 'none');
+                if (Err === "SchQtyGreaterErr") {
+                    $('#lblSchOrdrMsg').text("Schedule qty should be less than or equal to balance qty")
+                        .css({ color: 'red', display: 'block' });
+                } else {
+                    $('#lblSchOrdrMsg').text("").hide();
                     $('#btnSchOrderSpinner').show();
+
+                    // Prepare schedule order object
                     scheduleorder.QuoteNo = $('#hfQuoteNo').val();
                     scheduleorder.ScheduleDate = $('#txtScheduleDate').val();
+                    scheduleorder.DocumentDate = $('#txtDocumentDate').val();
                     scheduleorder.ExternalDocNo = $('#txtExternalDocNo').val();
-                    if ($('#ddlUsers').val() == "-1") {
-                        scheduleorder.AssignTo = "";
-                    }
-                    else {
-                        const userDetails = $('#ddlUsers').val().split('_');
-                        scheduleorder.AssignTo = userDetails[0];
-                    }
-                    
+                    scheduleorder.AssignTo = $('#ddlUsers').val() === "-1" ? "" : $('#ddlUsers').val().split('_')[0];
+
+                    // Iterate over table rows
                     $('#tblProdsForSchOrdr tr').each(function () {
+                        var $row = $(this);
+                        var prodDetails = $row.find("TD").eq(0).html();
+                        if (!prodDetails) return; // Skip empty rows
 
-                        var productDetails = {};
-                        var prodDetails = $(this).find("TD").eq(0).html();
-                        const prodDetails_ = prodDetails.split('_');
-                        var prodNo = prodDetails_[1];
-                        var prodLineNo = parseInt(prodDetails_[0]);
+                        const prodDetailsSplit = prodDetails.split('_');
+                        var prodLineNo = parseInt(prodDetailsSplit[0]);
+                        var prodNo = prodDetailsSplit[1];
 
-                        if ($(this).prop('id').includes("TRSQProd_") && parseFloat($("#" + prodNo + "_ScheduleQty").val()) > 0) {
+                        var scheduleQty = parseFloat($("#" + prodNo + "_ScheduleQty").val());
+                        var remarks = $("#" + prodNo + "_Remarks").val();
 
-                            /*if (parseFloat($("#" + prodNo + "_ScheduleQty").val()) > 0) {*/
-
-                            //UpdateScheduleQty($('#hfQuoteNo').val(), prodLineNo, parseFloat($("#" + prodNo + "_ScheduleQty").val()));
-                            //$.post(apiUrl + 'UpdateScheduleQty?QuoteNo=' + $('#hfQuoteNo').val() + '&ProdLineNo=' + prodLineNo +
-                            //    '&ScheduleQty=' + parseFloat($("#" + prodNo + "_ScheduleQty").val()), function (data) {
-
-                            //    });
-                            productDetails.QuoteNo = $('#hfQuoteNo').val();
-                            productDetails.ProdLineNo = parseInt(prodDetails_[0]);
-                            productDetails.ScheduleQty = parseFloat($("#" + prodNo + "_ScheduleQty").val());
-                            productDetails_.push(productDetails);
-                            /*}*/
-
-                        }
-
-                        if ($("#" + prodNo + "_InvDetails").html() != "") {
-
-                            $("#" + prodNo + "_InvDetails tr").each(function () {
-
-                                var invQtyDetails = {};
-
-                                invQtyDetails.QuoteNo = $('#hfQuoteNo').val();
-                                invQtyDetails.LineNo = prodLineNo;
-                                invQtyDetails.ItemNo = $(this).find("TD").eq(2).html();
-                                invQtyDetails.LotNo = $(this).find("TD").eq(3).html();
-                                invQtyDetails.Qty = $(this).find("TD").eq(4).html();
-                                invQtyDetails.LocationCode = $(this).find("TD").eq(5).html();
-
-                                invQtyDetails_.push(invQtyDetails);
+                        // Only process rows where ScheduleQty > 0
+                        if ($row.prop('id').includes("TRSQProd_") && scheduleQty > 0) {
+                            // Add product details
+                            productDetails_.push({
+                                QuoteNo: scheduleorder.QuoteNo,
+                                ProdLineNo: prodLineNo,
+                                ScheduleQty: scheduleQty,
+                                PCPL_Remarks: remarks
                             });
 
-                            scheduleorder.InvQuantities = invQtyDetails_;
-
+                            // Include inventory details only for this row
+                            var $invTable = $("#" + prodNo + "_InvDetails");
+                            if ($invTable.html() !== "") {
+                                $invTable.find("tr").each(function () {
+                                    var $invRow = $(this);
+                                    invQtyDetails_.push({
+                                        QuoteNo: scheduleorder.QuoteNo,
+                                        LineNo: prodLineNo,
+                                        ItemNo: $invRow.find("TD").eq(2).html(),
+                                        LotNo: $invRow.find("TD").eq(3).html(),
+                                        Qty: $invRow.find("TD").eq(4).html(),
+                                        LocationCode: $invRow.find("TD").eq(5).html()
+                                    });
+                                });
+                            }
                         }
-
                     });
 
+                    // If no rows have ScheduleQty > 0, show message and exit
+                    if (productDetails_.length === 0) {
+                        $('#lblSchOrdrMsg').text("Please fill schedule qty in products for schedule order")
+                            .css({ color: 'red', display: 'block' });
+                        $('#btnSchOrderSpinner').hide();
+                        return;
+                    }
+
+                    // Assign final arrays to scheduleorder
                     scheduleorder.SchQtyProds = productDetails_;
+                    scheduleorder.InvQuantities = invQtyDetails_;
 
-                    //$('#tblSchOrderProds tr').each(function () {
-
-                    //    var prodDetails = $(this).find("TD").eq(0).html();
-                    //    const prodDetails_ = prodDetails.split('_');
-                    //    var prodNo = prodDetails_[1];
-                    //    var prodLineNo = parseInt(prodDetails_[0]);
-
-                    //    if ($("#" + prodNo + "_InvDetails").html() != "") {
-
-                    //        $("#" + prodNo + "_InvDetails tr").each(function () {
-
-                    //            var invQtyDetails = {};
-
-                    //            invQtyDetails.QuoteNo = $('#hfQuoteNo').val();
-                    //            invQtyDetails.LineNo = prodLineNo;
-                    //            invQtyDetails.ItemNo = $(this).find("TD").eq(2).html();
-                    //            invQtyDetails.LotNo = $(this).find("TD").eq(3).html();
-                    //            invQtyDetails.Qty = $(this).find("TD").eq(4).html();
-                    //            invQtyDetails.LocationCode = $(this).find("TD").eq(5).html();
-
-                    //            invQtyDetails_.push(invQtyDetails);
-                    //        });
-
-                    //        scheduleorder.InvQuantities = invQtyDetails_;
-
-                    //    }
-
-                    //});
-
+                    // Send data to server
                     $.ajax({
                         type: "POST",
                         url: "/SPSalesQuotes/ScheduleOrder",
                         data: JSON.stringify(scheduleorder),
                         contentType: "application/json; charset=utf-8",
                         success: function (data) {
-
                             $('#btnSchOrderSpinner').hide();
-                            //$('#divImage').hide();
-                            var responseMsg = data;
 
-                            if (responseMsg.includes("Error_:")) {
+                            if (!data) {
+                                $('#lblSchOrdrMsg').text("Error")
+                                    .css({ color: 'red', display: 'block' });
+                                return;
+                            }
 
-                                const responseMsgDetails = responseMsg.split(':');
-                                $('#btnSchOrderSpinner').hide();
-                                $('#dvSQScheOrder').css('display', 'none');
-                                $('#modalSQ').css('display', 'none');
-                                $('#modalErrMsg').css('display', 'block');
+                            if (data.includes("Error_:")) {
+                                const responseMsgDetails = data.split(':');
+                                $('#dvSQScheOrder, #modalSQ').hide();
+                                $('#modalErrMsg').show();
                                 $('#modalErrDetails').text(responseMsgDetails[1]);
-
-                            }
-                            else if (responseMsg.includes("Error : ")) {
-
-                                //const errDetails = responseMsg.split(':');
-                                //$('#resMsg').text(errDetails[1].trim());
-                                //$('#resIcon').attr('src', '../Layout/assets/images/appImages/Icon-2.png');
-                                //$("#resOrderNo").text("");
-
-                                $('#lblSchOrdrMsg').text(errDetails[1].trim());
-                                $('#lblSchOrdrMsg').css('color', 'red').css('display', 'block');
-                            }
-                            else if (responseMsg == null) {
-
-                                $('#lblSchOrdrMsg').text("Error");
-                                $('#lblSchOrdrMsg').css('color', 'red').css('display', 'block');
-
-                            }
-                            else {
-
-                                //$("#resOrderNo").text("Order No : " + responseMsg);
-                                //$('#resMsg').text("Order Scheduled Successfully");
-                                //$('#resIcon').attr('src', '../Layout/assets/images/appImages/Icon-1.png');
-
-                                $('#lblSchOrdrMsg').text("Order No : " + responseMsg + " - Order Scheduled Successfully");
-                                $('#lblSchOrdrMsg').css('color', 'green').css('display', 'block');
+                            } else if (data.includes("Error : ")) {
+                                const errDetails = data.split(':');
+                                $('#lblSchOrdrMsg').text(errDetails[1].trim())
+                                    .css({ color: 'red', display: 'block' });
+                            } else {
+                                $('#lblSchOrdrMsg').text("Order No : " + data + " - Order Scheduled Successfully")
+                                    .css({ color: 'green', display: 'block' });
                             }
 
-                            //$('#dvSQScheOrder').css('display', 'none');
-                            //$('#modalSQ').css('display', 'none');
-                            //$('#modalSchOrderMsg').css('display', 'block');
+                            // Reset UI and reload products
                             $('.modal-title').text('Schedule The Order');
-                            $('#lblErrMsgDateDocNo').text("");
-                            $('#lblErrMsgDateDocNo').css('display', 'none');
-
+                            $('#lblErrMsgDateDocNo').text("").hide();
                             ResetSchOrdrDetails();
-                            BindSQProds($('#hfQuoteNo').val());
-
+                            BindSQProds(scheduleorder.QuoteNo);
+                        },
+                        error: function (xhr, status, error) {
+                            $('#btnSchOrderSpinner').hide();
+                            $('#lblSchOrdrMsg').text("Error while saving schedule order: " + error)
+                                .css({ color: 'red', display: 'block' });
                         }
-
                     });
-
                 }
-                
+
+            } else {
+                $('#lblSchOrdrMsg').text("Please fill schedule qty in products for schedule order")
+                    .css({ color: 'red', display: 'block' });
             }
-            else {
-
-                $('#lblSchOrdrMsg').text("Please fill schedule qty in products for schedule order");
-                $('#lblSchOrdrMsg').css('color', 'red').css('display', 'block');
-
-            }
-
-            //
-
-            //$.post(apiUrl + 'ScheduleOrder?QuoteNo=' + $('#hfQuoteNo').val() + '&ScheduleDate=' + $('#txtScheduleDate').val() + '&ExternalDocNo=' +
-            //    $('#txtExternalDocNo').val(), function (data) {
-
-            //    var responseMsg = data;
-
-            //    if (responseMsg.includes("Error : ")) {
-
-            //        const errDetails = responseMsg.split(':');
-            //        $('#resMsg').text(errDetails[1].trim());
-            //        $('#resIcon').attr('src', '../Layout/assets/images/appImages/Icon-2.png');
-            //        $("#resOrderNo").text("");
-            //    }
-            //    else {
-
-            //        $("#resOrderNo").text("Order No : " + responseMsg);
-            //        $('#resMsg').text("Order Scheduled Successfully");
-            //        $('#resIcon').attr('src', '../Layout/assets/images/appImages/Icon-1.png');
-            //    }
-
-            //    $('#dvSQScheOrder').css('display', 'none');
-            //    $('#modalSQ').css('display', 'none');
-            //    $('#modalSchOrderMsg').css('display', 'block');
-            //    $('#lblErrMsgDateDocNo').text("");
-            //    $('#lblErrMsgDateDocNo').css('display', 'none');
-   
-            //});
-
         }
 
     });
@@ -962,14 +768,36 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
         {
             url: '/SPSalesQuotes/GetSalesQuoteListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
+            cache: false,
             contentType: 'application/json',
             success: function (data) {
-
-                if ($.fn.dataTable.isDataTable('#dataList')) {
-                    $('#dataList').DataTable().destroy();
+                var $dataListTable = $('#dataList');
+                if ($dataListTable.length && $.fn.DataTable && $.fn.DataTable.isDataTable($dataListTable)) {
+                    try {
+                        var existingDt = $dataListTable.DataTable();
+                        // Defensive: close responsive child rows before destroying
+                        if (existingDt && existingDt.rows) {
+                            existingDt.rows().every(function () {
+                                if (this.child && this.child.isShown && this.child.isShown()) {
+                                    this.child.hide();
+                                }
+                            });
+                        }
+                        existingDt.destroy();
+                    } catch (e) {
+                        // Avoid breaking the page if DataTables gets into a bad state
+                    }
                 }
                 $('#tableBody').empty();
+                var matchedNotificationItem = null;
                 $.each(data, function (index, item) {
+                    if (notificationQuoteNo && item.No === notificationQuoteNo) {
+                        matchedNotificationItem = item;
+                    }
+
+                    // Normalize approval status to avoid case/spacing mismatches
+                    var approvalStatus = (item.PCPL_Status || '').toString().trim();
+                    var approvalStatusKey = approvalStatus.toLowerCase();
 
                     /*"<td><a href='#'><i class='bx bx-message'></i></a></td><td><a href='#'><i class='bx bx-mail-send'></i></a></td><td><a href='#'><i class='bx bx-printer'></i></a></td>"*/
                     var rowData = "<tr><td></td><td><a class='EditCls' onclick='EditSalesQuote(\"" + item.No + "\",\"" + item.TPTPL_Schedule_status + "\",\"" + item.PCPL_Status + "\",SQFor=\"Edit\",LoggedInUserRole=\"" + $('#hdnLoggedInUserRole').val() + "\")'><i class='bx bxs-edit'></i></a></td>" +
@@ -977,13 +805,14 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         "<div class='dropdown-menu dropdown-menu-end'><a class='dropdown-item' href='javaScript:;'>Send SMS</a><a class='dropdown-item' onclick='SendEmail(\"" + item.No + "\",\"" + item.SellToEmail + "\")'>Send Email</a>" +
                         "<a class='dropdown-item' style='cursor:pointer' onclick='PrintQuote(\"" + item.No + "\")'>Print</a></div></div></td>" + "<td>" + item.No + "</td><td>" + item.Order_Date + "</td><td>" + item.Sell_to_Customer_Name + "</td>" +
                         "<td>";
-                        
+
                     if (item.TPTPL_Schedule_status == "Pending") {
 
                         if (item.TPTPL_Short_Close) {
                             rowData += "<a title='Salesquote shortclosed, so can not schedule order'><span class='badge bg-danger'>" + item.TPTPL_Schedule_status + "</span></a>";
                         }
                         else {
+
 
                             if (item.PCPL_Status == "Approved") {
                                 rowData += "<a class='ScheduleOrderCls' onclick='ScheduleOrder(\"" + item.No + "\",\"" + item.Location_Code + "\",\"" + item.PCPL_Status + "\")' title='Click here to schedule order'><span class='badge bg-danger'>" + item.TPTPL_Schedule_status + "</span></a>";
@@ -1003,7 +832,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         else {
                             rowData += "<a class='ScheduleOrderCls' onclick='ScheduleOrder(\"" + item.No + "\",\"" + item.Location_Code + "\")' title='Click here to schedule order'><span class='badge bg-info text-dark'>" + item.TPTPL_Schedule_status + "</span></a>";
                         }
-                        
+
                     }
                     else if (item.TPTPL_Schedule_status == "Completed") {
                         rowData += "<span class='badge bg-success' title='Schedule completed'>" + item.TPTPL_Schedule_status + "</span>";
@@ -1015,7 +844,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         "<td><a class='QtyCountCls' onclick='ShowOrderedQtyDetails(\"" + item.No + "\"," + item.TPTPLTotal_Ordered_Qty + ")'>" + item.TPTPLTotal_Ordered_Qty + "</a></td>" +
                         "<td><a class='QtyCountCls' onclick='ShowInvoicedQtyDetails(\"" + item.No + "\"," + item.TPTPLTotal_Invoiced_Qty + ")'>" + item.TPTPLTotal_Invoiced_Qty + "</a></td>";
 
-                        var InProcessQty = item.TPTPLTotal_Ordered_Qty - item.TPTPLTotal_Invoiced_Qty;
+                    var InProcessQty = item.TPTPLTotal_Ordered_Qty - item.TPTPLTotal_Invoiced_Qty;
                     rowData += "<td><a class='QtyCountCls' onclick='ShowInProcessQtyDetails(\"" + item.No + "\"," + InProcessQty + ")'>" + InProcessQty + "</a></td>";
 
                     if (item.PCPL_Status == "Approval pending from finance") {
@@ -1037,12 +866,20 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
                         rowData += "<td><span class='badge bg-danger'>Rejected-HOD</span></td>";
                     }
-   
+
+                    else if (approvalStatus) {
+                        // Fall back: show whatever backend returned
+                        rowData += "<td><span class='badge bg-secondary'>" + approvalStatus + "</span></td>";
+                    }
+                    else {
+                        rowData += "<td></td>";
+                    }
+
                     if (item.TPTPL_Short_Close) {
                         rowData += "<td><span class='badge bg-primary'>Yes</span></td>";
                     }
                     else {
-                        
+
                         if (item.TPTPL_Schedule_status == "Completed") {
                             rowData += "<td><span class='badge bg-secondary' title='schedule completed can\'t shortclose'>No</span></td>";
                         }
@@ -1054,7 +891,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     rowData += "<td>" + item.Payment_Terms_Code + "</td>";
 
 
-                    
+
                     if (item.PCPL_Rejected_Reason != "") {
                         rowData += "<td>" + item.PCPL_Rejected_Reason + "</td>";
                     }
@@ -1065,22 +902,35 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         rowData += "<td></td>";
                     }
 
+                    rowData += "<td>" + item.TPTPL_Short_Closed_Qty + "</td>" + "<td>" + item.TPTPL_Balance_Qty + "</td>";
+
                     //if (item.PCPL_Rejected_Reason == null || item.PCPL_Rejected_Reason == "") {
                     //    rowData += "<td></td>";
                     //}
                     //else {
                     //    rowData += "<td>" + item.PCPL_Rejected_Reason + "</td>";
                     //}
-    
+
                     rowData += "</tr>";
 
                     $('#tableBody').append(rowData);
-                    
+
                 });
                 if (firsload == 1) {
                     pageMe();
                 }
                 dataTableFunction(orderBy, orderDir);
+
+                if (notificationQuoteNo && matchedNotificationItem && !hasOpenedNotificationQuote) {
+                    hasOpenedNotificationQuote = true;
+                    EditSalesQuote(
+                        matchedNotificationItem.No,
+                        matchedNotificationItem.TPTPL_Schedule_status,
+                        matchedNotificationItem.PCPL_Status,
+                        "Edit",
+                        $('#hdnLoggedInUserRole').val());
+                    return;
+                }
 
                 if (data.length == 0) {
                     $('ul.pager li').remove();
@@ -1101,26 +951,6 @@ function commaSeparateNumber(val) {
     }
     return val;
 }
-
-//function UpdateScheduleQty(QuoteNo, ProdLineNo, ScheduleQty) {
-
-//    var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
-
-//    $.ajax({
-//        type: "POST",
-//        url: apiUrl + "UpdateScheduleQty?QuoteNo=" + QuoteNo + "&ProdLineNo=" + ProdLineNo +
-//            "&ScheduleQty=" + ScheduleQty,
-//        contentType: "application/json; charset=utf-8",
-//        success: function (data) {
-
-            
-
-//        }
-
-//    });
-
-//}
-
 function ScheduleOrder(QuoteNo, LocCode, SQStatus) {
 
     if (SQStatus == "Approval pending from finance" || SQStatus == "Approval pending from HOD") {
@@ -1164,9 +994,11 @@ function BindSQProds(QuoteNo) {
         if (data != null) {
 
             //$('#ddlSQProds').empty();
+            $('#txtExternalDocNo').prop('readonly', true);
 
             //var opt = "<option value='-1'>---Select---</option>";
             var prodsTR = "";
+            var externalDoc = {};
 
             $('#tblProdsForSchOrdr').empty();
 
@@ -1183,14 +1015,19 @@ function BindSQProds(QuoteNo) {
                     else {
                         prodsTR += "<td>No</td>";
                     }
-
+                    externalDoc[data[i].TPTPL_External_Document_No] = true;
                     prodsTR += "<td><button type='button' id='btnShowInvQty' onclick='ShowInvQty(\"" + data[i].No + "\",\"" + $('#hfLocCode').val() + "\",\"TRSQProd_" + data[i].No + "\")' class='btn btn-primary bx bx-show-alt' title='Quantity From Inventory'></button></td><td>" + data[i].Outstanding_Quantity +
                         "</td><td><input type='text' id=\"" + data[i].No + "_ScheduleQty" + "\" value='0' class='form-control'></td><td><input type='text' id=\"" + data[i].No + "_Remarks" + "\" class='form-control'></td></tr>";
 
                 }
-                
-            }
 
+            }
+            var uniqueArray = Object.keys(externalDoc);
+            if (uniqueArray == "" || uniqueArray == "null") {
+                $('#txtExternalDocNo').prop('readonly', false);
+                uniqueArray = "";
+            }
+            $('#txtExternalDocNo').val(uniqueArray);
             $('#tblProdsForSchOrdr').append(prodsTR);
             /*$('#ddlSQProds').append(opt);*/
 
@@ -1200,6 +1037,24 @@ function BindSQProds(QuoteNo) {
 
 }
 
+//function BindUsers() {
+
+//    $.get(apiUrl + 'GetAllUsers', function (data) {
+
+//        if (data != null) {
+
+//            $('#ddlUsers').empty();
+
+//            var opt = "<option value='-1'>---Select---</option>";
+//            for (i = 0; i < data.length; i++) {
+//                opt += "<option value=\"" + data[i].No + "_" + data[i].Company_E_Mail + "\">" + data[i].First_Name + " " + data[i].Last_Name + "</option>";
+//            }
+//            $('#ddlUsers').append(opt);
+
+//        }
+//    });
+
+//}
 function BindUsers() {
 
     $.get(apiUrl + 'GetAllUsers', function (data) {
@@ -1209,16 +1064,26 @@ function BindUsers() {
             $('#ddlUsers').empty();
 
             var opt = "<option value='-1'>---Select---</option>";
-            for (i = 0; i < data.length; i++) {
-                opt += "<option value=\"" + data[i].No + "_" + data[i].Company_E_Mail + "\">" + data[i].First_Name + " " + data[i].Last_Name + "</option>";
+
+            for (var i = 0; i < data.length; i++) {
+
+                var selected = "";
+
+                if (data[i].PCPL_Is_Documents_Team == true) {
+                    selected = "selected";
+                }
+
+                opt += "<option " + selected + " value='" + data[i].No + "_" + data[i].Company_E_Mail + "'>"
+                    + data[i].First_Name + " " + data[i].Last_Name +
+                    "</option>";
             }
+
             $('#ddlUsers').append(opt);
 
         }
     });
 
 }
-
 function ShowSQProduct(SQNo) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
@@ -1239,7 +1104,7 @@ function ShowSQProduct(SQNo) {
                     $.each(data, function (index, item) {
                         rowData = "<tr><td>" + item.No + "</td><td>" + item.Description + "</td><td>" + item.Quantity + "</td><td>" + item.PCPL_Packing_Style_Code + "</td><td>" +
                             item.Unit_of_Measure_Code + "</td><td>" + item.PCPL_MRP + "</td><td>" + item.Unit_Price + "</td>";
-                            
+
                         if (item.Drop_Shipment == true) {
                             rowData += "<td>Yes</td>";
                         }
@@ -1264,7 +1129,7 @@ function ShowSQProduct(SQNo) {
                 $('#dvOrderedQtyDetails').css('display', 'none');
                 $('#dvInvoicedQtyDetails').css('display', 'none');
                 $('#dvInProcessQtyDetails').css('display', 'none');
-                
+
             },
             error: function () {
                 alert("error");
@@ -1281,7 +1146,7 @@ function ShowInvQty(ProdNo, LocCode, TRSQProdNo) {
     $('#dvSQScheOrder').css('display', 'none');
     $('#InvQtyDetailsTitle').text("Lot No. Wise Qty");
     $('#modalInvQty').css('display', 'block');
-    
+
 
     //url: '/SPSalesQuotes/GetInventoryDetails?ProdNo=' + $('#hfProdNo').val() + '&LocCode=' + $('#hfProdLocCode').val(),
 
@@ -1320,49 +1185,42 @@ function ShowOrderedQtyDetails(SQNo, QtyCount) {
     $('#lblQtyDetailsTitle').text("Ordered Qty Details");
     $('#lblSQProdSQNo').text(SQNo);
 
+    $('#tblOrderedQtyDetails').empty();
+
     if (QtyCount > 0) {
 
-        $.ajax(
-            {
-                url: '/SPSalesQuotes/GetOrderedQtyDetails?SQNo=' + SQNo,
-                type: 'GET',
-                contentType: 'application/json',
-                success: function (data) {
+        $.ajax({
+            url: '/SPSalesQuotes/GetOrderedQtyDetails?SQNo=' + SQNo,
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (data) {
 
-                    $('#tblOrderedQtyDetails').empty();
-                    var rowData = "";
+                var rowData = "";
 
-                    if (data != null && data != "") {
+                if (data != null && data.length > 0) {
 
-                        const OrderDate = data.OrderDate.split('-');
-                        var OrderDate_ = OrderDate[2] + "-" + OrderDate[1] + "-" + OrderDate[0];
+                    $.each(data, function (index, item) {
+                        let OrderDate_ = formatDate(item.OrderDate);
+                        let ScheduledDate_ = formatDate(item.ScheduledDate);
 
-                        const ScheduledDate = data.ScheduledDate.split('-');
-                        var ScheduledDate_ = ScheduledDate[2] + "-" + ScheduledDate[1] + "-" + ScheduledDate[0];
+                        rowData += "<tr>" + "<td>" + item.orderNo + "</td>" + "<td>" + OrderDate_ + "</td>" + "<td>" + item.Description + "</td>" + "<td>" + item.PCPL_Packing_Style_Code + "</td>" + "<td>" + item.Quantity + "</td>" + "<td>" + item.ScheduleQty + "</td>" + "<td>" + ScheduledDate_ + "</td>" + "<td>" + item.PCPL_Remarks + "</td>" + "<td>" + item.TPTPL_Assign_to + "</td>" + "</tr>";
+                    });
 
-                        rowData = "<tr><td>" + data.orderNo + "</td><td>" + OrderDate_ + "</td><td>" + data.Quantity + "</td><td>" + data.ScheduleQty + "</td>" +
-                            "<td>" + ScheduledDate_ + "</td><td>" + data.PCPL_Remarks + "</td><td>" + data.TPTPL_Assign_to + "</td></tr>";
-
-                        $('#tblOrderedQtyDetails').append(rowData);
-                    }
-                    else {
-                        rowData = "<tr><td colspan=7>No Records Found</td></tr>";
-                        $('#tblOrderedQtyDetails').append(rowData);
-                    }
-
-                },
-                error: function () {
-                    alert("error");
+                    $('#tblOrderedQtyDetails').append(rowData);
+                } else {
+                    rowData = "<tr><td colspan=7>No Records Found</td></tr>";
+                    $('#tblOrderedQtyDetails').append(rowData);
                 }
+
+            },
+            error: function () {
+                alert("error");
             }
-        );
+        });
 
-    }
-    else {
-
+    } else {
         var rowData = "<tr><td colspan=7>No Records Found</td></tr>";
         $('#tblOrderedQtyDetails').append(rowData);
-
     }
 
     $('#modalQtyDetails').css('display', 'block');
@@ -1372,14 +1230,19 @@ function ShowOrderedQtyDetails(SQNo, QtyCount) {
     $('#dvInProcessQtyDetails').css('display', 'none');
 }
 
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    return parts.length === 3 ? (parts[2] + "-" + parts[1] + "-" + parts[0]) : dateStr;
+}
+
 function ShowInvoicedQtyDetails(SQNo, QtyCount) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
     $('#lblQtyDetailsTitle').text("Invoiced Qty Details");
     $('#lblSQProdSQNo').text(SQNo);
 
-    if (QtyCount > 0)
-    {
+    if (QtyCount > 0) {
 
         $.ajax(
             {
@@ -1395,7 +1258,7 @@ function ShowInvoicedQtyDetails(SQNo, QtyCount) {
 
                         $.each(data, function (index, item) {
 
-                            rowData = "<tr><td>" + item.InvoiceNo + "</td><td>" + item.Posting_Date + "</td><td>" + item.Quantity + "</td><td>" + item.Vehicle_No_ + "</td>" +
+                            rowData = "<tr><td>" + item.InvoiceNo + "</td><td>" + item.Posting_Date + "</td><td>" + item.Description + "</td><td>" + item.PCPL_Packing_Style_Code + "</td><td>" + item.Quantity + "</td><td>" + item.Vehicle_No_ + "</td>" +
                                 "<td>" + item.PCPL_Dirver_Mobile_No_ + "</td><td>" + item.LR_RR_No_ + "</td></tr>";
 
                             $('#tblInvoicedQtyDetails').append(rowData);
@@ -1436,8 +1299,7 @@ function ShowInProcessQtyDetails(SQNo, QtyCount) {
     $('#lblQtyDetailsTitle').text("In Process Qty Details");
     $('#lblSQProdSQNo').text(SQNo);
 
-    if (QtyCount > 0)
-    {
+    if (QtyCount > 0) {
 
         $.ajax(
             {
@@ -1453,7 +1315,7 @@ function ShowInProcessQtyDetails(SQNo, QtyCount) {
 
                         $.each(data, function (index, item) {
 
-                            rowData = "<tr><td>" + item.No + "</td><td>" + item.PCPL_Transporter_Name + "</td><td>" + item.LR_RR_No + "</td><td>" + item.Vehicle_No + "</td><td>" + item.PCPL_Driver_Mobile_No + "</td>" +
+                            rowData = "<tr><td>" + item.No + "</td><td>0</td><td>0</td><td>" + item.PCPL_Transporter_Name + "</td><td>" + item.LR_RR_No + "</td><td>" + item.Vehicle_No + "</td><td>" + item.PCPL_Driver_Mobile_No + "</td>" +
                                 "<td>" + item.PCPL_Remarks + "</td></tr>";
 
                             $('#tblInProcessQtyDetails').append(rowData);
@@ -1462,7 +1324,7 @@ function ShowInProcessQtyDetails(SQNo, QtyCount) {
 
                     }
                     else {
-                        rowData = "<tr><td colspan=5>No Records Found</td></tr>";
+                        rowData = "<tr><td colspan='12'>No Records Found</td></tr>";
                         $('#tblInProcessQtyDetails').append(rowData);
                     }
 
@@ -1486,10 +1348,10 @@ function ShowInProcessQtyDetails(SQNo, QtyCount) {
     $('#dvInProcessQtyDetails').css('display', 'block');
 
 }
-
 function ResetSchOrdrDetails() {
 
     $('#txtScheduleDate').val("");
+    $('#txtDocumentDate').val("");
     $('#txtExternalDocNo').val("");
     $('#ddlUsers').val('-1');
     $('#tblProdsForSchOrdr').empty();
@@ -1501,7 +1363,7 @@ function showLineItems(itemNo) {
     $('#modalSQ').css('display', 'block');
     $('#dvSQLineItems').css('display', 'block');
     $('.modal-title').text(itemNo + ' - Sales Quote Line Items');
-    
+
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
 
@@ -1516,7 +1378,7 @@ function showLineItems(itemNo) {
                 $.each(data, function (index, item) {
                     var rowData = "<tr><td>" + item.Description + "</td><td>" + item.Quantity + "</td><td>" + item.Line_Amount + "</td></tr>";
                     $('#tbodyLItems').append(rowData);
-                    
+
                 });
 
             },
@@ -1528,25 +1390,44 @@ function showLineItems(itemNo) {
 }
 
 function dataTableFunction(orderBy, orderDir) {
-    dtable = $('#dataList').DataTable({
-        retrieve: true,
-        filter: false,
-        paging: false,
-        info: false,
-        responsive: true,
-        ordering: false,
+    var $dataListTable = $('#dataList');
+    if (!$dataListTable.length || !$.fn.DataTable) {
+        return;
+    }
+
+    try {
+        dtable = $dataListTable.DataTable({
+            retrieve: true,
+            filter: false,
+            paging: false,
+            info: false,
+            responsive: true,
+            ordering: false,
+        });
+    } catch (e) {
+        // If DataTables throws (e.g., parentNode null), skip init to keep page usable
+        return;
+    }
+
+    // Allow selecting a quote row for actions like Reopen
+    $('#dataList tbody').off('click', 'tr').on('click', 'tr', function () {
+        var quoteNo = ($(this).find('td').eq(3).text() || '').trim();
+        if (quoteNo) {
+            $('#hfSQNo').val(quoteNo);
+            $(this).addClass('table-active').siblings().removeClass('table-active');
+        }
     });
 
     if (orderDir == "asc") {
         $('#dataList th:lt(3)').removeClass("sorting_asc").removeClass("sorting_disabled");
         $('#dataList th:gt(5)').removeClass("sorting_asc").removeClass("sorting_disabled");
-        $('#dataList th').slice(3,6).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(3, 6).removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_desc").addClass("sorting_asc");
     }
     if (orderDir == "desc") {
         $('#dataList th:lt(3)').removeClass("sorting_desc").removeClass("sorting_disabled");
         $('#dataList th:gt(5)').removeClass("sorting_desc").removeClass("sorting_disabled");
-        $('#dataList th').slice(3,6).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
+        $('#dataList th').slice(3, 6).removeClass("sorting_desc").removeClass("sorting_asc").removeClass("sorting_disabled").addClass("sorting");
         $("#dataList th:nth-child(" + (orderBy + 1) + ")").removeClass("sorting").removeClass("sorting_asc").addClass("sorting_desc");
     }
 }
@@ -1594,13 +1475,13 @@ function pageMe() {
 
     var curr = 0;
     var skip = 0, top = $('#ddlRecPerPage').val();
-    
+
     while (numPages > curr && (settings.hidePageNumbers == false)) {
         $('<li id="pg' + (curr + 1) + '" class="pg"><a href="#" skip=' + skip + ' top=' + top + ' class="page_link">' + (curr + 1) + '</a></li>').appendTo(pager);
         skip = skip + parseInt($('#ddlRecPerPage').val());
         curr++;
     }
-    
+
     if (settings.showPrevNext) {
         $('<li><a href="#" class="next_link">»</a></li>').appendTo(pager);
     }
@@ -1677,7 +1558,7 @@ function pageMe() {
         $('.page_link').removeClass("active");
 
         currpg1.addClass("active");
-        
+
         children.css('display', 'none').slice(startAt, endOn).show();
 
         if (page >= 1) {
@@ -1705,9 +1586,9 @@ function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.fileName != "") {
-                    
+
                     window.location.href = "/SPSalesQuotes/Download?file=" + data.fileName;
                 }
             },
@@ -1726,7 +1607,7 @@ function ShortcloseReason(SQNo, ShortcloseType, SCRemarksSetupValue) {
     $('#hfSQNo').val(SQNo);
     $('#hfSCRemarksSetupValue').val(SCRemarksSetupValue);
     BindShortcloseReason();
-    
+
 }
 
 function SendEmail(SQNo, CustEmail) {
@@ -1738,22 +1619,12 @@ function SendEmail(SQNo, CustEmail) {
         if (data) {
             $('#divImage').hide();
             $('#modalEmailSent').css('display', 'block');
-                
+
         }
 
     });
 
 }
-
-//function PrintPreviewSQ(SQNo) {
-
-//    var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
-//    $.post('/SPSalesQuotes/PrintPreviewSQ?SQNo=' + SQNo, function (data) {
-
-
-//    });
-
-//}
 
 function PrintQuote(SQNo) {
 
@@ -1854,4 +1725,37 @@ function ShowErrMsg(errMsg) {
         msg: errMsg
     });
 
+}
+var notificationQuoteNo = "";
+var hasOpenedNotificationQuote = false;
+
+function getQueryStringValue(key) {
+    var query = window.location.search || '';
+    if (query.indexOf('?') === 0) {
+        query = query.substring(1);
+    }
+
+    if (!query) {
+        return '';
+    }
+
+    var pairs = query.split('&');
+    for (var i = 0; i < pairs.length; i++) {
+        var parts = pairs[i].split('=');
+        if (decodeURIComponent(parts[0] || '') === key) {
+            return decodeURIComponent((parts[1] || '').replace(/\+/g, ' ')).trim();
+        }
+    }
+
+    return '';
+}
+
+function applyNotificationQuoteFilter() {
+    notificationQuoteNo = getQueryStringValue('notificationQuoteNo');
+    if (!notificationQuoteNo) {
+        return;
+    }
+
+    var quoteFilter = "No eq '" + notificationQuoteNo.replace(/'/g, "''") + "'";
+    filter = filter ? (filter + ' and ' + quoteFilter) : quoteFilter;
 }

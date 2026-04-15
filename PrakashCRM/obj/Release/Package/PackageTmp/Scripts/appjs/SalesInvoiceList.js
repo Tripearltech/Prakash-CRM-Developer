@@ -236,6 +236,8 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPPostedSalesInvoice/';
 
+    showPageDataLoader();
+
     $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=PostedSalesInvoicesDotNetAPI&filter=' + filter, function (data) {
         $('#hdnSPSICount').val(data);
     });
@@ -275,6 +277,9 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                hidePageDataLoader();
             },
             error: function () {
                 alert("error");

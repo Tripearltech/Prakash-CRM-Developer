@@ -217,6 +217,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCount?apiEndPointName=EmployeesDotNetAPI&filter=' + filter, function (data) {
         $('#hdnSPCount').val(data);
     });
@@ -261,6 +265,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
             },
             error: function () {
                 alert("error");
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             }
         }
     );

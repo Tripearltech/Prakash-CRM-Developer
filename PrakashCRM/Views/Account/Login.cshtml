@@ -15,6 +15,66 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
     <link href="~/Content/appcss/LoginOTPCss.css" rel="stylesheet" />
     @Styles.Render("~/bundles/commoncss")
+    <style>
+        .app-loader-card {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            min-width: 140px;
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 12px 32px rgba(33, 37, 41, 0.16);
+        }
+
+        .app-loader-spinner {
+            display: inline-block;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            border: 0.35rem solid rgba(152, 185, 219, 0.28);
+            border-top-color: #4f8fc9;
+            border-right-color: #8bc9c2;
+            box-sizing: border-box;
+            animation: appLoaderSpin 0.95s linear infinite;
+        }
+
+        .app-loader-text {
+            margin: 0;
+            color: #495057;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .login-page-data-loader {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(2px);
+            z-index: 2000;
+        }
+
+        .login-page-data-loader__content {
+            min-width: 140px;
+        }
+
+        .login-page-data-loader__spinner {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-width: 0.4rem;
+        }
+
+        @keyframes appLoaderSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -56,6 +116,7 @@
                                                 <div class="d-grid">
                                                     <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
                                                     <input type="hidden" id="hdnSiteErrorLogUrl" value='@Url.Action("LogClientError", "SPSiteError")' />
+                                                    <input type="hidden" id="hfPostLoginRedirectUrl" value="@((ViewBag.PostLoginRedirectUrl ?? string.Empty).ToString())" />
                                                     <input id="hfAdminContactNo" value="" style="display:none" />
                                                     <button id="btnLogin" type="button" class="btn btn-primary"><i class="bx bxs-lock-open"></i>Login</button>
                                                 </div>
@@ -72,10 +133,10 @@
         </div>
     </div>
     <!--end wrapper-->
-    <div class='loader' id='divImage' style="display:none">
-        <!-- MODAL CONTENT -->
-        <div class='loader-content'>
-            <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+    <div id="divImage" class="login-page-data-loader" aria-hidden="true">
+        <div class="login-page-data-loader__content app-loader-card">
+            <span class="app-loader-spinner login-page-data-loader__spinner" role="status" aria-label="Loading"></span>
+            <p class="app-loader-text">Please wait...</p>
         </div>
     </div>
 
@@ -138,12 +199,22 @@
     <script src="~/Scripts/appjs/LoginOTP.js"></script>
     <!--Password show & hide js -->
     <script>
+        function showLoginPageLoader() {
+            $('#divImage').css('display', 'flex').attr('aria-hidden', 'false');
+        }
+
+        function hideLoginPageLoader() {
+            $('#divImage').hide().attr('aria-hidden', 'true');
+        }
+
         $(document).ready(function () {
 
           //GetAdminContact();
             var intervalID;
             var seconds = parseInt($("#lblSeconds").text());
             var minutes = parseInt($("#lblMinutes").text());
+            var trustedDeviceStorageKey = 'trustedDeviceToken';
+            var trustedDeviceExpiryKey = 'trustedDeviceExpiryUtc';
 
             // Function to call repeatedly
             function Timer() {
@@ -207,6 +278,118 @@
                 }
             }
 
+            function buildDeviceFingerprint() {
+                var parts = [
+                    navigator.userAgent || '',
+                    navigator.language || '',
+                    navigator.platform || '',
+                    (screen && screen.width ? screen.width : '') + 'x' + (screen && screen.height ? screen.height : ''),
+                    screen && screen.colorDepth ? screen.colorDepth : '',
+                    new Date().getTimezoneOffset()
+                ];
+
+                return parts.join('|');
+            }
+
+            function clearTrustedDeviceState() {
+                try { localStorage.removeItem(trustedDeviceStorageKey); } catch (e) { }
+                try { localStorage.removeItem(trustedDeviceExpiryKey); } catch (e) { }
+            }
+
+            function setTrustedDeviceState(token, expiryUtc) {
+                if (!token) {
+                    clearTrustedDeviceState();
+                    return;
+                }
+
+                try { localStorage.setItem(trustedDeviceStorageKey, token); } catch (e) { }
+
+                if (expiryUtc) {
+                    try { localStorage.setItem(trustedDeviceExpiryKey, expiryUtc); } catch (e) { }
+                }
+            }
+
+            function getTrustedDeviceToken() {
+                var expiryUtc = '';
+
+                try { expiryUtc = localStorage.getItem(trustedDeviceExpiryKey) || ''; } catch (e) { }
+
+                if (expiryUtc) {
+                    var expiryDate = new Date(expiryUtc);
+                    if (!isNaN(expiryDate.getTime()) && expiryDate <= new Date()) {
+                        clearTrustedDeviceState();
+                        return '';
+                    }
+                }
+
+                try { return localStorage.getItem(trustedDeviceStorageKey) || ''; } catch (e) { return ''; }
+            }
+
+            function resolvePostLoginRedirectUrl(serverRedirectUrl) {
+                var redirectUrl = serverRedirectUrl || $('#hfPostLoginRedirectUrl').val() || '@Url.Action("Index", "SPDashboard")';
+                return redirectUrl;
+            }
+
+            function detectPrivateMode(callback) {
+                var completed = false;
+
+                function finish(value) {
+                    if (completed) {
+                        return;
+                    }
+
+                    completed = true;
+                    callback(value === true);
+                }
+
+                try {
+                    var ua = (navigator.userAgent || '').toLowerCase();
+
+                    if (window.webkitRequestFileSystem) {
+                        window.webkitRequestFileSystem(window.TEMPORARY, 1, function () { finish(false); }, function () { finish(true); });
+                        return;
+                    }
+
+                    if (ua.indexOf('firefox') >= 0 && window.indexedDB) {
+                        try {
+                            var db = indexedDB.open('trusted-device-check');
+                            db.onerror = function () { finish(true); };
+                            db.onsuccess = function () {
+                                try {
+                                    db.result.close();
+                                    indexedDB.deleteDatabase('trusted-device-check');
+                                } catch (e) { }
+                                finish(false);
+                            };
+                            return;
+                        }
+                        catch (e) {
+                            finish(true);
+                            return;
+                        }
+                    }
+
+                    if (navigator.storage && navigator.storage.estimate) {
+                        navigator.storage.estimate().then(function (estimate) {
+                            if (estimate && estimate.quota && estimate.quota < 120000000) {
+                                finish(true);
+                                return;
+                            }
+
+                            finish(false);
+                        }, function () {
+                            finish(false);
+                        });
+                        return;
+                    }
+
+                    finish(false);
+                }
+                catch (e) {
+                    finish(false);
+                }
+            }
+
             $('#OTPmodal').on('hidden.bs.modal', function () {
                 $('#btnLoginSpinner').hide();
                 $('#InvalidOTPMsg').hide();
@@ -248,92 +431,110 @@
 
             $('#btnLogin').click(function () {
 
-                $('#divImage').show();
+                showLoginPageLoader();
 
-                //OTP functionality on Login Start
-
-                if ($('#email').val() != "" || $('#pass').val() != "") {
-
-                    //var pass = encodeURIComponent($('#pass').val());
-
-                    $.get("/Account/CheckLoginAndSendOTP?email=" + encodeURIComponent($('#email').val()) + "&pass=" + encodeURIComponent($('#pass').val()) + "&adminContactNo=" + encodeURIComponent($('#hfAdminContactNo').val()), function (data) {
-
-                        if (data.No != null) {
-
-                            if (data.PCPL_Enable_OTP_On_Login)
-                            {
-                                //$('#hfUserContactNo').val(data);
-                                $('#divImage').hide();
-                                showOtpModal();
-                                $('#hfSPNo').val(data.No);
-                                $('#hfUserContactNo').val(data.Phone_No_2);
-                                startTimer();
+                if ($('#email').val() != "" && $('#pass').val() != "") {
+                    detectPrivateMode(function (isPrivateMode) {
+                        $.post('/Account/CheckLoginAndSendOTP', {
+                            email: $('#email').val(),
+                            pass: $('#pass').val(),
+                            adminContactNo: $('#hfAdminContactNo').val(),
+                            trustedDeviceToken: getTrustedDeviceToken(),
+                            deviceFingerprint: buildDeviceFingerprint(),
+                            isPrivateMode: isPrivateMode
+                        }, function (data) {
+                            if (data && data.ClearTrustedDeviceState) {
+                                clearTrustedDeviceState();
                             }
-                            else {
-                                $('#divImage').hide();
-                                if (data.Status == "Inactive") {
-                                    var msg = "User is Inactive";
-                                    ShowActionMsg(msg);
+
+                            if (data && data.No != null) {
+                                if (data.RequireOtpVerification) {
+                                    hideLoginPageLoader();
+                                    showOtpModal();
+                                    $('#hfSPNo').val(data.No);
+                                    $('#hfUserContactNo').val(data.Phone_No_2);
+                                    startTimer();
                                 }
                                 else {
+                                    if (data.TrustedDeviceToken) {
+                                        setTrustedDeviceState(data.TrustedDeviceToken, data.TrustedDeviceExpiresUtc);
+                                    }
 
-                                window.location.replace('@Url.Action("Index", "SPDashboard")');
+                                    hideLoginPageLoader();
+                                    if (data.Status == "Inactive") {
+                                        var msg = "User is Inactive";
+                                        ShowActionMsg(msg);
+                                    }
+                                    else {
+                                        window.location.replace(resolvePostLoginRedirectUrl(data.RedirectUrl));
+                                    }
                                 }
                             }
-                        }
-                        else {
-
-                            $('#divImage').hide();
-                            var msg = "Please Enter Correct Email ID and Password.";
-                            ShowErrorMsg(msg);
-
-                        }
-
+                            else {
+                                hideLoginPageLoader();
+                                var msg = "Please Enter Correct Email ID and Password.";
+                                ShowErrorMsg(msg);
+                            }
+                        }).fail(function () {
+                            hideLoginPageLoader();
+                            ShowErrorMsg('Unable to process login right now.');
+                        });
                     });
-
                 }
                 else {
-
-                    $('#divImage').hide();
+                    hideLoginPageLoader();
                     var msg = "Please Enter Email ID and Password.";
                     ShowErrorMsg(msg);
-
                 }
-
             });
 
             $('#btnVerify').click(function () {
 
-                //$('#divImage').show();
                 $('#btnLoginSpinner').show();
-
                 var OTPInput = $('#otpdigit1').val() + $('#otpdigit2').val() + $('#otpdigit3').val() + $('#otpdigit4').val();
 
-                $.get('/Account/CheckLogin?SPNo=' + $('#hfSPNo').val() + '&OTP=' + OTPInput + '&ContactNo=' + $('#hfUserContactNo').val(), function (data) {
-                    if (data != "") {
-                        //$('#divImage').hide();
+                detectPrivateMode(function (isPrivateMode) {
+                    $.post('/Account/CheckLogin', {
+                        SPNo: $('#hfSPNo').val(),
+                        OTP: OTPInput,
+                        ContactNo: $('#hfUserContactNo').val(),
+                        deviceFingerprint: buildDeviceFingerprint(),
+                        isPrivateMode: isPrivateMode
+                    }, function (data) {
+                        if (data && data.ClearTrustedDeviceState) {
+                            clearTrustedDeviceState();
+                        }
+
+                        if (data && data.IsSuccess) {
+                            if (data.TrustedDeviceToken) {
+                                setTrustedDeviceState(data.TrustedDeviceToken, data.TrustedDeviceExpiresUtc);
+                            }
+
+                            $('#btnLoginSpinner').hide();
+                            window.location.replace(resolvePostLoginRedirectUrl(data.RedirectUrl));
+                        }
+                        else {
+                            hideLoginPageLoader();
+                            $('#btnLoginSpinner').hide();
+
+                            $('#InvalidOTPMsg').css('display', 'block');
+                            $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').val("");
+                            $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').removeAttr("value");
+                            $('#otpdigit1').focus();
+                        }
+                    }).fail(function () {
                         $('#btnLoginSpinner').hide();
-                        window.location.replace('@Url.Action("Index", "SPDashboard")');
-                        //remove below comments for OTP functionality
-                    }
-                    else {
-                        $('#divImage').hide();
-                        $('#btnLoginSpinner').hide();
-
-                        $('#InvalidOTPMsg').css('display', 'block');
-                        $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').val("");
-                        $('#otpdigit1,#otpdigit2,#otpdigit3,#otpdigit4').removeAttr("value");
-                        $('#otpdigit1').focus();
-                    }
+                        ShowErrorMsg('Unable to verify OTP right now.');
+                    });
                 });
-                });
+            });
 
-                $('#btnResendOTP').click(function () {
+            $('#btnResendOTP').click(function () {
 
-                    $('#btnLoginSpinner').show();
+                $('#btnLoginSpinner').show();
 
-                    $.get('/Account/ResendOTP?email=' + $('#email').val() + '&pass=' + $('#pass').val() +
-                        '&adminContactNo=' + $('#hfAdminContactNo').val(), function (data) {
+                $.get('/Account/ResendOTP?email=' + $('#email').val() + '&pass=' + $('#pass').val() +
+                    '&adminContactNo=' + $('#hfAdminContactNo').val(), function (data) {
                         if (data)
                         {
                             $('#btnLoginSpinner').hide();
@@ -350,13 +551,11 @@
                             startTimer();
                         }
                         else {
-                            //$('#divImage').hide();
                             $('#btnLoginSpinner').hide();
 
                         }
-                    });
-
                 });
+            });
             //OTP functionality on Login End*/
         });
 

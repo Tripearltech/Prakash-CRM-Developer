@@ -29,58 +29,75 @@
         });
 
     }
+    //$('#tblProdList').show();
+    DailyvisitDetailsFill();
+
+    var isDailyVisitEdit = ($.trim($('#hfDailyVisitEdit').val()).toLowerCase() === 'true') || ($.trim($('#hfNo').val()) !== '');
+    var dailyVisitNo = $.trim($('#hfNo').val());
+    var didLoadEditLines = false;
 
     let currentDate = new Date();
-    $('#txtDate').val(currentDate.toISOString().slice(0, 10));
+    if (!isDailyVisitEdit && $.trim($('#txtDate').val()) === '') {
+        $('#txtDate').val(currentDate.toISOString().slice(0, 10));
+    }
     GetAndFillWeeklyPlanForDailyPlan();
-
+    /*BindContactCompany();*/
     BindFinancialYear();
     BindStartingTime();
     BindClosingTime();
     BindVisitTypes();
     BindSalesperson();
     BindVisitMode();
+    // NOTE: BindVisitSubTypes is triggered after Type is selected in BindVisitTypes (edit mode safety).
     $('#ddlCompInvoice').append("<option value='-1'>---Select---</option>");
     $('#ddlCompInvoice').val('-1');
-    /*$('#ddlCompProduct').append("<option value='-1'>---Select---</option>");*/
-    //$('#ddlCompProduct').val('-1');
 
     $('#txtDate').blur(function () {
 
         GetAndFillWeeklyPlanForDailyPlan();
 
     });
-    
-    $('#ddlClosingAMPM').change(function () {
+
+    $('#ddlStartHours, #ddlStartMinutes,#ddlStartAMPM, #ddlClosingHours, #ddlClosingMinutes, #ddlClosingAMPM').change(function () {
 
         CalculateUpdateTotalTime();
 
     });
+    $("#txtClosingKM").on('keyup', function () {
+        let startKM = parseFloat($('#txtStartingKM').val());
+        let closeKM = parseFloat($('#txtClosingKM').val());
 
-    $('#txtClosingKM').change(function () {
+        // Reset previous error
+        $('#ErrorClosingKM').text("").css('display', 'none');
 
-        $('#txtTotalKM').val($('#txtClosingKM').val() - $('#txtStartingKM').val());
-        $('#txtTotalKM').attr('readonly', true);
+        if (isNaN(startKM) || isNaN(closeKM)) {
+            $('#txtTotalKM').val("");
+            return;
+        }
 
+        if (closeKM === startKM) {
+            $('#ErrorClosingKM').text("Closing KM cannot be equal to Starting KM.").css('display', 'block');
+            $('#txtTotalKM').val("");
+        }
+        else if (closeKM < startKM) {
+            $('#ErrorClosingKM').text("Closing KM cannot be less than Starting KM").css('display', 'block');
+            $('#txtTotalKM').val("");
+        }
+        else {
+
+            let totalKM = closeKM - startKM;
+
+            if (totalKM < 0) {
+                totalKM = 0;
+            }
+            $('#txtTotalKM').val(totalKM);
+            $('#txtTotalKM').attr('readonly', true);
+        }
     });
 
     $('#ddlType').change(function () {
 
         BindVisitSubTypes();
-
-        //if ($('#ddlType option:selected').text() == "TASK") {
-        //    $('#dvCustomerContact').css('display', 'block');
-        //    $('#dvProdDetails').css('display', 'block');
-        //    $('#dvEventTopic').css('display', 'none');
-        //    BindContactCompany();
-        //    BindProducts();
-        //}
-        //if ($('#ddlType option:selected').text() == "KNOWLEDGE") {
-        //    $('#dvEventTopic').css('display', 'block');
-        //    $('#dvCustomerContact').css('display', 'none');
-        //    $('#dvProdDetails').css('display', 'none');
-        //}
-        
     });
 
     $('#ddlSubType').change(function () {
@@ -99,6 +116,11 @@
             $('#dvEventTopic').css('display', 'none');
             BindContactCompany();
             $('#dvProdDetails').css('display', 'block');
+
+            if (isDailyVisitEdit && !didLoadEditLines && dailyVisitNo !== '') {
+                LoadDailyVisitProductsForEdit(dailyVisitNo);
+                didLoadEditLines = true;
+            }
         }
         else if (SubTypeDetails[1] == "Event") {
             $('#dvEventTopic').css('display', 'block');
@@ -112,6 +134,11 @@
             BindContactCompany();
             BindEvents($('#ddlType').val(), $('#ddlSubType').val());
             $('#dvProdDetails').css('display', 'block');
+
+            if (isDailyVisitEdit && !didLoadEditLines && dailyVisitNo !== '') {
+                LoadDailyVisitProductsForEdit(dailyVisitNo);
+                didLoadEditLines = true;
+            }
         }
 
     });
@@ -119,45 +146,28 @@
     $('#ddlCustomerName').change(function () {
 
         BindContactPerson();
-        //$('#btnCPersonAdd').prop('disabled', false);
+
         BindProducts();
         BindInvoiceDetails();
 
     });
 
     $('#ddlProductName').change(function () {
-
-        const CCompanyDetails = $('#ddlCustomerName').val().split('__');
-        var CompanyNo = CCompanyDetails[0];
-
-        if ($('#chkShowAllProducts').prop('checked')) {
-            CompanyNo = "";
-        }
-
-        $.get(apiUrl + 'GetProductDetails?CCompanyNo=' + CompanyNo + '&ProductNo=' + $('#ddlProductName').val(), function (data) {
-
-            $('#txtUOM').val(data.UOM);
-            $('#txtUOM').attr('readonly', true);
-
-            $('#hfCompetitor').val(data.Competitor);
-            BindCompetitors(data.Competitor);
-        });
-
+        LoadSelectedProductDetails();
     });
 
     $('#btnSaveProd').click(function () {
+        competitors = "";
+        selectedCompetitors = "";
 
         var numbers = /^[0-9]+$/;
         var prodQty = $('#txtProdQty').val();
-        var competitors = "";
-        var selectedCompetitors = "";
 
-        if ($('#ddlProductName').val() == "-1" || $('#txtProdQty').val() == "" || $('#txtUOM').val() == "") {
+        if ($('#ddlProductName').val() == "" || $('#txtProdQty').val() == "" || $('#txtUOM').val() == "") {
 
             var ErrMsg = "Please fill product details";
             $('#lblProdMsg').text(ErrMsg);
             $('#lblProdMsg').css('display', 'block');
-            //ShowErrMsg(ErrMsg);
 
         }
         else if (!prodQty.match(numbers)) {
@@ -168,45 +178,43 @@
 
         }
         else {
-
-            $('#lblProdMsg, #lblProdQtyMsg').css('display', 'none');
-            $('#lblProdMsg, #lblProdQtyMsg').text("");
-
+            $('#lblProdMsg, #lblProdQtyMsg').hide().text("");
             var prodOpts = "";
             var prodOptsTR = "";
 
-            $('#tblProdList').css('display', 'block');
+            $('#tblProdList').show();
 
             if ($('#hfProdNoEdit').val() != "") {
-
                 $("#ProdTR_" + $('#hfProdNoEdit').val()).html("");
                 prodOptsTR = "";
-
             }
             else {
-                prodOptsTR = "<tr id=\"ProdTR_" + $('#ddlProductName').val() + "\">";
+                prodOptsTR = "<tr id=\"ProdTR_" + $('#hfProdNo').val() + "\">";
             }
 
-            prodOpts = "<td><a class='DailyPlanProdCls' onclick='EditDailyPlanProd(\"ProdTR_" + $('#ddlProductName').val() + "\")'><i class='bx bxs-edit'></i></a>&nbsp;" +
-                "<a class='DailyPlanProdCls' onclick='DeleteDailyPlanProd(\"ProdTR_" + $('#ddlProductName').val() + "\")'><i class='bx bxs-trash'></i></a></td><td hidden>" + $('#ddlProductName').val() +
-                "</td><td>" + $('#ddlProductName option:selected').text() + "</td><td>" + $('#txtProdQty').val() + "</td><td>" + $('#txtUOM').val() + "</td>";
+            prodOpts = "<td><a class='DailyPlanProdCls' onclick='EditDailyPlanProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-edit'></i></a>&nbsp;" + "<a class='DailyPlanProdCls' onclick='DeleteDailyPlanProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-trash'></i></a></td>" + "<td hidden>" + $('#hfProdNo').val() + "</td>" + "<td>" + $('#ddlProductName').val() + "</td>" + "<td>" + $('#txtProdQty').val() + "</td>" + "<td>" + $('#txtUOM').val() + "</td>";
 
             if ($('#ddlCompetitors option').length > 1) {
-
 
                 $('#ddlCompetitors option:not(:first-child)').each(function () {
 
                     if ($(this).prop('selected')) {
                         selectedCompetitors += $(this).text() + ",";
                     }
+
                     competitors += $(this).text() + ",";
                 });
 
-                competitors = competitors.substring(0, competitors.length - 1);
-                selectedCompetitors = selectedCompetitors.substring(0, selectedCompetitors.length - 1);
-                prodOpts += "<td>" + selectedCompetitors + "</td>";
+                if (selectedCompetitors.length > 0)
+                    selectedCompetitors = selectedCompetitors.slice(0, -1);
 
+                if (competitors.length > 0)
+                    competitors = competitors.slice(0, -1);
+
+                prodOpts += "<td>" + selectedCompetitors + "</td>";
             }
+
+            $("#hfCompetitor").val("");
 
             if ($('#hfProdLineNo').val() != "") {
                 prodOpts += "<td hidden>" + $('#hfProdLineNo').val() + "</td>";
@@ -216,9 +224,7 @@
             }
 
             if ($('#hfProdNoEdit').val() != "") {
-
                 $("#ProdTR_" + $('#hfProdNoEdit').val()).append(prodOpts);
-
             }
             else {
                 prodOptsTR += prodOpts + "</tr>";
@@ -228,32 +234,35 @@
             $('#hfProdNoEdit').val("");
             $('#hfProdLineNo').val("");
             $('#ddlProductName').prop('disabled', false);
-            //var ProdTR = "<tr><td>" + $('#ddlProductName option:selected').text() + "</td><td>" + $('#txtProdQty').val() + "</td><td>" + $('#txtUOM').val() + "</td></tr>";
-            //$('#tblProducts').append(ProdTR);
+
             ResetProdDetails();
-            $('#ddlCompetitors').remove();
+            BindCompetitors("");
 
             var newCompetitors = "";
             const availableCompetitors = $('#hfAvailableCompetitors').val().split(',');
             const competitorsDetails = competitors.split(',');
-            for (var a = 1; a < competitorsDetails.length; a++) {
 
+            for (var a = 1; a < competitorsDetails.length; a++) {
                 if (!availableCompetitors.includes(competitorsDetails[a])) {
                     newCompetitors += competitorsDetails[a] + ",";
                 }
-
             }
 
             if (newCompetitors.length > 0) {
-                newCompetitors = newCompetitors.substring(0, newCompetitors.length - 1);
+                newCompetitors = newCompetitors.slice(0, -1);
                 AddNewCompetitors(newCompetitors);
             }
+        }
+    });
+    function DailyvisitDetailsFill() {
 
-            BindCompetitors($('#hfCompetitor').val());
-
+        // Edit-mode header hydration that isn't handled by server-bound helpers
+        var pdcVal = $.trim($('#hfchkIsPDC').val());
+        if (pdcVal !== '') {
+            $('#chkIsPDC').prop('checked', pdcVal.toLowerCase() === 'true');
         }
 
-    });
+    }
 
     $('#ddlCompInvoice').change(function () {
 
@@ -278,7 +287,9 @@
                     }
 
                     $('#ddlCompProduct').append(prodOpts);
-                    //$('#ddlCompProduct').val('-1');
+                    if ($("#hfddlCompProduct").val() != "") {
+                        $("#ddlCompProduct").val($("#hfddlCompProduct").val());
+                    }
 
                 },
                 error: function () {
@@ -298,24 +309,38 @@
 
     $('#chkShowAllProducts').change(function () {
 
-        if ($('#chkShowAllProducts').prop('checked')) {
-            BindAllProducts();
-        }
-        else {
-            BindProducts();
-        }
+        BindProducts();
+
         $('#txtUOM').val("");
 
     });
 
     $('#btnCPersonAdd').click(function () {
 
-        $('#modalAddNewCPerson').css('display', 'block');
-        BindDepartment();
+        if ($('#ddlCustomerName').val() != '-1' && $('#ddlCustomerName').val() != null) {
+            $('#lblAddMsg').text("");
+            $('#modalAddNewCPerson').css('display', 'block');
+            BindDepartment();
+        }
+        else {
+            alert("Select Contact Company");
+        }
 
     });
+    function CheckCPersonFieldValues() {
 
+        var errMsg = "";
+
+        if ($('#txtCPersonName').val() == "" || $('#txtCPersonMobile').val() == "" || $('#txtCPersonEmail').val() == "" || $('#ddlDepartment').val() == "-1" ||
+            $('#txtJobResponsibility').val() == "") {
+            errMsg = "Please Fill Details";
+        }
+
+        return errMsg;
+    }
     $('#btnConfirmAddCPerson').click(function () {
+        debugger;
+
 
         var errMsg = CheckCPersonFieldValues();
 
@@ -329,7 +354,8 @@
             var CPersonDetails = {};
 
             CPersonDetails.Name = $('#txtCPersonName').val();
-            CPersonDetails.Company_No = $('#ddlCustomerName').val();
+            const CompanyDetails = $('#ddlCustomerName').val().split('_');
+            CPersonDetails.Company_No = CompanyDetails[0];
             CPersonDetails.Mobile_Phone_No = $('#txtCPersonMobile').val();
             CPersonDetails.E_Mail = $('#txtCPersonEmail').val();
             CPersonDetails.PCPL_Job_Responsibility = $('#txtJobResponsibility').val();
@@ -349,25 +375,27 @@
                     body: JSON.stringify(CPersonDetails)
                 });
                 const res = await rawResponse.ok;
-                if (res) {
 
+                if (res) {
                     $('#btnAddSpinner').css('display', 'none');
-                    //$('#hfContactDetails').val($('#hfContactCompanyNo').val() + "_" + $('#hfPrimaryContactNo').val());
-                    //BindContact($('#hfContactDetails').val());
                     $('#lblAddMsg').text("Contact Person Added Successfully");
                     $('#lblAddMsg').css('color', 'green').css('display', 'block');
                     ResetCPersonDetails();
+                    setTimeout(function () {
+                        $('#modalAddNewCPerson').css('display', 'none');
 
+                    }, 1000);
+                    BindContactPerson();
                 }
             })();
         }
-
     });
+
 
     $('#btnCloseAddNewCPerson').click(function () {
 
         $('#modalAddNewCPerson').css('display', 'none');
-
+        BindContactPerson();
     });
 
 });
@@ -388,7 +416,9 @@ function GetAndFillWeeklyPlanForDailyPlan() {
 
                     $.each(data, function (index, item) {
 
-                        rowData += "<tr id=\"ProdTR_" + item.No + "\"><td><a onclick='FillWeekPlanDetails(\"ProdTR_" + item.No + "\")'><i class='bx bx-edit'></i></a></td><td>" + item.Financial_Year + "</td><td>" + item.Week_Plan_Date + "</td><td hidden>" +
+                        var editLink = "<a class='week-plan-edit-link' href='javascript:void(0);' onclick='FillWeekPlanDetails(\"ProdTR_" + item.No + "\")'><i class='bx bx-edit'></i></a>";
+
+                        rowData += "<tr id=\"ProdTR_" + item.No + "\"><td>" + editLink + "</td><td>" + item.Financial_Year + "</td><td>" + item.Week_Plan_Date + "</td><td hidden>" +
                             item.Contact_Company_No + "</td><td>" + item.ContactCompanyName + "</td><td hidden>" + item.Visit_Type + "</td><td>" + item.Visit_Name + "</td><td hidden>" +
                             item.Visit_Sub_Type + "</td><td>" + item.Visit_Sub_Type_Name + "</td><td>" + item.Mode_of_Visit + "</td><td>" + item.Pur_Visit + "</td><td hidden>" +
                             item.Contact_Person_No + "</td><td>" + item.Contact_Person_Name + "</td><td hidden>" + item.Event_No + "</td><td>" + item.Event_Name + "</td><td>" +
@@ -398,6 +428,7 @@ function GetAndFillWeeklyPlanForDailyPlan() {
 
                     $('#tblWeekPlanList').css('display', 'block');
                     $('#tableBody').append(rowData);
+                    ApplyCompletedWeekPlanRowState();
                 }
                 else {
 
@@ -414,6 +445,64 @@ function GetAndFillWeeklyPlanForDailyPlan() {
         }
     );
 
+}
+
+function ApplyCompletedWeekPlanRowState() {
+
+    var completedRowIds = GetCompletedWeekPlanRowIds();
+
+    $.each(completedRowIds, function (index, rowId) {
+        var $row = $('#' + rowId);
+        if ($row.length === 0) {
+            return;
+        }
+
+        $row.attr('data-is-dailyvisit-created', 'true');
+        $row.css('background-color', '#f8d7da');
+        $row.find('td').css('background-color', '#f8d7da');
+        $row.find('.week-plan-edit-link').addClass('disabled').css({
+            'pointer-events': 'none',
+            'opacity': '0.5',
+            'cursor': 'not-allowed'
+        }).removeAttr('onclick').attr('title', 'Already saved in Daily Visit');
+    });
+}
+
+function GetCompletedWeekPlanStorageKey() {
+
+    var selectedDate = $.trim($('#txtDate').val());
+    return 'DailyVisitCompletedWeekPlanRows_' + selectedDate;
+}
+
+function GetCompletedWeekPlanRowIds() {
+
+    var storageKey = GetCompletedWeekPlanStorageKey();
+    var savedRows = sessionStorage.getItem(storageKey);
+
+    if (!savedRows) {
+        return [];
+    }
+
+    try {
+        var parsedRows = JSON.parse(savedRows);
+        return Array.isArray(parsedRows) ? parsedRows : [];
+    }
+    catch (ex) {
+        return [];
+    }
+}
+
+function MarkWeekPlanRowAsCompleted(rowId) {
+
+    if ($.trim(rowId) === '') {
+        return;
+    }
+
+    var completedRowIds = GetCompletedWeekPlanRowIds();
+    if ($.inArray(rowId, completedRowIds) === -1) {
+        completedRowIds.push(rowId);
+        sessionStorage.setItem(GetCompletedWeekPlanStorageKey(), JSON.stringify(completedRowIds));
+    }
 }
 
 function BindFinancialYear() {
@@ -436,6 +525,15 @@ function BindFinancialYear() {
 
     $('#ddlFinancialYear').append(yearOpts);
 
+    var hiddenFY = $.trim($('#hfFinancialYear').val());
+    if (hiddenFY !== '') {
+        if ($('#ddlFinancialYear option[value="' + hiddenFY + '"]').length === 0) {
+            $('#ddlFinancialYear').append("<option value='" + hiddenFY + "'>" + hiddenFY + "</option>");
+        }
+        $('#ddlFinancialYear').val(hiddenFY);
+        return;
+    }
+
     if (currentMonth <= 2) {
         $('#ddlFinancialYear').val(prevFinancialYear);
     }
@@ -445,7 +543,17 @@ function BindFinancialYear() {
 
 }
 
+function ResetCPersonDetails() {
 
+    $('#txtCPersonName').val("");
+    $('#txtCPersonMobile').val("");
+    $('#txtCPersonEmail').val("");
+    $('#txtJobResponsibility').val("");
+    BindDepartment();
+    $('#chkAllowLogin').prop('checked', false);
+    $('#chkEnableOTPOnLogin').prop('checked', false);
+
+}
 function BindStartingTime() {
 
     var startHrs = "";
@@ -476,6 +584,15 @@ function BindStartingTime() {
 
     var startAMPM = "<option value=\"-1\"></option><option value=\"AM\">AM</option><option value=\"PM\">PM</option>";
     $('#ddlStartAMPM').append(startAMPM);
+    if ($("#hfStartTime").val() != "") {
+        $('#ddlStartHours').val($("#hfStartTime").val());
+    }
+    if ($("#hfStartMinutes").val() != "") {
+        $('#ddlStartMinutes').val($("#hfStartMinutes").val());
+    }
+    if ($.trim($("#hfStartAMPM").val()) != "") {
+        $('#ddlStartAMPM').val($("#hfStartAMPM").val());
+    }
 
 }
 
@@ -509,40 +626,77 @@ function BindClosingTime() {
 
     var closeAMPM = "<option value=\"-1\"></option><option value=\"AM\">AM</option><option value=\"PM\">PM</option>";
     $('#ddlClosingAMPM').append(closeAMPM);
-
+    if ($("#hfEndTime").val() != "") {
+        $('#ddlClosingHours').val($("#hfEndTime").val());
+    }
+    if ($("#hfEndMinutes").val() != "") {
+        $('#ddlClosingMinutes').val($("#hfEndMinutes").val());
+    }
+    if ($.trim($("#hfEndAMPM").val()) != "") {
+        $('#ddlClosingAMPM').val($("#hfEndAMPM").val());
+    }
 }
-
 function CalculateUpdateTotalTime() {
+    var startHH = $('#ddlStartHours').val();
+    var startMM = $('#ddlStartMinutes').val();
+    var startAMPM = $('#ddlStartAMPM').val();
 
-    var startHH = "", startMM = "";
-    var closeHH = "", closeMM = "";
-    var diffHH = "", diffMM = "";
+    var closeHH = $('#ddlClosingHours').val();
+    var closeMM = $('#ddlClosingMinutes').val();
+    var closeAMPM = $('#ddlClosingAMPM').val();
+    $('#ErrorClosingTimeMsg').text("");
 
-    if ($('#ddlStartAMPM').val() == "AM" && $('#ddlClosingAMPM').val() == "PM") {
-        closeHH = 12 + parseInt($('#ddlClosingHours').val());
+
+    if (closeAMPM == "-1") {
+
+        $('#txtTotalTime').val("");
+        return;
     }
-    else if ($('#ddlStartAMPM').val() == "PM" && $('#ddlClosingAMPM').val() == "AM") {
-        closeHH = 12 + parseInt($('#ddlClosingHours').val());
+
+    startHH = parseInt(startHH);
+    startMM = parseInt(startMM);
+    closeHH = parseInt(closeHH);
+    closeMM = parseInt(closeMM);
+
+    if (startAMPM === "PM" && startHH !== 12) {
+        startHH += 12;
     }
-    else {
-        closeHH = parseInt($('#ddlClosingHours').val());
+    if (startAMPM === "AM" && startHH === 12) {
+        startHH = 0;
+    }
+    if (closeAMPM === "PM" && closeHH !== 12) {
+        closeHH += 12;
+    }
+    if (closeAMPM === "AM" && closeHH === 12) {
+        closeHH = 0;
     }
 
-    //diffHH = $('#ddlClosingHours').val() - $('#ddlStartHours').val();
-    diffHH = closeHH - parseInt($('#ddlStartHours').val());
-    diffMM = $('#ddlClosingMinutes').val() - $('#ddlStartMinutes').val();
+    var startTime = new Date(0, 0, 0, startHH, startMM, 0);
+    var closeTime = new Date(0, 0, 0, closeHH, closeMM, 0);
 
-    if (diffHH <= 9)
-        diffHH = "0" + diffHH;
+    if (closeTime <= startTime) {
 
-    if (diffMM <= 9)
-        diffMM = "0" + diffMM;
+        $('#ErrorClosingTimeMsg').text("Please select a valid time.");
+        $('#ErrorClosingTimeMsg').css('display', 'block');
+        $('#txtTotalTime').val("");
+        return;
+    }
 
-    var totalTime = diffHH + ":" + diffMM + ":" + "00";
+
+    var diff = closeTime - startTime;
+
+    var diffHH = Math.floor(diff / (1000 * 60 * 60));
+    var diffMM = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+
+    diffHH = diffHH < 10 ? "0" + diffHH : diffHH;
+    diffMM = diffMM < 10 ? "0" + diffMM : diffMM;
+
+    var totalTime = diffHH + ":" + diffMM + ":00";
     $('#txtTotalTime').val(totalTime);
     $('#txtTotalTime').attr('readonly', true);
-
 }
+
 
 function BindVisitTypes() {
 
@@ -558,9 +712,17 @@ function BindVisitTypes() {
                 $.each(data, function (index, item) {
                     typeOpts += "<option value='" + item.No + "'>" + item.Description + "</option>";
                 });
-
                 $('#ddlType').append(typeOpts);
-                $('#ddlType').val('-1');
+                if ($("#hfddlType").val() != "") {
+                    $("#ddlType").val($("#hfddlType").val());
+                    // Ensure sub-types + downstream bindings load for edit mode
+                    $('#ddlType').trigger('change');
+                }
+                else {
+                    BindVisitSubTypes();
+                }
+
+
             },
             error: function () {
                 //alert("error");
@@ -585,21 +747,29 @@ function BindVisitSubTypes() {
                 $('#ddlSubType option').remove();
                 var subTypeOpts = "<option value='-1'>---Select---</option>";
                 var subTypeEdit = "";
+                var hiddenSubType = $.trim($('#hfSubType').val());
                 $.each(data, function (index, item) {
                     subTypeOpts += "<option value='" + item.No + "_" + item.Visit_Type_Option + "'>" + item.Description + "</option>";
-                    if ($('#hfSubType').val() != "") {
-                        if ($('#hfSubType').val() == item.No) {
+                    if (hiddenSubType !== "" && hiddenSubType.indexOf('_') === -1) {
+                        if (hiddenSubType == item.No) {
                             subTypeEdit = item.No + "_" + item.Visit_Type_Option;
                         }
-
                     }
                 });
 
                 $('#ddlSubType').append(subTypeOpts);
 
-                if ($('#hfSubType').val() != "") {
-                    $('#ddlSubType').val(subTypeEdit);
-                    $('#ddlSubType').change();
+                if (hiddenSubType !== "") {
+                    if (hiddenSubType.indexOf('_') > -1) {
+                        $('#ddlSubType').val(hiddenSubType);
+                    }
+                    else if (subTypeEdit !== "") {
+                        $('#ddlSubType').val(subTypeEdit);
+                    }
+
+                    if ($('#ddlSubType').val() && $('#ddlSubType').val() !== '-1') {
+                        $('#ddlSubType').trigger('change');
+                    }
                 }
 
             },
@@ -648,36 +818,100 @@ function BindDepartment() {
     );
 }
 
-function BindProducts() {
+function BindProducts(callback) {
 
-    const CCompanyDetails = $('#ddlCustomerName').val().split('__');
+    if ($('#ddlCustomerName').val() != null) {
 
-    $.ajax(
-        {
-            url: '/SPVisitEntry/GetProductsForDDL?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&CCompanyNo=' + CCompanyDetails[0],
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (data) {
+        const CCompanyDetails = $('#ddlCustomerName').val().split('__');
+        var CompnayNo = CCompanyDetails[0];
+    }
+    if (typeof ($.fn.autocomplete) === 'undefined') { return; }
+    console.log('init_autocomplete');
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
+    if ($('#chkShowAllProducts').prop('checked')) {
+        apiUrl += 'GetAllProductsForDDL'
+    }
+    else {
+        apiUrl += 'GetProductsForDDL?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&CCompanyNo=' + CompnayNo;
+    }
+    $.get(apiUrl, function (data) {
 
-                $('#ddlProductName option').remove();
-                var itemOpts = "<option value='-1'>---Select---</option>";
+        if (data != null) {
 
-                if (data.length > 0) {
-                    $.each(data, function (index, item) {
-                        itemOpts += "<option value='" + item.Item_No + "'>" + item.Item_Name + "</option>";
-                    });
+            let products = {};
+
+            for (let i = 0; i < data.length; i++) {
+                if ($('#chkShowAllProducts').prop('checked')) {
+                    products[data[i].No] = data[i].Description.trim();
+
                 }
-                
-                $('#ddlProductName').append(itemOpts);
-                $('#ddlProductName').val('-1');
-                
-            },
-            error: function () {
-                //alert("error");
-            }
-        }
-    );
+                else {
 
+                    products[data[i].Item_No] = data[i].Item_Name;
+                }
+            }
+            var productArray = $.map(products, function (value, key) {
+                return {
+                    value: value,
+                    data: key
+                };
+            });
+
+            $("#ddlProductName").autocomplete({
+
+                lookup: productArray,
+                onSelect: function (selecteditem) {
+                    $("#hfProdNo").val((selecteditem.data));
+                    LoadSelectedProductDetails();
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                }
+            })
+
+        }
+    });
+
+
+
+}
+
+function LoadSelectedProductDetails() {
+
+    var CompanyNo = "";
+    var selectedCompany = $('#ddlCustomerName').val();
+
+    if (selectedCompany != null && selectedCompany !== "") {
+        const CCompanyDetails = selectedCompany.split('__');
+        CompanyNo = CCompanyDetails[0];
+    }
+
+    if ($('#chkShowAllProducts').prop('checked')) {
+        CompanyNo = "";
+    }
+
+    var productNo = $.trim($('#hfProdNo').val());
+    if (productNo === "") {
+        return;
+    }
+
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
+    $.get(apiUrl + 'GetProductDetails?CCompanyNo=' + CompanyNo + '&ProductNo=' + productNo, function (data) {
+
+        $('#txtUOM').val(data.UOM);
+        $('#txtUOM').attr('readonly', true);
+        let compFromProduct = data.Competitor == null ? "" : data.Competitor;
+
+        var compOverride = $.trim($('#hfCompetitor').val());
+        if (compOverride !== "") {
+            BindCompetitors(compOverride, true);
+            $('#hfCompetitor').val('');
+        }
+        else {
+            BindCompetitors(compFromProduct);
+        }
+
+    });
 }
 
 function BindAllProducts() {
@@ -691,7 +925,7 @@ function BindAllProducts() {
 
                 $('#ddlProductName option').remove();
 
-                var itemOpts = "<option value='-1'>---Select---</option>";
+                var itemOpts = "<option value=''>---Select---</option>";
                 $.each(data, function (index, item) {
                     itemOpts += "<option value='" + item.No + "'>" + item.Description + "</option>";
                 });
@@ -707,47 +941,57 @@ function BindAllProducts() {
 
 }
 
-function BindCompetitors(Competitors) {
+function BindCompetitors(Competitors, showOnlySelected) {
 
     $.ajax(
         {
             url: '/SPVisitEntry/GetCompetitorsForDDL',
             type: 'GET',
-            contentType: 'application/json',
             success: function (data) {
 
-                $('#ddlCompetitors option').remove();
-                var availableCompetitors = "";
+                var raw = (Competitors || "");
+                var selectedNames = raw.split(',').map(function (x) { return $.trim(x); }).filter(function (x) { return x !== ""; });
+                // unique
+                selectedNames = selectedNames.filter(function (v, i, a) { return a.indexOf(v) === i; });
+
+                // Clear previous select2 selection + options
+                $('#ddlCompetitors').val(null).trigger('change');
+                $('#ddlCompetitors').empty();
+
                 var competitorOpts = "<option value='-1'>---Select---</option>";
-                $.each(data, function (index, item) {
 
-                    const competitorDetails = Competitors.split(',');
-
-
-                    if (competitorDetails.includes(item.competitor_Name)) {
-                        competitorOpts += "<option id=\"Competitor_" + item.competitor_Name + "\" value='" + item.No + "' selected>" + item.competitor_Name + "</option>";
-                    }
-                    else {
-                        competitorOpts += "<option id=\"Competitor_" + item.competitor_Name + "\" value='" + item.No + "'>" + item.competitor_Name + "</option>";
-                    }
-
-                    availableCompetitors += item.competitor_Name + ",";
-
-                });
-
-                availableCompetitors = availableCompetitors.substring(0, availableCompetitors.length - 1);
-                $('#hfAvailableCompetitors').val(availableCompetitors);
+                if (showOnlySelected === true) {
+                    // Only show the previously saved competitors
+                    $.each(selectedNames, function (_, name) {
+                        var match = null;
+                        if (data && data.length) {
+                            for (var i = 0; i < data.length; i++) {
+                                if (data[i].competitor_Name === name) { match = data[i]; break; }
+                            }
+                        }
+                        if (match) {
+                            competitorOpts += "<option value='" + match.No + "' selected>" + match.competitor_Name + "</option>";
+                        }
+                        else {
+                            var safeText = name.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+                            competitorOpts += "<option value='" + safeText + "' selected>" + safeText + "</option>";
+                        }
+                    });
+                }
+                else {
+                    // Normal behavior: show all competitors, preselect saved ones
+                    $.each(data, function (index, item) {
+                        var isSelected = selectedNames.indexOf(item.competitor_Name) > -1;
+                        competitorOpts += "<option value='" + item.No + "'" + (isSelected ? " selected" : "") + ">" + item.competitor_Name + "</option>";
+                    });
+                }
 
                 $('#ddlCompetitors').append(competitorOpts);
-
-            },
-            error: function () {
-                //alert("error");
+                $('#ddlCompetitors').trigger('change');
             }
-        }
-    );
-
+        });
 }
+
 
 function BindEvents(TypeNo, SubTypeDetails) {
 
@@ -801,6 +1045,9 @@ function BindSalesperson() {
                 });
 
                 $('#ddlCompAssignTo').append(spOpts);
+                if ($("#hfddlCompAssignTo").val() != "") {
+                    $("#ddlCompAssignTo").val($("#hfddlCompAssignTo").val());
+                }
             },
             error: function () {
                 //alert("error");
@@ -834,13 +1081,44 @@ function BindContactCompany() {
 
                     }
                 });
-
-                $('#ddlCustomerName').val('-1');
                 $('#ddlCustomerName').append(cCompanyOpts);
 
-                if ($('#hfContactCompanyNo').val() != "") {
-                    $('#ddlCustomerName').val(EditSelectCustDetails);
-                    $('#ddlCustomerName').change();
+                //if ($('#hfContactCompanyNo').val() != "") {
+                //    $('#ddlCustomerName').val(EditSelectCustDetails);
+                //    $('#ddlCustomerName').change();
+                //}
+                //var value = $("#hfddlCustomerName").val();
+                //var customer = $.trim(value);
+                //if ($("#hfddlCustomerName").val() != "") {
+                //    $("#ddlCustomerName").val(customer);
+                //}
+                var customer = $.trim($("#hfddlCustomerName").val());
+                var companyNo = $.trim($('#hfContactCompanyNo').val());
+
+                // 1) Exact match (composite value)
+                if (customer !== "" && $('#ddlCustomerName option[value="' + customer + '"]').length > 0) {
+                    $('#ddlCustomerName').val(customer);
+                    $('#ddlCustomerName').trigger('change');
+                    return;
+                }
+
+                // 2) Prefix match when only Company No is available
+                var noToMatch = customer !== "" ? customer : companyNo;
+                if (noToMatch !== "") {
+                    var matchedVal = "";
+                    $('#ddlCustomerName option').each(function () {
+                        var val = $(this).val();
+                        if (val && val.indexOf(noToMatch + "__") === 0) {
+                            matchedVal = val;
+                            return false;
+                        }
+                    });
+
+                    if (matchedVal !== "") {
+                        $('#ddlCustomerName').val(matchedVal);
+                        $('#ddlCustomerName').trigger('change');
+                        return;
+                    }
                 }
 
             },
@@ -852,12 +1130,92 @@ function BindContactCompany() {
 
 }
 
+function LoadDailyVisitProductsForEdit(dvpNo) {
+
+    if (!dvpNo) return;
+
+    $.ajax({
+        url: '/SPVisitEntry/GetDailyVisitProductDetails?dvpNo=' + encodeURIComponent(dvpNo),
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
+            $('#tblProducts').empty();
+
+            if (!data || data.length === 0) {
+                return;
+            }
+
+            $('#tblProdList').show();
+
+            $.each(data, function (index, item) {
+
+                var prodNo = item.Product_No || '';
+                var prodName = item.Product_Name || '';
+                var qty = (item.Quantity != null ? item.Quantity : '');
+                var uom = item.Unit_of_Measure || '';
+                var competitor = item.Competitor || '';
+                var lineNo = item.No || '';
+
+                var rowId = 'ProdTR_' + (prodNo || (index + 1));
+
+                var rowData = "<tr id=\"" + rowId + "\">";
+                rowData += "<td><a class='DailyPlanProdCls' onclick='EditDailyPlanProd(\"" + rowId + "\")'><i class='bx bxs-edit'></i></a>&nbsp;" +
+                    "<a class='DailyPlanProdCls' onclick='DeleteDailyPlanProd(\"" + rowId + "\")'><i class='bx bxs-trash'></i></a></td>";
+                rowData += "<td hidden>" + prodNo + "</td>";
+                rowData += "<td>" + prodName + "</td>";
+                rowData += "<td>" + qty + "</td>";
+                rowData += "<td>" + uom + "</td>";
+                rowData += "<td>" + competitor + "</td>";
+                rowData += "<td hidden>" + lineNo + "</td>";
+                rowData += "</tr>";
+
+                $('#tblProducts').append(rowData);
+            });
+        },
+        error: function () {
+            // Silent fail (same behavior as other binds)
+        }
+    });
+}
+
+//function BindContactCompany() {
+
+//    $.ajax({
+//        url: '/SPVisitEntry/GetContactCompanyForDDL',
+//        type: 'GET',
+//        success: function (data) {
+
+//            $('#ddlCustomerName').empty();
+//            var options = "<option value=''>---Select---</option>";
+
+//            $.each(data, function (index, item) {
+
+//                var optionValue = item.No + "__" + item.E_Mail + "__" + item.PCPL_Primary_Contact_No;
+
+//                options += "<option value='" + optionValue + "'>" + item.Name + "</option>";
+//            });
+
+//            $('#ddlCustomerName').html(options);
+
+//            // ✅ AFTER OPTIONS ARE LOADED
+//            var hiddenVal = $.trim($("#hfddlCustomerName").val());
+
+//            if (hiddenVal !== "") {
+//                $('#ddlCustomerName').val(hiddenVal);
+
+//                // debug
+//                console.log("Hidden:", hiddenVal);
+//                console.log("DDL:", $('#ddlCustomerName').val());
+//            }
+//        }
+//    });
+//}
+
 function BindContactPerson() {
 
     const CCompanyDetails = $('#ddlCustomerName').val().split('__');
     var CompanyNo = CCompanyDetails[0];
     var PrimaryContactNo = CCompanyDetails[2];
-    //url: '/SPVisitEntry/GetContactPersonForDDL?CompanyNo=' + $('#ddlCustomerName').val(),
 
     $.ajax(
         {
@@ -880,8 +1238,8 @@ function BindContactPerson() {
                     //$('#ddlContact').change();
                 }
 
-                if ($('#hfContactPersonNo').val() != "") {
-                    $('#ddlContactPerson').val($('#hfContactPersonNo').val());
+                if ($('#hfddlContactPerson').val() != "") {
+                    $('#ddlContactPerson').val($('#hfddlContactPerson').val());
                 }
 
             },
@@ -893,8 +1251,7 @@ function BindContactPerson() {
 
 }
 
-function BindInvoiceDetails()
-{
+function BindInvoiceDetails() {
     const CCompanyDetails = $('#ddlCustomerName').val().split('__');
     //url: '/SPVisitEntry/GetCustomerInvoiceForDDL?CompanyNo=' + $('#ddlCustomerName').val(),
 
@@ -911,9 +1268,10 @@ function BindInvoiceDetails()
                     invoiceOpts += "<option value='" + item.No + "'>" + item.No + "</option>";
                 });
 
-                $('#ddlCompInvoice').val('-1');
                 $('#ddlCompInvoice').append(invoiceOpts);
-
+                if ($("#hfddlCompInvoice").val() != "") {
+                    $("#ddlCompInvoice").val($("#hfddlCompInvoice").val());
+                }
             },
             error: function () {
                 //alert("error");
@@ -932,20 +1290,28 @@ function BindVisitMode() {
     VisitModeOpts += "<option value='Email'>Email</option>";
 
     $('#ddlVisitMode').append(VisitModeOpts);
+    if ($("#hfmodevisit").val() != "") {
+        $("#ddlVisitMode").val($("#hfmodevisit").val());
+    }
 
 }
 
 function EditDailyPlanProd(ProdTR) {
 
     ResetProdDetails();
-    var prodNo = $("#" + ProdTR).find("TD").eq(1).html();
+    var $row = $("#" + ProdTR);
+    var prodNo = $row.find("td[hidden]").first().html();
+    var prodName = $row.find("TD").eq(2).html();
+    var lineNo = $row.find("td[hidden]").last().html();
+    var competitorText = $.trim($row.find('td').filter(function () { return !$(this).is('[hidden]'); }).eq(4).text());
     $('#hfProdNoEdit').val(prodNo);
     $('#hfProdNo').val(prodNo);
-    $('#ddlProductName').val(prodNo);
+    $('#hfCompetitor').val(competitorText);
+    $('#ddlProductName').val(prodName);
     $('#ddlProductName').change();
     $('#ddlProductName').prop('disabled', true);
     $('#txtProdQty').val($("#" + ProdTR).find("TD").eq(3).html());
-    $('#hfProdLineNo').val($("#" + ProdTR).find("TD").eq(5).html());
+    $('#hfProdLineNo').val(lineNo);
 
 }
 
@@ -957,12 +1323,15 @@ function DeleteDailyPlanProd(ProdTR) {
 
 function ResetProdDetails() {
 
-    $('#ddlProductName').val('-1');
+    $('#ddlProductName').val('');
     $('#txtProdQty').val('');
     $('#txtUOM').attr('readonly', false);
     $('#txtUOM').val('');
-
+    $('#ddlCompetitors option:selected').prop("selected", false);
+    $('#ddlCompetitors').val(null).trigger('change');
+    $("#hfCompetitor").val("");
 }
+
 
 function CheckDailyPlanValues() {
 
@@ -1009,57 +1378,57 @@ function CheckDailyPlanValues() {
         $('#lblSubTypeMsg').css('display', 'none');
     }
 
-    if ($('#ddlSubType').val() != "-1") {
+    //if ($('#ddlSubType').val() != "-1") {
 
-        var subTypeDetails = $('#ddlSubType').val().split('_');
+    //    var subTypeDetails = $('#ddlSubType').val().split('_');
 
-        if (subTypeDetails[1] == "Customer" || subTypeDetails[1] == "Both") {
+    //    if (subTypeDetails[1] == "Customer" || subTypeDetails[1] == "Both") {
 
-            if ($('#ddlCustomerName').val() == "-1") {
-                $('#lblCustomerNameMsg').text("Please Select Customer");
-                $('#lblCustomerNameMsg').css('display', 'block');
-                flag = false;
-            }
-            else {
-                $('#lblCustomerNameMsg').text("");
-                $('#lblCustomerNameMsg').css('display', 'none');
-            }
+    //        if ($('#ddlCustomerName').val() == "-1") {
+    //            $('#lblCustomerNameMsg').text("Please Select Customer");
+    //            $('#lblCustomerNameMsg').css('display', 'block');
+    //            flag = false;
+    //        }
+    //        else {
+    //            $('#lblCustomerNameMsg').text("");
+    //            $('#lblCustomerNameMsg').css('display', 'none');
+    //        }
 
-            if ($('#ddlContactPerson').val() == "-1") {
-                $('#lblContactPersonMsg').text("Please Select Contact Person");
-                $('#lblContactPersonMsg').css('display', 'block');
-                flag = false;
-            }
-            else {
-                $('#lblContactPersonMsg').text("");
-                $('#lblContactPersonMsg').css('display', 'none');
-            }
+    //        if ($('#ddlContactPerson').val() == "-1") {
+    //            $('#lblContactPersonMsg').text("Please Select Contact Person");
+    //            $('#lblContactPersonMsg').css('display', 'block');
+    //            flag = false;
+    //        }
+    //        else {
+    //            $('#lblContactPersonMsg').text("");
+    //            $('#lblContactPersonMsg').css('display', 'none');
+    //        }
 
-        }
+    //    }
 
-        if (subTypeDetails[1] == "Event" || subTypeDetails[1] == "Both") {
+    //    if (subTypeDetails[1] == "Event" || subTypeDetails[1] == "Both") {
 
-            if ($('#ddlEventName').val() == "-1") {
-                $('#lblEventNameMsg').text("Please Select Event");
-                $('#lblEventNameMsg').css('display', 'block');
-                flag = false;
-            }
-            else {
-                $('#lblEventNameMsg').text("");
-                $('#lblEventNameMsg').css('display', 'none');
-            }
+    //        if ($('#ddlEventName').val() == "-1") {
+    //            $('#lblEventNameMsg').text("Please Select Event");
+    //            $('#lblEventNameMsg').css('display', 'block');
+    //            flag = false;
+    //        }
+    //        else {
+    //            $('#lblEventNameMsg').text("");
+    //            $('#lblEventNameMsg').css('display', 'none');
+    //        }
 
-            if ($('#txtTopicName').val() == "") {
-                $('#lblTopicNameMsg').text("Please Fill Topic Name");
-                $('#lblTopicNameMsg').css('display', 'block');
-                flag = false;
-            }
-            else {
-                $('#lblTopicNameMsg').text("");
-                $('#lblTopicNameMsg').css('display', 'none');
-            }
-        }
-    }
+    //        if ($('#txtTopicName').val() == "") {
+    //            $('#lblTopicNameMsg').text("Please Fill Topic Name");
+    //            $('#lblTopicNameMsg').css('display', 'block');
+    //            flag = false;
+    //        }
+    //        else {
+    //            $('#lblTopicNameMsg').text("");
+    //            $('#lblTopicNameMsg').css('display', 'none');
+    //        }
+    //    }
+    //}
 
     if ($('#ddlVisitMode').val() == "-1") {
         $('#lblVisitModeMsg').text("Please Select Mode Of Visit");
@@ -1075,7 +1444,6 @@ function CheckDailyPlanValues() {
         var ErrMsg = "Please fill product details";
         $('#lblProdMsg').text(ErrMsg);
         $('#lblProdMsg').css('display', 'block');
-        //ShowErrMsg(ErrMsg);
         flag = false;
     }
 
@@ -1087,6 +1455,12 @@ function CheckDailyPlanValues() {
 }
 
 function FillWeekPlanDetails(ProdTR) {
+
+    if ($("#" + ProdTR).attr('data-is-dailyvisit-created') === 'true') {
+        return;
+    }
+
+    $('#hfSelectedWeekPlanRowId').val(ProdTR);
 
     $('#ddlType').val($("#" + ProdTR).find("TD").eq(5).html());
     $('#hfSubType').val($("#" + ProdTR).find("TD").eq(7).html());
@@ -1103,7 +1477,7 @@ function FillWeekPlanDetails(ProdTR) {
     $('#hfWeekNo').val($("#" + ProdTR).find("TD").eq(16).html());
     $('#hfWeekStartDate').val($("#" + ProdTR).find("TD").eq(17).html());
     $('#hfWeekEndDate').val($("#" + ProdTR).find("TD").eq(18).html());
-    
+
     const ProdTRDetails = ProdTR.split('_');
     BindWeekPlanLineDetails(ProdTRDetails[1]);
 }
@@ -1190,3 +1564,82 @@ function ShowErrMsg(errMsg) {
     });
 
 }
+
+//function EditWeekPlanProd(ProdTR) {
+//    debugger;
+//    var row = $("#" + ProdTR).find("td");
+//    var productName = row.eq(2).text().trim();
+//    var quantity = row.eq(3).text().trim();
+//    var uom = row.eq(4).text().trim();
+//    var Competitors = row.eq(5).text().trim();
+//    $('#txtProdQty').val(quantity);
+//    $('#txtUOM').val(uom);
+//    //$('#ddlCompetitors').val(uom);
+//    //var competitorArray = Competitors.split(',').map(item => item.trim());
+
+
+//    BindProducts(function () {
+//        var matched = false;
+//        $("#ddlProductName option").each(function () {
+//            if ($(this).text().trim().toLowerCase() === productName.toLowerCase()) {
+//                $(this).prop("selected", true);
+//                matched = true;
+//                return false;
+//            }
+//        });
+//        if (!matched) {
+//            $('#ddlProductName').val(productName);
+//        }
+
+//        $('#ddlProductName').trigger('change');
+//        //$('#txtProdQty').val(quantity);
+//        //$('#txtUOM').val(uom);
+//        //competitorArray.forEach(function (val) {
+//        //    if ($("#ddlCompetitors option[value='" + val + "']").length === 0) {
+//        //        $("#ddlCompetitors").append(`<option value="${val}">${val}</option>`);
+//        //    }
+//        //});
+//        //$('#ddlCompetitors').val(competitorArray);
+//        //$('#ddlCompetitors').trigger('change');
+//        BindCompetitors(Competitors);
+//    });
+//}
+
+function EditWeekPlanProd(ProdTR) {
+
+    ResetProdDetails();
+    var $row = $("#" + ProdTR);
+    var prodNo = $row.find("td[hidden]").first().html();
+    var prodName = $row.find("TD").eq(2).html();
+    var lineNo = $row.find("td[hidden]").last().html();
+    var competitorText = $.trim($row.find('td').filter(function () { return !$(this).is('[hidden]'); }).eq(4).text());
+    $('#hfProdNoEdit').val(prodNo);
+    $('#hfProdNo').val(prodNo);
+    $('#hfCompetitor').val(competitorText);
+    $('#ddlProductName').val(prodName);
+    $('#ddlProductName').change();
+    $('#ddlProductName').prop('disabled', true);
+    $('#txtProdQty').val($("#" + ProdTR).find("TD").eq(3).html());
+    $('#hfProdLineNo').val(lineNo);
+
+}
+function EditDailyVisit(dvpNo) {
+
+    $.ajax({
+        url: "/SPVisitEntry/GetDailyvisitDDL",
+        type: "GET",
+        data: { No: dvpNo },
+        success: function (data) {
+
+            if (data != null) {
+                $('#ddlType').val(data.Visit_Name);
+                $('#ddlSubType').val(data.Visit_SubType_Name);
+                $('#ddlCustomerName').val(data.Contact_Company_Name);
+                $('#ddlContactPerson').val(data.Contact_Person_Name);
+                $('#ddlVisitMode').val(data.Mode_of_Visit);
+            }
+        }
+    });
+
+}
+

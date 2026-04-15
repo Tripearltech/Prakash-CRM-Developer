@@ -218,6 +218,10 @@ $(document).ready(function () {
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax(
         {
             url: '/SPWarehouse/GetWarehouseTaskAll?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter,
@@ -289,16 +293,19 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         } else if (item.DocumentType === "Purchase Order") {
                             fromLocaCell = item.FrompurCity;
                             toLocaCell = item.TopurCity;
+                        } else if (item.DocumentType === "Purchase Return") {
+                            fromLocaCell = item.FrompurCity;
+                            toLocaCell = item.TopurCity;
                         } else if (item.DocumentType === "Transfer Order") {
                             fromLocaCell = item.fromTransCity;
                             toLocaCell = item.ToTransCity;
                         }
                         if (item.AcceptedBy == "") {
                             var rowData = "<tr class='Incoming'>" + "<td><input type='checkbox' class='form-check-input' value='" + item.SystemId + "," + item.DocumentType + "~" + item.IsAnyLineWithDropShipment + "," + item.DocumentNo + "' /></td>" + "<td><a href='/SPWarehouse/WarehouseCard?No=" + item.DocumentNo + "&DocumentType=" + item.DocumentType + "'><span>" + item.DocumentNo + "</span></a></td>" +
-                                "<td>" + item.ShipmentDate + "</td>" + "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" + "<td>" + toLocaCell + "</td>" + "<td>" + item.DocumentType + "</td>" + "<td>" + item.AcceptedBy + "</td>" + "<td>" + item.IncoTerm + "</td>" + "<td>" + item.FromAddress + "</td>" + "<td>" + item.ToAddress + "</td>" + "</tr>";
+                                "<td>" + item.ShipmentDate + "</td>" + "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Purchase Return" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" + "<td>" + toLocaCell + "</td>" + "<td>" + item.DocumentType + "</td>" + "<td>" + item.AcceptedBy + "</td>" + "<td>" + item.IncoTerm + "</td>" + "<td>" + item.FromAddress + "</td>" + "<td>" + item.ToAddress + "</td>" + "</tr>";
                         } else {
                             var rowData = "<tr>" + "<td></td>" + "<td><a href='/SPWarehouse/WarehouseCard?No=" + item.DocumentNo + "&DocumentType=" + item.DocumentType + "'><span>" + item.DocumentNo + "</span></a></td>" + "<td>" + item.ShipmentDate + "</td>" +
-                                "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" + "<td>" + toLocaCell + "</td>" + "<td>" + item.DocumentType + "</td>" + "<td>" + item.AcceptedBy + "</td>" + "<td>" + item.IncoTerm + "</td>" + "<td>" + item.FromAddress + "</td>" + "<td>" + item.ToAddress + "</td>" + "</tr>";
+                                "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Purchase Return" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" + "<td>" + toLocaCell + "</td>" + "<td>" + item.DocumentType + "</td>" + "<td>" + item.AcceptedBy + "</td>" + "<td>" + item.IncoTerm + "</td>" + "<td>" + item.FromAddress + "</td>" + "<td>" + item.ToAddress + "</td>" + "</tr>";
                         }
 
 
@@ -331,6 +338,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
                 dataTableFunction(orderBy, orderDir);
 
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             },
             error: function () {
                 alert("error");

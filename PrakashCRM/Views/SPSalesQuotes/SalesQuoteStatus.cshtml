@@ -129,11 +129,11 @@
                             </thead>
                             <tbody id="tableBody">
                             </tbody>
-                            <tfoot>
+                            <!--<tfoot>
                                 <tr>
-                                    <th></th>
+                                    <th></th>-->
                                     @*<th></th>*@
-                                    <th></th>
+                                    <!--<th></th>
                                     <th>Quote No</th>
                                     <th>Quote Date</th>
                                     <th>Customer Name</th>
@@ -143,7 +143,7 @@
                                     <th>Salesperson Code</th>
                                     <th hidden>Salesperson Email</th>
                                 </tr>
-                            </tfoot>
+                            </tfoot>-->
                         </table>
                         <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
                         <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
@@ -351,7 +351,7 @@
 <script>
     function RedirectToSQCard(SQNo, ScheduleStatus, SQStatus, SQFor, LoggedInUserRole) {
 
-        window.location.replace('@Url.Action("SalesQuote", "SPSalesQuotes")?SQNo=' + SQNo + '&ScheduleStatus=' + ScheduleStatus + '&SQStatus=' + SQStatus + '&SQFor=' + SQFor + '&LoggedInUserRole=' + LoggedInUserRole);
+        window.location.replace('@Url.Action("SalesQuote", "SPSalesQuotes")?SQNo=' + SQNo + '&ScheduleStatus=' + ScheduleStatus + '&SQStatus=' + SQStatus + '&SQFor=' + SQFor + '&LoggedInUserRole=' + LoggedInUserRole + '&ReturnTo=SalesQuoteStatus');
 
     }
 </script>

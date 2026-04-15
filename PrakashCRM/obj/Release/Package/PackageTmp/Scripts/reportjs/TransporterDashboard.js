@@ -10,6 +10,10 @@ $(document).ready(function () {
 });
 
 function TransporterdashboardList(skip, top, firsload, orderBy, orderDir) {
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCounts?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=Transporterdashboard', function (data) {
         $('#hdnSPSICount').val(data);
     });
@@ -47,6 +51,11 @@ function TransporterdashboardList(skip, top, firsload, orderBy, orderDir) {
             }
             if (data.length == 0) {
                 $('ul.pager li').remove();
+            }
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
             }
         }
     });

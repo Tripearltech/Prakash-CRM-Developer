@@ -14,6 +14,10 @@ function InquiryManagement() {
     //var fromDate = fDate;
     //var toDate = tDate;
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetInquiryManagement',
         type: 'GET',
@@ -45,6 +49,11 @@ function InquiryManagement() {
             $("#tblemployeeInquiryManagement").append(employeeRow);
 
         },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
+        }
 
     });
 
@@ -59,6 +68,10 @@ $(document).on('click', '.salesQuotes', function () {
 });
 
 function SalesPersonQuotes(salespersonName, fromDate, toDate) {
+
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
 
 
     $.ajax({
@@ -87,6 +100,11 @@ function SalesPersonQuotes(salespersonName, fromDate, toDate) {
             $("#tbleSalesPesonQuotes").append(rowData);
 
 
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
 
     });
@@ -102,6 +120,10 @@ $(document).on('click', '.salesInquiry', function () {
     SalesPersonInquiry(salespersonName, "", "");
 });
 function SalesPersonInquiry(salespersonName, fromDate, toDate) {
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetSalesPesonInquiry',
         type: 'GET',
@@ -127,6 +149,11 @@ function SalesPersonInquiry(salespersonName, fromDate, toDate) {
             }
             $("#tbleSalesPesonInquiry").append(rowData);
 
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
     });
 }
@@ -139,6 +166,10 @@ $(document).on('click', '.confirmqoute', function () {
     ConfirmSalesQuotes(salesPerson, "", "");
 });
 function ConfirmSalesQuotes(salespersonName, fromDate, toDate) {
+
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
 
 
     $.ajax({
@@ -167,6 +198,11 @@ function ConfirmSalesQuotes(salespersonName, fromDate, toDate) {
             $("#tbleSalesPesonConfirmQuotes").append(rowData);
 
 
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
 
     });

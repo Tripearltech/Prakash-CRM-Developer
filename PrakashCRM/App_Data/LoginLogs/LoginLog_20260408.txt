@@ -1,0 +1,168 @@
+DateTime: 2026-04-08 11:30:22
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 11:57:27
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 11:57:29
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 11:57:44
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 11:57:44
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 11:58:00
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 13:04:32
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 13:16:26
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 14:33:25
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 14:54:08
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 15:50:30
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 15:50:31
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 15:50:48
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 15:50:48
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 15:51:07
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 16:07:25
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 16:19:59
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 16:38:12
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 17:01:44
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 18:00:41
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 18:00:41
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":null,"Phone_No_2":null,"PCPL_OTP":null,"First_Name":null,"Last_Name":null,"Company_E_Mail":null,"Job_Title":null,"Mobile_Phone_No":null,"Role":null,"Salespers_Purch_Code":null,"Global_Dimension_1_Code":null,"Status":null,"PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 18:00:56
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 18:25:52
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-08 18:31:49
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=prashant.s%40tripearltech.com&pass=Kusum1974%40%21
+RequestPayload: {"email":"prashant.s@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"9123472139","PCPL_OTP":"3165","First_Name":"Arvind","Last_Name":"khatod","Company_E_Mail":"prashant.s@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"9123472139","Role":"Salesperson","Salespers_Purch_Code":"AK18","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------

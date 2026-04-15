@@ -1,4 +1,5 @@
-﻿$(document).ready(function () {
+﻿var tempdate = "";
+$(document).ready(function () {
     BindYear(null);
 
     $('#btnCloseModalErrMsg').click(function () {
@@ -8,10 +9,21 @@
 
     });
 
+    var savedDate = localStorage.getItem("filterDate");
+    if (savedDate) {
+        $('#DateFilter').text(savedDate);
+        tempdate = savedDate;
+    } else {
+        $('#DateFilter').text("Select date by Clear Filter");
+        tempdate = "";
+    }
+    var txtSearch = "";
+    BindItemDropDwon_autocomplete(txtSearch);
 });
 var businessData;
 var financialYearData = {};
 function bindAdminBusinessPlan(previousFinancialYear, currentFinancialYear) {
+    debugger
     var apiUrl = $('#getServiceApiUrl').val() + 'SPAdminBusinessPlan/';
     $('#save-price').css('display', 'none');
     $.ajax(
@@ -20,10 +32,9 @@ function bindAdminBusinessPlan(previousFinancialYear, currentFinancialYear) {
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                // Rebind Year Dropdown and FY Header based on the data
                 var currentPlanYear = data != null && data.length > 0 ? data[0].Plan_Year : null;
                 console.log("Current Plan Year : " + currentPlanYear);
-              
+
                 let financialYearInfo = getFinancialYears(currentPlanYear);
                 bindYearDropdown(financialYearInfo);
                 bindFYHeader(financialYearInfo);
@@ -34,30 +45,32 @@ function bindAdminBusinessPlan(previousFinancialYear, currentFinancialYear) {
                 }
                 $('#tbl-admin-business-plan').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr id=\"ProdTR_" + item.Product_No + "\">" +
-                        "<td id=\"" + item.Product_No + "\" style=\"display:none;\">" + item.Product_No + "</td>" +
-                        "<td class='align-middle'>" + item.Product_Name + "</td>" +
+
+                    var rowData = "<tr id='ProdTR_" + item.Product_No + "'>" +
+                        "<td id='" + item.Product_No + "' style='display:none;'>" + item.Product_No + "</td>" + "<td class='align-middle'>" + item.Product_Name + "</td>" +
+                        "<td class='align-middle'>" + "<span class='badge bg-secondary'>" + commaSeparateNumber(item.Pre_Avg_Price.toFixed(2)) + "</span>" +"</td>" +
+                        "<td class='align-middle'>" +"<span class='badge bg-secondary'>" + commaSeparateNumber(item.Pre_GP_Percentage.toFixed(2)) + "</span>" +"</td>" +
+
                         "<td class='align-middle'>" +
                         "<span class='badge bg-secondary'>" + commaSeparateNumber(item.Actual_Avg_Price.toFixed(2)) + "</span>" +
                         "</td>" +
+
                         "<td class='align-middle'>" +
                         "<span class='badge bg-secondary'>" + commaSeparateNumber(item.Actual_GP_Percent.toFixed(2)) + "</span>" +
                         "</td>" +
-                        "<td class='align-middle'>" +
-                        "<span class='badge bg-secondary'>" + commaSeparateNumber(item.Pre_Avg_Price.toFixed(2)) + "</span>" +
-                        "</td>" +
-                        "<td class='align-middle'>" +
-                        "<span class='badge bg-secondary'>" + commaSeparateNumber(item.Pre_GP_Percentage.toFixed(2)) + "</span>" +
-                        "</td>" +
+
                         "<td>" +
-                        "<input type='number' class='form-control' name='item.Avg_Price' value=\"" + item.Avg_Price +"\" id=\"" + item.Product_No + "_Avg_Price\" onchange=\"setRowAltered('" + item.Product_No + "')\" />" +
+                        "<input type='number' class='form-control' name='item.Avg_Price' value='" + item.Avg_Price + "' id='" + item.Product_No + "_Avg_Price' onchange=\"setRowAltered('" + item.Product_No + "')\" />" +
                         "</td>" +
+
                         "<td>" +
-                        "<input type='number' class='form-control' name='item.GP_Percentage' value=\"" + item.GP_Percentage +"\" id=\"" + item.Product_No + "_GP_Percentage\" onchange=\"setRowAltered('" + item.Product_No + "')\" />" +
+                        "<input type='number' class='form-control' name='item.GP_Percentage' value='" + item.GP_Percentage + "' id='" + item.Product_No + "_GP_Percentage' onchange=\"setRowAltered('" + item.Product_No + "')\" />" +
                         "</td>" +
+
                         "<td>" +
-                        "<input type='hidden' name='item.isAltered' id=\"" + item.Product_No + "_isAltered\" value='false' />" +
+                        "<input type='hidden' name='item.isAltered' id='" + item.Product_No + "_isAltered' value='false' />" +
                         "</td>" +
+
                         "</tr>";
 
                     $('#tbl-admin-business-plan').append(rowData);
@@ -65,9 +78,7 @@ function bindAdminBusinessPlan(previousFinancialYear, currentFinancialYear) {
                     if (item.Avg_Price > 0) {
                         setRowAltered(item.Product_No);
                     }
-
                 });
-
 
                 if (data.length == 0) {
                     $('#tbl-admin-business-plan').empty();
@@ -128,11 +139,6 @@ $('#save-price').click(function () {
                 var actionMsg = "Admin Business Plan Updated Successfully";
                 ShowActionMsg(actionMsg);
             }
-
-            //if (responseMsg) {
-            //    var actionMsg = "Admin Business Plan Updated Successfully";
-            //    ShowActionMsg(actionMsg);
-            //}
         },
         error: function (data1) {
             $('#divImage').hide();
@@ -155,6 +161,22 @@ function ShowActionMsg(actionMsg) {
     });
 
 }
+$("#btnClearFilter").on('click', function () {
+    var today = new Date();
+    var day = today.getDate();
+    var month = today.getMonth() + 1;
+    var year = today.getFullYear();
+
+    if (day < 10) day = '0' + day;
+    if (month < 10) month = '0' + month;
+
+    var formattedDate = day + '/' + month + '/' + year;
+    $('#DateFilter').text(formattedDate);
+    tempdate = formattedDate;
+    localStorage.setItem("filterDate", formattedDate);
+    location.reload();
+});
+
 function getFinancialYears(financialYear) {
     let currentFinancialYear;
 
@@ -214,7 +236,7 @@ function bindYearDropdown(financialYearData) {
 function bindFYHeader(financialYearData) {
     $('#pre-FY').text(financialYearData.previous);
     $('#curr-FY').text(financialYearData.current);
-}   
+}
 function onYearChange() {
     const selectedYear = $('#ddlYear').val();
     console.log("Selected Financial Year:", selectedYear);
@@ -233,8 +255,66 @@ function onYearChange() {
 
     bindAdminBusinessPlan(previousYear, selectedYear);
 }
+function FilterBusinessPlanItem(searchText) {
 
+    searchText = searchText.toLowerCase().trim();
 
+    $("#tbl-admin-business-plan tr").each(function () {
 
+        var productName = $(this).find("td:eq(1)").text().toLowerCase();
 
+        if (searchText === "" || productName.includes(searchText)) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
 
+    });
+}
+
+function BindItemDropDwon_autocomplete(txtSearch) {
+
+    var Search = txtSearch != null ? txtSearch.trim() : "";
+
+    if (typeof ($.fn.autocomplete) === 'undefined') return;
+
+    var apiUrl = $('#getServiceApiUrl').val() + 'SPAdminBusinessPlan/GetItemDropDwon?Search=' + Search;
+
+    $.get(apiUrl, function (data) {
+
+        if (data != null) {
+
+            var productsArray = [];
+
+            for (var i = 0; i < data.length; i++) {
+                productsArray.push({
+                    value: data[i].Description,
+                    data: data[i].No
+                });
+            }
+
+            $('#txtitemName').autocomplete({
+                lookup: productsArray,
+                minChars: 0,
+                onSelect: function (selecteditem) {
+                    $('#hfitemNo').val(selecteditem.data);
+                }
+            });
+        }
+    });
+}
+
+$('#btnSearch').on('click', function () {
+
+    var txtSearch = $("#txtitemName").val();
+
+    if (!txtSearch) txtSearch = "";
+    FilterBusinessPlanItem(txtSearch);
+});
+//clear search filter
+$('#btnRefresh').on('click', function () {
+    $("#txtitemName").val("");
+    $("#hfitemNo").val("");
+    $("#tbl-admin-business-plan tr").show();
+
+});

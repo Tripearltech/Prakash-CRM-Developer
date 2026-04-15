@@ -9,6 +9,65 @@
     .EditCls:hover {
         cursor: pointer;
     }
+
+    .inquiry-filter-toolbar {
+        justify-content: flex-end;
+        align-items: center;
+        row-gap: 12px;
+    }
+
+    .inquiry-filter-toolbar .form-select,
+    .inquiry-filter-toolbar .form-control,
+    .inquiry-filter-toolbar .btn {
+        height: 38px;
+    }
+
+    .inquiry-filter-toolbar #ddlStatus {
+        min-width: 130px;
+    }
+
+    .inquiry-filter-toolbar #ddlField,
+    .inquiry-filter-toolbar #ddlOperator {
+        min-width: 190px;
+    }
+
+    .inquiry-filter-toolbar #txtFromDate,
+    .inquiry-filter-toolbar #txtToDate {
+        min-width: 160px;
+    }
+
+    .inquiry-filter-toolbar #dvtxtSearch {
+        min-width: 260px;
+    }
+
+    .inquiry-filter-toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .inquiry-filter-toolbar-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 42px;
+    }
+
+    @@media (max-width: 991.98px) {
+        .inquiry-filter-toolbar {
+            justify-content: flex-start;
+        }
+
+        .inquiry-filter-toolbar #ddlStatus,
+        .inquiry-filter-toolbar #ddlField,
+        .inquiry-filter-toolbar #ddlOperator,
+        .inquiry-filter-toolbar #txtFromDate,
+        .inquiry-filter-toolbar #txtToDate,
+        .inquiry-filter-toolbar #dvtxtSearch {
+            min-width: 100%;
+            width: 100%;
+        }
+    }
 </style>
 <link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
 <div class="page-content">
@@ -37,7 +96,7 @@
                         </div>
 
                         <div class="col-md-11">
-                            <div class="row row-cols-auto g-3" style="float:right">
+                            <div class="row row-cols-auto g-3 inquiry-filter-toolbar">
                                 <div class="col">
                                     <select id="ddlStatus" class="form-select">
                                         <option value="-1">All</option>
@@ -80,11 +139,12 @@
                                     </div>
                                 </div>
                                 <div class="col">
-                                    <button id="btnSearch" class="btn btn-primary" type="button"><i class="bx bx-search"></i></button>
-                                    &nbsp;
-                                    <button id="btnClearFilter" class="btn btn-primary" type="button">
-                                        <i class="bx bx-rotate-right me-0"></i>&nbsp;
-                                    </button>
+                                    <div class="inquiry-filter-toolbar-actions">
+                                        <button id="btnSearch" class="btn btn-primary" type="button" title="Search"><i class="bx bx-search"></i></button>
+                                        <button id="btnClearFilter" class="btn btn-primary" type="button" title="Clear Filter">
+                                            <i class="bx bx-rotate-right me-0"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="col">
                                     <button id="btnSendNotification" class="btn btn-primary" type="button"><i class="bx bx-mail-send"></i>Send Notification</button>

@@ -653,6 +653,16 @@ namespace PrakashCRM.Service.Controllers
             //if (result.Result.Item2.message != null)
             //    ed = result.Result.Item2;
 
+            if (!isEdit && responseInquiry != null && !string.IsNullOrWhiteSpace(responseInquiry.Inquiry_No)
+                && (responseInquiry.errorDetails == null || responseInquiry.errorDetails.isSuccess))
+            {
+                NotificationService notificationService = new NotificationService();
+                notificationService.RecordNewInquiry(
+                    inquiryheader.SPCode,
+                    responseInquiry.Inquiry_No,
+                    string.IsNullOrWhiteSpace(responseInquiry.Contact_Company_Name) ? inquiryheader.CustomerName : responseInquiry.Contact_Company_Name);
+            }
+
             return responseInquiry;
         }
 
@@ -759,6 +769,7 @@ namespace PrakashCRM.Service.Controllers
             SPInqNewJobtoAddressRes resNewJobtoAddress = new SPInqNewJobtoAddressRes();
             errorDetails ed = new errorDetails();
 
+            reqNewJobtoAddress.Code = string.IsNullOrWhiteSpace(reqNewJobtoAddress.Code) ? "" : reqNewJobtoAddress.Code.Trim();
             reqNewJobtoAddress.Address_2 = reqNewJobtoAddress.Address_2 == null || reqNewJobtoAddress.Address_2 == "" ? "" : reqNewJobtoAddress.Address_2;
             reqNewJobtoAddress.Job_to_GST_Customer_Type = "Registered";
 

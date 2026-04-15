@@ -1,6 +1,35 @@
 ﻿$(document).ready(function () {
 
-    var apiUrl = $('#getServiceApiUrl').val() + 'Salesperson/';
+    var validateResetTokenUrl = $('#validateResetTokenUrl').val();
+    var completeResetPasswordUrl = $('#completeResetPasswordUrl').val();
+    var resetToken = $('#resetToken').val();
+    var isTokenValid = false;
+
+    function showTokenError(message) {
+        $('#tokenStatusMessage').text(message).show();
+        $('#btnReset').prop('disabled', true);
+        $('#newpass').prop('disabled', true);
+        $('#confirmnewpass').prop('disabled', true);
+    }
+
+    function clearTokenError() {
+        $('#tokenStatusMessage').hide().text('');
+        $('#newpass').prop('disabled', false);
+        $('#confirmnewpass').prop('disabled', false);
+    }
+
+    $.get(validateResetTokenUrl, { token: resetToken }, function (data) {
+        if (data && data.IsValid) {
+            isTokenValid = true;
+            clearTokenError();
+        }
+        else {
+            showTokenError(data && data.Message ? data.Message : 'Invalid link');
+        }
+    }).fail(function () {
+        showTokenError('Invalid link');
+    });
+
     $("#show_hide_newpassword a").on('click', function (event) {
         debugger;
         event.preventDefault();
@@ -29,7 +58,7 @@
     });
 
     $('#newpass').blur(function () {
-        if ($('#newpass').val() != "") {
+        if (isTokenValid && $('#newpass').val() !== "") {
             var str = $('#newpass').val();
             if (str.match(/[a-z]/g) && str.match(/[A-Z]/g) && str.match(/[0-9]/g) && str.match(/[^a-zA-Z\d]/g) && isValid(str) && str.length >= 8) {
                 $('#btnReset').prop('disabled', false);
@@ -52,15 +81,10 @@
     });
 
     $('#confirmnewpass').blur(function () {
-        if ($('#confirmnewpass').val() != "") {
-            if ($('#newpass').val() != $('#confirmnewpass').val()) {
-
-                var msg = "New Password and Confirm New Password didn\'t match.";
-                ShowErrMsg(msg);
-
-                $('#confirmnewpass').val('');
-                $('#confirmnewpass').focus();
-            }
+        if ($('#confirmnewpass').val() !== "" && $('#newpass').val() !== $('#confirmnewpass').val()) {
+            ShowErrMsg("New Password and Confirm New Password didn't match.");
+            $('#confirmnewpass').val('');
+            $('#confirmnewpass').focus();
         }
     });
 
@@ -77,45 +101,53 @@
 
     $('#btnReset').click(function () {
 
+        if (!isTokenValid) {
+            showTokenError('Invalid link');
+            return;
+        }
+
         $('#divImage').show();
 
-        if ($('#newpass').val() != "" && $('#confirmnewpass').val() != "" && $('#newpass').val() == $('#confirmnewpass').val()) {
+        if ($('#newpass').val() !== "" && $('#confirmnewpass').val() !== "" && $('#newpass').val() === $('#confirmnewpass').val()) {
+            $.ajax({
+                url: completeResetPasswordUrl,
+                type: 'POST',
+                data: {
+                    token: resetToken,
+                    newPassword: $('#confirmnewpass').val()
+                },
+                success: function (data) {
+                    $('#divImage').hide();
 
-            $.get(apiUrl + 'GetByEmail?email=' + getUrlVars()["token"] + '&isEncrypted=true', function (data) {
-
-                if (data != null) {
-
-                    $.post(
-                        apiUrl + 'ResetForgotPassword?email=' + data.Company_E_Mail + '&userNo=' + data.No + '&newPassword=' + $('#confirmnewpass').val(),
-                        function (data) {
-
-                            if (data) {
-
-                                $('#divImage').hide();
-                                //$('#successMsg').show();
-                                if (sessionStorage.getItem('#modal') !== 'true') {
-                                    $('#modal').css('display', 'block');
-
-                                    //then the modal will be set true in the current session due to which the modal won't
-
-                                    //reappear on the refresh, we need to reload the page in a new tab to make the modal
-
-                                    //reappear.
-
-                                    sessionStorage.setItem('#ad_modal', 'true');
-                                }
-                                $('#btnReset').prop('disabled', true);
-                            }
+                    if (data && data.Success) {
+                        if (sessionStorage.getItem('#modal') !== 'true') {
+                            $('#modal').css('display', 'block');
+                            sessionStorage.setItem('#ad_modal', 'true');
                         }
-                    );
+
+                        $('#btnReset').prop('disabled', true);
+                    }
+                    else {
+                        var errorMessage = data && data.Message ? data.Message : 'Invalid link';
+                        if (errorMessage === 'Invalid link' || errorMessage === 'Link already used' || errorMessage === 'Link expired') {
+                            isTokenValid = false;
+                            showTokenError(errorMessage);
+                        }
+                        else {
+                            ShowErrMsg(errorMessage);
+                        }
+                    }
+                },
+                error: function () {
+                    $('#divImage').hide();
+                    ShowErrMsg('Unable to reset password right now.');
                 }
             });
         }
         else {
 
             $('#divImage').hide();
-            var msg = "Please Enter New Password and Confirm New Password and both must be a same.";
-            ShowErrMsg(msg);
+            ShowErrMsg('Please Enter New Password and Confirm New Password and both must be a same.');
 
         }
 
@@ -123,19 +155,7 @@
 });
 
 function isValid(str) {
-    return /^(?=.*[!@$_])[a-zA-Z0-9!@$_]+$/.test(str);
-}
-function getUrlVars() {
-
-    var vars = [], hash;
-    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-    }
-    return vars;
-
+    return /^(?=.*[^a-zA-Z0-9]).+$/.test(str);
 }
 
 function ShowErrMsg(errMsg) {

@@ -18,6 +18,25 @@
         overflow-y: auto;
         height: 550px;
     }
+    /* 🔥 scroll container */
+    .table-scroll {
+        max-height: 650px;
+        overflow-y: auto;
+    }
+
+        /* 🔥 sticky header (FORCE FIX) */
+        .table-scroll thead th {
+            position: sticky !important;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+    /* 🔥 important for bootstrap conflict */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
 </style>
 <link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
 <div class="page-content">
@@ -39,27 +58,30 @@
     <hr />
     <div class="card">
         <div class="card-body">
-
             <div class="row g-3">
-                <div class="col-md-1">
-                    <button id="btnCreateWeekPlan" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                <div class="col-auto">
+                    <button id="btnCreateWeekPlan"
+                            class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 px-3 py-2"
+                            type="button">
+
+                        <i class='bx bxs-plus-square'></i>
+                        <span>New</span>
+
+                    </button>
                 </div>
                 <div class="col-md-5">
-                    <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label">Financial Year</label>
-                        <div class="col-sm-10">
-                            @*<select id="ddlFinancialYear" class="form-select"></select>*@
-                            <label id="lblCurrFinancialYear" class="form-label" style="font-weight:bold"></label>
-                        </div>
+                    <div class="d-inline-flex align-items-center">
+                        <span class="text-muted me-2">Financial Year</span>
+                        <span id="lblCurrFinancialYear" class="fw-bold"></span>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-3">
+            <div class="row mt-3">
                 <div class="col-md-12">
-                    <div class="table-responsive">
-                        <table class="table mb-0 table-striped">
-                            <thead>
+                    <div class="table-responsive table-scroll">
+                        <table class="table table-striped mb-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Week No</th>
                                     <th>From Date</th>
@@ -70,19 +92,19 @@
                             </thead>
                             <tbody id="tblWeekPlans">
                                 @*<tr>
-                                <td>1</td>
-                                <td>01-04-2025</td>
-                                <td>05-04-2025</td>
-                                <td><a onclick="ShowWeekPlans()" style="cursor:pointer">17</a></td>
-                                <td><a href="#">7</a></td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>07-04-2025</td>
-                                <td>12-04-2025</td>
-                                <td><a href="#">15</a></td>
-                                <td><a href="#">5</a></td>
-                            </tr>*@
+                            <td>1</td>
+                            <td>01-04-2025</td>
+                            <td>05-04-2025</td>
+                            <td><a onclick="ShowWeekPlans()" style="cursor:pointer">17</a></td>
+                            <td><a href="#">7</a></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>07-04-2025</td>
+                            <td>12-04-2025</td>
+                            <td><a href="#">15</a></td>
+                            <td><a href="#">5</a></td>
+                        </tr>*@
                             </tbody>
                         </table>
                         <input id="hdnWeekPlanNo" style="display:none" />
@@ -234,13 +256,13 @@
 <script>
 $(document).ready(function () {
     $('#btnCreateWeekPlan').click(function () {
-        window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")');
+        window.location.href = '@Url.Action("WeekPlan", "SPVisitEntry")';
     });
 });
 
 function EditWeekPlan(No) {
 
-    window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")?No=' + No);
+    window.location.href = '@Url.Action("WeekPlan", "SPVisitEntry")?No=' + No;
 
 }
 </script>

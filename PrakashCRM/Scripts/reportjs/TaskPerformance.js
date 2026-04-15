@@ -14,6 +14,10 @@ function TaskPerformance() {
     //var fromDate = fDate;
     //var toDate = tDate;
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetTaskPerformance',
         type: 'GET',
@@ -42,6 +46,11 @@ function TaskPerformance() {
             $("#tblemployeeTaskPerformance").append(employeeRow);
 
         },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
+        }
 
     });
 
@@ -56,6 +65,10 @@ $(document).on('click', '.SalesPerson', function () {
 });
 
 function PerfomanceTask(salespersonName) {
+
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
 
 
     $.ajax({
@@ -97,6 +110,11 @@ function PerfomanceTask(salespersonName) {
             $("#tbleTaskPerformance").append(rowData);
 
 
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
 
     });

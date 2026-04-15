@@ -436,12 +436,22 @@ namespace PrakashCRM.Controllers
             return Json(WebsiteLog, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task<JsonResult> GetCustomerOutStanding()
+        public async Task<JsonResult> GetCustomerOutStanding(int pageNumber = 1, int pageSize = 10, string orderby = "Location_Code asc")
         {
-            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerOutStanding";
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            if (pageSize <= 0)
+                pageSize = 10;
+
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerOutStanding?pageNumber=" + pageNumber + "&pageSize=" + pageSize + "&orderby=" + HttpUtility.UrlEncode(string.IsNullOrWhiteSpace(orderby) ? "Location_Code asc" : orderby);
 
             HttpClient client = new HttpClient();
-            List<SPCustomerOutstanding> outStandingDtails = new List<SPCustomerOutstanding>();
+            PagedResult<SPCustomerOutstanding> outStandingDtails = new PagedResult<SPCustomerOutstanding>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
 
             client.BaseAddress = new Uri(apiUrl);
             client.DefaultRequestHeaders.Accept.Clear();
@@ -451,7 +461,7 @@ namespace PrakashCRM.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var data = await response.Content.ReadAsStringAsync();
-                outStandingDtails = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SPCustomerOutstanding>>(data);
+                outStandingDtails = Newtonsoft.Json.JsonConvert.DeserializeObject<PagedResult<SPCustomerOutstanding>>(data);
             }
 
             return Json(outStandingDtails, JsonRequestBehavior.AllowGet);

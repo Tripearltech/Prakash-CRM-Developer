@@ -19,6 +19,72 @@ namespace PrakashCRM.Service.Controllers
     {
         private static readonly TimeSpan DefaultResetTokenLifetime = TimeSpan.FromMinutes(15);
 
+        private static string NormalizeEmail(string email)
+        {
+            return (email ?? string.Empty).Trim();
+        }
+
+        private static IEnumerable<string> SplitEmails(string emails)
+        {
+            return (emails ?? string.Empty)
+                .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(part => (part ?? string.Empty).Trim())
+                .Where(part => !string.IsNullOrWhiteSpace(part));
+        }
+
+        private static string FindMatchingEmail(string emails, string email)
+        {
+            string normalizedEmail = NormalizeEmail(email);
+            if (string.IsNullOrWhiteSpace(normalizedEmail))
+                return string.Empty;
+
+            foreach (string candidate in SplitEmails(emails))
+            {
+                if (string.Equals(candidate, normalizedEmail, StringComparison.OrdinalIgnoreCase))
+                    return candidate;
+            }
+
+            return string.Empty;
+        }
+
+        private static Salesperson FindSalespersonByEmail(API api, string email, out string matchedEmail)
+        {
+            matchedEmail = string.Empty;
+
+            string normalizedEmail = NormalizeEmail(email);
+            if (string.IsNullOrWhiteSpace(normalizedEmail))
+                return null;
+
+            string escapedEmail = normalizedEmail.Replace("'", "''");
+            var exactResult = api.GetData<Salesperson>("EmployeesDotNetAPI", "Company_E_Mail eq '" + escapedEmail + "'");
+            Salesperson exactUser = exactResult?.Result.Item1?.value?.FirstOrDefault();
+            if (exactUser != null)
+            {
+                matchedEmail = FindMatchingEmail(exactUser.Company_E_Mail, normalizedEmail);
+                if (string.IsNullOrWhiteSpace(matchedEmail))
+                    matchedEmail = normalizedEmail;
+
+                return exactUser;
+            }
+
+            var containsResult = api.GetData<Salesperson>("EmployeesDotNetAPI", "contains(Company_E_Mail,'" + escapedEmail + "')");
+            List<Salesperson> candidates = containsResult?.Result.Item1?.value;
+            if (candidates == null)
+                return null;
+
+            foreach (Salesperson candidate in candidates)
+            {
+                string candidateEmail = FindMatchingEmail(candidate.Company_E_Mail, normalizedEmail);
+                if (!string.IsNullOrWhiteSpace(candidateEmail))
+                {
+                    matchedEmail = candidateEmail;
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
         private static LoggedInUserProfile MapLoggedInUserProfile(SPProfile user)
         {
             LoggedInUserProfile loggedInUserProfile = new LoggedInUserProfile();
@@ -206,16 +272,15 @@ namespace PrakashCRM.Service.Controllers
 
             UserCustVendor userCustVendor = new UserCustVendor();
 
-            var result = ac.GetData<Salesperson>("EmployeesDotNetAPI", "Company_E_Mail eq '" + email + "'");
+            string matchedEmail;
+            Salesperson matchedUser = FindSalespersonByEmail(ac, email, out matchedEmail);
 
-            if (result.Result.Item1.value.Count > 0)
+            if (matchedUser != null)
             {
-                userCustVendor.No = result.Result.Item1.value[0].No;
-
-                userCustVendor.Company_E_Mail = result.Result.Item1.value[0].Company_E_Mail;
-                userCustVendor.Role = result.Result.Item1.value[0].Role;
-
-                userCustVendor.Password = result.Result.Item1.value[0].Password;
+                userCustVendor.No = matchedUser.No;
+                userCustVendor.Company_E_Mail = string.IsNullOrWhiteSpace(matchedEmail) ? NormalizeEmail(email) : matchedEmail;
+                userCustVendor.Role = matchedUser.Role;
+                userCustVendor.Password = matchedUser.Password;
             }
 
             return userCustVendor;

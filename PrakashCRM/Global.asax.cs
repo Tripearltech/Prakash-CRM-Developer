@@ -7,6 +7,7 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using System.Web.Http;
 using PrakashCRM.App_Start;
+using PrakashCRM.Security;
 
 namespace PrakashCRM
 {
@@ -19,6 +20,13 @@ namespace PrakashCRM
             GlobalConfiguration.Configure(WebApiConfig.Register);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            try
+            {
+                TrustedDeviceStore.EnsureCreated();
+            }
+            catch
+            {
+            }
             HttpRuntime.Cache.Insert("Pages",DateTime.Now);
             
         }

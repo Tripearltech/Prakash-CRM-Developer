@@ -2,7 +2,27 @@
     ViewBag.Title = "DispatchDetails";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
 }
+<style>
+    /* 🔥 scroll container */
+    .table-scroll {
+        max-height: 650px;
+        overflow-y: auto;
+    }
 
+        /* 🔥 sticky header (FORCE FIX) */
+        .table-scroll thead th {
+            position: sticky !important;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+    /* 🔥 important for bootstrap conflict */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+</style>
 <div class="page-content">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
@@ -63,23 +83,28 @@
                 <div class="row mt-3">
                     <div>
                         <div class="row g-3">
-                            <div class="col-md-12">
-                                <table class="table mb-0 table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Invoice No</th>
-                                            <th scope="col">Date</th>
-                                            <th scope="col">Customer No</th>
-                                            <th scope="col">Customer Name</th>
-                                            <th scope="col">Vehicle No</th>
-                                            <th scope="col">LRNo</th>
-                                            <th scope="col">SalesQuoteNo</th>
-                                            <th scope="col">OrderDetails</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tblDispatchDetails">
-                                    </tbody>
-                                </table>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+
+                                    <div class="table-responsive table-scroll">
+                                        <table class="table table-striped mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Invoice No</th>
+                                                    <th>Date</th>
+                                                    <th>Customer No</th>
+                                                    <th>Customer Name</th>
+                                                    <th>Vehicle No</th>
+                                                    <th>LRNo</th>
+                                                    <th>SalesQuoteNo</th>
+                                                    <th>OrderDetails</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDispatchDetails"></tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -120,7 +120,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.City + "</td><td>" + item.Post_Code + "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.Balance_Due_LCY + "</td><td>" + item.ContactName + "</td><td>" + item.MobilePhoneNo + "</td><td>" + item.Salesperson_Code + "</td>";
+                    var rowData = "<tr><td></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.City + "</td><td>" + item.Post_Code + "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.Balance_Due_LCY + "</td><td>" + item.ContactName + "</td><td>" + item.MobilePhoneNo + "</td><td>" + item.PCPL_Secondary_SP_Code + "</td><td>" + item.PCPL_Class + "</td>";
 
                     rowData = rowData + "</tr>";
 

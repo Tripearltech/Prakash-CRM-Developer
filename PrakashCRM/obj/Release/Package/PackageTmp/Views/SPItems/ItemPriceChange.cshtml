@@ -172,6 +172,7 @@
                             <th>Discount</th>
                             <th>Current Price</th>
                             <th>Previous Price</th>
+                            <th>Current Discount</th>
                             <th>Item Price Change</th>
                         </tr>
                     </thead>
@@ -206,6 +207,7 @@
                     </div>
                 </div>
                 <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                <input id="loggedInSalesPersonCode" value="@(Session["loggedInUserSPCode"] == null ? "" : Session["loggedInUserSPCode"].ToString())" style="display:none" />
             </div>
         </div>
     </div>

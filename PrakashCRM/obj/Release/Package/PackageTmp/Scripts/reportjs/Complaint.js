@@ -12,6 +12,10 @@ $(document).ready(function () {
 
 function ComplainList(skip, top, firsload, orderBy, orderDir) {
     debugger
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=DailyVisitsDotNetAPI&fdate=null&tdate=null&text=null', function (data) {
         $('#hdnSPSICount').val(data);
     });
@@ -51,6 +55,11 @@ function ComplainList(skip, top, firsload, orderBy, orderDir) {
                 $('ul.pager li').remove();
             }
 
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
     });
 }

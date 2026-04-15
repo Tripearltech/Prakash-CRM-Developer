@@ -348,7 +348,17 @@ $(document).ready(function () {
     });
 
     $('#ddlPackingStyle').change(function () {
-        const packingStyleDetails = $('#ddlPackingStyle').val().split('_');
+            const packingStyleValue = ($('#ddlPackingStyle').val() || '').toString();
+            if (!packingStyleValue || packingStyleValue === '-1' || packingStyleValue.indexOf('_') < 0) {
+                $('#txtBasicPurchaseCost').val('');
+                $('#txtMRPPrice').val('');
+                $('#hfPurchaseDays').val('0');
+
+                try { CalculateFormula(); } catch (e) { }
+                return;
+            }
+
+            const packingStyleDetails = packingStyleValue.split('_');
         // Set Basic Purchase Cost to PCPL_MRP (use packing style Purchase Cost, not MRP Price)
         $('#txtBasicPurchaseCost').val(parseFloat(packingStyleDetails[0]).toFixed(2));
         $('#txtBasicPurchaseCost').prop('disabled', true);
@@ -485,6 +495,11 @@ $(document).ready(function () {
         var prodOpts = $('#hfProdNo').val();
 
         var prodOptsTR = $('#hfProdNoEdit').val();
+
+        sqClearPendingLineSaveOverride(prodOpts);
+        if (prodOptsTR && prodOptsTR !== prodOpts) {
+            sqClearPendingLineSaveOverride(prodOptsTR);
+        }
 
         var dropShipmentOpt = $('#chkDropShipment').is(':checked') ? 'Yes' : 'No';
 
@@ -1147,7 +1162,7 @@ $(document).ready(function () {
                 var NewDeliveryToAddress = {};
 
                 NewDeliveryToAddress.Customer_No = $('#hfCustomerNo').val();
-                NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
+               // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
                 NewDeliveryToAddress.Address = $('#txtNewJobtoAddress').val();
                 NewDeliveryToAddress.Address_2 = $('#txtNewJobtoAddress2').val();
                 NewDeliveryToAddress.Post_Code = $('#txtNewJobtoAddPostCode').val();
@@ -2218,6 +2233,11 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
             window.SQStatus = data.Status || window.SQStatus;
             window.ScheduleStatus = ScheduleStatus || window.ScheduleStatus;
 
+            if (shouldBlockApprovalLinkAccess(SQFor, LoggedInUserRole, data.Status)) {
+                showApprovalLinkUsedMessage(SalesQuoteNo, data.Status, LoggedInUserRole);
+                return;
+            }
+
             $('#hfSQEdit').val("true");
             $('#hfSalesQuoteNo').val(SalesQuoteNo);
             //$('#ddlNoSeries').prop('disabled', true);
@@ -2316,10 +2336,13 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
                 var newMargin = parseFloatSafe(item.New_Margin);
                 var priceUpdated = parseBool(item.Price_Updated);
 
-                // Pending approval: show New Price instead of Basic Purchase Cost (display only)
-                var showNewPriceAsCost = (newPrice !== 0) && !priceUpdated &&
-                    (data.Status == "Approval pending from finance" || data.Status == "Approval pending from HOD");
-                var displayedBasicCost = showNewPriceAsCost ? newPrice : parseFloatSafe(item.PCPL_MRP);
+                var displayedBasicCost = parseFloatSafe(item.PCPL_Purchase_Cost);
+                if (displayedBasicCost === 0) {
+                    displayedBasicCost = parseFloatSafe(item.PCPL_Basic_Price);
+                }
+                if (displayedBasicCost === 0) {
+                    displayedBasicCost = parseFloatSafe(item.PCPL_MRP);
+                }
 
                 var rowArray = [
                     "", // dtr-control
@@ -2329,7 +2352,7 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
                     item.Quantity,
                     item.Unit_of_Measure_Code,
                     item.PCPL_Packing_Style_Code,
-                    item.PCPL_MRP,
+                    displayedBasicCost,
                     item.Unit_Price,
                     newPrice,
                     newMargin,
@@ -2596,7 +2619,7 @@ function EditSQProd(Line_No, ProdTR) {
     }
     $('#txtProdQty').val($("#" + ProdTR).find("TD").eq(4).html());
     $('#txtProdMRP').val($("#" + ProdTR).find("TD").eq(7).html());
-    $('#ddlTransportMethod option:selected').text($("#" + ProdTR).find("TD").eq(17).html());
+    SetSQTransportMethodSelection($("#" + ProdTR).find("TD").eq(17).text());
     $('#txtSalesPrice').val($("#" + ProdTR).find("TD").eq(8).html());
     $('#txtTransportCost').val($("#" + ProdTR).find("TD").eq(18).html());
     $('#txtSalesDiscount').val($("#" + ProdTR).find("TD").eq(19).html());
@@ -2738,6 +2761,44 @@ function EditSQProd(Line_No, ProdTR) {
         // no-op
     }
 }
+
+function SetSQTransportMethodSelection(rawTransportMethod) {
+    var transportMethod = (rawTransportMethod || '').toString().trim();
+    var $ddlTransportMethod = $('#ddlTransportMethod');
+
+    if ($ddlTransportMethod.length === 0) {
+        return;
+    }
+
+    if (transportMethod === '') {
+        $ddlTransportMethod.val('-1');
+        $ddlTransportMethod.change();
+        return;
+    }
+
+    var normalizedTransportMethod = transportMethod.toUpperCase().replace(/\s+/g, '');
+    var matchedValue = '';
+
+    if ($ddlTransportMethod.find("option[value='" + transportMethod + "']").length > 0) {
+        matchedValue = transportMethod;
+    }
+    else if ($ddlTransportMethod.find("option[value='" + normalizedTransportMethod + "']").length > 0) {
+        matchedValue = normalizedTransportMethod;
+    }
+    else {
+        $ddlTransportMethod.find('option').each(function () {
+            var optionText = ($(this).text() || '').toString().trim().toUpperCase().replace(/\s+/g, '');
+            if (optionText === normalizedTransportMethod) {
+                matchedValue = $(this).val();
+                return false;
+            }
+        });
+    }
+
+    $ddlTransportMethod.val(matchedValue || '-1');
+    $ddlTransportMethod.change();
+}
+
 function DeleteSQProd(LineNo, ProdTR) {
     var $row = $("#" + ProdTR);
 
@@ -2760,6 +2821,7 @@ function DeleteSQProd(LineNo, ProdTR) {
     }
 
     var deletedProdNo = (ProdTR || '').toString().replace(/^ProdTR_/, '').trim();
+    sqClearPendingLineSaveOverride(deletedProdNo);
     var currentProdNo = ($('#hfProdNo').val() || '').toString().trim();
     var currentEditProdNo = ($('#hfProdNoEdit').val() || '').toString().trim();
 
@@ -2933,7 +2995,6 @@ function GetInterestRate() {
     );
 
 }
-
 function AdditionalQtyChange() {
 
     if ($('#hfiteminvstatus').val() == "InInventory") {
@@ -3161,12 +3222,16 @@ function PaymentTermsChange() {
                 }
             );
         }
-        if ($('#ddlPaymentTerms').val() != null) {
-            const PaymentTermsDetails = $('#ddlPaymentTerms').val().split('_');
-            if (PaymentTermsDetails[1] != "") {
+        const paymentTermsValue = ($('#ddlPaymentTerms').val() || '').toString();
+        if (paymentTermsValue && paymentTermsValue !== '-1' && paymentTermsValue.indexOf('_') >= 0) {
+            const PaymentTermsDetails = paymentTermsValue.split('_');
+            if (PaymentTermsDetails.length > 1 && PaymentTermsDetails[1] != "") {
                 var PaymentTermsDays = PaymentTermsDetails[1].substring(0, PaymentTermsDetails[1].length - 1);
                 $('#hfPaymentTermsDays').val(parseInt(PaymentTermsDays));
             }
+        }
+        else {
+            $('#hfPaymentTermsDays').val('0');
         }
         CalculateFormula();
         ////UpdateValueForTotalCost();
@@ -3289,7 +3354,7 @@ function CheckNewDeliverytoAddressValues() {
 
     var errMsg = "";
 
-    if ($('#txtNewJobtoAddCode').val() == "" || $('#txtNewJobtoAddress').val() == "" || $('#txtNewJobtoAddPostCode').val() == "" ||
+    if (/*$('#txtNewJobtoAddCode').val() == "" || */$('#txtNewJobtoAddress').val() == "" || $('#txtNewJobtoAddPostCode').val() == "" ||
         $('#ddlNewJobtoAddArea').val() == "-1" || $('#txtNewJobtoAddState').val() == "" || $('#txtNewJobtoAddGSTNo').val() == "") {
 
         errMsg = "Please Fill Details";
@@ -3564,9 +3629,13 @@ function CheckCostSheetDetails() {
 
 function GetCreditDaysForNotInInventory() {
 
-    if ($('#ddlPackingStyle').val() != "-1") {
-        const packingStyleDetails = $('#ddlPackingStyle').val().split('_');
+    const packingStyleValue = ($('#ddlPackingStyle').val() || '').toString();
+    if (packingStyleValue && packingStyleValue != "-1" && packingStyleValue.indexOf('_') >= 0) {
+        const packingStyleDetails = packingStyleValue.split('_');
         $('#hfPurchaseDays').val(parseInt(packingStyleDetails[2]));
+    }
+    else {
+        $('#hfPurchaseDays').val('0');
     }
 
     return ($('#hfPaymentTermsDays').val() - $('#hfPurchaseDays').val());
@@ -3664,7 +3733,7 @@ function ResetNewBillToAddressDetails() {
 
 function ResetNewDeliveryToAddressDetails() {
 
-    $('#txtNewJobtoAddCode').val("");
+   // $('#txtNewJobtoAddCode').val("");
     $('#txtNewJobtoAddress').val("");
     $('#txtNewJobtoAddress2').val("");
     $('#txtNewJobtoAddPostCode').val("");
@@ -3912,6 +3981,7 @@ var SQ_FORM_LOCKS = {
 
 // Pending form-apply values for Price Update action (applied inside EditSQProd).
 var SQ_PENDING_PRICEUPDATE = null;
+var SQ_PENDING_LINE_SAVE_OVERRIDES = {};
 
 
 function applySQEditOverridesIfAny() {
@@ -3934,6 +4004,19 @@ function applySQEditOverridesIfAny() {
 }
 
 function initSQPriceColumnIndexes() {
+    if (!SQ_PRICE_COLS || typeof SQ_PRICE_COLS !== 'object') {
+        SQ_PRICE_COLS = {
+            BASIC_PURCHASE_COST: -1,
+            SALES_PRICE: -1,
+            TOTAL_COST: -1,
+            NEW_PRICE: -1,
+            NEW_MARGIN: -1,
+            PRICE_UPDATED: -1,
+            MRP_PRICE: -1,
+            MARGIN: -1
+        };
+    }
+
     // Resolve by header text so column order can change safely.
     var $ths = $('#dataList thead th');
     var findIdx = function (label) {
@@ -4032,6 +4115,36 @@ function parseFloatSafe(val) {
     return isNaN(n) ? 0 : n;
 }
 
+function sqGetPendingLineSaveOverride(prodNo) {
+    var key = (prodNo || '').toString().trim();
+    if (!key) return null;
+    return SQ_PENDING_LINE_SAVE_OVERRIDES[key] || null;
+}
+
+function sqClearPendingLineSaveOverride(prodNo) {
+    var key = (prodNo || '').toString().trim();
+    if (!key) return;
+    delete SQ_PENDING_LINE_SAVE_OVERRIDES[key];
+}
+
+function sqStagePendingLineSaveOverride(prodNo, lineNo) {
+    var key = (prodNo || '').toString().trim();
+    if (!key) return;
+
+    var marginPercentText = ($('#spnMarginPercent').text() || '').toString().replace('%', '').trim();
+    SQ_PENDING_LINE_SAVE_OVERRIDES[key] = {
+        Line_No: parseInt(lineNo || $('#hfSQProdLineNo').val() || '0') || 0,
+        Unit_Price: parseFloatSafe($('#txtSalesPrice').val()),
+        PCPL_Total_Cost: parseFloatSafe($('#txtTotalCost').val()),
+        PCPL_Margin: parseFloatSafe($('#txtMargin').val()),
+        PCPL_Margin_Percent: parseFloatSafe(marginPercentText),
+        PCPL_Commission_Amount: parseFloatSafe($('#txtCommissionAmt').val()),
+        Price_Updated: true,
+        New_Price: 0,
+        New_Margin: 0
+    };
+}
+
 function sqRecalcCommissionAmountFromSalesPriceIfPercentMode() {
     try {
         // Commission amount depends on Sales Price when commission is enabled and mode is %.
@@ -4049,6 +4162,70 @@ function sqRecalcCommissionAmountFromSalesPriceIfPercentMode() {
     } catch (e) {
         // no-op
     }
+}
+
+function normalizeApprovalLinkRole(linkRole) {
+    var role = ((linkRole === null || linkRole === undefined) ? '' : linkRole).toString().trim().toLowerCase();
+    if (role === 'reportingperson') return 'hod';
+    return role;
+}
+
+function expectedPendingStatusForApprovalRole(linkRole) {
+    var role = normalizeApprovalLinkRole(linkRole);
+    if (role === 'finance') return 'approval pending from finance';
+    if (role === 'hod') return 'approval pending from hod';
+    return '';
+}
+
+function shouldBlockApprovalLinkAccess(SQFor, LoggedInUserRole, actualStatus) {
+    if (((SQFor === null || SQFor === undefined) ? '' : SQFor).toString().trim().toLowerCase() !== 'approvereject') {
+        return false;
+    }
+
+    var normalizedStatus = ((actualStatus === null || actualStatus === undefined) ? '' : actualStatus).toString().trim().toLowerCase();
+    if (normalizedStatus === '') {
+        return false;
+    }
+
+    var expectedStatus = expectedPendingStatusForApprovalRole(LoggedInUserRole);
+    if (expectedStatus === '') {
+        return false;
+    }
+
+    return normalizedStatus !== expectedStatus;
+}
+
+function buildApprovalLinkUsedMessage(quoteNo, actualStatus, loggedInUserRole) {
+    var safeQuoteNo = (quoteNo || '').toString().trim();
+    var safeStatus = (actualStatus || '').toString().trim();
+    var normalizedStatus = safeStatus.toLowerCase();
+    var normalizedRole = normalizeApprovalLinkRole(loggedInUserRole);
+
+    if (normalizedStatus.indexOf('approved') >= 0) {
+        return "This quote has already been approved via this link. Quote No: <strong>" + safeQuoteNo + "</strong>.";
+    }
+
+    if (normalizedStatus.indexOf('rejected') >= 0) {
+        return "This link has already been processed, and the quote has been rejected. Quote No: <strong>" + safeQuoteNo + "</strong>.";
+    }
+
+    if (normalizedRole === 'finance' && normalizedStatus.indexOf('approval pending from hod') >= 0) {
+        return "This quote has already been approved via this link. Quote No: <strong>" + safeQuoteNo + "</strong>. Current Status: <strong>" + safeStatus + "</strong>.";
+    }
+
+    return "This link has already been processed, and the quote has been approved. Quote No: <strong>" + safeQuoteNo + "</strong>. Current Status: <strong>" + safeStatus + "</strong>.";
+}
+
+function showApprovalLinkUsedMessage(quoteNo, actualStatus, loggedInUserRole) {
+    var $cardBody = $('.page-content .card .card-body').first();
+    var $message = $('#dvApprovalLinkUsedMessage');
+    if ($cardBody.length === 0 || $message.length === 0) {
+        ShowErrMsg('This quote has already been approved via this link. Quote No: ' + quoteNo);
+        return;
+    }
+
+    $cardBody.children().hide();
+    $message.html(buildApprovalLinkUsedMessage(quoteNo, actualStatus, loggedInUserRole)).show();
 }
 
 function isSQStatusApprovedOrRejected() {
@@ -4099,7 +4276,7 @@ function buildSQPriceActionsHtml(prodNo, lineNo, enabled) {
     var dis = canClick ? "" : "disabled";
     var title1 = "";
     if (!canClick) {
-        if (roleBlocked) title1 = " title='Disabled for Finance/HOD role'";
+        if (roleBlocked) title1 = " title='Disabled for Finance/HOD approval role'";
         else title1 = " title='New Price must be non-zero'";
     }
 
@@ -4113,7 +4290,7 @@ function isSQPriceActionRoleBlocked() {
             ? LoggedInUserRole
             : ($('#hdnLoggedInUserRole').val() || '');
         role = (role || '').toString().trim().toLowerCase();
-        return role === 'finance' || role === 'hod';
+        return role === 'finance' || role === 'hod' || role === 'reportingperson';
     } catch (e) {
         return false;
     }
@@ -4191,7 +4368,7 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
 
     // Requirement: For Finance/HOD role, price update actions are always disabled.
     if (isSQPriceActionRoleBlocked()) {
-        ShowErrMsg('Update Price action is disabled for Finance/HOD role.');
+        ShowErrMsg('Update Price action is disabled for Finance/HOD approval role.');
         return;
     }
 
@@ -4223,6 +4400,7 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_MARGIN, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.PRICE_UPDATED, 'false');
         applySQPriceRowState(prodTR);
+        sqClearPendingLineSaveOverride(prodNo);
 
         // If user is currently editing this same product, release any margin lock.
         if (($('#hfProdNo').val() || '').toString().trim() === (prodNo || '').toString().trim()) {
@@ -4241,25 +4419,14 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
     var applyUpdateClientSide = function () {
         enableSaveButtonsForPriceUpdateIfNeeded();
 
-        // Margin will be recalculated via CalculateFormula() after opening Edit.
-        var computedMargin = sqTryComputeMarginFromRow($tr, newPrice);
-
-        // Update Sales Price + Margin from New values
-        var salesPriceIdx = (SQ_PRICE_COLS.SALES_PRICE !== null && SQ_PRICE_COLS.SALES_PRICE >= 0) ? SQ_PRICE_COLS.SALES_PRICE : 8;
-        var marginIdx = (SQ_PRICE_COLS.MARGIN !== null && SQ_PRICE_COLS.MARGIN >= 0) ? SQ_PRICE_COLS.MARGIN : 14;
-        sqSetRowCellText($tr, salesPriceIdx, newPrice.toFixed(2));
-        sqSetRowCellText($tr, marginIdx, computedMargin.toFixed(2));
-
-        // Clear New fields + mark updated
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_PRICE, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_MARGIN, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.PRICE_UPDATED, 'true');
-
         applySQPriceRowState(prodTR);
 
         // Open line in edit mode and auto-save changes.
-        SQ_EDIT_OVERRIDES.SalesPrice = newPrice.toFixed(2);
-        SQ_EDIT_OVERRIDES.Margin = null;
+        //SQ_EDIT_OVERRIDES.SalesPrice = null;
+        //SQ_EDIT_OVERRIDES.Margin = null;
 
         SQ_FORM_LOCKS.Margin = false;
         SQ_FORM_LOCKS.MarginValue = null;
@@ -4307,9 +4474,10 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
             try { sqRecalcCommissionAmountFromSalesPriceIfPercentMode(); } catch (e) { }
             try { CalculateFormula(); } catch (e) { }
 
-            // Auto-save only when editable.
-            if ($('#btnSave').prop('disabled') === true || $('#btnSaveProd').prop('disabled') === true) return;
-            $('#btnSaveProd').click();
+            sqStagePendingLineSaveOverride(prodNo, lineNo);
+            SQ_PENDING_PRICEUPDATE = null;
+            ResetQuoteLineDetails();
+            ShowActionMsg('Price update prepared. Click Save to apply.');
         };
 
         setTimeout(tryAutoSave, 250);

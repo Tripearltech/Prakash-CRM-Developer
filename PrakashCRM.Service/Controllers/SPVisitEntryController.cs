@@ -1088,18 +1088,18 @@ namespace PrakashCRM.Service.Controllers
             reqDailyVisit.Complain_Subject = dailyVisitDetails.Complain_Subject == null || dailyVisitDetails.Complain_Subject == "" ? "" : dailyVisitDetails.Complain_Subject;
             reqDailyVisit.Complain_Products = dailyVisitDetails.Complain_Products == null || dailyVisitDetails.Complain_Products == "" ? "" : dailyVisitDetails.Complain_Products;
             reqDailyVisit.Complain_Invoice = dailyVisitDetails.Complain_Invoice == "-1" ? "" : dailyVisitDetails.Complain_Invoice;
-            reqDailyVisit.Com_Date = dailyVisitDetails.Com_Date == null || dailyVisitDetails.Com_Date == "" ? "1900-01-01" : dailyVisitDetails.Com_Date;
+            reqDailyVisit.Com_Date = dailyVisitDetails.Com_Date == null || dailyVisitDetails.Com_Date == "" ? null : dailyVisitDetails.Com_Date;
             reqDailyVisit.Complain_Assign_To = dailyVisitDetails.Complain_Assign_To == "-1" ? "" : dailyVisitDetails.Complain_Assign_To;
-            reqDailyVisit.Root_Analysis = dailyVisitDetails.Root_Analysis == null || dailyVisitDetails.Root_Analysis == "" ? "" : dailyVisitDetails.Root_Analysis;
-            reqDailyVisit.Root_Analysis_date = dailyVisitDetails.Root_Analysis_date == null || dailyVisitDetails.Root_Analysis_date == "" ? "1900-01-01" : dailyVisitDetails.Root_Analysis_date;
+            reqDailyVisit.Root_Analysis = dailyVisitDetails.Root_Analysis == null || dailyVisitDetails.Root_Analysis == "" ? null : dailyVisitDetails.Root_Analysis;
+            reqDailyVisit.Root_Analysis_date = dailyVisitDetails.Root_Analysis_date == null || dailyVisitDetails.Root_Analysis_date == "" ? null : dailyVisitDetails.Root_Analysis_date;
             reqDailyVisit.Corrective_Action = dailyVisitDetails.Corrective_Action == null || dailyVisitDetails.Corrective_Action == "" ? "" : dailyVisitDetails.Corrective_Action;
-            reqDailyVisit.Corrective_Action_Date = dailyVisitDetails.Corrective_Action_Date == null || dailyVisitDetails.Corrective_Action_Date == "" ? "1900-01-01" : dailyVisitDetails.Corrective_Action_Date;
+            reqDailyVisit.Corrective_Action_Date = dailyVisitDetails.Corrective_Action_Date == null || dailyVisitDetails.Corrective_Action_Date == "" ? null : dailyVisitDetails.Corrective_Action_Date;
             reqDailyVisit.Preventive_Action = dailyVisitDetails.Preventive_Action == null || dailyVisitDetails.Preventive_Action == "" ? "" : dailyVisitDetails.Preventive_Action;
-            reqDailyVisit.Preventive_Date = dailyVisitDetails.Preventive_Date == null || dailyVisitDetails.Preventive_Date == "" ? "1900-01-01" : dailyVisitDetails.Preventive_Date;
+            reqDailyVisit.Preventive_Date = dailyVisitDetails.Preventive_Date == null || dailyVisitDetails.Preventive_Date == "" ? null : dailyVisitDetails.Preventive_Date;
             reqDailyVisit.Market_Update = dailyVisitDetails.Market_Update == null || dailyVisitDetails.Market_Update == "" ? "" : dailyVisitDetails.Market_Update;
-            reqDailyVisit.Market_Update_Date = dailyVisitDetails.Market_Update_Date == null || dailyVisitDetails.Market_Update_Date == "" ? "1900-01-01" : dailyVisitDetails.Market_Update_Date;
+            reqDailyVisit.Market_Update_Date = dailyVisitDetails.Market_Update_Date == null || dailyVisitDetails.Market_Update_Date == "" ? null : dailyVisitDetails.Market_Update_Date;
             reqDailyVisit.Payment_Amt = dailyVisitDetails.Payment_Amt;
-            reqDailyVisit.Payment_Date = dailyVisitDetails.Payment_Date == null || dailyVisitDetails.Payment_Date == "" ? "1900-01-01" : dailyVisitDetails.Payment_Date;
+            reqDailyVisit.Payment_Date = dailyVisitDetails.Payment_Date == null || dailyVisitDetails.Payment_Date == "" ? null : dailyVisitDetails.Payment_Date;
             reqDailyVisit.Payment_Remarks = dailyVisitDetails.Payment_Remarks == null || dailyVisitDetails.Payment_Remarks == "" ? "" : dailyVisitDetails.Payment_Remarks;
             reqDailyVisit.Salesperson_Code = dailyVisitDetails.Salesperson_Code;
             reqDailyVisit.Remarks = dailyVisitDetails.Remarks == null || dailyVisitDetails.Remarks == "" ? "" : dailyVisitDetails.Remarks;
@@ -1373,7 +1373,7 @@ namespace PrakashCRM.Service.Controllers
             else
                 result = ac.GetData1<SPDailyVisit>("DailyVisitsDotNetAPI", filter, skip, top, orderby);
 
-            if (result.Result.Item1.value.Count > 0)
+            if (result.Result.Item1?.value?.Count > 0)
                 dailyVisitData = result.Result.Item1.value;
 
             return dailyVisitData;

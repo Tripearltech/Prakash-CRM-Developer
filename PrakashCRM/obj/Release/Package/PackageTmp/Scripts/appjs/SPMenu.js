@@ -40,7 +40,39 @@
 
     });
 
+    $('#menuForm').on('submit', function () {
+        var $form = $(this);
+
+        if ($form.data('isSaving') === true) {
+            return false;
+        }
+
+        if (typeof $form.valid === 'function' && !$form.valid()) {
+            setMenuSaveInProgress(false);
+            return false;
+        }
+
+        setMenuSaveInProgress(true);
+    });
+
 });
+
+function setMenuSaveInProgress(isSaving) {
+    var $loader = $('#btnSaveLoader');
+    var $btn = $('#btnSave');
+    var $form = $('#menuForm');
+
+    if (isSaving) {
+        $loader.css('display', 'inline-flex');
+        $btn.prop('disabled', true);
+        $form.data('isSaving', true);
+        return;
+    }
+
+    $loader.hide();
+    $btn.prop('disabled', false);
+    $form.removeData('isSaving');
+}
 
 var __menuNameItems = [];
 

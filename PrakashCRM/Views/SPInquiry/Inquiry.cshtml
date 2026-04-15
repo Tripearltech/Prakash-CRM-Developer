@@ -288,10 +288,6 @@
                             <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
                             &nbsp;
                             <a href="/SPInquiry/InquiryList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
-                            @if (ViewBag.InquiryNo != null)
-                            {
-                                <button type="button" class="btn btn-primary">Convert To SQ</button>
-                            }
                         </div>
                     </div>
 
@@ -303,7 +299,7 @@
 <div class='loader' id='divImage' style="display:none">
     <!-- MODAL CONTENT -->
     <div class='loader-content'>
-        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+        <span class="app-loader-spinner" role="status" aria-label="Loading"></span>
     </div>
 </div>
 <div class="modal" id="modalDelInqLine" tabindex="-1" aria-hidden="true" style="display:none">
@@ -535,14 +531,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="row mb-3">
-                                <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                <div class="col-sm-9">
-                                    <input type="text" id="txtNewJobtoAddCode" class="form-control" />
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -671,6 +659,8 @@
         $('#btnAddNewContactCompany').click(function () {
             window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")?No=salesquote');
         });
+
+        $(document).ready(function () {
 
         @*$('#btnSave').click(function () {
 

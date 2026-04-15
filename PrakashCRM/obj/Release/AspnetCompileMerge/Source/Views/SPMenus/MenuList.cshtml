@@ -5,7 +5,7 @@
 }
 
 <style>
-    .EditMenuCls, .DeleteMenuCls:hover {
+    .EditMenuCls, .DeleteMenuCls {
         cursor: pointer;
     }
 </style>
@@ -98,7 +98,7 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th></th>
+                            <th>Actions</th>
                             <th>No</th>
                             <th>Menu Name</th>
                             <th>Parent Menu</th>
@@ -112,7 +112,7 @@
                     <tfoot>
                         <tr>
                             <th></th>
-                            <th></th>
+                            <th>Actions</th>
                             <th>No</th>
                             <th>Menu Name</th>
                             <th>Parent Menu</th>
@@ -155,7 +155,7 @@
         </div>
     </div>
 </div>
-<div class="modal" id="modal" tabindex="-1" aria-hidden="true">
+<div class="modal" id="modal" tabindex="-1" aria-hidden="true" style="display:none">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content bg-primary">
             <div class="modal-header">
@@ -180,7 +180,9 @@
     $(document).ready(function () {
 
         $('#btnNew').click(function () {
-            window.location.replace('@Url.Action("Menu", "SPMenus")');
+            $.get('/SPMenus/NullMenuSession', function () {
+                window.location.replace('@Url.Action("Menu", "SPMenus")');
+            });
         });
 
     });

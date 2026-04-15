@@ -30,6 +30,19 @@ function setSaveInProgress(isSaving) {
     }
 }
 
+function toggleRoleRightsPageLoader(isVisible) {
+    if (isVisible) {
+        if (typeof showPageDataLoader === 'function') {
+            showPageDataLoader();
+        }
+        return;
+    }
+
+    if (typeof hidePageDataLoader === 'function') {
+        hidePageDataLoader();
+    }
+}
+
 
 // NOTE: Do not auto-check all rights on menu checkbox click.
 // Rights are controlled per-row; checking a menu should at most default to View.
@@ -153,6 +166,7 @@ $('#btnSave').click(function () {
     }
 
     setSaveInProgress(true);
+    toggleRoleRightsPageLoader(true);
 
     // selected menus
     var checkedMenus = $("input[type=checkbox]:checked").filter(function () {
@@ -249,6 +263,7 @@ $('#btnSave').click(function () {
                 if (typeof ShowErrMsg === 'function')
                     ShowErrMsg(msg);
                 setSaveInProgress(false);
+                toggleRoleRightsPageLoader(false);
                 return;
             }
             $.ajax({
@@ -268,6 +283,7 @@ $('#btnSave').click(function () {
                 },
                 complete: function () {
                     setSaveInProgress(false);
+                    toggleRoleRightsPageLoader(false);
                 }
                 ,
                 error: function (xhr) {
@@ -293,6 +309,7 @@ $('#btnSave').click(function () {
                 ShowErrMsg(msg);
 
             setSaveInProgress(false);
+            toggleRoleRightsPageLoader(false);
         }
     });
 });
@@ -300,6 +317,7 @@ $('#btnSave').click(function () {
 $('#ddlRoles').change(function () {
 
     resetRightAndMenus();
+    toggleRoleRightsPageLoader(true);
 
     $.ajax(
         {
@@ -419,6 +437,9 @@ $('#ddlRoles').change(function () {
             },
             error: function (data1) {
                 //alert(data1);
+            },
+            complete: function () {
+                toggleRoleRightsPageLoader(false);
             }
         }
     );
@@ -455,6 +476,7 @@ function applySavedRightsToRows() {
 function BindRoles() {
     var $ddl = $('#ddlRoles');
     var existingSelection = ($ddl.val() || '').toString();
+    toggleRoleRightsPageLoader(true);
     $.ajax(
         {
             url: combineUrl(appBaseUrl, 'SPRoleRights/GetAllRolesForDDL'),
@@ -487,6 +509,9 @@ function BindRoles() {
             },
             error: function (data1) {
                 alert(data1);
+            },
+            complete: function () {
+                toggleRoleRightsPageLoader(false);
             }
         }
     );

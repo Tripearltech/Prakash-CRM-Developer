@@ -93,7 +93,7 @@ namespace PrakashCRM.Service.Controllers
 
             var resultInquiries = ac.GetData<SPInquiry>("InquiryDotNetAPI", "Document_Type eq 'Quote' and PCPL_IsInquiry eq true and Salesperson_Code eq '" + SPCode + "'");
 
-            if (resultInquiries.Result.Item1.value.Count > 0)
+            if (resultInquiries.Result.Item1?.value?.Count > 0)
                 sdbDetails.InquiryCount = resultInquiries.Result.Item1.value.Count;
 
             return sdbDetails;

@@ -128,17 +128,44 @@ $(document).ready(function () {
         var no = $('#hdnRoleNo').val();
         var name = $('#hdnRoleName').val();
 
-        $.post(
-            apiUrl + 'DeleteRole?No=' + no + '&Name=' + name,
-            function (data) {
-                if (data) {
-
+        $.ajax({
+            url: apiUrl + 'DeleteRole?No=' + encodeURIComponent(no) + '&Name=' + encodeURIComponent(name),
+            type: 'POST',
+            success: function (data) {
+                if (data === true || data === 'true') {
                     $('#modalDelRole').css('display', 'none');
                     $('#modalDelMsg').css('display', 'block');
+                    // auto refresh so it disappears from Active list
+                    setTimeout(function () {
+                        location.reload(true);
+                    }, 800);
+                } else {
+                    if (typeof Lobibox !== 'undefined') {
+                        Lobibox.notify('error', { size: 'mini', rounded: true, position: 'top right', delay: 8000, msg: 'Delete failed.' });
+                    } else {
+                        alert('Delete failed.');
+                    }
+                }
+            },
+            error: function (xhr) {
+                var msg = 'Delete failed.';
+                try {
+                    if (xhr && xhr.responseJSON) {
+                        if (xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        else if (xhr.responseJSON.Message) msg = xhr.responseJSON.Message;
+                        else msg = JSON.stringify(xhr.responseJSON);
+                    } else if (xhr && xhr.responseText) {
+                        msg = xhr.responseText;
+                    }
+                } catch (e) { }
 
+                if (typeof Lobibox !== 'undefined') {
+                    Lobibox.notify('error', { size: 'mini', rounded: true, position: 'top right', delay: 9000, closeOnClick: true, msg: msg });
+                } else {
+                    alert(msg);
                 }
             }
-        );
+        });
     });
 
     $('#btnDelNo,.btn-close').click(function () {

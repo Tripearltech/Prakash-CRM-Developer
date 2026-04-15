@@ -26,7 +26,7 @@
 
     <div class="card">
         <div class="card-body">
-            @using (Html.BeginForm("Menu", "SPMenus", FormMethod.Post))
+            @using (Html.BeginForm("Menu", "SPMenus", FormMethod.Post, new { id = "menuForm" }))
             {
                 @Html.ValidationSummary(true)
                 <div class="row">
@@ -122,6 +122,7 @@
                         <input type="hidden" id="hdnMenuType" value="@ViewBag.MenuType" />
                         <input type="hidden" id="hdnParentMenuNo" value="@ViewBag.ParentMenuNo" />
                         <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                        <span id="btnSaveLoader" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display:none;"></span>
                         <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
                         &nbsp;
                         <a href="/SPMenus/MenuList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
