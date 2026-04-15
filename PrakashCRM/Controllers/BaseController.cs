@@ -14,6 +14,36 @@ using PrakashCRM.Security;
 
 namespace PrakashCRM.Controllers
 {
+    internal static class LoginRedirectHelper
+    {
+        internal const string PostLoginRedirectSessionKey = "PostLoginRedirectUrl";
+
+        internal static string NormalizeReturnUrl(string returnUrl)
+        {
+            if (string.IsNullOrWhiteSpace(returnUrl))
+                return string.Empty;
+
+            string decodedUrl = HttpUtility.UrlDecode(returnUrl.Trim());
+            if (string.IsNullOrWhiteSpace(decodedUrl))
+                return string.Empty;
+
+            if (decodedUrl.StartsWith("~/", StringComparison.Ordinal))
+                decodedUrl = VirtualPathUtility.ToAbsolute(decodedUrl);
+
+            if (!decodedUrl.StartsWith("/", StringComparison.Ordinal)
+                || decodedUrl.StartsWith("//", StringComparison.Ordinal)
+                || decodedUrl.StartsWith("/\\", StringComparison.Ordinal))
+            {
+                return string.Empty;
+            }
+
+            if (decodedUrl.StartsWith("/Account/Login", StringComparison.OrdinalIgnoreCase))
+                return string.Empty;
+
+            return decodedUrl;
+        }
+    }
+
     public class RedirectingActionAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
@@ -178,15 +208,23 @@ namespace PrakashCRM.Controllers
 
             if (isAjaxLikeRequest)
             {
+                filterContext.HttpContext.Response.SuppressFormsAuthenticationRedirect = true;
+                filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
                 filterContext.Result = new HttpStatusCodeResult(HttpStatusCode.Unauthorized);
                 return;
             }
 
-            filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new
+            string returnUrl = LoginRedirectHelper.NormalizeReturnUrl(request != null ? request.RawUrl : null);
+            RouteValueDictionary routeValues = new RouteValueDictionary(new
             {
                 controller = "Account",
                 action = "Login"
-            }));
+            });
+
+            if (!string.IsNullOrWhiteSpace(returnUrl))
+                routeValues["returnUrl"] = returnUrl;
+
+            filterContext.Result = new RedirectToRouteResult(routeValues);
         }
 
         private static string ResolveBrowserName(HttpRequestBase request)

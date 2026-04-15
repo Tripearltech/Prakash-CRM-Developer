@@ -41,6 +41,7 @@ namespace PrakashCRM.Data.Models
         public string Item_Category_Code { get; set; }
 
         public bool PCPL_Rate_Change_Update { get; set; }
+        public bool PCPL_IsDiscUpdate { get; set; }
     }
 
     public class SPItemRequest
@@ -57,7 +58,9 @@ namespace PrakashCRM.Data.Models
         public double? PCPL_MRP_Price { get; set; }
         public double? PCPL_Purchase_Cost { get; set; }
         public double? PCPL_Previous_Price { get; set; }
+        public bool? PCPL_IsDiscUpdate { get; set; }
         public string Item_No { get; set; }
         public string Packing_Style_Code { get; set; }
+        public string SalesPerson_Code { get; set; }
     }
 }

@@ -261,6 +261,8 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
 
+    showPageDataLoader();
+
     if ($('#hdnLoggedInUserRole').val() == "Finance") {
         UserRoleORReportingPerson = "Finance";
     }
@@ -336,6 +338,9 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                hidePageDataLoader();
             },
             error: function () {
                 alert("error");

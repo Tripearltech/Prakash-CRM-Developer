@@ -183,14 +183,15 @@ function BindYearOpt() {
 
     var YearOpt = "<option value='-1'>---Select---</option>";
 
-    /*if (currentYearFlag) {*/
+    const d = new Date();
+    let year = d.getFullYear(); let month = d.getMonth();
+    // Financial Year: APRIL → MARCH
+    if (month < 3) {
+        year = year - 1;
+    }
 
-        const d = new Date();
-        let year = d.getFullYear();
-        //YearOpt = year.toString() + "-" + (year + 1).toString().substring(2);
-        var YearOpt_ = year.toString() + "-" + (year + 1).toString();
-        YearOpt += "<option value='" + YearOpt_ + "'>" + YearOpt_ + "</option>";
-    /*}*/
+    var YearOpt_ = year + "-" + (year + 1);
+    YearOpt += "<option value='" + YearOpt_ + "'>" + YearOpt_ + "</option>";
 
     if ($('#hfYear').val() != "") {
         YearOpt_ = $('#hfYear').val();
@@ -198,30 +199,31 @@ function BindYearOpt() {
     $('#ddlYear').append(YearOpt);
     $('#ddlYear').val(YearOpt_);
     BindYearMonthVisitPlan(YearOpt_);
-
 }
+
 
 function BindMonth() {
 
-    const d = new Date();
-    var currMonth = d.getMonth();
-    const monthNames = ["January", "February", "March", "April", "May", "June",
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
 
     var monthOpts = "<option value='-1'>---Select---</option>";
-    for (var a = currMonth; a < 12; a++) {
-        monthOpts += "<option value='" + monthNames[a] + "'>" + monthNames[a] + "</option>"; 
+
+    // April (3) se December (11)
+    for (var i = 3; i < 12; i++) {
+        monthOpts += "<option value='" + monthNames[i] + "'>" + monthNames[i] + "</option>";
     }
 
-    if (currMonth <= 12) {
-        monthOpts += "<option value='" + monthNames[0] + "'>" + monthNames[0] + "</option>"; 
-        monthOpts += "<option value='" + monthNames[1] + "'>" + monthNames[1] + "</option>"; 
-        monthOpts += "<option value='" + monthNames[2] + "'>" + monthNames[2] + "</option>"; 
+    // January (0) se March (2)
+    for (var i = 0; i < 3; i++) {
+        monthOpts += "<option value='" + monthNames[i] + "'>" + monthNames[i] + "</option>";
     }
 
-    $('#ddlMonth').append(monthOpts);
+    $('#ddlMonth').empty().append(monthOpts);
 }
+
 
 function BindVisitTypes() {
 
@@ -351,7 +353,7 @@ function BindMonthlyVisits(year,TypeNo,SubTypeNo) {
                     $.each(data, function (index, item) {
 
                         //rowData += "<tr><td>" + item.Visit_Month + "</td><td>" + item.No_of_Visit + "</td><td>" + item.Visit_Type + "</td><td>" + item.Visit_Sub_Type_Name + "</td><td><a class='clsDelYearMonthPlan' onclick='showDelPopup(this)'><i class='bx bx-trash'></i></a></td></tr>";
-                        rowData += "<tr><td>" + item.Visit_Month + "</td><td>" + item.No_of_Visit + "</td><td>0</td><td>" + item.Visit_Type + "</td><td>" + item.Visit_Sub_Type_Name + "</td></tr>";
+                        rowData += "<tr><td>" + item.Visit_Month + "</td><td>" + item.No_of_Visit + "</td><td>" + item.No_of_Actual_visit +"</td><td>" + item.Visit_Type + "</td><td>" + item.Visit_Sub_Type_Name + "</td></tr>";
 
                     });
                     

@@ -68,6 +68,10 @@ $(document).ready(function () {
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCount?SPNo=' + $('#hfSPNo').val() + '&apiEndPointName=MarketUpdateDotNetAPI&filter=' + filter, function (data) {
         $('#hfMUCount').val(data);
     });
@@ -99,6 +103,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             },
             error: function () {
                 alert("error");

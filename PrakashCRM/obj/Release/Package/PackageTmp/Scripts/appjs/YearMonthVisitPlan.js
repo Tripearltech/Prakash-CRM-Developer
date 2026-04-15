@@ -206,18 +206,20 @@ function BindMonth() {
 
     const monthNames = [
         "January", "February", "March", "April", "May", "June",
-
         "July", "August", "September", "October", "November", "December"
     ];
 
     var monthOpts = "<option value='-1'>---Select---</option>";
-    for (var i = 2; i < 12; i++) {
+
+    // April (3) se December (11)
+    for (var i = 3; i < 12; i++) {
         monthOpts += "<option value='" + monthNames[i] + "'>" + monthNames[i] + "</option>";
     }
 
-    monthOpts += "<option value='" + monthNames[0] + "'>" + monthNames[0] + "</option>";
-    monthOpts += "<option value='" + monthNames[1] + "'>" + monthNames[1] + "</option>";
-    monthOpts += "<option value='" + monthNames[2] + "'>" + monthNames[2] + "</option>";
+    // January (0) se March (2)
+    for (var i = 0; i < 3; i++) {
+        monthOpts += "<option value='" + monthNames[i] + "'>" + monthNames[i] + "</option>";
+    }
 
     $('#ddlMonth').empty().append(monthOpts);
 }

@@ -1,6 +1,28 @@
 ﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
 
 $(document).ready(function () {
+    //validateForm
+    $('#PanNo').on('keyup', function () {
+        var pan = $(this).val().toUpperCase();
+        $(this).val(pan);
+
+        var panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+        // Agar user ne typing start ki hai
+        if (pan.length > 0 && pan.length < 10) {
+            $('#lblCCompanyPANNoMsg')
+                .text("PAN must be 10 characters")
+                .show();
+        }
+        else if (pan.length === 10 && !panRegex.test(pan)) {
+            $('#lblCCompanyPANNoMsg')
+                .text("Invalid PAN format (Ex: ABCDE1234F)")
+                .show();
+        }
+        else {
+            $('#lblCCompanyPANNoMsg').hide();
+        }
+    });
 
     $('#btnAddContact').click(function () {
 

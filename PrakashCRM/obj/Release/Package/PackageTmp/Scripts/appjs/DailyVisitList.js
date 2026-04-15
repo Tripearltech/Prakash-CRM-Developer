@@ -2,11 +2,23 @@
 var filter = "";
 var orderBy = 3;
 var orderDir = "desc";
+
 $(document).ready(function () {
+
+    BindFinancialYear();
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
 
+    filter = buildCombinedFilter();
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+
+    $('#ddlFinancialYear').change(function () {
+        filter = buildCombinedFilter(getCustomFilter(false));
+        $('ul.pager li').remove();
+        orderBy = 3;
+        orderDir = "desc";
+        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    });
 
     $('#ddlRecPerPage').change(function () {
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
@@ -30,57 +42,16 @@ $(document).ready(function () {
 
     $('#btnSearch').click(function () {
 
-        var flag = true;
+        var customFilter = getCustomFilter(true);
 
-        filter = "";
-
-        if ($('#ddlField').val() == "Date" || $('#ddlField').val() == "Payment_Date") {
-            if ($('#txtFromDate').val() == "" || $('#txtToDate').val() == "") {
-                flag = false;
-            }
-            else {
-                filter = $('#ddlField').val() + ' ge ' + $('#txtFromDate').val() + ' and ' + $('#ddlField').val() + ' le ' + $('#txtToDate').val();
-            }
-        }
-        else {
-
-            if ($('#ddlField').val() == "-1" || $('#ddlOperator').val() == "-1" || $('#txtSearch').val() == "") {
-                flag = false;
-            }
-            else {
-
-                switch ($('#ddlOperator').val()) {
-                    case 'Equal':
-                        filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
-                        break;
-                    case 'Not Equal':
-                        filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
-                        break;
-                    case 'Starts With':
-                        filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
-                        break;
-                    case 'Ends With':
-                        filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
-                        break;
-                    case 'Contains':
-                        filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
-                        break;
-                    default:
-                        filter = "";
-                        break;
-                }
-
-            }
-
-        }
-
-        if (flag == false) {
+        if (customFilter == null) {
 
             var msg = "Please Fill All Filter Details";
             ShowErrMsg(msg);
 
         }
         else {
+            filter = buildCombinedFilter(customFilter);
             $('ul.pager li').remove();
             bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
         }
@@ -95,7 +66,8 @@ $(document).ready(function () {
         $('#ddlOperator').val('Contains');
         $('#txtSearch').val('');
 
-        filter = "";
+        setDefaultFinancialYear();
+        filter = buildCombinedFilter();
         $('ul.pager li').remove();
         orderBy = 3;
         orderDir = "desc";
@@ -103,27 +75,7 @@ $(document).ready(function () {
     });
 
     $('#btnExport').click(function () {
-
-        switch ($('#ddlOperator').val()) {
-            case 'Equal':
-                filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
-                break;
-            case 'Not Equal':
-                filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
-                break;
-            case 'Starts With':
-                filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
-                break;
-            case 'Ends With':
-                filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
-                break;
-            case 'Contains':
-                filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
-                break;
-            default:
-                filter = "";
-                break;
-        }
+        filter = buildCombinedFilter(getCustomFilter(false));
 
         exportGridData(0, 0, 0, orderBy, orderDir, filter);
 
@@ -163,14 +115,19 @@ var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
+    var encodedFilter = encodeURIComponent(filter || "");
 
-    $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hfSPCode').val() + '&Page=DailyVisit&apiEndPointName=DailyVisitsDotNetAPI&filter=' + filter, function (data) {
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
+    $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hfSPCode').val() + '&Page=DailyVisit&apiEndPointName=DailyVisitsDotNetAPI&filter=' + encodedFilter, function (data) {
         $('#hdnDVPCount').val(data);
     });
 
     $.ajax(
         {
-            url: '/SPVisitEntry/GetDailyVisitsListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
+            url: '/SPVisitEntry/GetDailyVisitsListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + encodedFilter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
@@ -211,6 +168,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             },
             error: function () {
                 alert("error");
@@ -395,9 +357,11 @@ function pageMe() {
 
 function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    var encodedFilter = encodeURIComponent(filter || "");
+
     $.ajax(
         {
-            url: '/SPVisitEntry/ExportListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
+            url: '/SPVisitEntry/ExportListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + encodedFilter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
@@ -427,6 +391,108 @@ function ClearCustomFilter() {
     $('#txtFromDate').css('display', 'none');
     $('#txtToDate').css('display', 'none');
 
+}
+
+function BindFinancialYear() {
+
+    var financialYears = getFinancialYearOptions();
+    var yearOpts = "";
+
+    yearOpts += "<option value='" + financialYears.previous + "'>" + financialYears.previous + "</option>";
+    yearOpts += "<option value='" + financialYears.current + "'>" + financialYears.current + "</option>";
+
+    $('#ddlFinancialYear').empty().append(yearOpts);
+    $('#ddlFinancialYear').val(financialYears.current);
+}
+
+function setDefaultFinancialYear() {
+
+    var financialYears = getFinancialYearOptions();
+    $('#ddlFinancialYear').val(financialYears.current);
+}
+
+function getFinancialYearOptions() {
+
+    var currentDate = new Date();
+    var startYear = currentDate.getMonth() <= 2 ? currentDate.getFullYear() - 1 : currentDate.getFullYear();
+
+    return {
+        previous: (startYear - 1) + '-' + startYear,
+        current: startYear + '-' + (startYear + 1)
+    };
+}
+
+function getFinancialYearFilter() {
+
+    var selectedFinancialYear = $('#ddlFinancialYear').val();
+
+    if (selectedFinancialYear == null || selectedFinancialYear == '') {
+        return '';
+    }
+
+    var financialYearParts = selectedFinancialYear.split('-');
+
+    if (financialYearParts.length != 2) {
+        return '';
+    }
+
+    var fromDate = financialYearParts[0] + '-04-01';
+    var toDate = financialYearParts[1] + '-03-31';
+
+    return 'Date ge ' + fromDate + ' and Date le ' + toDate;
+}
+
+function getCustomFilter(requireComplete) {
+
+    var selectedField = $('#ddlField').val();
+    var filterField = selectedField;
+
+    if (selectedField == '-1') {
+        return requireComplete ? null : '';
+    }
+
+    if (selectedField == 'Date' || selectedField == 'Payment_Date') {
+        if ($('#txtFromDate').val() == '' || $('#txtToDate').val() == '') {
+            return requireComplete ? null : '';
+        }
+
+        return filterField + ' ge ' + $('#txtFromDate').val() + ' and ' + filterField + ' le ' + $('#txtToDate').val();
+    }
+
+    if ($('#ddlOperator').val() == '-1' || $('#txtSearch').val() == '') {
+        return requireComplete ? null : '';
+    }
+
+    switch ($('#ddlOperator').val()) {
+        case 'Equal':
+            return filterField + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
+        case 'Not Equal':
+            return filterField + ' ne \'' + $('#txtSearch').val() + '\'';
+        case 'Starts With':
+            return "startswith(" + filterField + ",\'" + $('#txtSearch').val() + "\') eq true";
+        case 'Ends With':
+            return "endswith(" + filterField + ",\'" + $('#txtSearch').val() + "\') eq true";
+        case 'Contains':
+            return filterField + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
+        default:
+            return '';
+    }
+}
+
+function buildCombinedFilter(customFilter) {
+
+    var filters = [];
+    var financialYearFilter = getFinancialYearFilter();
+
+    if (financialYearFilter != '') {
+        filters.push(financialYearFilter);
+    }
+
+    if (customFilter != null && customFilter != '') {
+        filters.push(customFilter);
+    }
+
+    return filters.join(' and ');
 }
 
 function ShowDetails(dvpNo, detailsOf) {
@@ -558,5 +624,25 @@ function ShowDetails(dvpNo, detailsOf) {
             }
         }
     );
+}
+
+function ShowErrMsg(errMsg) {
+
+    if (typeof Lobibox !== 'undefined' && Lobibox.notify) {
+        Lobibox.notify('error', {
+            pauseDelayOnHover: true,
+            size: 'mini',
+            rounded: true,
+            delayIndicator: false,
+            icon: 'bx bx-x-circle',
+            continueDelayOnInactiveTab: false,
+            position: 'top right',
+            msg: errMsg
+        });
+
+        return;
+    }
+
+    alert(errMsg);
 }
 

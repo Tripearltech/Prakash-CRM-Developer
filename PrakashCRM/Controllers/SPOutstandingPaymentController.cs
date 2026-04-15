@@ -192,11 +192,14 @@ namespace PrakashCRM.Controllers
             //put a breakpoint here and check datatable
             return dataTable;
         }
-        public async Task<JsonResult> GetCustomerCollectionOut()
+        public async Task<JsonResult> GetCustomerCollectionOut(string SPCode)
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPOutstandingPayment/";
 
-            apiUrl = apiUrl + "GetCustomerCollectionOut";
+            if (string.IsNullOrWhiteSpace(SPCode) && Session["loggedInUserSPCode"] != null)
+                SPCode = Session["loggedInUserSPCode"].ToString();
+
+            apiUrl = apiUrl + "GetCustomerCollectionOut?SPCode=" + HttpUtility.UrlEncode(SPCode ?? "");
 
             HttpClient client = new HttpClient();
             List<CustomerCollectionOut> customercollectionout = new List<CustomerCollectionOut>();
@@ -215,10 +218,14 @@ namespace PrakashCRM.Controllers
             return Json(customercollectionout, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task<JsonResult> GetCustomerSexMonthData(string customerNo)
+        public async Task<JsonResult> GetCustomerSexMonthData(string customerNo, string SPCode)
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPOutstandingPayment/";
-            apiUrl = apiUrl + "GetCustomerSexMonthData?customerNo=" + customerNo;
+
+            if (string.IsNullOrWhiteSpace(SPCode) && Session["loggedInUserSPCode"] != null)
+                SPCode = Session["loggedInUserSPCode"].ToString();
+
+            apiUrl = apiUrl + "GetCustomerSexMonthData?customerNo=" + HttpUtility.UrlEncode(customerNo ?? "") + "&SPCode=" + HttpUtility.UrlEncode(SPCode ?? "");
 
             HttpClient client = new HttpClient();
             List<CustomerCollectionOut> customercollectionout = new List<CustomerCollectionOut>();

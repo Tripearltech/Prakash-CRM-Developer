@@ -12,6 +12,10 @@ $(document).ready(function () {
 function StockManagement() {
     debugger
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetStockManagement',
         type: 'GET',
@@ -29,6 +33,11 @@ function StockManagement() {
             $('#tblStockManagement').append(rowData);
 
         },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
+        }
 
     });
 
@@ -43,6 +52,10 @@ $(document).on('click', '.branchName', function () {
 });
 const ProductGroupsCode = {};
 function BranchWiseProducts(branchName) {
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetBranchWiseProducts',
         type: 'GET',
@@ -152,6 +165,11 @@ function BranchWiseProducts(branchName) {
                     $icon.removeClass('bx-plus-circle').addClass('bx-minus-circle');
                 }
             });
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
     });
 }

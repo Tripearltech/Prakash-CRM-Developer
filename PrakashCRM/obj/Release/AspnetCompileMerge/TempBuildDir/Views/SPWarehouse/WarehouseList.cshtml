@@ -44,6 +44,18 @@
                         <div class="col-md-10">
                             <div class="row row-cols-auto g-3" style="float:right">
                                 <div class="col">
+                                    <label class="col-form-label">Document Type:</label>
+                                </div>
+                                <div class="col">
+                                    <select id="ddlDocType" class="form-select">
+                                        <option value="">All</option>
+                                        <option value="Sales Order">Sales Order</option>
+                                        <option value="Purchase Order">Purchase Order</option>
+                                        <option value="Transfer Order">Transfer Order</option>
+                                        <option value="Sales Return">Sales Return</option>
+                                    </select>
+                                </div>
+                                <div class="col">
                                     <label class="col-form-label">Filter:</label>
                                 </div>
                                 <div class="col">
@@ -52,6 +64,7 @@
                                         <option value="Order_No_Filter_FilterOnly">Order No</option>
                                         <option value="Shipment_Date_Filter_FilterOnly">Shipment Date</option>
                                         <option value="ShiptoName_Filter_FilterOnly">Customer/Vendor</option>
+                                        <option value="DocumentType_UI">Document Type</option>
                                         <option value="PCPLAcceptedName_Filter_FilterOnly">Accepted By</option>
                                         <option value="Item_No_Filter_FilterOnly">Item No</option>
                                         <option value="PCPLFromPostCodeFilter_FilterOnly">From PinCode</option>
@@ -67,7 +80,7 @@
                                         <option value="Ends With">Ends With</option>
                                         <option value="Contains" selected>Contains</option>
                                         @*<option value="Less Than">Less Than</option>
-                                        <option value="Greater Than">Greater Than</option>*@
+                <option value="Greater Than">Greater Than</option>*@
                                     </select>
                                 </div>
                                 <div class="col">

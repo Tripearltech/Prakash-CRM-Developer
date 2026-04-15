@@ -133,6 +133,8 @@ function getdata() {
 
 function DrawChart(datamodel) {
     //debugger;
+    if (typeof window.Highcharts === 'undefined') return;
+    if (!document.getElementById('dvCustSatisfaction')) return;
     Highcharts.chart('dvCustSatisfaction', {
         chart: {
             //width: '190',

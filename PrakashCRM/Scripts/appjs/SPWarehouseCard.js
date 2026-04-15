@@ -201,7 +201,7 @@ if (doctype === "Sales Order") {
     $('#txtUnloadingCharges').val("0");
     // Disable input
     $('#txtUnLoadingVendor').prop('disabled', false);
-} else if (doctype === "Sales Return") {
+} else if (doctype === "Sales Return" || doctype === "Purchase Return") {
     $('#hfLoadingVendorNo').val("");
     $('#txtLoadingVendor').val("");
     $('#txtLoadingCharges').val("0");
@@ -894,7 +894,7 @@ function SetLoaingUnloading() {
     else if (doctype == "Purchase Order") {
         filter = "Code eq '" + tocode + "'";
     }
-    else if (doctype == "Transfer Order" || doctype == "Sales Return") {
+    else if (doctype == "Transfer Order" || doctype == "Sales Return" || doctype == "Purchase Return") {
         filter = "(Code eq '" + fromcode + "' or Code eq '" + tocode + "')";
     }
 
@@ -940,8 +940,8 @@ function SaveTransportQty(lineNo, itemNo, btn) {
     }
 
     var documentno = $('#lnlDocumentNo').text().trim();
-    if (doctype !== "Sales Order" && doctype !== "Sales Return" && doctype !== "Purchase Order" && doctype !== "Transfer Order") {
-        ShowErrMsg(qtyFieldLabel + ' update is allowed only for Sales Order, Sales Return, Purchase Order and Transfer Order.');
+    if (doctype !== "Sales Order" && doctype !== "Sales Return" && doctype !== "Purchase Order" && doctype !== "Purchase Return" && doctype !== "Transfer Order") {
+        ShowErrMsg(qtyFieldLabel + ' update is allowed only for Sales Order, Sales Return, Purchase Order, Purchase Return and Transfer Order.');
         return false;
     }
 
@@ -1074,7 +1074,7 @@ function SaveTransporter() {
         $('#hfUnLoadingVendorNo').val("");
         $('#txtUnLoadingVendor').val("");
     }
-    else if (doctype === "Sales Return") {
+    else if (doctype === "Sales Return" || doctype === "Purchase Return") {
         unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
         $('#hfLoadingVendorNo').val("");
         $('#txtLoadingVendor').val("");
@@ -1161,7 +1161,7 @@ function SaveAndCloseTransporter() {
             loadingVendor = $('#hfLoadingVendorNo').val() || "";
             $('#hfUnLoadingVendorNo').val("");
             $('#txtUnLoadingVendor').val("");
-        } else if (doctype === "Sales Return") {
+        } else if (doctype === "Sales Return" || doctype === "Purchase Return") {
 
             unloadingVendor = $('#hfUnLoadingVendorNo').val() || "";
             $('#hfLoadingVendorNo').val(""); $('#txtLoadingVendor').val("");
@@ -1245,6 +1245,8 @@ function getItemTrackingSourceParams(documentType) {
     switch ((documentType || '').trim()) {
         case 'Purchase Order':
             return { sourceType: 39, sourceSubtype: '1' };
+        case 'Purchase Return':
+            return { sourceType: 39, sourceSubtype: '5' };
         case 'Sales Return':
             return { sourceType: 37, sourceSubtype: '5' };
         case 'Sales Order':

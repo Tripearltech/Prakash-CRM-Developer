@@ -2,6 +2,7 @@
 var filter = "";
 var orderBy = 3;
 var orderDir = "desc";
+
 $(document).ready(function () {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
@@ -31,39 +32,41 @@ $(document).ready(function () {
     $('#btnSearch').click(function () {
 
         var flag = true;
+        var selectedField = $('#ddlField').val();
+        var filterField = selectedField;
 
         filter = "";
 
-        if ($('#ddlField').val() == "Date" || $('#ddlField').val() == "Payment_Date") {
+        if (selectedField == "Date" || selectedField == "Payment_Date") {
             if ($('#txtFromDate').val() == "" || $('#txtToDate').val() == "") {
                 flag = false;
             }
             else {
-                filter = $('#ddlField').val() + ' ge ' + $('#txtFromDate').val() + ' and ' + $('#ddlField').val() + ' le ' + $('#txtToDate').val();
+                filter = filterField + ' ge ' + $('#txtFromDate').val() + ' and ' + filterField + ' le ' + $('#txtToDate').val();
             }
         }
         else {
 
-            if ($('#ddlField').val() == "-1" || $('#ddlOperator').val() == "-1" || $('#txtSearch').val() == "") {
+            if (selectedField == "-1" || $('#ddlOperator').val() == "-1" || $('#txtSearch').val() == "") {
                 flag = false;
             }
             else {
 
                 switch ($('#ddlOperator').val()) {
                     case 'Equal':
-                        filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
+                        filter = filterField + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                         break;
                     case 'Not Equal':
-                        filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
+                        filter = filterField + ' ne \'' + $('#txtSearch').val() + '\'';
                         break;
                     case 'Starts With':
-                        filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
+                        filter = "startswith(" + filterField + ",\'" + $('#txtSearch').val() + "\') eq true";
                         break;
                     case 'Ends With':
-                        filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
+                        filter = "endswith(" + filterField + ",\'" + $('#txtSearch').val() + "\') eq true";
                         break;
                     case 'Contains':
-                        filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
+                        filter = filterField + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
                         break;
                     default:
                         filter = "";
@@ -104,25 +107,38 @@ $(document).ready(function () {
 
     $('#btnExport').click(function () {
 
-        switch ($('#ddlOperator').val()) {
-            case 'Equal':
-                filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
-                break;
-            case 'Not Equal':
-                filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
-                break;
-            case 'Starts With':
-                filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
-                break;
-            case 'Ends With':
-                filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
-                break;
-            case 'Contains':
-                filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
-                break;
-            default:
+        var selectedField = $('#ddlField').val();
+        var filterField = selectedField;
+
+        if (selectedField == "Date" || selectedField == "Payment_Date") {
+            if ($('#txtFromDate').val() != "" && $('#txtToDate').val() != "") {
+                filter = filterField + ' ge ' + $('#txtFromDate').val() + ' and ' + filterField + ' le ' + $('#txtToDate').val();
+            }
+            else {
                 filter = "";
-                break;
+            }
+        }
+        else {
+            switch ($('#ddlOperator').val()) {
+                case 'Equal':
+                    filter = filterField + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
+                    break;
+                case 'Not Equal':
+                    filter = filterField + ' ne \'' + $('#txtSearch').val() + '\'';
+                    break;
+                case 'Starts With':
+                    filter = "startswith(" + filterField + ",\'" + $('#txtSearch').val() + "\') eq true";
+                    break;
+                case 'Ends With':
+                    filter = "endswith(" + filterField + ",\'" + $('#txtSearch').val() + "\') eq true";
+                    break;
+                case 'Contains':
+                    filter = filterField + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
+                    break;
+                default:
+                    filter = "";
+                    break;
+            }
         }
 
         exportGridData(0, 0, 0, orderBy, orderDir, filter);
@@ -181,9 +197,9 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
 
-                    var rowData = "<tr><td></td><td><a href='/SPVisitEntry/DailyVisit?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td>" +
+                    var rowData = " <tr><td></td><td><a href='/SPVisitEntry/DailyVisitDetails?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td>" +
                         "<td><a class='ViewProdCls' onclick='ShowDetails(\"" + item.No + "\",\"Product\")'><i class='bx bx-show'></i></a></td><td>" +
-                        item.Date + "</td><td>" + item.Visit_Name + "</td><td>" + item.Visit_SubType_Name + "</td><td>" + item.Contact_Company_Name +
+                        item.Date + "</td><td>" + item.No + "</td><td>" + item.Visit_Name + "</td><td>" + item.Visit_SubType_Name + "</td><td>" + item.Contact_Company_Name +
                         "</td><td>" + item.Contact_Person_Name + "</td><td>" + item.Event_Name + "</td><td>" + item.Topic_Name + "</td><td>" +
                         item.Mode_of_Visit + "</td><td>" + item.Feedback + "</td><td>" + item.Remarks + "</td><td>" + item.Market_Update + "</td><td>" +
                         item.Payment_Date + "</td><td>" + item.Payment_Amt + "</td><td>" + item.Payment_Remarks + "</td><td>" + item.Complain_Subject +
@@ -197,7 +213,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     else {
                         rowData += "<td>No</td>";
                     }
-                    
+
                     $('#tableBody').append(rowData);
                     // loop and do whatever with data
 
@@ -429,7 +445,7 @@ function ClearCustomFilter() {
 
 }
 
-function ShowDetails(dvpNo,detailsOf) {
+function ShowDetails(dvpNo, detailsOf) {
     debugger;
     var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
     var detailsUrl = "";
@@ -503,7 +519,7 @@ function ShowDetails(dvpNo,detailsOf) {
                     $('#dvProductDetails').css('display', 'none');
                 }
                 else if (detailsOf == "Expanse") {
-                   
+
                     $('#tblExpanseDet').empty();
                     var rowData = "";
 
@@ -559,3 +575,24 @@ function ShowDetails(dvpNo,detailsOf) {
         }
     );
 }
+
+function ShowErrMsg(errMsg) {
+
+    if (typeof Lobibox !== 'undefined' && Lobibox.notify) {
+        Lobibox.notify('error', {
+            pauseDelayOnHover: true,
+            size: 'mini',
+            rounded: true,
+            delayIndicator: false,
+            icon: 'bx bx-x-circle',
+            continueDelayOnInactiveTab: false,
+            position: 'top right',
+            msg: errMsg
+        });
+
+        return;
+    }
+
+    alert(errMsg);
+}
+

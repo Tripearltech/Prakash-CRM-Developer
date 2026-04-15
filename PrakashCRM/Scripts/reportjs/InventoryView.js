@@ -28,26 +28,39 @@ function normalizeDateForService(value) {
 }
 
 function GenerateInvData() {
-    $('#divImage').show();
+    $('#divImage').hide();
     var fromDate = normalizeDateForService($('#txtInvFDate').val());
     var toDate = normalizeDateForService($('#txtInvTDate').val());
 
     if (fromDate !== "" && toDate !== "") {
+        if (typeof showPageDataLoader === 'function') {
+            showPageDataLoader();
+        }
+
         $.post(apiUrl + 'GenerateInvData?FromDate=' + fromDate + '&ToDate=' + toDate,
             function (data) {
                 if (data) {
                     BindInvBranchWiseTotals();
+                } else if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
                 }
             }
         );
     } else {
         $('#divImage').hide();
+        if (typeof hidePageDataLoader === 'function') {
+            hidePageDataLoader();
+        }
         alert('Please select FromDate and ToDate.');
     }
 }
 
 const ProductGroupsCode = {};
 function BindInvBranchWiseTotals() {
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetBranchWiseTotal',
         type: 'GET',
@@ -313,6 +326,11 @@ function BindInvBranchWiseTotals() {
         },
         error: function (err) {
             alert("Error fetching branch data: " + err.responseText);
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         }
     });
 }

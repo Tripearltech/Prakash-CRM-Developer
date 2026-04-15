@@ -3,15 +3,47 @@
 var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
 
 var filter = "";
-var orderBy = 5;
-var orderDir = "asc";
+// Default sort: Order No (thead cellIndex = 1)
+var orderBy = 1;
+var orderDir = "desc";
+
+// Keep Document Type filter independent from the main filter controls.
+var docTypeFilter = "";
+
+function getEffectiveFilter() {
+    var a = (docTypeFilter || "").trim();
+    var b = (filter || "").trim();
+    if (a && b) return a + " and " + b;
+    return a || b;
+}
+
+function refreshGridWithCurrentFilters() {
+    $('ul.pager li').remove();
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
+}
+
+function _normalizeWarehouseDocType(v) {
+    return (v || "").toString().trim();
+}
+
+function _applyWarehouseDocTypeFilter(docType) {
+    var dt = _normalizeWarehouseDocType(docType);
+    if (!dt) {
+        docTypeFilter = "";
+        refreshGridWithCurrentFilters();
+        return;
+    }
+
+    docTypeFilter = "DocumentType_UI eq '" + dt.replace(/'/g, "''") + "'";
+    refreshGridWithCurrentFilters();
+}
 
 $(document).ready(function () {
 
-    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
 
     $('#ddlRecPerPage').change(function () {
-        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
     });
 
     $('#ddlField').change(function () {
@@ -95,7 +127,7 @@ $(document).ready(function () {
         }
         else {
             $('ul.pager li').remove();
-            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
         }
 
     });
@@ -153,22 +185,21 @@ $(document).ready(function () {
         rebindGrid();
     });
 
-    $('#dataList th').click(function () {
-        var table = $(this).parents('table').eq(0)
+    // Document Type dropdown: selection triggers auto-search (no typing needed).
+    $(document).off('change.wDocType', '#ddlDocType')
+        .on('change.wDocType', '#ddlDocType', function () {
+            var dt = $(this).val();
+            _applyWarehouseDocTypeFilter(dt);
+        });
 
+    // Use delegated handler so it survives DataTable destroy/re-init and ignore tfoot clicks.
+    $(document).off('click', '#dataList thead th').on('click', '#dataList thead th', function () {
         this.asc = !this.asc;
         if (this.cellIndex != 0) {
             orderBy = parseInt(this.cellIndex);
-            orderDir = "asc";
-
-            if (this.asc) {
-                orderDir = "asc";
-            }
-            else {
-                orderDir = "desc";
-            }
+            orderDir = this.asc ? "asc" : "desc";
             $('ul.pager li').remove();
-            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
         }
     });
 
@@ -241,7 +272,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     // loop and do whatever with data
 
                 });
-                
+
                 dataTableFunction(orderBy, orderDir);
 
             },
@@ -459,7 +490,7 @@ function pageMe() {
 
         pager.data("curr", page);
 
-        bindGridData(skip2, top2, 0, orderBy, orderDir, filter);
+        bindGridData(skip2, top2, 0, orderBy, orderDir, getEffectiveFilter());
     }
 };
 /* end pagination filter code */
@@ -519,16 +550,18 @@ function rebindGrid() {
     $('#ddlField').val('-1');
     $('#ddlOperator').val('Contains');
     $('#txtSearch').val('');
+    $('#ddlDocType').val('');
     $('#txtFromDate').val('');
     $('#txtToDate').val('');
     $('#ddlOperator').css('display', 'block');
     $('#dvtxtSearch').css('display', 'block');
     $('#txtFromDate').css('display', 'none');
-    $('#txtToDate').css('display', 'none');
+    $('#txtToDate').css('display', 'none'); a
 
     filter = "";
+    docTypeFilter = "";
     $('ul.pager li').remove();
-    orderBy = 5;
-    orderDir = "asc";
-    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    orderBy = 1;
+    orderDir = "desc";
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
 }

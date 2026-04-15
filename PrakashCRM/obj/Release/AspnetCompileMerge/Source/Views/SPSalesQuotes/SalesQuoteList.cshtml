@@ -10,6 +10,7 @@
         overflow-y: auto;
         height: 500px;
     }
+
     .QtyCountCls, .ScheduleOrderCls,
     .EditCls:hover {
         cursor: pointer;
@@ -51,12 +52,18 @@
 
                         <div class="col-md-10">
                             <div class="row row-cols-auto g-3" style="float:right">
+                                <td id="btnFinancehide" class="col">
+                                    <button id="btnReopenSQ" class="btn btn-success" type="button">
+                                        Price Updated Quotes
+                                    </button>
+                                </td>
                                 <div class="col">
                                     <select id="ddlStatus" class="form-select">
                                         <option value="-1">All</option>
                                         <option value="Pending" selected>Pending</option>
                                         <option value="Partial">Partial</option>
                                         <option value="Completed">Completed</option>
+                                        <option value="PendingPartial">Pending | Partial</option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -121,8 +128,8 @@
                             <th>Edit</th>
                             <th></th>
                             @*<th>SMS</th>
-                    <th>Email</th>
-                    <th>Print</th>*@
+                                <th>Email</th>
+                                <th>Print</th>*@
                             <th>Quote No</th>
                             <th>Quote Date</th>
                             <th>Customer Name</th>
@@ -135,6 +142,8 @@
                             <th>Shortclose</th>
                             <th>Payment Terms</th>
                             <th>Reject Remarks</th>
+                            <th>Shortclose Qty</th>
+                            <th>Balance Qty</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -145,8 +154,8 @@
                             <th>Edit</th>
                             <th></th>
                             @*<th>SMS</th>
-                    <th>Email</th>
-                    <th>Print</th>*@
+                                <th>Email</th>
+                                <th>Print</th>*@
                             <th>Quote No</th>
                             <th>Quote Date</th>
                             <th>Customer Name</th>
@@ -159,6 +168,8 @@
                             <th>Shortclose</th>
                             <th>Payment Terms</th>
                             <th>Reject Remarks</th>
+                            <th>Shortclose Qty</th>
+                            <th>Balance Qty</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -241,7 +252,7 @@
                                                 <th scope="col">Quantity</th>
                                                 <th scope="col">Packing Style</th>
                                                 <th scope="col">UOM</th>
-                                                <th scope="col">MRP</th>
+                                                <th scope="col">Basic Purchase Cost</th>
                                                 <th scope="col">Unit Price(Sales Price)</th>
                                                 <th scope="col">Drop Shipment</th>
                                                 @*<th scope="col">Vendor</th>*@
@@ -263,8 +274,13 @@
                                     <table class="table mb-0 table-striped">
                                         <thead>
                                             <tr>
-                                                <th scope="col">Sales<br />Order No</th>
+                                                <th scope="col">
+                                                    Sales
+                                                    Order No
+                                                </th>
                                                 <th scope="col">Order Date</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Packing Style</th>
                                                 <th scope="col">Quantity</th>
                                                 <th scope="col">Schedule Qty</th>
                                                 <th scope="col">Schedule Date</th>
@@ -290,6 +306,8 @@
                                             <tr>
                                                 <th scope="col">Invoice No</th>
                                                 <th scope="col">Posting Date</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Packing Style</th>
                                                 <th scope="col">Quantity</th>
                                                 <th scope="col">Vehicle No</th>
                                                 <th scope="col">Driver Mobile No</th>
@@ -313,10 +331,15 @@
                                         <thead>
                                             <tr>
                                                 <th scope="col">Sales Order No</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Packing Style</th>
                                                 <th scope="col">Transporter Name</th>
                                                 <th scope="col">LR No</th>
                                                 <th scope="col">Vehicle No</th>
-                                                <th scope="col">Driver<br />Mobile No</th>
+                                                <th scope="col">
+                                                    Driver
+                                                    Mobile No
+                                                </th>
                                                 <th scope="col">Remarks</th>
                                             </tr>
                                         </thead>
@@ -342,7 +365,7 @@
             <div class="modal-body">
 
                 <div id="dvLocationDet" class="SQverticalScroll">
-                    
+
                     <div class="row g-3">
                         <div class="col-md-12">
                             <div class="row mb-3">
@@ -401,7 +424,7 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="row mb-3">
-                                <label class="col-sm-3 col-form-label">Schedule Date:<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <label class="col-sm-3 col-form-label">schedule Date:<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-9">
                                     <input id="txtScheduleDate" type="date" class="form-control">
                                 </div>
@@ -427,6 +450,12 @@
                             </div>
                         </div>
                         <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Document Date:<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input id="txtDocumentDate" type="date" class="form-control">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row g-3">
@@ -435,28 +464,28 @@
                         </div>
                     </div>
                     @*<div class="row g-3">
-            <div class="col-md-12">
-                <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">External Document No:</label>
-                    <div class="col-sm-3">
-                        <input id="txtExternalDocNo" type="text" class="form-control">
-                        <br />
-                        <label id="lblErrMsgDateDocNo" style="color: red; display: none"></label>
-                    </div>
-                </div>
-            </div>
-        </div>*@
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">External Document No:</label>
+                                    <div class="col-sm-3">
+                                        <input id="txtExternalDocNo" type="text" class="form-control">
+                                        <br />
+                                        <label id="lblErrMsgDateDocNo" style="color: red; display: none"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
 
                     @*<div class="row g-3">
-            <div class="col-md-12">
-                <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Customer Reference No:</label>
-                    <div class="col-sm-9">
-                        <input id="txtPopupCustRefNo" type="text" class="form-control" />
-                    </div>
-                </div>
-            </div>
-        </div>*@
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Customer Reference No:</label>
+                                    <div class="col-sm-9">
+                                        <input id="txtPopupCustRefNo" type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
 
                     <div class="row g-3">
                         <div class="col-md-12">
@@ -477,26 +506,26 @@
                                         </thead>
                                         <tbody id="tblProdsForSchOrdr">
                                             @*<tr>
-                                                <td>
-                                                    <select id="ddlSQProds" class="form-select">
-                                                    </select>
-                                                </td>
-                                                <td>
-                                                    <label id="lblDropShipment"></label>
-                                                </td>
-                                                <td>
-                                                    <button type="button" id="btnShowInvQty" class="btn btn-primary bx bx-show-alt" title="Quantity From Inventory"></button>
-                                                </td>
-                                                <td>
-                                                    <input id="txtBalQty" type="text" class="form-control" />
-                                                </td>
-                                                <td>
-                                                    <input id="txtScheduleQty" type="text" class="form-control" value="" />
-                                                </td>
-                                                <td>
-                                                    <input id="txtSchRemarks" type="text" class="form-control" />
-                                                </td>
-                                            </tr>*@
+                                                    <td>
+                                                        <select id="ddlSQProds" class="form-select">
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <label id="lblDropShipment"></label>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" id="btnShowInvQty" class="btn btn-primary bx bx-show-alt" title="Quantity From Inventory"></button>
+                                                    </td>
+                                                    <td>
+                                                        <input id="txtBalQty" type="text" class="form-control" />
+                                                    </td>
+                                                    <td>
+                                                        <input id="txtScheduleQty" type="text" class="form-control" value="" />
+                                                    </td>
+                                                    <td>
+                                                        <input id="txtSchRemarks" type="text" class="form-control" />
+                                                    </td>
+                                                </tr>*@
                                         </tbody>
                                     </table>
                                 </div>
@@ -504,42 +533,42 @@
                         </div>
                     </div>
                     @*<div class="row g-3">
-                        <div class="col-md-12">
-                            <div class="row mb-3">
-                                <div class="col-sm-10" align="right">
-                                    <label id="lblSchOrderErrMsg" class="form-label" style="color:red;display:none"></label>
-                                </div>
-                                <div class="col-sm-2" align="right">
-                                    <button id="btnAddRow" type="button" class="btn btn-primary">Add Row</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <div class="row mb-3">
-                                <div class="col-sm-12">
-                                    <table id="tblSchOrderDetails" class="table mb-0 table-striped" style="display:none">
-                                        <thead>
-                                            <tr>
-                                                <th hidden>Product No</th>
-                                                <th scope="col">Product Name</th>
-                                                <th scope="col">Balance Qty</th>
-                                                <th scope="col">Schedule Qty</th>
-                                                <th scope="col">Remarks</th>
-                                                <th scope="col">Drop Shipment</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tblSchOrderProds">
-                                        </tbody>
-                                    </table>
-                                    <br />
-                                    <table id="tblLotNoWiseQtyDetails">
-                                    </table>
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-10" align="right">
+                                        <label id="lblSchOrderErrMsg" class="form-label" style="color:red;display:none"></label>
+                                    </div>
+                                    <div class="col-sm-2" align="right">
+                                        <button id="btnAddRow" type="button" class="btn btn-primary">Add Row</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>*@
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table id="tblSchOrderDetails" class="table mb-0 table-striped" style="display:none">
+                                            <thead>
+                                                <tr>
+                                                    <th hidden>Product No</th>
+                                                    <th scope="col">Product Name</th>
+                                                    <th scope="col">Balance Qty</th>
+                                                    <th scope="col">Schedule Qty</th>
+                                                    <th scope="col">Remarks</th>
+                                                    <th scope="col">Drop Shipment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblSchOrderProds">
+                                            </tbody>
+                                        </table>
+                                        <br />
+                                        <table id="tblLotNoWiseQtyDetails">
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
                 </div>
                 <div id="dvSQLineItems" style="display:none">
                     <div class="row g-3">

@@ -2,8 +2,13 @@
 @{
     ViewBag.Title = "SalesQuote";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+    var isApprovalNavigation = string.Equals(Request["ReturnTo"], "SalesQuoteStatus", System.StringComparison.OrdinalIgnoreCase)
+        || string.Equals(Request["SQFor"], "ApproveReject", System.StringComparison.OrdinalIgnoreCase);
+    var salesQuoteBackUrl = isApprovalNavigation
+        ? Url.Action("SalesQuoteStatus", "SPSalesQuotes")
+        : Url.Action("SalesQuoteList", "SPSalesQuotes");
+    var salesQuoteBackLabel = isApprovalNavigation ? "Sales Quote Status" : "Sales Quote List";
 }
-
 <style>
     .InqProdCls, .EditCls,
     .CostSheetCls, .SQLineCls {
@@ -21,7 +26,8 @@
     .SQverticalScroll {
         padding: 15px;
         overflow-y: auto;
-        height: 500px;
+        min-height: 220px;
+        max-height: min(440px, calc(var(--app-viewport-height, 100vh) - 220px));
     }
 </style>
 <div class="page-content">
@@ -33,7 +39,7 @@
                         <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="/SPSalesQuotes/SalesQuoteList"> Sales Quote List </a>
+                        <a href="@salesQuoteBackUrl"> @salesQuoteBackLabel </a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
                         Sales Quote
@@ -46,6 +52,7 @@
 
     <div class="card">
         <div class="card-body">
+            <div id="dvApprovalLinkUsedMessage" class="alert alert-warning" style="display:none"></div>
 
             <div class="row">
                 <div>
@@ -799,7 +806,7 @@
                                             </td>
                                             <td></td>
                                             <td id="btnFinancehide1">
-                                                <a href="/SPSalesQuotes/SalesQuoteList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                                                <a href="@salesQuoteBackUrl" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
                                             </td>
                                         </tr>
                                     </table>
@@ -955,7 +962,7 @@
             <div class='loader' id='divImage' style="display:none">
                 <!-- MODAL CONTENT -->
                 <div class='loader-content'>
-                    <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+                    <span class="app-loader-spinner" role="status" aria-label="Loading"></span>
                 </div>
             </div>
             <div class="modal" id="modalSQDetails" tabindex="-1" aria-hidden="true">
@@ -996,7 +1003,7 @@
                                 </div>
                             </div>
 
-                            <div id="dvLocationDet" style="display:none" class="SQverticalScroll">
+                            <div id="dvLocationDet" style="display:none" class="SQverticalScroll" data-auto-scale-height="panel" data-auto-scale-offset="32">
                                 <div class="row g-3">
 
                                     <div class="col-md-12">
@@ -1153,9 +1160,9 @@
                             <div class="row g-3" id="Justification1" style="display:none">
                                 <div class="col-md-12">
                                     <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Negative Credit Limit Justification :</label>
+                                        <label class="col-sm-3 col-form-label">Negative Credit Limit Justification<span style="color:red;margin-left:2px">*</span></label>
                                         <div class="col-sm-9">
-                                            <textarea id="txtJustification1" class="form-control"></textarea>
+                                            <textarea id="txtJustification1" class="form-control required"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -1163,7 +1170,7 @@
                             <div class="row g-3" id="targetDate" style="display:none">
                                 <div class="col-md-12">
                                     <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Target Date:</label>
+                                        <label class="col-sm-3 col-form-label">Target Date:<span style="color:red;margin-left:2px">*</span></label>
                                         <div class="col-sm-9">
                                             <input id="txtTargetDate" type="date" class="form-control" />
                                         </div>
@@ -1173,24 +1180,18 @@
                             <div class="row g-3" id="Justification2" style="display:none">
                                 <div class="col-md-12">
                                     <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Negative Margin Justification :</label>
+                                        <label class="col-sm-3 col-form-label">Negative Margin Justification<span style="color:red;margin-left:2px">*</span></label>
                                         <div class="col-sm-9">
                                             <textarea id="txtJustification2" class="form-control"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            @*<div class="row g-3">
-            <div class="col-md-12">
-                <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Target Date:</label>
-                    <div class="col-sm-9">
-                        <input id="txtTargetDate" type="date" class="form-control" />
-                    </div>
-                </div>
-            </div>
-        </div>*@
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div id="lblSQJustificationValidation" class="text-danger" style="display:none"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button id="btnConfirmSaveSQSpinner" class="btn btn-primary" type="button" disabled style="display:none">
@@ -1198,7 +1199,7 @@
                                 <span class="visually-hidden">Loading...</span>
                             </button>
                             &nbsp;
-                            <button id="btnConfirmSaveSQ" type="button" class="btn btn-primary">Submit</button>
+                            <button id="btnConfirmSaveSQ" type="button" class="btn btn-primary" disabled>Submit</button>
                         </div>
                     </div>
                 </div>
@@ -1584,14 +1585,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    @*<div class="col-md-6">
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
                                             <div class="col-sm-9">
                                                 <input type="text" id="txtNewJobtoAddCode" class="form-control" />
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>*@
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -1800,8 +1801,18 @@
         });
 
         $('#btnShowCustTrans').click(function () {
+
+                    var prodNo = ($(this).find("TD").eq(2).text() || "").toString().trim();
+                    var pendingLineOverride = null;
+                    try {
+                        if (typeof sqGetPendingLineSaveOverride === 'function') {
+                            pendingLineOverride = sqGetPendingLineSaveOverride(prodNo);
+                        }
+                    } catch (e) { }
             debugger
-            //var location = $('#ddlLocations').val();
+                    var rowMargin = pendingLineOverride
+                        ? parseAmount(pendingLineOverride.PCPL_Margin)
+                        : parseAmount($(this).find("TD").eq(marginColIdx).text());
             //var Loc = location.split("_");
             //var loc = Loc[0];
             $('#modalSQDetails').css('display', 'block');
@@ -1895,14 +1906,26 @@
 
             $('#ddlQtyPopupLocCode').append(LocCodeOpts);
             $('#ddlQtyPopupLocCode').val($('#ddlLocations').val());
-            var qty = $("#txtProdQty").val();
+            var qty = parseFloat($("#txtProdQty").val()) || 0;
             var location = $('#ddlLocations').val();
-             var Loc = location.split("_");
-             var loc = Loc[0];
+            var Loc = location.split("_");
+            var loc = Loc[0];
+            var packingStyleValue = ($('#ddlPackingStyle').val() || '').toString();
+            var packingStyleCode = '';
+
+            if (packingStyleValue !== '' && packingStyleValue !== '-1') {
+                var packingStyleDetails = packingStyleValue.split('_');
+                packingStyleCode = packingStyleDetails.length > 1 ? packingStyleDetails[1] : '';
+            }
 
             $.ajax({
-                url: '/SPSalesQuotes/GetAvailableQuantity?ProdNo=' + $('#hfProdNo').val() + '&LocationCode=' + loc,
+                url: '/SPSalesQuotes/GetAvailableQuantity',
                 type: 'GET',
+                data: {
+                    ProdNo: $('#hfProdNo').val(),
+                    LocationCode: loc,
+                    PackingStyleCode: packingStyleCode
+                },
                 dataType: 'json',
                 success: function (data) {
 
@@ -1913,10 +1936,15 @@
 
                         $.each(data, function (index, item) {
                             var costActual = parseFloat(item.Cost_Amount_Actual) || 0;
-                            var totalqty = qty > 0 ? (costActual / qty) : 0;
+                            var Remainingqty = parseFloat(item.Remaining_Quantity) || 0;
+                            var totalqty = Remainingqty > 0 ? (costActual / Remainingqty) : 0;
 
-                            rows += "<tr>" + "<td>" + item.PCPL_Mfg_Name + "</td>" + "<td>" + item.Lot_No + "</td>" + "<td>" + qty + "</td>" + "<td>" + totalqty.toFixed(2) + "</td><td>0</td></tr>";
+                            rows += "<tr>" + "<td>" + item.PCPL_Mfg_Name + "</td>" + "<td>" + item.Lot_No + "</td>" + "<td>" + Remainingqty + "</td>" + "<td>" + qty.toFixed(2) + "</td><td>" + totalqty.toFixed(2) + "</td></tr>";
                         });
+
+                        if (rows === "") {
+                            rows = "<tr><td colspan='7' style='text-align:center'>No Records Available</td></tr>";
+                        }
 
                     } else {
                         rows = "<tr><td colspan='7' style='text-align:center'>No Records Available</td></tr>";
@@ -2056,6 +2084,8 @@
                     $('#Justification1').show();
                     $('#Justification2').show();
                     $('#targetDate').show();
+                    resetSQJustificationValidation();
+                    updateSQJustificationSubmitState(false);
                     $('#modalJustification').show();
 
                 }
@@ -2068,6 +2098,8 @@
                     $('#Justification1').show();
                     $('#Justification2').hide();
                     $('#targetDate').show();
+                    resetSQJustificationValidation();
+                    updateSQJustificationSubmitState(false);
                     $('#modalJustification').show();
 
                 }
@@ -2080,6 +2112,8 @@
                     $('#Justification1').hide();
                     $('#Justification2').show();
                     $('#targetDate').hide();
+                    resetSQJustificationValidation();
+                    updateSQJustificationSubmitState(false);
                     $('#modalJustification').show();
 
                 }
@@ -2092,7 +2126,14 @@
         });
         debugger;
 
+        $('#txtJustification1, #txtTargetDate, #txtJustification2').on('input change', function () {
+            updateSQJustificationSubmitState(true);
+        });
+
         $('#btnConfirmSaveSQ').click(function () {
+            if (!updateSQJustificationSubmitState(true)) {
+                return;
+            }
 
             SaveSalesQuote();
 
@@ -2113,7 +2154,72 @@
         var s = (value || "").toString().trim().toLowerCase();
         return (s === "true" || s === "yes" || s === "1");
     }
+
+    function setSQJustificationFieldValidity(selector, isValid) {
+        $(selector).toggleClass('is-invalid', !isValid);
+    }
+
+    function resetSQJustificationValidation() {
+        setSQJustificationFieldValidity('#txtJustification1', true);
+        setSQJustificationFieldValidity('#txtTargetDate', true);
+        setSQJustificationFieldValidity('#txtJustification2', true);
+        $('#lblSQJustificationValidation').hide().text('');
+    }
+
+    function getSQJustificationValidationState() {
+        var invalidFields = [];
+        var justification1Visible = $('#Justification1').is(':visible');
+        var targetDateVisible = $('#targetDate').is(':visible');
+        var justification2Visible = $('#Justification2').is(':visible');
+
+        var justification1Value = ($('#txtJustification1').val() || '').toString().trim();
+        var targetDateValue = ($('#txtTargetDate').val() || '').toString().trim();
+        var justification2Value = ($('#txtJustification2').val() || '').toString().trim();
+
+        var justification1Valid = !justification1Visible || justification1Value !== '';
+        var targetDateValid = !targetDateVisible || targetDateValue !== '';
+        var justification2Valid = !justification2Visible || justification2Value !== '';
+
+        setSQJustificationFieldValidity('#txtJustification1', justification1Valid);
+        setSQJustificationFieldValidity('#txtTargetDate', targetDateValid);
+        setSQJustificationFieldValidity('#txtJustification2', justification2Valid);
+
+        if (!justification1Valid) {
+            invalidFields.push('Negative Credit Limit Justification');
+        }
+
+        if (!targetDateValid) {
+            invalidFields.push('Target Date');
+        }
+
+        if (!justification2Valid) {
+            invalidFields.push('Negative Margin Justification');
+        }
+
+        return {
+            isValid: invalidFields.length === 0,
+            message: invalidFields.length > 0 ? 'Enter ' + invalidFields.join(', ') + ' to continue.' : ''
+        };
+    }
+
+    function updateSQJustificationSubmitState(showMessage) {
+        var validationState = getSQJustificationValidationState();
+        $('#btnConfirmSaveSQ').prop('disabled', !validationState.isValid);
+
+        if (showMessage && !validationState.isValid) {
+            $('#lblSQJustificationValidation').show().text(validationState.message);
+        } else {
+            $('#lblSQJustificationValidation').hide().text('');
+        }
+
+        return validationState.isValid;
+    }
+
     function SaveSalesQuote() {
+        if ($('#modalJustification').is(':visible') && !updateSQJustificationSubmitState(true)) {
+            return;
+        }
+
         $('#divImage').show();
         $('#btnConfirmSaveSQSpinner').show();
 
@@ -2142,8 +2248,9 @@
         salesquoteheader.PaymentMethodCode = $('#ddlPaymentMethods').val();
         salesquoteheader.TransportMethodCode = $('#ddlTransportMethod').val();
 
-        const PaymentTermsDetails = $('#ddlPaymentTerms').val().split('_');
-        salesquoteheader.PaymentTermsCode = PaymentTermsDetails[0];
+            const paymentTermsValue = ($('#ddlPaymentTerms').val() || '').toString();
+            const PaymentTermsDetails = paymentTermsValue && paymentTermsValue !== '-1' ? paymentTermsValue.split('_') : [];
+            salesquoteheader.PaymentTermsCode = PaymentTermsDetails.length > 0 ? PaymentTermsDetails[0] : '';
         salesquoteheader.ShipmentMethodCode = $('#ddlIncoTerms').val();
         salesquoteheader.ConsigneeAddress = $('#ddlConsigneeAddress').val();
         salesquoteheader.ShiptoCode = $('#ddlBillTo').val();
@@ -2175,7 +2282,8 @@
             // Use Packing Style CODE (value) instead of text
             productDetails.PCPL_Packing_Style_Code = $(this).find("TD").eq(6).attr("data-code") || $(this).find("TD").eq(6).html();
 
-            productDetails.PCPL_MRP = parseAmount($(this).find("TD").eq(7).text());
+            productDetails.PCPL_Purchase_Cost = parseAmount($(this).find("TD").eq(7).text());
+            productDetails.PCPL_MRP = parseAmount($(this).find("TD").eq(36).text());
             productDetails.Delivery_Date = $(this).find("TD").eq(12).html();
             productDetails.PCPL_Total_Cost = $(this).find("TD").eq(13).html();
             productDetails.PCPL_Margin = $(this).find("TD").eq(14).html();
@@ -2236,6 +2344,24 @@
             marginPercent = marginPercent.replace('%', '');
             productDetails.PCPL_Margin_Percent = parseFloat(marginPercent) || 0;
 
+            var pendingLineOverride = null;
+            try {
+                if (typeof sqGetPendingLineSaveOverride === 'function') {
+                    pendingLineOverride = sqGetPendingLineSaveOverride(prodNo);
+                }
+            } catch (e) { }
+
+            if (pendingLineOverride) {
+                productDetails.Unit_Price = parseAmount(pendingLineOverride.Unit_Price);
+                productDetails.PCPL_Total_Cost = parseAmount(pendingLineOverride.PCPL_Total_Cost);
+                productDetails.PCPL_Margin = parseAmount(pendingLineOverride.PCPL_Margin);
+                productDetails.PCPL_Margin_Percent = parseAmount(pendingLineOverride.PCPL_Margin_Percent);
+                productDetails.PCPL_Commission_Amount = parseAmount(pendingLineOverride.PCPL_Commission_Amount);
+                productDetails.Price_Updated = parseBool(pendingLineOverride.Price_Updated);
+                productDetails.New_Price = 0;
+                productDetails.New_Margin = 0;
+            }
+
             // Liquid Product Details
             productDetails.IsLiquidProd = isLiquidProd;
             if (isLiquidProd) {
@@ -2275,15 +2401,20 @@
 
                     try {
                         if (typeof initSQPriceColumnIndexes === 'function') initSQPriceColumnIndexes();
+                        if (typeof SQ_PENDING_LINE_SAVE_OVERRIDES !== 'undefined') {
+                            SQ_PENDING_LINE_SAVE_OVERRIDES = {};
+                        }
                         $("#tblProducts TR[id^='ProdTR_']").each(function () {
                             var $tr = $(this);
                             if (typeof sqSetRowCellText === 'function' && typeof SQ_PRICE_COLS !== 'undefined') {
                                 sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_PRICE, '0');
                                 sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_MARGIN, '0');
+                                sqSetRowCellText($tr, SQ_PRICE_COLS.PRICE_UPDATED, 'false');
                             } else {
                                 // Fallback to fixed indexes matching the grid header.
                                 $tr.find('TD').eq(9).text('0');
                                 $tr.find('TD').eq(10).text('0');
+                                $tr.find('TD').eq(11).text('false');
                             }
                             if (typeof applySQPriceRowState === 'function') {
                                 applySQPriceRowState($tr.attr('id'));
@@ -2300,7 +2431,7 @@
                 $('#divImage').hide();
                 $('#btnConfirmSaveSQSpinner').hide();
                 console.error("Error saving Sales Quote:", err);
-                alert("Failed to save Sales Quote. Check console for details.");
+                alert(err && err.responseText ? err.responseText : "Failed to save Sales Quote. Check console for details.");
             }
         });
     }
@@ -2308,7 +2439,7 @@
 
 
     function RedirectToSQApproval() {
-        window.location.replace('@Url.Action("SalesQuoteList", "SPSalesQuotes")');
+        window.location.replace('@salesQuoteBackUrl');
     }
 
 </script>

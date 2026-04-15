@@ -560,14 +560,30 @@ namespace PrakashCRM.Service.Controllers
         }
         [HttpGet]
         [Route("GetCustomerOutStanding")]
-        public List<SPCustomerOutstanding> GetCustomerOutStanding()
+        public PagedResult<SPCustomerOutstanding> GetCustomerOutStanding(int pageNumber = 1, int pageSize = 10, string orderby = "Location_Code asc")
         {
-            API ac = new API();
-            List<SPCustomerOutstanding> customerOutStanding = new List<SPCustomerOutstanding>();
-            var result = ac.GetData<SPCustomerOutstanding>("CollectionSummaryView", "");
+            if (pageNumber < 1)
+                pageNumber = 1;
 
-            if (result != null && result.Result.Item1.value.Count > 0)
-                customerOutStanding = result.Result.Item1.value;
+            if (pageSize <= 0)
+                pageSize = 10;
+
+            API ac = new API();
+            PagedResult<SPCustomerOutstanding> customerOutStanding = new PagedResult<SPCustomerOutstanding>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var count = ac.CalculateCount("CollectionSummaryView", "");
+            customerOutStanding.TotalCount = Convert.ToInt32(count.Result);
+
+            var skip = (pageNumber - 1) * pageSize;
+            var result = ac.GetData1<SPCustomerOutstanding>("CollectionSummaryView", "", skip, pageSize, string.IsNullOrWhiteSpace(orderby) ? "Location_Code asc" : orderby);
+
+            if (result != null && result.Result.Item1 != null && result.Result.Item1.value != null && result.Result.Item1.value.Count > 0)
+                customerOutStanding.Items = result.Result.Item1.value;
+
             return customerOutStanding;
         }
         [HttpGet]

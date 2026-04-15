@@ -364,7 +364,7 @@
                         @*@Html.TextBoxFor(model => model.Total_km, new { @id = "txtTotalKM", @class = "form-control" })*@
                     </div>
                 </div>
-                <br /><br />
+                <!--<br /><br />
                 <h6 class="mb-0 text-uppercase">Attachment</h6>
                 <hr />
                 <div class="row g-3">
@@ -372,9 +372,9 @@
                         <label class="form-label">Document Name</label>
                     </div>
                     <div class="col-md-5">
-                        <input type="text" id="txtDocName" class="form-control" />
+                        <input type="text" id="txtDocName" class="form-control" />-->
                         @*@Html.TextBoxFor(model => model.Topic_Name, new { @id = "txtTopicName", @class = "form-control" })*@
-                    </div>
+                    <!--</div>
                     <div class="col-md-5">
                         <input type="file" id="AttachmentFile" class="form-control" />
                     </div>
@@ -422,7 +422,7 @@
                         </div>
                     </div>
 
-                </div>
+                </div>-->
                 <br /><br />
                 <h6 class="mb-0 text-uppercase">Feedback</h6>
                 <hr />
@@ -552,10 +552,10 @@
                                         @*<textarea id="txtRootCauseAna" class="form-control"></textarea>*@
                                         @Html.TextAreaFor(model => model.Root_Analysis, new { @id = "txtRootCauseAna", @class = "form-control" })
                                     </div>
-                                    <div class="col-md-4">
+                                    @*<div class="col-md-4">
                                         <label class="form-label">Attachment</label>
                                         <input type="file" id="RCAFile" class="form-control" />
-                                    </div>
+                                    </div>*@
                                 </div>
                                 <br />
                                 <div class="row g-3">
@@ -570,10 +570,10 @@
                                         @*<textarea id="txtCorrectiveAction" class="form-control"></textarea>*@
                                         @Html.TextBoxFor(model => model.Corrective_Action, new { @id = "txtCorrectiveAction", @class = "form-control" })
                                     </div>
-                                    <div class="col-md-4">
+                                    @*<div class="col-md-4">
                                         <label class="form-label">Attachment</label>
                                         <input type="file" id="CActionFile" class="form-control" />
-                                    </div>
+                                    </div>*@
                                 </div>
                                 <br />
                                 <div class="row g-3">
@@ -587,10 +587,10 @@
                                         @*<textarea id="txtPreventionAction" class="form-control"></textarea>*@
                                         @Html.TextBoxFor(model => model.Preventive_Action, new { @id = "txtPreventionAction", @class = "form-control" })
                                     </div>
-                                    <div class="col-md-4">
+                                    @*<div class="col-md-4">
                                         <label class="form-label">Attachment</label>
                                         <input type="file" id="PActionFile" class="form-control" />
-                                    </div>
+                                    </div>*@
                                 </div>
                                 <br />
                                 <div class="row g-3">
@@ -864,14 +864,14 @@
                 }
 
                 if ($('#hfWeekStartDate').val() == null || $('#hfWeekStartDate').val() == "") {
-                    dailyvisit.Week_Start_Date = "1900-01-01";
+                    dailyvisit.Week_Start_Date = "";
                 }
                 else {
                     dailyvisit.Week_Start_Date = $('#hfWeekStartDate').val();
                 }
 
                 if ($('#hfWeekEndDate').val() == null || $('#hfWeekEndDate').val() == "") {
-                    dailyvisit.Week_End_Date = "1900-01-01";
+                    dailyvisit.Week_End_Date = "";
                 }
                 else {
                     dailyvisit.Week_End_Date = $('#hfWeekEndDate').val();

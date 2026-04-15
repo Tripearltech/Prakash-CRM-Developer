@@ -6,6 +6,19 @@
 }
 
 <link href="~/Content/appcss/VerticalScrollInDiv.css" rel="stylesheet" />
+<style>
+    .dashboard-table-loader-cell {
+        padding: 1.5rem 0;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.72);
+    }
+
+    .dashboard-table-loader__spinner {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-width: 0.3rem;
+    }
+</style>
 <div class="page-content">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
@@ -184,7 +197,7 @@
                                     </button>
 
                                     <button id="btnClearFilter" class="btn btn-primary btn-sm px-3" type="button">
-                                        <i class="bx bx-rotate-right"></i> Refresh
+                                       Refresh
                                     </button>
                                 </div>
                             </div>
@@ -616,7 +629,7 @@
 <div class='loader' id='divImage' style="display:none">
     <!-- MODAL CONTENT -->
     <div class='loader-content'>
-        <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+        <span class="app-loader-spinner" role="status" aria-label="Loading"></span>
     </div>
 </div>
 <div class="modal" id="modal1" tabindex="-1" aria-hidden="true">
@@ -926,7 +939,7 @@
     });
 
 
-    $.get(apiUrl + 'GetDashboardDetails?SPCode=@Session["loggedInUserSPCode"].ToString()', function (data) {
+    dashboardGet(apiUrl + 'GetDashboardDetails?SPCode=@Session["loggedInUserSPCode"].ToString()', function (data) {
 
         if (data != null)
         {

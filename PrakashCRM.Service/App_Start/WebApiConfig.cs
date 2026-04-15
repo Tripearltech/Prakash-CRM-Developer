@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using PrakashCRM.Service.App_Start;
+//using PrakashCRM.Service.App_Start;
 using PrakashCRM.Service.Filters;
 
 namespace PrakashCRM.Service
@@ -30,7 +30,7 @@ namespace PrakashCRM.Service
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            SwaggerConfig.Register(config);
+           // SwaggerConfig.Register(config);
         }
     }
 }

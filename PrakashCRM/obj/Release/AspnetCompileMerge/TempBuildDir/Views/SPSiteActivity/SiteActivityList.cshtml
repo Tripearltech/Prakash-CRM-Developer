@@ -37,13 +37,15 @@
                                 <div class="col">
                                     <select id="ddlField" class="form-select">
                                         <option value="---Select---">---Select---</option>
+                                        <option value="Activity_Date">Activity Date</option>
+                                        <option value="Activity_User_Name">User Name</option>
                                         <option value="Module_Name">Module Name</option>
                                         <option value="Trace_Id">Trace Id</option>
                                         <option value="IP_Address">IP Address</option>
                                         <option value="Browser">Browser</option>
                                         <option value="Description">Description</option>
                                         <option value="Web_URL">Web URL</option>
-                                        <option value="Device_Name ">Device Name</option>
+                                        <option value="Device_Name">Device Name</option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -71,7 +73,7 @@
                                         <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
                                     </button>
                                 </div>
-                                <div style="display:none" class="col">
+                                <div class="col">
                                     <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
                                 </div>
                             </div>
@@ -91,6 +93,8 @@
                     <thead>
                         <tr>
                             <th></th>
+                            <th>Activity Date</th>
+                            <th>User Name</th>
                             <th>Module Name</th>
                             <th>Trace Id</th>
                             <th>IP Address</th>
@@ -105,6 +109,8 @@
                     <tfoot>
                         <tr>
                             <th></th>
+                            <th>Activity Date</th>
+                            <th>User Name</th>
                             <th>Module Name</th>
                             <th>Trace Id</th>
                             <th>IP Address</th>

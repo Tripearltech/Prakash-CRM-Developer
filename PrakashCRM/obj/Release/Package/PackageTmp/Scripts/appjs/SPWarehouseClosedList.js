@@ -217,6 +217,10 @@ $(document).ready(function () {
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax(
         {
             url: '/SPWarehouse/GetWarehouseClosedTaskAll?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter,
@@ -275,6 +279,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
                 dataTableFunction(orderBy, orderDir);
 
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             },
             error: function () {
                 alert("error");

@@ -246,6 +246,8 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var encodedFilter = encodeURIComponent(filter || "");
 
+    showPageDataLoader();
+
     var countRequest = $.get(
         apiUrl + 'GetApiRecordsCount?page=BusinessPlanContactList&SPNo=' + $('#hdnLoggedInUserSPCode').val() + '&LoggedInUserNo=&apiEndPointName=Business_Plan_Customer_Wise&filter=' + encodedFilter,
         function (data) {
@@ -254,7 +256,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
     );
 
     //url: '/SPBusinessPlan/GetContactCompanyListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
-    $.ajax(
+    var gridRequest = $.ajax(
         {
             url: '/SPBusinessPlan/GetBusinessPlanCustWiseListData?page=BusinessPlanContactList&SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + encodedFilter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
@@ -331,7 +333,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
     );
 
 
-    $.ajax(
+    var summaryRequest = $.ajax(
         {
             url: '/SPBusinessPlan/GetTotalDemandAndTargetQtyOfAllCust?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&filter=' + encodedFilter,
             type: 'GET',
@@ -355,6 +357,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
             }
         }
     );
+
+    $.when(gridRequest, summaryRequest).always(function () {
+        hidePageDataLoader();
+    });
 
 }
 
@@ -540,10 +546,7 @@ function BindFinancialYear() {
     var prevFinancialYear = (currentYear - 1) + '-' + currentYear;
     var currFinancialYear = currentYear + '-' + (currentYear + 1);
 
-    if (currentMonth <= 2) {
-        /*yearOpts += "<option value='" + (currentYear - 1) + '-' + currentYear + "'>" + (currentYear - 1) + '-' + currentYear + "</option>";*/
-        yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
-    }
+    yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
 
     yearOpts += "<option value='" + currFinancialYear + "'>" + currFinancialYear + "</option>";
 

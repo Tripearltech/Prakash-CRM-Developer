@@ -13,6 +13,10 @@ function DailyVisitMonthWise(fDate, tDate) {
     var fromDate = fDate;
     var toDate = tDate;
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPReports/GetDailyVisitMonthWise',
         type: 'GET',
@@ -45,6 +49,11 @@ function DailyVisitMonthWise(fDate, tDate) {
             $('#tblEmpDailyVisitMonthWise').append(employeeRow);
 
         },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
+        }
 
     });
 

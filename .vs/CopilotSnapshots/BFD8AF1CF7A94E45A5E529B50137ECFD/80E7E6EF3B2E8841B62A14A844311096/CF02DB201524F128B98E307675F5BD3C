@@ -1,0 +1,95 @@
+﻿/* start pagination filter code */
+var filter = "";
+var orderBy = 4;
+var orderDir = "desc";
+var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
+var salesQuotePerms = null;
+
+function normalizeStatus(v) {
+    if (v === undefined || v === null) return "";
+    return (v + "").trim();
+}
+
+function ensureDefaultStatusSelected() {
+    var v = normalizeStatus($('#ddlStatus').val());
+    // If nothing selected / placeholder selected, default to Pending (previous behavior)
+    if (v === "" || v === "-1") {
+        $('#ddlStatus').val('Pending');
+    }
+}
+
+function buildScheduleStatusFilter() {
+    ensureDefaultStatusSelected();
+    var status = normalizeStatus($('#ddlStatus').val());
+    // 'All' means no filter
+    if (status === "" || status === "-1" || status.toLowerCase() === "all") return "";
+    return "TPTPL_Schedule_status eq '" + status.replace(/'/g, "''") + "'";
+}
+
+$(document).ready(function () {
+
+    // ---- PAGE-LEVEL RIGHTS via shared PermissionService ----
+    salesQuotePerms = PermissionService.getForCurrentPage('Sales Quote List');
+    if (!salesQuotePerms.read) {
+        alert('Access Denied');
+        window.location.href = '/Error/AccessDenied';
+        return;
+    }
+
+    // Default filter should be Pending on first load
+    filter = buildScheduleStatusFilter();
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+
+    $('#ddlRecPerPage').change(function () {
+        // keep current status filter
+        filter = buildScheduleStatusFilter();
+        $('ul.pager li').remove();
+        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    });
+
+    $('#hfIsScheduleOrder').val("false");
+
+    $('#ddlField').change(function () {
+
+        if ($('#ddlField').val() == "Order_Date") {
+            $('#ddlOperator').css('display', 'none');
+            $('#dvtxtSearch').css('display', 'none');
+            $('#txtFromDate').css('display', 'block');
+            $('#txtToDate').css('display', 'block');
+        }
+        else {
+            $('#ddlOperator').css('display', 'block');
+            $('#dvtxtSearch').css('display', 'block');
+            $('#txtFromDate').css('display', 'none');
+            $('#txtToDate').css('display', 'none');
+        }
+
+    });
+
+    $('#ddlStatus').change(function () {
+
+        ClearCustomFilter();
+        filter = buildScheduleStatusFilter();
+
+        $('ul.pager li').remove();
+        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+
+    });
+
+    $('#btnSearch').click(function () {
+        var flag = true;
+
+        filter = "";
+
+        if ($('#ddlField').val() == "Order_Date") {
+            if ($('#txtFromDate').val() == "" || $('#txtToDate').val() == "") {
+                flag = false;
+            }
+            else {
+                filter = $('#ddlField').val() + ' ge ' + $('#txtFromDate').val() + ' and ' + $('#ddlField').val() + ' le ' + $('#txtToDate').val();
+            }
+        }
+        else {
+
+
+            if ($('#ddlField').val() != "-1" && ($('#ddlOperator').val() == "-1'

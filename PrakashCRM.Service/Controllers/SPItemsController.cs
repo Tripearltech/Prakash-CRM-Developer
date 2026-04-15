@@ -18,12 +18,7 @@ namespace PrakashCRM.Service.Controllers
 {
     [RoutePrefix("api/SPItems")]
     public class SPItemsController : ApiController
-    {
-        private static string EscapeODataString(string value)
-        {
-            // OData uses single quotes for string literals; escape by doubling them.
-            return (value ?? string.Empty).Replace("'", "''");
-        }
+    {        
 
         [Route("GetAllItems")]
         public List<SPItemList> GetAllItems()
@@ -71,11 +66,17 @@ namespace PrakashCRM.Service.Controllers
             if (!mrpPriceToUpdate.HasValue && model.PCPL_Purchase_Cost.HasValue)
                 mrpPriceToUpdate = model.PCPL_Purchase_Cost;
 
+            // update the zero value ar empty filed.
+            var purchaseDaysToUpdate = model.PCPL_Purchase_Days;
+            var discountToUpdate = model.PCPL_Discount ?? 0;
+            var mrpPriceValueToUpdate = mrpPriceToUpdate;
+
             var requestMU = new SPitemUpdateModel
             {
-                PCPL_Purchase_Days = model.PCPL_Purchase_Days,
-                PCPL_Discount = model.PCPL_Discount,
-                PCPL_MRP_Price = mrpPriceToUpdate,
+                PCPL_Purchase_Days = purchaseDaysToUpdate,
+                PCPL_Discount = discountToUpdate,
+                PCPL_MRP_Price = mrpPriceValueToUpdate,
+                PCPL_IsDiscUpdate = model.PCPL_IsDiscUpdate,
                 //PCPL_Purchase_Cost = null,
                 //PCPL_Previous_Price = model.PCPL_Previous_Price
             };
@@ -85,6 +86,18 @@ namespace PrakashCRM.Service.Controllers
 
             if (!result.Item2.isSuccess)
                 return Content(HttpStatusCode.BadRequest, result.Item2);
+
+            if (!string.IsNullOrWhiteSpace(model.SalesPerson_Code) && mrpPriceValueToUpdate.HasValue)
+            {
+                NotificationService notificationService = new NotificationService();
+                notificationService.RecordItemPriceUpdated(
+                    model.SalesPerson_Code,
+                    model.Item_No,
+                    result.Item1 == null ? string.Empty : result.Item1.Item_Description,
+                    model.Packing_Style_Code,
+                    result.Item1 == null ? string.Empty : result.Item1.Packing_Style_Description,
+                    mrpPriceValueToUpdate);
+            }
 
             return Ok(result.Item1);
         }
@@ -113,8 +126,14 @@ namespace PrakashCRM.Service.Controllers
                 patchObj["PCPL_Purchase_Days"] = requestModel.PCPL_Purchase_Days.Value;
             if (requestModel.PCPL_Discount.HasValue)
                 patchObj["PCPL_Discount"] = requestModel.PCPL_Discount.Value;
+            //if (requestModel.PCPL_Purchase_Cost.HasValue)
+            //    patchObj["PCPL_Purchase_Cost"] = requestModel.PCPL_Purchase_Cost.Value;
             if (requestModel.PCPL_MRP_Price.HasValue)
                 patchObj["PCPL_MRP_Price"] = requestModel.PCPL_MRP_Price.Value;
+            //if (requestModel.PCPL_Previous_Price.HasValue)
+            //    patchObj["PCPL_Previous_Price"] = requestModel.PCPL_Previous_Price.Value;
+            if (requestModel.PCPL_IsDiscUpdate.HasValue)
+                patchObj["PCPL_IsDiscUpdate"] = requestModel.PCPL_IsDiscUpdate.Value;
             //if (requestModel.PCPL_Purchase_Cost.HasValue)
             //    patchObj["PCPL_Purchase_Cost"] = requestModel.PCPL_Purchase_Cost.Value;
             //if (requestModel.PCPL_Previous_Price.HasValue)

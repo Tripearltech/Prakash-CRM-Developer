@@ -55,14 +55,12 @@ namespace PrakashCRM.Data.Models
         [JsonProperty("@odata.context")]
         public string Metadata { get; set; }
 
-        public bool value { get; set; }
+        public Boolean value { get; set; }
 
         public errorDetails errorDetails { get; set; } = null;
     }
     public class SPCollGenerateDataPost
     {
-        public bool value { get; set; }
-
         public string systemdate { get; set; }
     }
     public class SPCollGenerateDetails

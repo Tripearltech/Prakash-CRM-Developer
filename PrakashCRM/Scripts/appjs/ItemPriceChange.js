@@ -9,6 +9,16 @@ $(document).ready(function () {
 
     var isSaving = false;
 
+        // readonly checkbox block
+        $(document).on('click', '.priceChangeChk.readonly', function (e) {
+            e.preventDefault();
+        });
+
+        $(document).on('keydown', '.priceChangeChk.readonly', function (e) {
+            if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+            }
+        });
     function setSavingState(saving) {
         try {
             isSaving = saving === true;
@@ -212,7 +222,6 @@ $(document).ready(function () {
         currentPage = 1;
         $('#tblProdDetails').find('input.purchase-days, input.price-new, input.discount').val('');
     }
-
     function BindProductDetails() {
         var apiUrl = $('#getServiceApiUrl').val() + 'SPItems/';
         $.ajax({
@@ -230,7 +239,7 @@ $(document).ready(function () {
                         "<td><input type='text' class='form-control purchase-days' inputmode='days' placeholder='Enter the Days'></td>" +
                         "<td><input type='text' class='form-control price-new' inputmode='decimal' placeholder='Enter new price'></td>" +
                         "<td><input type='text' class='form-control discount' inputmode='decimal' placeholder='Enter the Discount'></td>" +
-                        "<td class='current-price'>" + item.PCPL_Purchase_Cost + "</td><td class='previous-price'>" + item.PCPL_Previous_Price + "</td>" +
+                        "<td class='current-price'>" + item.PCPL_Purchase_Cost + "</td><td class='previous-price'>" + item.PCPL_Previous_Price + "</td>" + "</td><td class='current-Discount'>" + item.PCPL_Discount + "</td>" +
                         "<td class='checkbox-cell'>" + "<label class='custom-check readonly-check'>" + "<input type='checkbox' class='priceChangeChk readonly' " + checkedAttr + ">" + "<span class='checkmark'></span>" + "</label>" + "</td></tr>";
 
                     TROptsArr.push(rowHtml);
@@ -261,8 +270,6 @@ $(document).ready(function () {
             console.error('ItemPriceChange: API failed', xhr && xhr.status, xhr && xhr.responseText);
         });
     }
-
-    // Initial load
     BindProductDetails();
 
     // Per-page selection
@@ -434,12 +441,7 @@ function attachTypeahead(inputSelector, menuSelector, values) {
 }
 
 function htmlEscape(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 // Call this function to update price via API
 function updatePackingStylePrice(payload) {
@@ -526,10 +528,11 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
     var currentPrice = Number($tr.find('.current-price').text()) || 0;
     var previousPrice = Number($tr.find('.previous-price').text()) || 0;
 
-    var discountVal = (discount !== undefined && discount !== null && (('' + discount).trim() !== '')) ? Number(discount) : null;
+    var hasDiscountValue = discount !== undefined && discount !== null && (('' + discount).trim() !== '');
+    var discountVal = hasDiscountValue ? Number(discount) : 0;
     var newPriceVal = (newPrice !== undefined && newPrice !== null && (('' + newPrice).trim() !== '')) ? Number(newPrice) : null;
 
-    function proceedWithChoice(changePrevious) {
+    function proceedWithChoice(changePrevious, isDiscUpdate) {
         var prevToSend = null;
         if (changePrevious) {
             prevToSend = currentPrice;
@@ -541,15 +544,17 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
         // build payload
         var payload = {
             Item_No: itemNo,
-            Packing_Style_Code: packingStyle
+            Packing_Style_Code: packingStyle,
+            SalesPerson_Code: $('#loggedInSalesPersonCode').val() || ''
         };
         if (purchaseDays !== undefined && purchaseDays !== null && (('' + purchaseDays).trim() !== '')) {
             var pd = Number(purchaseDays);
             if (!isNaN(pd)) payload.PCPL_Purchase_Days = Math.round(pd);
         }
-        if (discountVal !== null && !isNaN(discountVal)) payload.PCPL_Discount = discountVal;
+        if (!isNaN(discountVal)) payload.PCPL_Discount = discountVal;
         if (newPriceVal !== null && !isNaN(newPriceVal)) payload.PCPL_MRP_Price = Math.round(newPriceVal);
         if (prevToSend !== null) payload.PCPL_Previous_Price = Math.round(prevToSend);
+        payload.PCPL_IsDiscUpdate = isDiscUpdate === true;
 
         updatePackingStylePrice(payload).done(function (data) {
             ShowActionMsg('Price updated successfully!');
@@ -566,17 +571,17 @@ function saveRowWithPrompt($tr, itemNo, packingStyle, purchaseDays, newPrice, di
         });
     }
 
-    if (discountVal !== null) {
+    if (hasDiscountValue) {
         showPreviousPriceConfirm().then(function (choice) {
             if (choice === true) {
-                proceedWithChoice(true);
+                proceedWithChoice(true, true);
             } else {
                 // User chose "No" (or dismissed modal): update Current Price only.
-                proceedWithChoice(false);
+                proceedWithChoice(false, false);
             }
         });
     } else {
-        proceedWithChoice(true);
+        proceedWithChoice(true, true);
     }
 
     return dfd.promise();

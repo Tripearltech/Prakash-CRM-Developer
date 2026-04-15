@@ -4,7 +4,14 @@
     ViewBag.Title = "WarehouseCard";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
 }
-
+<style>
+    .form-control-xs {
+        height: 40px;
+        padding: 1px 4px;
+        font-size: 16px;
+        width: 110px;
+    }
+</style>
 <div class="page-content">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
@@ -35,7 +42,13 @@
                         <div class="row">
                             <div>
 
-                                <h6 class="mb-0 font-weight-bold">General</h6>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h6 class="mb-0 font-weight-bold">General</h6>
+                                    @if (string.IsNullOrWhiteSpace(Model.AcceptedBy))
+                                    {
+                                        <button id="btnAcceptTask" type="button" class="btn btn-primary" onclick="return AcceptCurrentWarehouseTask();"><i class='bx bx-message-square-check'></i> Accept</button>
+                                    }
+                                </div>
                                 <hr />
 
                                 <div class="row g-3">
@@ -58,7 +71,7 @@
                                 </div>
 
                                 <div class="row g-3">
-                                   
+
                                     <div class="col-md-6">
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Customer/Vendor : </label>
@@ -67,7 +80,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="col-md-6">
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Document Type : </label>
@@ -143,18 +156,27 @@
 
                                 <div class="row g-3">
                                     <div class="col-md-12">
+                                        @{ bool canEditTransportQty = Model.DocumentType == "Sales Order" || Model.DocumentType == "Sales Return" || Model.DocumentType == "Purchase Order" || Model.DocumentType == "Transfer Order"; }
+                                        @{ string transportQtyLabel = Model.DocumentType == "Purchase Order" ? "Qty to Receive" : "Transport Qty"; }
+                                        @{ string shipQtyLabel = Model.DocumentType == "Purchase Order" ? "Received Qty" : "Shipped Qty"; }
                                         <table class="table mb-0 table-striped">
                                             <thead>
                                                 <tr>
                                                     <th scope="col">Product No</th>
                                                     <th scope="col">Product Name</th>
-                                                    <th scope="col">Quantity</th>
-                                                    <th scope="col">UOM</th>
+                                                    <th scope="col">Qty. in MTS</th>
+                                                    @* <th scope="col">UOM</th>*@
                                                     <th scope="col">Gross Weight</th>
-                                                    <th scope="col">Packing UOM</th>
+                                                    <th scope="col" hidden>Packing UOM</th>
                                                     <th scope="col">Packing Style</th>
-                                                    <th scope="col">Transport Qty</th>
+                                                    <th scope="col">@transportQtyLabel</th>
                                                     <th scope="col">Packing Qty</th>
+                                                    <th scope="col">@shipQtyLabel</th>
+                                                    @if (canEditTransportQty)
+                                                    {
+                                                        <th scope="col">Item Tracking</th>
+                                                        <th scope="col">Action</th>
+                                                    }
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -163,6 +185,7 @@
                                                     var packingUOMs = "";
                                                     decimal totalQty = 0;
                                                     decimal totalGrossWeight = 0;
+                                                    //decimal totalStandardRate = 0;
                                                 }
 
                                                 @foreach (var line in Model.warehouseCardLines)
@@ -171,27 +194,54 @@
                                                     totalQty = totalQty + @line.Qty;
                                                     totalGrossWeight = totalGrossWeight + @line.GrossWeightperunit;
                                                     <tr>
+                                                        <td hidden>@line.LineNo</td>
                                                         <td>@line.ItemNo</td>
                                                         <td>@line.ItemDescription</td>
                                                         <td>@line.Qty</td>
-                                                        <td>@line.UOM</td>
+                                                        @*<td>@line.UOM</td>*@
                                                         <td>@line.GrossWeightperunit</td>
-                                                        <td>@line.PackingUOM</td>
+                                                        <td hidden>@line.PackingUOM</td>
                                                         <td>@line.PackingStyle</td>
-                                                        <td>@line.TransportQty</td>
+                                                        @if (canEditTransportQty)
+                                                        {
+                                                            <td>
+                                                                <input type="text" id="txtTransportQty_@line.LineNo" data-qty="@line.Qty" class="form-control form-control-xs" value="@line.TransportQty" />
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>@line.TransportQty</td>
+                                                        }
                                                         <td>@line.PackingQty</td>
+                                                        <td>@line.Shipqty</td>
+                                                        @if (canEditTransportQty)
+                                                        {
+                                                            <td>
+                                                                @{
+                                                                    var trackingCodeValue = Convert.ToString(line.PCPL_Item_Tracking_Code);
+                                                                    var showTrackingIcon = !string.IsNullOrWhiteSpace(trackingCodeValue);
+                                                                }
+                                                                @if (showTrackingIcon)
+                                                                {
+                                                                    <a style="cursor:pointer;" title="Item Tracking" onclick="ShowWarehouseItemTracking('@line.LineNo','@line.ItemNo'); return false;"><i class="bx bx-show"></i></a>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-sm btn-primary" onclick="return SaveTransportQty('@line.LineNo', '@line.ItemNo', this);"><i class="bx bxs-save"></i> Save</button>
+                                                            </td>
+                                                        }
                                                     </tr>
                                                 }
 
                                                 @{
-                                                    totalQty = totalQty * totalGrossWeight;
+                                                    // totalQty = totalQty * totalGrossWeight;
                                                 }
 
                                                 @* @if (packingUOMs.EndsWith(", "))
-                                                {
-                                                    packingUOMs = packingUOMs.Substring(0, packingUOMs.Length - 2);
+                        {
+                            packingUOMs = packingUOMs.Substring(0, packingUOMs.Length - 2);
 
-                                                }*@
+                        }*@
                                             </tbody>
                                         </table>
                                     </div>
@@ -203,8 +253,9 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Transporter No : </label>
+                                            <label class="col-sm-3 col-form-label">Transporter:<span class="required" style="color:red;margin-left:2px">*</span> : </label>
                                             <div class="col-sm-9">
+
                                                 <input id="txtTransporterNo" class="form-control" type="text" value="@Model.PCPL_Transporter_Name" />
                                                 @Html.ValidationMessageFor(model => model.PCPL_Transporter_No, null, new { style = "color:red" })
                                             </div>
@@ -225,10 +276,33 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Loading Vendor : </label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtLoadingVendor" class="form-control" placeholder="" value="@Model.PCPL_Loading_Vendor_Name" />
+                                                @*<input type="hidden" id="hfLoadingVendor" name="hftxtLoadingVendor" value="@Model.PCPL_Loading_Vendor" />*@
+                                                @Html.ValidationMessageFor(model => model.PCPL_Loading_Vendor, null, new { style = "color:red" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Loading Charges : </label>
                                             <div class="col-sm-9">
 
                                                 <input id="txtLoadingCharges" type="text" value="@Model.PCPL_Loading_Charges" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Unloading Vendor : </label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtUnLoadingVendor" class="form-control" placeholder="" value="@Model.PCPL_UnLoading_Vendor_Name" />
+                                                @*<input type="hidden" id="hfUnLoadingVendor" name="hfUnLoadingVendor" value="@Model.PCPL_UnLoading_Vendor"/>*@
+                                                @Html.ValidationMessageFor(model => model.PCPL_Loading_Vendor, null, new { style = "color:red" })
+
                                             </div>
                                         </div>
                                     </div>
@@ -245,7 +319,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">LR RR No : </label>
+                                            <label class="col-sm-3 col-form-label">LR/RR No : </label>
                                             <div class="col-sm-9">
                                                 <input id="txtLRRRNo" type="text" value="@Model.LR_RR_No_" class="form-control" pattern="\d{2}\/\d{2}\/\d{4}" />
                                             </div>
@@ -253,7 +327,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">LR RR Date : </label>
+                                            <label class="col-sm-3 col-form-label">LR/RR Date : </label>
                                             <div class="col-sm-9">
                                                 <input id="txtLRRRDate" type="text" value="@Model.LR_RR_Date" class="form-control datepicker" />
                                             </div>
@@ -263,17 +337,24 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Vehicle No : </label>
+                                            <label class="col-sm-3 col-form-label">Vehicle No<span class="required" style="color:red;margin-left:2px">*</span> : </label>
                                             <div class="col-sm-9">
-                                                <input id="txtVehicleNo" type="text" value="@Model.VehiclenNo" class="form-control" />
+                                                <input id="txtVehicleNo" type="text" value="@Model.VehiclenNo" class="form-control" maxlength="10" inputmode="text" pattern="[A-Za-z0-9]{0,10}" autocomplete="off" style="text-transform:uppercase" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0,10);" />
+                                                <span id="error-message" class="text-danger"></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Driver Name : </label>
+                                            <label class="col-sm-3 col-form-label">Driver Name<span class="required" style="color:red;margin-left:2px"></span></label>
                                             <div class="col-sm-9">
-                                                <input id="txtDirverName" value="@Model.PCPL_Driver_Name" class="form-control" />
+                                                <div class="input-group">
+                                                    <input id="txtDirverName" value="@Model.PCPL_Driver_Name" class="form-control" />
+                                                    <div><button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person"></button></div>
+                                                </div>
+                                                @*<div class="col-sm-1" style="margin-left:-15px;" id="divAddNewContactPerson">
+                            <button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person"></button>
+                        </div>*@
                                             </div>
                                         </div>
                                     </div>
@@ -283,7 +364,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Driver MobileNo : </label>
                                             <div class="col-sm-9">
-                                                <input id="txtDirverMobileNo" type="text" value="@Model.PCPL_Driver_Mobile_No_" class="form-control" />
+                                                <input id="txtDirverMobileNo" type="text" maxlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" value="@Model.PCPL_Driver_Mobile_No_" class="form-control" />
                                             </div>
                                         </div>
                                     </div>
@@ -301,7 +382,7 @@
                                         <div class="row mb-3">
                                             <label class="col-sm-3 col-form-label">Remarks</label>
                                             <div class="col-sm-9">
-                                                <input id="txtRemarks" type="text" value="@Model.PCPL_Remarks" class="form-control" />
+                                                <textarea id="txtRemarks" type="text" cols="45" rows="5" value="@Model.PCPL_Remarks" class="form-control"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -310,6 +391,7 @@
                                             <label class="col-sm-3 col-form-label">GST Number : </label>
                                             <div class="col-sm-9">
                                                 <input id="txtGSTorARNNo" class="form-control" type="text" value="" />
+
                                             </div>
                                         </div>
                                     </div>
@@ -353,12 +435,23 @@
                                 <input id="hfPackingUOMs" value="@packingUOMs" style="display:none" />
                                 <input id="hfTotalQty" value="@totalQty" style="display:none" />
                                 <input id="hfVendorCompanyNo" value="" style="display:none" />
+                                <input id="hfTransporterContactNo" value="@Model.PCPL_Transporter_Contact_No_" style="display:none" />
+                                <input id="hfSPNo" value="@Session["loggedInUserNo"]" style="display:none" />
                                 <input id="hfTransporterNo" value="@Model.PCPL_Transporter_No" style="display:none" />@**@
                                 <input id="hfFromLocationCode" value="@Model.FromLocation" style="display:none" />
                                 <input id="hfToLocationCode" value="@Model.ToLocation" style="display:none" />
                                 <input id="hfSystemId" value="@Model.SystemId" style="display:none" />
                                 <input id="hfDriverflag" value="false" style="display:none" />
+                                <input id="hfUnLoadingVendorNo" value="@Model.PCPL_UnLoading_Vendor" style="display:none" />@**@
+                                <input id="hfLoadingVendorNo" value="@Model.PCPL_Loading_Vendor" style="display:none" />@**@
+                                <input id="hfDocumentType" value="@Model.DocumentType" style="display:none" />@**@
+                                <input id="hfHasPendingDropShipment" value="@Model.TPTPLDropShipment" style="display:none" />
+                                @*///  <input id="hfLoadingVendorNo" value="@Model.s" style="display:none" />*@
 
+                                <button id="btnAcceptSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Loading...</span>
+                                </button>
                                 <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                     <span class="visually-hidden">Loading...</span>
@@ -373,6 +466,63 @@
                         </div>
                     }
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalItemTracking" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvItemTracking" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="display:none;">Entry No</th>
+                                                <th scope="col">Line No</th>
+                                                <th scope="col">Item No</th>
+                                                <th scope="col">Lot No</th>
+                                                <th scope="col">Quantity to Handle</th>
+                                                <th scope="col">Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbItemTrackingLines">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label id="lblItemTrackMsg" style="font-weight:bold"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center">
+                <div class="text-center flex-fill">
+                    <label style="font-weight: bold;">Total QTY:</label>
+                    <input id="txttotalQty" type="text" value="0.00" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                </div>
+                <div class="text-center flex-fill">
+                    <label style="font-weight: bold;">Transport QTY:</label>
+                    <input id="txtTransportQtyFixed" type="text" value="0.00" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                </div>
+                <div class="text-center flex-fill">
+                    <label style="font-weight: bold;">Balance QTY:</label>
+                    <input id="txtbalanceQty" readonly style="border: none; background: transparent; color: orangered; font-weight: bold; width: 80px; text-align: center;" />
+                </div>
+                <button id="btnSaveItemTrackingWarehouse" type="button" class="btn btn-primary ms-auto" onclick="SaveWarehouseItemTracking();">Save</button>
             </div>
         </div>
     </div>
@@ -423,6 +573,70 @@
             </div>
             <div class="modal-footer">
                 <button id="btnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalAddWarehouseContactPerson" tabindex="-1" aria-hidden="true" style="display:none">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <p id="lblWarehouseContactModalTitle" class="modal-title">Add New Contact Person In Selected Compnay -<b> @Model.PCPL_Transporter_Name</b></p>
+                <button id="btnCloseWarehouseContactIcon" type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtWarehouseCPersonName" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">License No</label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtWarehouseCPersonLicenseNo" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtWarehouseCPersonMobile" class="form-control" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Job Title</label>
+                            <div class="col-sm-9">
+                                <input type="text" id="txtWarehouseCPersonJobTitle" class="form-control" value="Driver" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label id="lblWarehouseContactMsg" style="font-weight:bold;display:none"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnAddWarehouseContactSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading...</span>
+                </button>
+                <button id="btnConfirmWarehouseContactAdd" type="button" class="btn btn-primary">Add</button>
+                <button id="btnCloseWarehouseContact" type="button" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>

@@ -109,6 +109,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
     var apiUrl = $('#getServiceApiUrl').val() + 'SPNotification/';
     var encodedFilter = encodeURIComponent(filter || '');
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCount?filter=' + encodedFilter + '&apiEndPointName=NotificationsListDotNetAPI', function (data) {
         $('#hdnNotifSetupCount').val(data);
     });
@@ -144,6 +148,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
             },
             error: function () {
                 alert("error");
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             }
         }
     );

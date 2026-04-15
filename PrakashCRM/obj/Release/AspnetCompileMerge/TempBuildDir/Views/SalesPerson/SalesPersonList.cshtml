@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewBag.Title = "Sales Person List";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
 }
@@ -55,7 +54,8 @@
                                         <option value="Last_Name">Last Name</option>
                                         <option value="Company_E_Mail">Email</option>
                                         <option value="Job_Title">Job Title</option>
-                                        <option value="Address">Address</option>
+                                        <option value="Role">Role</option>
+                                        <option value="PCPL_Department_Name">Department Name</option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -112,7 +112,8 @@
                             <th>Last Name</th>
                             <th>Email</th>
                             <th>Job Title</th>
-                            <th>Address</th>
+                            <th>Role</th>
+                            <th>Department Name</th>
                             <th>OTP Enabled<br />On Login</th>
                         </tr>
                     </thead>
@@ -129,7 +130,8 @@
                             <th>Last Name</th>
                             <th>Email</th>
                             <th>Job Title</th>
-                            <th>Address</th>
+                            <th>Role</th>
+                            <th>Department Name</th>
                             <th>OTP Enabled<br />On Login</th>
                         </tr>
                     </tfoot>
@@ -243,7 +245,7 @@
                                         <p data-start="254" data-end="284">✅ At least <strong data-start="265" data-end="276">1 digit</strong> (0–9)</p>
                                     </li>
                                     <li data-start="285" data-end="348">
-                                        <p data-start="287" data-end="348">✅ At least <strong data-start="298" data-end="321">1 special character</strong> from: !, @@, $, _</p>
+                                        <p data-start="287" data-end="348">✅ At least <strong data-start="298" data-end="321">1 special character</strong> (any special symbol)</p>
                                     </li>
                                     <li data-start="349" data-end="387">
                                         <p data-start="351" data-end="387">✅ Minimum length of <strong data-start="371" data-end="387">8 characters</strong></p>
@@ -257,7 +259,7 @@
 
             </div>
             <div class="modal-footer">
-               
+
             </div>
         </div>
     </div>
@@ -272,5 +274,3 @@
         });
     });
 </script>
-
-

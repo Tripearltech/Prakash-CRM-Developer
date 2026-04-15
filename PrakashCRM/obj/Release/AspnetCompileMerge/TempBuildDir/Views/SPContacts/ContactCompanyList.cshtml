@@ -13,9 +13,9 @@
     }
 
     .ck-content, textarea {
-        height:270px;
-        padding:15px;
-        overflow-y:auto;
+        height: 270px;
+        padding: 15px;
+        overflow-y: auto;
     }
 
     .ViewContactCls:hover {
@@ -146,6 +146,7 @@
                             <th></th>
                             <th><input type="checkbox" id="chkAll" class="form-check-input" /></th>
                             <th></th>
+                            <th></th>
                             <th>Contact<br />Persons</th>
                             <th>No</th>
                             <th>Company Name</th>
@@ -173,6 +174,7 @@
                             <th></th>
                             <th></th>
                             <th></th>
+                            <th></th>
                             <th>Contact<br />Persons</th>
                             <th>No</th>
                             <th>Company Name</th>
@@ -197,6 +199,7 @@
                 <input id="hdnItemSpecMSDSCOA" style="display:none" />
                 <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />
                 <input id="hdnCCompanyCount" style="display:none" />
+                <input type="hidden" id="CompanyNo" />
                 <div id="orderInfo"></div>
             </div>
             <div>
@@ -343,18 +346,18 @@
 
             </div>
             <div class="modal-footer" style="padding-bottom:0px">
-                
-                    <div class="col-md-12">
-                        <div class="row mb-3">
-                            <div class="col-sm-11">
-                                <label class="col-form-label">Path:</label>
-                                <label id="lblItemSpecMSDSCOAPath" class="col-form-label"></label>
-                            </div>
-                            <div class="col-sm-1" align="right">
-                                <button id="btnSendItemSpecMSDSCOA" type="button" class="btn btn-primary">Send</button>
-                            </div>
+
+                <div class="col-md-12">
+                    <div class="row mb-3">
+                        <div class="col-sm-11">
+                            <label class="col-form-label">Path:</label>
+                            <label id="lblItemSpecMSDSCOAPath" class="col-form-label"></label>
+                        </div>
+                        <div class="col-sm-1" align="right">
+                            <button id="btnSendItemSpecMSDSCOA" type="button" class="btn btn-primary">Send</button>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
     </div>
@@ -482,6 +485,294 @@
                     Feedback Form Link Sent Successfully.
                 </center>
             </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="DetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+
+
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Daily Visit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+
+            <div class="modal-body">
+
+
+                <div class="row align-items-end mb-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">From Date</label>
+                        <input type="date" id="txtDailyVisitFDate" class="form-control" />
+                        <small id="lblDailyVisitFDateMsg" class="text-danger d-none">
+                            Please Select From Date
+                        </small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">To Date</label>
+                        <input type="date" id="txtDailyVisitTDate" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <button id="btnDailyVisitShowAll" class="btn btn-primary">
+                            Show All
+                        </button>
+
+                        <button id="btnDailyVisitListSpinner"
+                                class="btn btn-primary d-none"
+                                type="button" disabled>
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="table-responsive"
+                     style="max-height:450px; overflow-y:auto;">
+
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Sub Type</th>
+                                <th>Customer</th>
+                                <th>Contact Person</th>
+                                <th>Event</th>
+                                <th>Topic</th>
+                                <th>Visit Mode</th>
+                                <th>Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblContactDailyVisit">
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="quotesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+
+
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Sales Quotes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="row align-items-end mb-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label">From Date</label>
+                        <input type="date" id="txtSQListFromDate" class="form-control" />
+                        <small id="lblSQListFDateMsg" class="text-danger d-none">
+                            Please Select From Date
+                        </small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">To Date</label>
+                        <input type="date" id="txtSQListToDate" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <button id="btnSQListShowAll" class="btn btn-primary">
+                            Show All
+                        </button>
+
+                        <button id="btnSQListSpinner"
+                                class="btn btn-primary d-none"
+                                type="button" disabled>
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </button>
+                    </div>
+
+                </div>
+                <div class="table-responsive"
+                     style="max-height:450px; overflow-y:auto;">
+
+                    <table class="table table-striped table-hover mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Quote No</th>
+                                <th>Quote Date</th>
+                                <th>Customer</th>
+                                <th>Payment Terms</th>
+                                <th>Schedule Order</th>
+                                <th>Products</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblContactSQ">
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalSQProds" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="dvSQProds" style="display:none">
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <table>
+                                <tr>
+                                    <td><label style="font-weight:bold">Sales Quote No: </label></td>
+                                    <td>&nbsp;</td>
+                                    <td><label id="lblSQNo"></label></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-12">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Product No</th>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Packing Style</th>
+                                                <th scope="col">UOM</th>
+                                                <th scope="col">MRP</th>
+                                                <th scope="col">Unit Price(Sales Price)</th>
+                                                <th scope="col">Drop Shipment</th>
+                                                @*<th scope="col">Vendor</th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblContactSQProds">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="businessplanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+
+
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Business Plan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="row align-items-end mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">
+                            Financial Year:
+                        </label>
+                        <select id="ddlFinancialYear" class="form-select"></select>
+                    </div>
+                </div>
+
+                <div class="table-responsive"
+                     style="max-height:500px; overflow-y:auto;">
+
+                    <table class="table table-striped table-hover mb-0 text-center">
+
+                        <thead class="table-light sticky-top">
+
+
+                            <tr>
+                                <th hidden></th>
+                                <th class="text-start">Product Name</th>
+
+                                <th colspan="4" class="fw-bold">
+                                    Prev. Financial Year
+                                    (<span id="lblDetailsPrevYear"></span>)
+                                </th>
+
+                                <th colspan="4" class="fw-bold">
+                                    Financial Year
+                                    (<span id="lblDetailsYearGrid"></span>)
+                                </th>
+                            </tr>
+
+                            <tr>
+                                <th hidden></th>
+                                <th></th>
+
+                                <th>Demand<br>Qty</th>
+                                <th>Target<br>Qty</th>
+                                <th>Achieved<br>Qty</th>
+                                <th>Last Year<br>Sale (₹)</th>
+
+                                <th>Demand<br>Qty</th>
+                                <th>Target<br>Qty</th>
+                                <th>Avg Price</th>
+                                <th>Target<br>Revenue</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tblDetailsContactBusinessPlan">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer bg-light">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
         </div>
     </div>
 </div>

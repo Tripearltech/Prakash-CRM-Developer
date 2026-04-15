@@ -40,6 +40,8 @@
                                 <div class="col">
                                     <select id="ddlField" class="form-select">
                                         <option value="---Select---">---Select---</option>
+                                        <option value="CurrentDateTime">Date &amp; Time</option>
+                                        <option value="UserID">User Name</option>
                                         <option value="Error_Code">Error Code</option>
                                         <option value="Exception_Message">Exception Message</option>
                                         <option value="Source">Source</option>
@@ -73,7 +75,7 @@
                                         <i class="bx bx-rotate-right me-0"></i>&nbsp;Refresh
                                     </button>
                                 </div>
-                                <div style="display:none" class="col">
+                                <div class="col">
                                     <button id="btnExport" class="btn btn-primary" type="button"><i class="bx bxs-file"></i>Export</button>
                                 </div>
                             </div>
@@ -93,11 +95,14 @@
                     <thead>
                         <tr>
                             <th></th>
+                            <th>Date &amp; Time</th>
+                            <th>User Name</th>
                             <th>Error Code</th>
                             <th>Exception Message</th>
                             <th>Source</th>
                             <th>IP Address</th>
                             <th>Browser</th>
+                            <th>Description</th>
                             <th>Exception Trace</th>
                         </tr>
                     </thead>
@@ -106,11 +111,14 @@
                     <tfoot>
                         <tr>
                             <th></th>
+                            <th>Date &amp; Time</th>
+                            <th>User Name</th>
                             <th>Error Code</th>
                             <th>Exception Message</th>
                             <th>Source</th>
                             <th>IP Address</th>
                             <th>Browser</th>
+                            <th>Description</th>
                             <th>Exception Trace</th>
                         </tr>
                     </tfoot>

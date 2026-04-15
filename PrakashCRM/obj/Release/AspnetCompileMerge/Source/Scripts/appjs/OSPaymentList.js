@@ -202,7 +202,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td><td>" + item.Posting_Date + "</td><td>" + item.Document_No + "</td><td>" + item.Customer_Name + "</td><td>" + item.Description + "</td><td align='right'>" + commaSeparateNumber(item.Amount_LCY.toFixed(2)) + "</td><td align='right'>" + commaSeparateNumber(item.Remaining_Amt_LCY.toFixed(2)) + "</td><td>" + item.Due_Date + "</td></tr>";
+                    var rowData = "<tr><td></td><td>" + item.Posting_Date + "</td><td>" + item.Document_No + "</td><td>" + item.PCPL_Customer_Name + "</td><td>" + item.Description + "</td><td>" + commaSeparateNumber(item.Amount_LCY.toFixed(2)) + "</td><td>" + commaSeparateNumber(item.Remaining_Amt_LCY.toFixed(2)) + "</td><td>" + item.Due_Date + "</td></tr>";
                     $('#tableBody').append(rowData);
                     // loop and do whatever with data
 

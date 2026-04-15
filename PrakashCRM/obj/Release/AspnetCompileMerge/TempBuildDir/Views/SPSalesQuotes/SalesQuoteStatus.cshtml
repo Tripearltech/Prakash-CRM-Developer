@@ -43,7 +43,7 @@
                                         <option value="No">Quote No</option>
                                         <option value="Sell_to_Customer_Name">Customer Name</option>
                                         <option value="Sell_to_Contact">Contact Name</option>
-                                        <option value="Posting_Date">Posting Date</option>
+                                        <option value="Posting_Date">Document Date</option>
                                         <option value="Due_Date">Due Date</option>
                                         <option value="Amount">Amount</option>
                                     </select>
@@ -96,13 +96,13 @@
                         <span class="visually-hidden">Loading...</span>
                     </button>
                     &nbsp;
-                    <button type="button" class="btn btn-outline-success px-5" onclick="ApproveRejectSQ('Approve','')">
+                    @*<button type="button" class="btn btn-outline-success px-5" onclick="ApproveRejectSQ('Approve','')">
                         <i class='bx bx-check mr-1'></i>Approve
-                    </button>
+                    </button>*@
                     &nbsp;
-                    <button id="btnReject" type="button" class="btn btn-outline-danger px-5">
+                    @*<button id="btnReject" type="button" class="btn btn-outline-danger px-5">
                         <i class='bx bx-x mr-1'></i>Reject
-                    </button>
+                    </button>*@
                 </div>
 
             </div>
@@ -115,14 +115,14 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th><input type="checkbox" id="chkAll" class="form-check-input" /></th>
+                                    @*<th><input type="checkbox" id="chkAll" class="form-check-input" /></th>*@
                                     <th></th>
                                     <th>Quote No</th>
                                     <th>Quote Date</th>
                                     <th>Customer Name</th>
                                     <th>Payment Terms</th>
                                     <th hidden>ApprovalFor</th>
-                                    <th></th>
+                                    <th>Status</th>
                                     <th>Salesperson Code</th>
                                     <th hidden>Salesperson Email</th>
                                 </tr>
@@ -132,14 +132,14 @@
                             <tfoot>
                                 <tr>
                                     <th></th>
-                                    <th></th>
+                                    @*<th></th>*@
                                     <th></th>
                                     <th>Quote No</th>
                                     <th>Quote Date</th>
                                     <th>Customer Name</th>
                                     <th>Payment Terms</th>
                                     <th hidden>ApprovalFor</th>
-                                    <th></th>
+                                    <th>Status</th>
                                     <th>Salesperson Code</th>
                                     <th hidden>Salesperson Email</th>
                                 </tr>
@@ -351,7 +351,7 @@
 <script>
     function RedirectToSQCard(SQNo, ScheduleStatus, SQStatus, SQFor, LoggedInUserRole) {
 
-        window.location.replace('@Url.Action("SalesQuote", "SPSalesQuotes")?SQNo=' + SQNo + '&ScheduleStatus=' + ScheduleStatus + '&SQStatus=' + SQStatus + '&SQFor=' + SQFor + '&LoggedInUserRole=' + LoggedInUserRole);
+        window.location.replace('@Url.Action("SalesQuote", "SPSalesQuotes")?SQNo=' + SQNo + '&ScheduleStatus=' + ScheduleStatus + '&SQStatus=' + SQStatus + '&SQFor=' + SQFor + '&LoggedInUserRole=' + LoggedInUserRole + '&ReturnTo=SalesQuoteStatus');
 
     }
 </script>

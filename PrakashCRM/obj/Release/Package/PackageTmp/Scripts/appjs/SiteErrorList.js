@@ -119,6 +119,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPSiteError/';
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetApiRecordsCount?apiEndPointName=SiteErrorsListDotNetAPI&filter=' + filter, function (data) {
         $('#hdnSPSECount').val(data);
     });
@@ -152,6 +156,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
             },
             error: function () {
                 alert("error");
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             }
         }
     );

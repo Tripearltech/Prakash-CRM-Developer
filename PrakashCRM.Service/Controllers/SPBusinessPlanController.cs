@@ -237,7 +237,7 @@ namespace PrakashCRM.Service.Controllers
 
             var result = ac.GetData<SPBusinessPlanSPList>("Business_Plan_Customer_Wise", filter);
 
-            if (result != null && result.Result.Item1.value.Count > 0)
+            if (result != null && result?.Result.Item1?.value.Count > 0)
             {
                 salesperson = result.Result.Item1.value;
                 distinctSalesperson = salesperson.DistinctBy(x => x.Salesperson_Purchaser).ToList();

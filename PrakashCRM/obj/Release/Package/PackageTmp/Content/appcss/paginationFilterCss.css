@@ -6,6 +6,45 @@
     border: 1px solid #ddd;
 }
 
+#myPager {
+    gap: 0;
+}
+
+#myPager .page-item {
+    min-width: 58px;
+}
+
+#myPager .page-link,
+#myPager .page-item.disabled span.page-link {
+    min-width: 58px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+}
+
+.customer-outstanding-loader {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(1px);
+}
+
+.customer-outstanding-loader-content {
+    min-width: 180px;
+}
+
+.customer-outstanding-loader-spinner {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-width: 0.35rem;
+}
+
 .pagination .page_link.active {
     background-color: #8833ff;
     color: white;

@@ -6,12 +6,12 @@
     ccName_autocomplete();
     bccName_autocomplete();
 
-    if ($('#hfType').val() != "" && $('#hfEmployee_No').val() != "") {        
+    if ($('#hfType').val() != "" && $('#hfEmployee_No').val() != "") {
         $('#ddlType').attr("disabled", true);
         $('#ddlFromCode').attr("disabled", true);
         $('#txtToName').attr("disabled", false);
     }
-    
+
     if ($('#hdnNotificationAction').val() != "") {
 
         var NotificationActionDetails = $('#hdnNotificationAction').val() + ' Successfully';
@@ -29,7 +29,7 @@
     $('#ddlFromCode').change(function () {
         $.ajax(
             {
-                url: '/SPNotification/GetSalespersonDetails?FromCode=' + $("#ddlFromCode option:selected").text(), //$('#ddlFromCode').val(),
+                url: '/SPNotification/GetSalespersonDetails?FromCode=' + $('#ddlFromCode').val(),
                 type: 'GET',
                 contentType: 'application/json',
                 success: function (data) {
@@ -39,7 +39,7 @@
                         $('#txtFromEmail').val(data.Company_E_Mail);
                         $('#txtFromMobile').val(data.Mobile_Phone_No);
                         $('#txtEmpNo').val($('#ddlFromCode').val());
-                        $('#hdnFromCode').val($("#ddlFromCode option:selected").text());
+                        $('#hdnFromCode').val($('#ddlFromCode option:selected').attr('data-code'));
                     }
                 },
                 error: function (data1) {
@@ -140,13 +140,13 @@
     $('#txtToName').focusout(function () {
         
         var apiUrl = $('#getServiceApiUrl').val() + 'SPNotification/';
-        $.get(apiUrl + 'GetUserFromName?Name=' + $('#txtToName').val(), function (data) {
+        $.get(apiUrl + 'GetUserFromName?Name=' + encodeURIComponent($('#txtToName').val() || ''), function (data) {
 
             if (data != null) {
 
                 $('#txtToEmail').val(data.Company_E_Mail);
                 $('#txtToMobile').val(data.Mobile_Phone_No);
-                
+
             }
 
         });
@@ -154,9 +154,9 @@
     });
 
     $('#txtCcName').change(function () {
-        
+
         var apiUrl = $('#getServiceApiUrl').val() + 'SPNotification/';
-        $.get(apiUrl + 'GetUserFromName?Name=' + $('#txtCcName').val(), function (data) {
+        $.get(apiUrl + 'GetUserFromName?Name=' + encodeURIComponent($('#txtCcName').val() || ''), function (data) {
 
             if (data != null) {
 
@@ -170,9 +170,9 @@
     });
 
     $('#txtBccName').change(function () {
-        
+
         var apiUrl = $('#getServiceApiUrl').val() + 'SPNotification/';
-        $.get(apiUrl + 'GetUserFromName?Name=' + $('#txtBccName').val(), function (data) {
+        $.get(apiUrl + 'GetUserFromName?Name=' + encodeURIComponent($('#txtBccName').val() || ''), function (data) {
 
             if (data != null) {
 
@@ -185,9 +185,9 @@
     });
 });
 function BindType() {
-    
+
     $('#ddlType').append($('<option value="-1">---Select---</option>'));
-                    
+
     $('<option>',
         {
             value: "Notification",
@@ -232,19 +232,19 @@ function BindFromCode() {
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.length > 0) {
 
                     var FromCodeOpt = "<option value='-1'>---Select---</option>";
-                    
+
                     $.each(data, function (i, data) {
-                        FromCodeOpt += "<option value=\"" + data.No + "\">" + data.PCPL_Employee_Code + "</option>";    
+                        FromCodeOpt += "<option value=\"" + data.No + "\" data-code=\"" + data.PCPL_Employee_Code + "\">" + data.FullName + "</option>";
                     });
 
                     $('#ddlFromCode').append(FromCodeOpt);
 
                     if ($('#hfEmployee_No').val() != "") {
-                        $("#ddlFromCode").val($('#hfEmployee_No').val());
+                        $("#ddlFromCode").val($('#hfEmployee_No').val()).trigger('change');
                     }
                 }
             },

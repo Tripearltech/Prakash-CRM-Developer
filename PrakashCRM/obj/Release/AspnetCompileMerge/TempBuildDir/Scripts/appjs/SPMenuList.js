@@ -3,7 +3,7 @@
 /* start pagination filter code */
 var filter = "";
 var orderBy = 2;
-var orderDir = "asc";
+var orderDir = "desc";
 $(document).ready(function () {
 
     filter = "IsActive eq " + JSON.parse($('#ddlStatus').val());
@@ -74,7 +74,7 @@ $(document).ready(function () {
 
         $('ul.pager li').remove();
         orderBy = 2;
-        orderDir = "asc";
+        orderDir = "desc";
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
     });
@@ -125,22 +125,52 @@ $(document).ready(function () {
 
     $('#btnDelYes').click(function () {
 
-        var row = $(objDelRole).closest("tr");
+        if (!objDelMenu) {
+            $('#modal').css('display', 'none');
+            return;
+        }
 
-        var no = row.find("[name=MenuNo]").text();
-        var name = row.find("[name=MenuName]").text();
+        var row = $(objDelMenu).closest("tr");
+        var no = (row.find("[name=MenuNo]").text() || '').trim();
+        var name = (row.find("[name=MenuName]").text() || '').trim();
 
-        //$.post(
-        //    apiUrl + 'DeleteRole?No=' + no + '&Name=' + name,
-        //    function (data) {
-        //        if (data) {
+        if (!no) {
+            ShowErrMsg('Menu No is missing.');
+            $('#modal').css('display', 'none');
+            return;
+        }
 
-        //            $('#modal').css('display', 'none');
-
-        //            location.reload(true);
-        //        }
-        //    }
-        //);
+        $.ajax({
+            url: apiUrl + 'DeleteMenu?No=' + encodeURIComponent(no),
+            type: 'POST',
+            success: function (data) {
+                var ok = (data === true || data === 'true');
+                if (ok) {
+                    $('#modal').css('display', 'none');
+                    if (typeof Lobibox !== 'undefined') {
+                        Lobibox.notify('success', { size: 'mini', rounded: true, position: 'top right', delay: 3000, msg: 'Menu deleted successfully.' });
+                    }
+                    setTimeout(function () {
+                        location.reload(true);
+                    }, 600);
+                } else {
+                    ShowErrMsg('Delete failed.');
+                }
+            },
+            error: function (xhr) {
+                var msg = 'Delete failed.';
+                try {
+                    if (xhr && xhr.responseJSON) {
+                        if (xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        else if (xhr.responseJSON.Message) msg = xhr.responseJSON.Message;
+                        else msg = JSON.stringify(xhr.responseJSON);
+                    } else if (xhr && xhr.responseText) {
+                        msg = xhr.responseText;
+                    }
+                } catch (e) { }
+                ShowErrMsg(msg);
+            }
+        });
     });
 
     $('#btnDelNo,.btn-close').click(function () {
@@ -170,7 +200,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
                     
-                    var rowData = "<tr><td></td><td><a class='EditMenuCls' href='/SPMenus/Menu?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td><td name='MenuNo'>" + item.No + "</td><td name='MenuName'>" + item.Menu_Name + "</td><td>" + item.Parent_Menu_Name + "</td><td>" + item.Serial_No + "</td><td>" + item.Type + "</td><td>" + item.ClassName + "</td>";
+                    var rowData = "<tr><td></td><td>" +
+                        "<a class='EditMenuCls' href='/SPMenus/Menu?No=" + item.No + "'><i class='bx bxs-edit'></i></a>" +
+                        "&nbsp;&nbsp;<a class='DeleteMenuCls' href='javascript:void(0)' onclick='DeleteMenu(this)'><i class='bx bx-trash'></i></a>" +
+                        "</td><td name='MenuNo'>" + item.No + "</td><td name='MenuName'>" + item.Menu_Name + "</td><td>" + item.Parent_Menu_Name + "</td><td>" + item.Serial_No + "</td><td>" + item.Type + "</td><td>" + item.ClassName + "</td>";
 
                     rowData = rowData + "</tr>";
 

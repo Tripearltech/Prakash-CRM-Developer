@@ -1,8 +1,12 @@
 using PrakashCRM.Data.Models;
+using PrakashCRM.Service.Classes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
@@ -34,6 +38,7 @@ namespace PrakashCRM.Service.Controllers
                 var lotNo = httpRequest.Form["lotNo"];
                 var itemNo = httpRequest.Form["itemNo"];
                 var fileName = httpRequest.Form["FileName"];
+                var variantCode = httpRequest.Form["variantCode"] ?? string.Empty;
 
                 if (string.IsNullOrWhiteSpace(lotNo))
                 {
@@ -69,18 +74,18 @@ namespace PrakashCRM.Service.Controllers
                     }
 
                     var base64 = Convert.ToBase64String(bytes);
-                    var responsesFIleName = Path.GetFileName(fileName);
+                    var normalizedFileName = Path.GetFileName(fileName);
                     var resolvedExtension = Path.GetExtension(currentFile.FileName);
                     if (string.IsNullOrWhiteSpace(resolvedExtension))
                     {
-                        resolvedExtension = Path.GetExtension(responsesFIleName);
+                        resolvedExtension = Path.GetExtension(normalizedFileName);
                     }
 
-                    SaveAttachmentFile(bytes, lotNo, itemNo, responsesFIleName);
+                    SaveAttachmentFile(bytes, lotNo, itemNo, normalizedFileName);
 
                     responses.Add(new FileUploadResponse
                     {
-                        FileName = Path.GetFileNameWithoutExtension(responsesFIleName),
+                        FileName = Path.GetFileNameWithoutExtension(normalizedFileName),
                         FileExtension = resolvedExtension,
                         ContentType = currentFile.ContentType,
                         Size = currentFile.ContentLength,
@@ -91,13 +96,24 @@ namespace PrakashCRM.Service.Controllers
                     });
                 }
 
-                return Ok(responses);
+                var docAttachmentJson = BuildDocAttachmentJson(responses);
+                UpdateTrackingFlag(itemNo, lotNo, variantCode, docAttachmentJson);
+
+                return Ok(responses.Select(response => new
+                {
+                    response.FileName,
+                    response.FileExtension,
+                    response.ContentType,
+                    response.Base64,
+                    response.LotNo,
+                    response.ItemNo,
+                    response.IsUploaded
+                }));
             }
             catch (Exception ex)
             {
                 return Content(HttpStatusCode.InternalServerError, new
                 {
-                    error = "An error occurred while processing the file.",
                     details = ex.Message
                 });
             }
@@ -140,5 +156,245 @@ namespace PrakashCRM.Service.Controllers
 
             return input;
         }
+
+        private static string BuildDocAttachmentJson(IEnumerable<FileUploadResponse> responses)
+        {
+            var documents = new List<DocAttachmentInfo>();
+
+            foreach (var response in responses)
+            {
+                documents.Add(new DocAttachmentInfo
+                {
+                    FileName = response.FileName,
+                    FileExtension = response.FileExtension,
+                    ContentType = response.ContentType,
+                    Base64 = response.Base64,
+                    LotNo = response.LotNo,
+                    ItemNo = response.ItemNo,
+                    IsUploaded = response.IsUploaded
+                });
+            }
+
+            return JsonConvert.SerializeObject(documents);
+        }
+
+        [Route("UpdateTrackingFlag")]
+        public LotNoInformationCard UpdateTrackingFlag(string itemNo, string lotNo, string variantCode, string docAttachmentJson)
+        {
+            var ac = new API();
+            var normalizedVariantCode = variantCode ?? string.Empty;
+            var response = new LotNoInformationCard
+            {
+                Item_No = itemNo,
+                Lot_No = lotNo,
+                Variant_Code = normalizedVariantCode,
+                DocAttachmentJson = docAttachmentJson,
+                IsTrackingDocumentAttached = true
+            };
+            var result = (dynamic)null;
+            var request = new LotNoInformationCard
+            {
+                Item_No = itemNo ?? string.Empty,
+                Lot_No = lotNo ?? string.Empty,
+                Variant_Code = normalizedVariantCode,
+                DocAttachmentJson = docAttachmentJson,
+                IsTrackingDocumentAttached = true
+            };
+
+            result = ac.PatchItem("LotNoInformationCard", request, response, "Item_No='" + itemNo + "',Lot_No='" + lotNo + "',Variant_Code='" + normalizedVariantCode + "'");
+            if (result.Result.Item1 != null)
+                response = result.Result.Item1;
+
+            response.Item_No = string.IsNullOrWhiteSpace(response.Item_No) ? itemNo : response.Item_No;
+            response.Lot_No = string.IsNullOrWhiteSpace(response.Lot_No) ? lotNo : response.Lot_No;
+            response.Variant_Code = response.Variant_Code ?? normalizedVariantCode;
+            response.DocAttachmentJson = string.IsNullOrWhiteSpace(response.DocAttachmentJson) ? docAttachmentJson : response.DocAttachmentJson;
+
+            if (result.Result.Item2 != null && result.Result.Item2.isSuccess)
+                response.IsTrackingDocumentAttached = true;
+
+            return response;
+        }
+
+        [HttpGet]
+        [Route("List")]
+        public async Task<IHttpActionResult> List(int tableId, string itemNo, string lotNo)
+        {
+            if (tableId <= 0)
+            {
+                return BadRequest("tableId must be greater than zero.");
+            }
+
+            if (string.IsNullOrWhiteSpace(itemNo))
+            {
+                return BadRequest("itemNo must be provided.");
+            }
+
+            if (string.IsNullOrWhiteSpace(lotNo))
+            {
+                return BadRequest("lotNo must be provided.");
+            }
+
+            var ac = new API();
+            var filter = BuildDocumentAttachmentFilter(tableId, itemNo, lotNo);
+            var result = await ac.GetData<BusinessCentralDocumentAttachment>("DocumentAttachments", filter).ConfigureAwait(false);
+
+            if (!result.err.isSuccess)
+            {
+                return Content(HttpStatusCode.BadGateway, new
+                {
+                    error = "Unable to fetch document attachments from Business Central.",
+                    details = result.err.message
+                });
+            }
+
+            var attachments = result.items?.value ?? new List<BusinessCentralDocumentAttachment>();
+            var formattedAttachments = new List<object>();
+
+            foreach (var attachment in attachments)
+            {
+                formattedAttachments.Add(new
+                {
+                    FileName = attachment.File_Name ?? string.Empty,
+                    FileExtension = NormalizeFileExtension(attachment.File_Extension),
+                    ContentType = ResolveContentType(attachment.File_Extension),
+                    Base64 = attachment.Base64Text ?? string.Empty,
+                    LotNo = attachment.No ?? string.Empty,
+                    ItemNo = attachment.Item_No ?? string.Empty,
+                    IsUploaded = true,
+                    ID = attachment.ID,
+                    Table_ID = attachment.Table_ID,
+                    DocumentType = attachment.Document_Type ?? string.Empty,
+                    LineNo = attachment.Line_No,
+                    //AttachmentId = BuildAttachmentIdentifier(attachment),
+                    AttachedDate = attachment.Attached_Date ?? string.Empty
+                });
+            }
+
+            return Ok(formattedAttachments);
+        }
+
+        [HttpPost]
+        [Route("Delete")]
+        public async Task<IHttpActionResult> DeleteAttachment([FromBody] GRNDocumentAttachmentDeleteRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Delete request payload is required.");
+            }
+
+            if (request.Table_ID <= 0)
+            {
+                return BadRequest("Table_ID must be greater than zero.");
+            }
+
+            if (request.ID <= 0)
+            {
+                return BadRequest("ID must be provided for delete.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.LotNo))
+            {
+                return BadRequest("LotNo must be provided for delete.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.DocumentType))
+            {
+                return BadRequest("DocumentType must be provided for delete.");
+            }
+
+            var ac = new API();
+            var deleteKey = BuildDocumentAttachmentKey(request);
+            var responseModel = new BusinessCentralDocumentAttachment();
+            var requestModel = new BusinessCentralDocumentAttachment
+            {
+                ID = request.ID,
+                Table_ID = request.Table_ID,
+                No = request.LotNo,
+                Document_Type = request.DocumentType,
+                Line_No = request.LineNo,
+                Item_No = request.ItemNo ?? string.Empty,
+                File_Name = request.FileName ?? string.Empty
+            };
+
+            var result = await ac.DeleteItem("DocumentAttachments", requestModel, responseModel, deleteKey).ConfigureAwait(false);
+            if (!result.Item2.isSuccess)
+            {
+                return Content(HttpStatusCode.BadGateway, new
+                {
+                    error = "Unable to delete document attachment from Business Central.",
+                    details = result.Item2.message
+                });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "Attachment deleted successfully."
+            });
+        }
+
+        private static string BuildDocumentAttachmentFilter(int tableId, string itemNo, string lotNo)
+        {
+            return $"Table_ID eq {tableId} and Item_No eq '{EscapeODataString(itemNo)}' and No eq '{EscapeODataString(lotNo)}'";
+        }
+
+        private static string BuildDocumentAttachmentKey(GRNDocumentAttachmentDeleteRequest request)
+        {
+            return $"ID={request.ID},Table_ID={request.Table_ID},No='{EscapeODataString(request.LotNo)}',Document_Type='{EscapeODataString(request.DocumentType)}',Line_No={request.LineNo}";
+        }
+
+        private static string BuildAttachmentIdentifier(BusinessCentralDocumentAttachment attachment)
+        {
+            return $"{attachment.ID}|{attachment.Table_ID}|{attachment.No}|{attachment.Document_Type}|{attachment.Line_No}";
+        }
+
+        private static string NormalizeFileExtension(string fileExtension)
+        {
+            if (string.IsNullOrWhiteSpace(fileExtension))
+            {
+                return string.Empty;
+            }
+
+            var normalized = fileExtension.Trim();
+            return normalized.StartsWith(".") ? normalized : "." + normalized;
+        }
+
+        private static string ResolveContentType(string fileExtension)
+        {
+            switch ((fileExtension ?? string.Empty).Trim().TrimStart('.').ToLowerInvariant())
+            {
+                case "jpg":
+                case "jpeg":
+                    return "image/jpeg";
+                case "png":
+                    return "image/png";
+                case "gif":
+                    return "image/gif";
+                case "bmp":
+                    return "image/bmp";
+                case "webp":
+                    return "image/webp";
+                case "svg":
+                    return "image/svg+xml";
+                case "pdf":
+                    return "application/pdf";
+                case "doc":
+                    return "application/msword";
+                case "docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case "xls":
+                    return "application/vnd.ms-excel";
+                case "xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                default:
+                    return "application/octet-stream";
+            }
+        }
+
+        private static string EscapeODataString(string value)
+        {
+            return (value ?? string.Empty).Replace("'", "''").Trim();
+        }
     }
- }
+}

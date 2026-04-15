@@ -6,20 +6,19 @@ var orderDir = "asc";
 $(document).ready(function () {
 
     BindFinancialYear();
-
+    BindCustomerNameDropdown_autocomplete();
     $('#ddlRecPerPage').change(function () {
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     });
 
     $('#btnSearch').click(function () {
-        if ($('#ddlField').val() == "-1" || $('#ddlOperator').val() == "-1" || $('#txtSearch').val() == "") {
+        if ($('#ddlField').val() == "-1" || $('#ddlOperator').val() == "-1" || $('#hfCustName').val() == "") {
 
             var msg = "Please Fill All Filter Details";
             ShowErrMsg(msg);
 
         }
         else {
-
             switch ($('#ddlOperator').val()) {
                 case 'Equal':
                     filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
@@ -87,6 +86,9 @@ $(document).ready(function () {
                 break;
             case 'Ends With':
                 filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
+                break;
+            case 'Contains':
+                filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
                 break;
             default:
                 filter = "";
@@ -186,19 +188,75 @@ $(document).ready(function () {
     });
 
 });
+
+function BindCustomerNameDropdown_autocomplete() {
+
+    if (typeof ($.fn.autocomplete) === 'undefined') return;
+
+    var baseApiUrl = $('#getServiceApiUrl').val() + 'SPBusinessPlan/';
+    var spCode = $('#hdnLoggedInUserSPCode').val();
+
+    if (!spCode) return;
+
+    // Clear selection when user types manually
+    $('#txtSearch').on('input', function () {
+        $('#hfCustName').val('');
+    });
+
+    $.get(baseApiUrl + 'GetAllCustomers?SPCode=' + encodeURIComponent(spCode), function (data) {
+
+        if (!data || !data.length) return;
+
+        var lookupArray = [];
+
+        for (var i = 0; i < data.length; i++) {
+            var name = ((data[i].Name || data[i].Company_Name) || '').toString().trim();
+            var no = (data[i].No || '').toString().trim();
+
+            if (!name) continue;
+
+            lookupArray.push({
+                value: name,
+                data: no
+            });
+        }
+
+        $('#txtSearch').autocomplete({
+            lookup: lookupArray,
+            minChars: 0,
+            onSelect: function (selectedItem) {
+                $('#txtSearch').val(selectedItem.value);
+                $('#hfCustName').val(selectedItem.value);
+            }
+        });
+
+        // Show dropdown on focus (safe-guarded for plugin versions)
+        $('#txtSearch').on('focus', function () {
+            try {
+                $(this).autocomplete('onValueChange');
+            }
+            catch (e) { }
+        });
+    });
+}
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPBusinessPlan/';
 
-    $.get(apiUrl + 'GetApiRecordsCount?page=BusinessPlanContactList&SPNo=' + $('#hdnLoggedInUserSPCode').val() + '&LoggedInUserNo=&apiEndPointName=Business_Plan_Customer_Wise&filter=' + filter, function (data) {
-        $('#hdnContactCount').val(data);
-    });
+    var encodedFilter = encodeURIComponent(filter || "");
+
+    var countRequest = $.get(
+        apiUrl + 'GetApiRecordsCount?page=BusinessPlanContactList&SPNo=' + $('#hdnLoggedInUserSPCode').val() + '&LoggedInUserNo=&apiEndPointName=Business_Plan_Customer_Wise&filter=' + encodedFilter,
+        function (data) {
+            $('#hdnContactCount').val(data);
+        }
+    );
 
     //url: '/SPBusinessPlan/GetContactCompanyListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
     $.ajax(
         {
-            url: '/SPBusinessPlan/GetBusinessPlanCustWiseListData?page=BusinessPlanContactList&SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
+            url: '/SPBusinessPlan/GetBusinessPlanCustWiseListData?page=BusinessPlanContactList&SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + encodedFilter + '&skip=' + skip + '&top=' + top,
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
@@ -209,7 +267,6 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 $('#tableBody').empty();
 
                 //var totalDemandQty = 0, totalTargetQty = 0;
-
                 $.each(data, function (index, item) {
                     var rowData = "<tr><td></td><td>" + item.Customer_Name + "</td><td>" + item.Prev_Year_Demand_Qty.toFixed(3) + "</td><td>" + item.Prev_Year_Target_Qty.toFixed(3) +
                         "</td><td>" + item.Prev_Year_Achieved_Qty.toFixed(3) + "</td><td>" + item.Total_Demand_Qty.toFixed(3) + "</td><td>" + item.Targeted_Qty.toFixed(3) + "</td>";
@@ -235,10 +292,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         rowData += "<td><span class='badge bg-danger'>Rejected</span></td>";
                     }
 
-                    rowData += "<td><a class='AddCls' onclick='CreateBusinessPlan(\"" + item.Customer_No + "\",\"" + item.Customer_Name + "\",\"" + item.Plan_Year + "\")'>" +
+                    rowData += "<td><a class='AddCls' onclick='CreateBusinessPlan(\"" + item.Customer_No + "\",\"" + item.Customer_Name + "\",\"" + item.Plan_Year + "\",\"" + item.Contact_No + "\")'>" +
                         "<img src='../Layout/assets/images/appImages/Plus-Icon.png' width='30' height='30' /></a></td>";
-                        
-                    
+
+
                     if (item.Status == "Rejected") {
                         rowData += "<td>" + item.Rejected_Reason + "</td>";
                     }
@@ -256,7 +313,9 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 //$('#lblTotalTargetQty').text(totalTargetQty.toFixed(3));
 
                 if (firsload == 1) {
-                    pageMe();
+                    $.when(countRequest).always(function () {
+                        pageMe();
+                    });
                 }
                 dataTableFunction(orderBy, orderDir);
 
@@ -274,7 +333,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     $.ajax(
         {
-            url: '/SPBusinessPlan/GetTotalDemandAndTargetQtyOfAllCust?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&filter=' + filter,
+            url: '/SPBusinessPlan/GetTotalDemandAndTargetQtyOfAllCust?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&filter=' + encodedFilter,
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
@@ -284,6 +343,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('#lblTotalDemandQty').text(data.totalDemandQty.toFixed(3));
                     $('#lblTotalTargetQty').text(data.totalTargetQty.toFixed(3));
 
+                }
+                if ($('#ddlStatus').val() == 'Not Filled') {
+                    $('#lblTotalDemandQty').text('');
+                    $('#lblTotalTargetQty').text('');
                 }
 
             },
@@ -477,10 +540,7 @@ function BindFinancialYear() {
     var prevFinancialYear = (currentYear - 1) + '-' + currentYear;
     var currFinancialYear = currentYear + '-' + (currentYear + 1);
 
-    if (currentMonth <= 2) {
-        /*yearOpts += "<option value='" + (currentYear - 1) + '-' + currentYear + "'>" + (currentYear - 1) + '-' + currentYear + "</option>";*/
-        yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
-    }
+    yearOpts += "<option value='" + prevFinancialYear + "'>" + prevFinancialYear + "</option>";
 
     yearOpts += "<option value='" + currFinancialYear + "'>" + currFinancialYear + "</option>";
 
@@ -501,10 +561,10 @@ function BindFinancialYear() {
 
 function ClearCustomFilter() {
 
-    $('#ddlField').val('-1');
+    $('#ddlField').val('Customer_Name');
     $('#ddlOperator').val('Contains');
     $('#txtSearch').val('');
-    
+
 }
 
 function ShowActionMsg(actionMsg) {
@@ -522,31 +582,3 @@ function ShowActionMsg(actionMsg) {
 
 }
 
-//
-//var apiUrl = $('#getServiceApiUrl').val() + 'SPBusinessPlan/';
-
-//$(document).ready(function () {
-
-//    BindCustomers();
-
-//});
-
-//function BindCustomers() {
-
-//    $.get(apiUrl + 'GetAllCompanyForDDL?SPCode=' + $('#hdnLoggedInUserSPCode').val(), function (data) {
-
-//        if (data != null) {
-
-//            var TROpts = "";
-//            var i;
-//            for (i = 0; i < data.length; i++) {
-//                TROpts += "<tr><td hidden>" + data[i].No + "</td><td>" + data[i].Name + "</td><td>0.00</td><td><span class='badge bg-warning text-dark'>Not Fill</span></td>" +
-//                    "<td><a href=''><i class='bx bx-plus-circle'></i></td>";
-//            }
-
-//            $('#ddlCustomer').append(opt);
-//        }
-
-//    });
-
-//}

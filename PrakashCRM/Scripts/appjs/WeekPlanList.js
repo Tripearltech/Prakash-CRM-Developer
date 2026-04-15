@@ -54,6 +54,8 @@ function BindFinancialYear() {
 
 function BindWeekPlanNoDetails() {
 
+    showPageDataLoader();
+
     $.ajax(
         {
             url: '/SPVisitEntry/GetWeekPlanNoDetailsForList',
@@ -89,6 +91,9 @@ function BindWeekPlanNoDetails() {
 
                 $('#tblWeekPlans').append(rowData);
 
+            },
+            complete: function () {
+                hidePageDataLoader();
             },
             error: function () {
                 //alert("error");

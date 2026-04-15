@@ -258,6 +258,10 @@ function loadBusinessReportSP(spName, yearValue, onSuccess) {
         return;
     }
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.ajax({
         url: '/SPBusinessPlan/GetBusinessReportSP',
         type: 'GET',
@@ -265,6 +269,11 @@ function loadBusinessReportSP(spName, yearValue, onSuccess) {
         success: function (result) {
             bpDemandContext.cache[cacheKey] = result || [];
             onSuccess(bpDemandContext.cache[cacheKey]);
+        },
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
+            }
         },
         error: function () {
             bpDemandContext.cache[cacheKey] = [];
@@ -789,6 +798,9 @@ function BindBusinessPlanReport(loginUser, year) {
             }
             $("#tblbusinessallreport").append(EmployeeListrows);
         },
+        complete: function () {
+            hidePageDataLoader();
+        },
         error: function (xhr, status, error) {
             console.error("Error:", error);
             alert("Error while fetching data");
@@ -810,6 +822,7 @@ $('#btnSearch').on('click', function () {
 
     // API service expects SalesPerson_Name in SerachSP, not the code,
     // so pass the selected option's text (salesperson name).
+    showPageDataLoader();
     BindBusinessPlanReport(selectedSalesPersonName, toYearFilter(yearValue));
 });
 
@@ -820,6 +833,7 @@ $("#btnClearFilter").on('click', function () {
 
 });
 function BindFinancialYear() {
+    showPageDataLoader();
     $.ajax({
         url: '/SPBusinessPlan/GetBusinessReportYears',
         type: 'GET',
@@ -864,6 +878,7 @@ function applyYearFilter() {
         filter = toYearFilter(yearValue);
     }
 
+    showPageDataLoader();
     BindBusinessPlanReport(selectedSP, filter);
 }
 

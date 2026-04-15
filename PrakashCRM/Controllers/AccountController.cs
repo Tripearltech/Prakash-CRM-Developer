@@ -21,6 +21,63 @@ namespace PrakashCRM.Controllers
 
     public class AccountController : Controller
     {
+        private const string TrustedDeviceCookieName = "trustedDevice";
+
+        private string GetDashboardRedirectUrl()
+        {
+            return Url.Action("Index", "SPDashboard") ?? "/SPDashboard/Index";
+        }
+
+        private string PeekPostLoginRedirectUrl(string returnUrl = null)
+        {
+            string redirectUrl = LoginRedirectHelper.NormalizeReturnUrl(returnUrl);
+
+            if (!string.IsNullOrWhiteSpace(redirectUrl))
+            {
+                Session[LoginRedirectHelper.PostLoginRedirectSessionKey] = redirectUrl;
+                return redirectUrl;
+            }
+
+            redirectUrl = LoginRedirectHelper.NormalizeReturnUrl(Session[LoginRedirectHelper.PostLoginRedirectSessionKey] as string);
+            if (!string.IsNullOrWhiteSpace(redirectUrl))
+            {
+                Session[LoginRedirectHelper.PostLoginRedirectSessionKey] = redirectUrl;
+                return redirectUrl;
+            }
+
+            return GetDashboardRedirectUrl();
+        }
+
+        private string ConsumePostLoginRedirectUrl()
+        {
+            string redirectUrl = PeekPostLoginRedirectUrl();
+            Session.Remove(LoginRedirectHelper.PostLoginRedirectSessionKey);
+            return redirectUrl;
+        }
+
+        private bool IsAuthenticatedSessionActive()
+        {
+            if (Session == null)
+                return false;
+
+            string firstName = Session["loggedInUserFName"] == null ? string.Empty : Session["loggedInUserFName"].ToString();
+            if (string.IsNullOrWhiteSpace(firstName))
+                return false;
+
+            string userNo = Session["loggedInUserNo"] == null ? string.Empty : Session["loggedInUserNo"].ToString();
+            string token = Session["AuthToken"] == null ? string.Empty : Session["AuthToken"].ToString();
+            if (string.IsNullOrWhiteSpace(token))
+                token = Session.SessionID;
+
+            if (UserTokenStore.IsTokenActive(userNo, token))
+                return true;
+
+            Session.Remove(LoginRedirectHelper.PostLoginRedirectSessionKey);
+            Session.Clear();
+            Session.Abandon();
+            return false;
+        }
+
         private void LogLoginRequestResponseToFile(string actionName, object requestPayload, string responseBody, HttpStatusCode? statusCode = null, string requestUrl = null)
         {
             try
@@ -44,13 +101,7 @@ namespace PrakashCRM.Controllers
 
                 string filePath = Path.Combine(logDirectory, "LoginLog_" + DateTime.Now.ToString("yyyyMMdd") + ".txt");
                 string requestJson = requestPayload != null ? JsonConvert.SerializeObject(requestPayload) : "";
-                string logText = "DateTime: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine
-                    + "Action: " + (actionName ?? "") + Environment.NewLine
-                    + "RequestUrl: " + (requestUrl ?? "") + Environment.NewLine
-                    + "RequestPayload: " + requestJson + Environment.NewLine
-                    + "StatusCode: " + (statusCode.HasValue ? ((int)statusCode.Value).ToString() : "") + Environment.NewLine
-                    + "ResponseBody: " + (responseBody ?? "") + Environment.NewLine
-                    + new string('-', 120) + Environment.NewLine;
+                string logText = "DateTime: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine + "Action: " + (actionName ?? "") + Environment.NewLine + "RequestUrl: " + (requestUrl ?? "") + Environment.NewLine + "RequestPayload: " + requestJson + Environment.NewLine + "StatusCode: " + (statusCode.HasValue ? ((int)statusCode.Value).ToString() : "") + Environment.NewLine + "ResponseBody: " + (responseBody ?? "") + Environment.NewLine + new string('-', 120) + Environment.NewLine;
 
                 System.IO.File.AppendAllText(filePath, logText);
             }
@@ -67,6 +118,142 @@ namespace PrakashCRM.Controllers
                 pass = string.IsNullOrWhiteSpace(pass) ? "" : "****",
                 adminContactNo = adminContactNo
             };
+        }
+
+        private int GetTrustedDeviceExpiryDays()
+        {
+            int expiryDays;
+            return int.TryParse(ConfigurationManager.AppSettings["TrustedDeviceExpiryDays"], out expiryDays) && expiryDays > 0 ? expiryDays : 1;
+        }
+
+        private async Task CompleteLoginForOtpProfile(ContactNoOTPForLogin user)
+        {
+            if (user == null)
+                return;
+
+            await CompleteLoginSession(user.No,user.First_Name,user.Last_Name,user.Company_E_Mail,user.Job_Title,user.Role,user.Mobile_Phone_No,user.Salespers_Purch_Code,user.Global_Dimension_1_Code);
+        }
+
+        private async Task CompleteLoginForProfile(LoggedInUserProfile user)
+        {
+            if (user == null)
+                return;
+
+            await CompleteLoginSession(user.No,user.First_Name,user.Last_Name,user.Company_E_Mail,user.Job_Title,user.Role,user.Mobile_Phone_No,user.Salespers_Purch_Code,user.Global_Dimension_1_Code);
+        }
+
+        private async Task CompleteLoginSession(string userNo, string firstName, string lastName, string email, string jobTitle, string role, string mobilePhoneNo, string spCode, string branchCode)
+        {
+            Session["loggedInUserNo"] = userNo;
+            Session["loggedInUserFName"] = firstName;
+            Session["loggedInUserLName"] = lastName;
+            Session["loggedInUserEmail"] = email;
+            Session["loggedInUserJobTitle"] = jobTitle;
+            Session["loggedInUserRole"] = role;
+            Session["loggedInUserMobile"] = mobilePhoneNo;
+            Session["loggedInUserSPCode"] = spCode;
+            Session["loggedinUserBranch"] = branchCode ?? "";
+            RegisterCurrentSessionToken(userNo);
+
+            string reportingSpCodes = await GetSPCodesOfReportingPersonUser(userNo);
+            Session["SPCodesOfReportingPersonUser"] = string.IsNullOrWhiteSpace(reportingSpCodes) ? "" : reportingSpCodes;
+
+            RoleWiseMenuRightsResponse menu = await GetRolewiseMenuRight(userNo);
+            Session["RoleWiseMenuData"] = menu;
+        }
+
+        //  login with OTP and then trusted device functionality will work for that device until the expiry of trusted device token or user clears cookies or logs out from that device or tries to login from another device or private mode
+        private TrustedDeviceValidationResult ValidateTrustedDevice(string userNo, string storageToken, string deviceFingerprint, bool isPrivateMode)
+        {
+            TrustedDeviceValidationResult invalidResult = new TrustedDeviceValidationResult
+            {
+                IsValid = false,
+                ShouldClearClientState = !string.IsNullOrWhiteSpace(storageToken)
+            };
+
+            try
+            {
+                if (isPrivateMode)
+                {
+                    ExpireTrustedDeviceCookie();
+                    invalidResult.ShouldClearClientState = true;
+                    return invalidResult;
+                }
+
+                HttpCookie trustedCookie = Request != null ? Request.Cookies[TrustedDeviceCookieName] : null;
+                string cookieToken = trustedCookie != null ? trustedCookie.Value : string.Empty;
+                    // login OTP validation for the old value.
+                TrustedDeviceValidationResult validation = TrustedDeviceStore.ValidateAndRenewToken(userNo,cookieToken,storageToken,deviceFingerprint,GetTrustedDeviceExpiryDays());
+                if (validation.IsValid && validation.Record != null)
+                    WriteTrustedDeviceCookie(validation.Record.Token, validation.Record.ExpiryUtc);
+                else if (validation.ShouldClearClientState)
+                    ExpireTrustedDeviceCookie();
+
+                return validation;
+            }
+            catch
+            {
+                ExpireTrustedDeviceCookie();
+                invalidResult.ShouldClearClientState = true;
+                return invalidResult;
+            }
+        }
+        private void ApplyTrustedDevice(LoginOtpVerificationResult responseModel, string userNo, string deviceFingerprint, bool isPrivateMode)
+        {
+            if (responseModel == null)
+                return;
+
+            if (isPrivateMode || string.IsNullOrWhiteSpace(userNo) || string.IsNullOrWhiteSpace(deviceFingerprint))
+            {
+                responseModel.ClearTrustedDeviceState = true;
+                ExpireTrustedDeviceCookie();
+                return;
+            }
+
+            try
+            {
+                TrustedDeviceRecord record = TrustedDeviceStore.IssueToken(userNo, deviceFingerprint, GetTrustedDeviceExpiryDays());
+                if (record == null)
+                    return;
+
+                WriteTrustedDeviceCookie(record.Token, record.ExpiryUtc);
+                responseModel.TrustedDeviceToken = record.Token;
+                responseModel.TrustedDeviceExpiresUtc = record.ExpiryUtc.ToString("o");
+                responseModel.ClearTrustedDeviceState = false;
+            }
+            catch
+            {
+                responseModel.ClearTrustedDeviceState = true;
+                ExpireTrustedDeviceCookie();
+            }
+        }
+        // DeviceCookies will be cleared when user logs out, tries to login from another device or private mode or when the trusted device token expires or when user clears cookies from browser
+        private void WriteTrustedDeviceCookie(string token, DateTime expiryUtc)
+        {
+            if (string.IsNullOrWhiteSpace(token) || Response == null)
+                return;
+
+            Response.Cookies.Add(new HttpCookie(TrustedDeviceCookieName, token)
+            {
+                HttpOnly = true,
+                Secure = Request != null && Request.IsSecureConnection,
+                Expires = expiryUtc,
+                Path = "/"
+            });
+        }
+
+        private void ExpireTrustedDeviceCookie()
+        {
+            if (Response == null)
+                return;
+
+            Response.Cookies.Add(new HttpCookie(TrustedDeviceCookieName, "")
+            {
+                HttpOnly = true,
+                Secure = Request != null && Request.IsSecureConnection,
+                Expires = DateTime.UtcNow.AddDays(-1),
+                Path = "/"
+            });
         }
 
         private async Task LogLoginActivity(string traceId, string description, string spCode)
@@ -193,12 +380,18 @@ namespace PrakashCRM.Controllers
             return View();
         }
 
-        public ActionResult Login()
+        public ActionResult Login(string returnUrl = null)
         {
+            string redirectUrl = PeekPostLoginRedirectUrl(returnUrl);
+            if (IsAuthenticatedSessionActive())
+                return Redirect(redirectUrl);
+
+            ViewBag.PostLoginRedirectUrl = redirectUrl;
             return View();
         }
 
-        public async Task<JsonResult> CheckLoginAndSendOTP(string email, string pass, string adminContactNo)
+        [HttpPost]
+        public async Task<JsonResult> CheckLoginAndSendOTP(string email, string pass, string adminContactNo, string trustedDeviceToken, string deviceFingerprint, bool isPrivateMode = false)
         {
             try
             {
@@ -227,12 +420,33 @@ namespace PrakashCRM.Controllers
                     {
                         if (contactNoOTPForLogin.PCPL_Enable_OTP_On_Login)
                         {
-                            Task<ContactNoOTPForLogin> task = Task.Run<ContactNoOTPForLogin>(async () => await GenerateOTPAndSend(contactNoOTPForLogin, adminContactNo));
-                            contactNoOTPForLoginRes = task.Result;
-                            await LogLoginActivity("LOGIN_OTP", "Login OTP Sent", contactNoOTPForLogin.Salespers_Purch_Code);
+                            TrustedDeviceValidationResult trustedDeviceValidation = ValidateTrustedDevice(contactNoOTPForLogin.No, trustedDeviceToken, deviceFingerprint, isPrivateMode);
+                            if (trustedDeviceValidation.IsValid)
+                            {
+                                await CompleteLoginForOtpProfile(contactNoOTPForLogin);
+                                contactNoOTPForLogin.RequireOtpVerification = false;
+                                contactNoOTPForLogin.TrustedDeviceRecognized = true;
+                                contactNoOTPForLogin.TrustedDeviceToken = trustedDeviceValidation.Record.Token;
+                                contactNoOTPForLogin.TrustedDeviceExpiresUtc = trustedDeviceValidation.Record.ExpiryUtc.ToString("o");
+                                contactNoOTPForLogin.RedirectUrl = ConsumePostLoginRedirectUrl();
+                                contactNoOTPForLoginRes = contactNoOTPForLogin;
+                                await LogLoginActivity("LOGIN_TRUSTED_DEVICE", "Login Success - Trusted Device", contactNoOTPForLogin.Salespers_Purch_Code);
+                            }
+                            else
+                            {
+                                Task<ContactNoOTPForLogin> task = Task.Run<ContactNoOTPForLogin>(async () => await GenerateOTPAndSend(contactNoOTPForLogin, adminContactNo));
+                                contactNoOTPForLoginRes = task.Result;
+                                contactNoOTPForLoginRes.RequireOtpVerification = true;
+                                contactNoOTPForLoginRes.TrustedDeviceRecognized = false;
+                                contactNoOTPForLoginRes.ClearTrustedDeviceState = trustedDeviceValidation.ShouldClearClientState;
+                                contactNoOTPForLoginRes.RedirectUrl = PeekPostLoginRedirectUrl();
+                                await LogLoginActivity("LOGIN_OTP", "Login OTP Sent", contactNoOTPForLogin.Salespers_Purch_Code);
+                            }
                         }
                         else
                         {
+                            await CompleteLoginForOtpProfile(contactNoOTPForLogin);
+                            contactNoOTPForLogin.RequireOtpVerification = false;
                             Session["loggedInUserNo"] = contactNoOTPForLogin.No;
                             Session["loggedInUserFName"] = contactNoOTPForLogin.First_Name;
                             Session["loggedInUserLName"] = contactNoOTPForLogin.Last_Name;
@@ -256,6 +470,7 @@ namespace PrakashCRM.Controllers
                             RoleWiseMenuRightsResponse menu = await GetRolewiseMenuRight(contactNoOTPForLogin.No);
 
                             Session["RoleWiseMenuData"] = menu;
+                            contactNoOTPForLogin.RedirectUrl = ConsumePostLoginRedirectUrl();
                             contactNoOTPForLoginRes = contactNoOTPForLogin;
                             await LogLoginActivity("LOGIN_SUCCESS", "Login Success", contactNoOTPForLogin.Salespers_Purch_Code);
                         }
@@ -435,8 +650,11 @@ namespace PrakashCRM.Controllers
         }
 
         //OTP functionality on Login Start
-        public async Task<string> CheckLogin(string SPNo, string OTP, string ContactNo)
+        [HttpPost]
+        public async Task<JsonResult> CheckLogin(string SPNo, string OTP, string ContactNo, string deviceFingerprint, bool isPrivateMode = false)
         {
+            LoginOtpVerificationResult result = new LoginOtpVerificationResult();
+
             try
             {
                 string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "Salesperson/";
@@ -471,6 +689,9 @@ namespace PrakashCRM.Controllers
 
                 if (loggedInUserProfile.First_Name != null)
                 {
+                    result.IsSuccess = true;
+                    result.LoggedInUser = loggedInUserProfile.First_Name + ' ' + loggedInUserProfile.Last_Name;
+                    await CompleteLoginForProfile(loggedInUserProfile);
                     loggedInUser = loggedInUserProfile.First_Name + ' ' + loggedInUserProfile.Last_Name;
                     Session["loggedInUserNo"] = loggedInUserProfile.No;
                     Session["loggedInUserFName"] = loggedInUserProfile.First_Name;
@@ -487,7 +708,7 @@ namespace PrakashCRM.Controllers
 
                     Task<SPUpdateOTP> task = Task.Run<SPUpdateOTP>(async () => await UpdateOTPBlank(SPNo, ContactNo));
                     contactNoOTPForLoginRes = task.Result;
-
+                    ApplyTrustedDevice(result, loggedInUserProfile.No, deviceFingerprint, isPrivateMode);
                     string SPCodesOfReportingPersonUser = "";
                     Task<string> task1 = Task.Run<string>(async () => await GetSPCodesOfReportingPersonUser(contactNoOTPForLoginRes.No));
                     SPCodesOfReportingPersonUser = task1.Result;
@@ -499,6 +720,7 @@ namespace PrakashCRM.Controllers
                     // otp boolian enable hone par  ye right update hota hai 
                     RoleWiseMenuRightsResponse menu = await GetRolewiseMenuRight(loggedInUserProfile.No);
                     Session["RoleWiseMenuData"] = menu;
+                    result.RedirectUrl = ConsumePostLoginRedirectUrl();
 
                     await LogLoginActivity("LOGIN_SUCCESS", "Login Success", loggedInUserProfile.Salespers_Purch_Code);
                 }
@@ -509,14 +731,14 @@ namespace PrakashCRM.Controllers
                     await LogLoginSiteError("LOGIN_OTP_FAIL", "Invalid OTP during login", "401", "OTP did not match or user profile was not returned");
                 }
 
-                return loggedInUser;
+                return Json(result, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 LogLoginRequestResponseToFile("CheckLogin", new { SPNo = SPNo, OTP = string.IsNullOrWhiteSpace(OTP) ? "" : "****", ContactNo = ContactNo }, ex.ToString(), HttpStatusCode.InternalServerError, Request != null ? Request.RawUrl : "");
                 await LogLoginActivity("LOGIN_OTP_EXCEPTION", "Login Failed - OTP Exception", "System");
                 await LogLoginSiteError("LOGIN_OTP_EXCEPTION", "Exception in CheckLogin", "500", ex.Message);
-                return "";
+                return Json(result, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -595,6 +817,7 @@ namespace PrakashCRM.Controllers
                     else
                     {
                         contactNoOTPForLoginRes = contactNoOTPForLogin;
+                        await CompleteLoginForOtpProfile(contactNoOTPForLogin);
                         Session["loggedInUserNo"] = contactNoOTPForLogin.No;
                         Session["loggedInUserFName"] = contactNoOTPForLogin.First_Name;
                         Session["loggedInUserLName"] = contactNoOTPForLogin.Last_Name;
@@ -644,6 +867,7 @@ namespace PrakashCRM.Controllers
             Session["SPProfileImage"] = null;
             Session["SPCodesOfReportingPersonUser"] = "";
             Session["AuthToken"] = "";
+            Session.Remove(LoginRedirectHelper.PostLoginRedirectSessionKey);
 
             return RedirectToAction("Login", "Account");
         }
@@ -772,7 +996,10 @@ namespace PrakashCRM.Controllers
                 PasswordResetResult resetResult = JsonConvert.DeserializeObject<PasswordResetResult>(payload) ?? invalidResult;
 
                 if (resetResult.Success && !string.IsNullOrWhiteSpace(resetResult.UserNo))
+                {
                     UserTokenStore.InvalidateAllTokensForUsers(new[] { resetResult.UserNo });
+                    TrustedDeviceStore.InvalidateAllDevicesForUser(resetResult.UserNo);
+                }
 
                 return Json(resetResult);
             }

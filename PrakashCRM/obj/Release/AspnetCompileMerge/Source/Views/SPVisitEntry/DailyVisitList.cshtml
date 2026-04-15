@@ -13,6 +13,9 @@
                     <li class="breadcrumb-item">
                         <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
                     </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPVisitEntry/DailyVisitList">Daily Visit List</a>
+                    </li>
                     <li class="breadcrumb-item active" aria-current="page">Daily Visit List</li>
                 </ol>
             </nav>
@@ -26,9 +29,10 @@
                 <div>
                     <div class="row g-3">
                         <div class="col-md-2">
-                            <input id="hfSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                            <input id="hfSPCode" value="@(Session["loggedInUserSPCode"] != null ? Session["loggedInUserSPCode"].ToString() : "")" style="display:none" />
                             <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
                             <button id="btnNew" class="btn btn-primary  mb-3 mb-lg-0" type="button"><i class='bx bxs-plus-square'></i>&nbsp;New</button>
+                            <input id="hfdvpNo" value="" style="display:none" />
                         </div>
 
                         <div class="col-md-10">
@@ -96,6 +100,7 @@
                             <th></th>
                             <th></th>
                             <th>Date</th>
+                            <th>DV No.</th>
                             <th>Type</th>
                             <th>Sub Type</th>
                             <th>Customer</th>
@@ -131,6 +136,7 @@
                             <th></th>
                             <th></th>
                             <th>Date</th>
+                            <th>DV No.</th>
                             <th>Type</th>
                             <th>Sub Type</th>
                             <th>Customer</th>
@@ -295,19 +301,25 @@
                         </div>
                     </div>
                 </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
+</div>
 @Scripts.Render("~/bundles/jquery")
 <script src="~/Scripts/appjs/DailyVisitList.js"></script>
+
 <script>
     $(document).ready(function () {
 
-    $('#btnNew').click(function () {
-        window.location.replace('@Url.Action("DailyVisit", "SPVisitEntry")');
-    });
+        // New Visit Button
+        $('#btnNew').click(function () {
+            window.location.href = '/SPVisitEntry/DailyVisit';
+        });
 
-});
+    });
+    function EditDailyVisit(dvpNo) {
+        window.location.href = '/SPVisitEntry/DailyVisitDetails?No=' + dvpNo;
+    }
+
 </script>

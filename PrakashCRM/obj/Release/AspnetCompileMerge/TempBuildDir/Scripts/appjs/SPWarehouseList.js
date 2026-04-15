@@ -3,15 +3,47 @@
 var apiUrl = $('#getServiceApiUrl').val() + 'SPWarehouse/';
 
 var filter = "";
-var orderBy = 2;
-var orderDir = "desc";
+// Default sort: Order No (thead cellIndex = 1)
+var orderBy = 1;
+var orderDir = "asc";
+
+// Keep Document Type filter independent from the main filter controls.
+var docTypeFilter = "";
+
+function getEffectiveFilter() {
+    var a = (docTypeFilter || "").trim();
+    var b = (filter || "").trim();
+    if (a && b) return a + " and " + b;
+    return a || b;
+}
+
+function refreshGridWithCurrentFilters() {
+    $('ul.pager li').remove();
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
+}
+
+function _normalizeWarehouseDocType(v) {
+    return (v || "").toString().trim();
+}
+
+function _applyWarehouseDocTypeFilter(docType) {
+    var dt = _normalizeWarehouseDocType(docType);
+    if (!dt) {
+        docTypeFilter = "";
+        refreshGridWithCurrentFilters();
+        return;
+    }
+
+    docTypeFilter = "DocumentType_UI eq '" + dt.replace(/'/g, "''") + "'";
+    refreshGridWithCurrentFilters();
+}
 
 $(document).ready(function () {
 
-    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
 
     $('#ddlRecPerPage').change(function () {
-        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
     });
 
     $('#ddlField').change(function () {
@@ -94,7 +126,7 @@ $(document).ready(function () {
         }
         else {
             $('ul.pager li').remove();
-            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
         }
 
     });
@@ -152,22 +184,21 @@ $(document).ready(function () {
         rebindGrid();
     });
 
-    $('#dataList th').click(function () {
-        var table = $(this).parents('table').eq(0)
+    // Document Type dropdown: selection triggers auto-search (no typing needed).
+    $(document).off('change.wDocType', '#ddlDocType')
+        .on('change.wDocType', '#ddlDocType', function () {
+            var dt = $(this).val();
+            _applyWarehouseDocTypeFilter(dt);
+        });
 
+    // Use delegated handler so it survives DataTable destroy/re-init and ignore tfoot clicks.
+    $(document).off('click', '#dataList thead th').on('click', '#dataList thead th', function () {
         this.asc = !this.asc;
         if (this.cellIndex != 0) {
             orderBy = parseInt(this.cellIndex);
-            orderDir = "asc";
-
-            if (this.asc) {
-                orderDir = "asc";
-            }
-            else {
-                orderDir = "desc";
-            }
+            orderDir = this.asc ? "asc" : "desc";
             $('ul.pager li').remove();
-            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+            bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
         }
     });
 
@@ -207,7 +238,6 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
                 //alert(data.length);
                 $.each(data, function (index, item) {
-                    debugger;
                     $('#ddlField').change(function () {
 
                         if ($('#ddlField').val() == "Shipment_Date_Filter_FilterOnly") {
@@ -245,28 +275,35 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         var fromLocaCell = "";
                         var toLocaCell = "";
 
-                        // Set from/to locations based on document type
                         if (item.DocumentType === "Sales Order") {
-                            fromLocaCell = item.FromLocation;
-                            toLocaCell = "";
-                        } else if (item.DocumentType === "Purchase Order" || item.DocumentType === "Sales Return") {
-                            fromLocaCell = "";
-                            toLocaCell = item.ToLocation;
+                            if (item.DropShipment === "Yes") {
+                                fromLocaCell = item.fromVenFromCity;
+                                toLocaCell = item.ToCity;
+                            } else {
+                                fromLocaCell = item.FromCity;
+                                toLocaCell = item.ToCity;
+                            }
+                        } else if (item.DocumentType === "Sales Return") {
+                            fromLocaCell = item.ToRetrunCity;
+                            toLocaCell = item.FromCity;
+                        } else if (item.DocumentType === "Purchase Order") {
+                            fromLocaCell = item.FrompurCity;
+                            toLocaCell = item.TopurCity;
                         } else if (item.DocumentType === "Transfer Order") {
-                            fromLocaCell = item.FromLocation;
-                            toLocaCell = item.ToLocation;
+                            fromLocaCell = item.fromTransCity;
+                            toLocaCell = item.ToTransCity;
                         }
                         if (item.AcceptedBy == "") {
-                            var rowData = "<tr class='Incoming'>" +"<td><input type='checkbox' class='form-check-input' value='" + item.SystemId + "," + item.DocumentType + "~" + item.IsAnyLineWithDropShipment + "," + item.DocumentNo + "' /></td>" + "<td><a href='/SPWarehouse/WarehouseCard?No=" + item.DocumentNo + "&DocumentType=" + item.DocumentType + "'><span>" + item.DocumentNo + "</span></a></td>" +
-                                "<td>" + item.ShipmentDate + "</td>" + "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" +"<td>" + toLocaCell + "</td>" +"<td>" + item.DocumentType + "</td>" +"<td>" + item.AcceptedBy + "</td>" +"<td>" + item.IncoTerm + "</td>" +"<td>" + item.FromAddress + "</td>" +"<td>" + item.ToAddress + "</td>" +"</tr>";
+                            var rowData = "<tr class='Incoming'>" + "<td><input type='checkbox' class='form-check-input' value='" + item.SystemId + "," + item.DocumentType + "~" + item.IsAnyLineWithDropShipment + "," + item.DocumentNo + "' /></td>" + "<td><a href='/SPWarehouse/WarehouseCard?No=" + item.DocumentNo + "&DocumentType=" + item.DocumentType + "'><span>" + item.DocumentNo + "</span></a></td>" +
+                                "<td>" + item.ShipmentDate + "</td>" + "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" + "<td>" + toLocaCell + "</td>" + "<td>" + item.DocumentType + "</td>" + "<td>" + item.AcceptedBy + "</td>" + "<td>" + item.IncoTerm + "</td>" + "<td>" + item.FromAddress + "</td>" + "<td>" + item.ToAddress + "</td>" + "</tr>";
                         } else {
-                            var rowData = "<tr>" + "<td></td>" + "<td><a href='/SPWarehouse/WarehouseCard?No=" + item.DocumentNo + "&DocumentType=" + item.DocumentType + "'><span>" + item.DocumentNo + "</span></a></td>" +"<td>" + item.ShipmentDate + "</td>" +
+                            var rowData = "<tr>" + "<td></td>" + "<td><a href='/SPWarehouse/WarehouseCard?No=" + item.DocumentNo + "&DocumentType=" + item.DocumentType + "'><span>" + item.DocumentNo + "</span></a></td>" + "<td>" + item.ShipmentDate + "</td>" +
                                 "<td>" + ((item.DocumentType === "Sales Order" || item.DocumentType === "Purchase Order" || item.DocumentType === "Sales Return") ? item.CustomerVendorName : "") + "</td>" + "<td>" + fromLocaCell + "</td>" + "<td>" + toLocaCell + "</td>" + "<td>" + item.DocumentType + "</td>" + "<td>" + item.AcceptedBy + "</td>" + "<td>" + item.IncoTerm + "</td>" + "<td>" + item.FromAddress + "</td>" + "<td>" + item.ToAddress + "</td>" + "</tr>";
                         }
 
 
                         $('#tableBody').append(rowData);
-                       innerrow += "<tr><th>Item No</th><th>Item Description</th><th>Qty</th><th>UOM</th><th>Packing Style</th><th>Transport Qty</th><th>Drop Shipment</th><th>Vendor</th></tr>";
+                        innerrow += "<tr><th>Item No</th><th>Item Description</th><th>Qty</th><th>UOM</th><th>Packing Style</th><th>Transport Qty</th><th>Drop Shipment</th><th>Vendor</th></tr>";
 
                         if (vendorico == "") {
                             innerrow += "<tr><td>" + item.ItemNo + "</td><td>" + item.ItemDescription + "</td><td>" + item.Qty + "</td><td>" + item.UOM + "</td><td>" + item.PackingStyle + "</td><td>" + item.TransportQty + "</td><td>" + item.DropShipment + "</td><td>" + vendorico + "</td></tr>";
@@ -290,7 +327,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         $('#tableBody').append(innerrows);
                         innerrow = "";
                     }
-               });
+                });
 
                 dataTableFunction(orderBy, orderDir);
 
@@ -509,7 +546,7 @@ function pageMe() {
 
         pager.data("curr", page);
 
-        bindGridData(skip2, top2, 0, orderBy, orderDir, filter);
+        bindGridData(skip2, top2, 0, orderBy, orderDir, getEffectiveFilter());
     }
 };
 /* end pagination filter code */
@@ -635,11 +672,11 @@ function AccceptTask() {
 
 }
 
-function rebindGrid()
-{
+function rebindGrid() {
     $('#ddlField').val('-1');
     $('#ddlOperator').val('Contains');
     $('#txtSearch').val('');
+    $('#ddlDocType').val('');
     $('#txtFromDate').val('');
     $('#txtToDate').val('');
     $('#ddlOperator').css('display', 'block');
@@ -648,10 +685,11 @@ function rebindGrid()
     $('#txtToDate').css('display', 'none');
 
     filter = "";
+    docTypeFilter = "";
     $('ul.pager li').remove();
-    orderBy = 2;
-    orderDir = "desc";
-    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    orderBy = 1;
+    orderDir = "asc";
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, getEffectiveFilter());
 }
 
 function BindVendor(itemno, lineno, docno) {

@@ -150,13 +150,15 @@ namespace PrakashCRM.Service.Controllers
 
         [HttpGet]
         [Route("GetCustomerCollectionOut")]
-        public List<CustomerCollectionOut> GetCustomerCollectionOut()
+        public List<CustomerCollectionOut> GetCustomerCollectionOut(string SPCode)
         {
             API ac = new API();
             List<CustomerCollectionOut> data = new List<CustomerCollectionOut>();
 
+            string salespersonFilter = string.IsNullOrWhiteSpace(SPCode) ? "" : " and Salesperson_Code eq '" + SPCode.Replace("'", "''") + "'";
+
             // Customer list
-            string customerFilter = "Is_Customer eq true and IsTotalCustAmt eq false and IsReceivedAmount eq false";
+            string customerFilter = "Is_Customer eq true and IsTotalCustAmt eq false and IsReceivedAmount eq false" + salespersonFilter;
 
             var customerResult = ac.GetData<CustomerCollectionOut>("Daily_Customer_Collection_View_Excel", customerFilter);
             if (customerResult.Result.Item1.value.Count > 0)
@@ -164,7 +166,7 @@ namespace PrakashCRM.Service.Controllers
 
 
             // Received Amount list
-            string receivedFilter = "Is_Customer eq false and IsTotalCustAmt eq false and IsReceivedAmount eq true";
+            string receivedFilter = "Is_Customer eq false and IsTotalCustAmt eq false and IsReceivedAmount eq true" + salespersonFilter;
 
             var receivedResult = ac.GetData<CustomerCollectionOut>("Daily_Customer_Collection_View_Excel", receivedFilter);
             if (receivedResult.Result.Item1.value.Count > 0)
@@ -172,7 +174,7 @@ namespace PrakashCRM.Service.Controllers
 
 
             // Total Customer Amount
-            string totalFilter = "Is_Customer eq true and IsTotalCustAmt eq true and IsReceivedAmount eq false and IsLastSixMonthsData eq true";
+            string totalFilter = "Is_Customer eq true and IsTotalCustAmt eq true and IsReceivedAmount eq false and IsLastSixMonthsData eq true" + salespersonFilter;
 
             var totalResult = ac.GetData<CustomerCollectionOut>("Daily_Customer_Collection_View_Excel", totalFilter);
             if (totalResult.Result.Item1.value.Count > 0)
@@ -184,7 +186,7 @@ namespace PrakashCRM.Service.Controllers
 
         [HttpGet]
         [Route("GetCustomerSexMonthData")]
-        public List<CustomerCollectionOut> GetCustomerSexMonthData(string customerNo)
+        public List<CustomerCollectionOut> GetCustomerSexMonthData(string customerNo, string SPCode)
         {
             API ac = new API();
             List<CustomerCollectionOut> list = new List<CustomerCollectionOut>();
@@ -192,6 +194,9 @@ namespace PrakashCRM.Service.Controllers
             string filter = "";
             filter += $"IsLastSixMonthsData eq true and IsTotalCustAmt eq false and Is_Customer eq false and IsReceivedAmount eq false";
             filter += $" and LastSixMonths_Customer_No eq '{customerNo}'";
+
+            if (!string.IsNullOrWhiteSpace(SPCode))
+                filter += $" and Salesperson_Code eq '{SPCode.Replace("'", "''")}'";
 
             var result = ac.GetData<CustomerCollectionOut>("Daily_Customer_Collection_View_Excel", filter);
 

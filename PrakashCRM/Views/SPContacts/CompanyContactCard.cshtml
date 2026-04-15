@@ -8,7 +8,8 @@
     .verticalScroll {
         padding: 15px;
         overflow-y: auto;
-        height: 310px;
+        min-height: 220px;
+        max-height: min(420px, calc(var(--app-viewport-height, 100vh) - 240px));
     }
 
     .EditContactCls, .DeleteContactCls,
@@ -32,9 +33,27 @@
         .btn-purple:hover {
             background-color: #6d28d9;
         }
+
+    .company-contact-card-page .company-contact-table,
+    .company-contact-card-page .company-contact-products-table {
+        width: 100%;
+        min-width: 640px;
+    }
+
+    .company-contact-card-page .company-contact-table-wrapper,
+    .company-contact-card-page .company-contact-products-wrapper {
+        width: 100%;
+    }
+
+    @@media (max-width: 991.98px) {
+        .company-contact-card-page .company-contact-table,
+        .company-contact-card-page .company-contact-products-table {
+            min-width: 0;
+        }
+    }
 </style>
 
-<div class="page-content">
+<div class="page-content company-contact-card-page">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
             <nav aria-label="breadcrumb">
@@ -74,20 +93,12 @@
                     <div>
                         <h6 class="mb-0 font-weight-bold">General</h6>
                         <hr />
-                        @*@if (Model == null || Model.Company_Name == null)
-                            {
-
-                            }
-                            else
-                            {
-
-                            }*@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Company Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Company_Name, new { Value = Model.Company_Name, @id = "txtCustomerName", @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.Company_Name, new { Value = Model.Company_Name, @id = "txtCustomerName", @class = "form-control", tabindex = "1" })
                                         @*@Html.ValidationMessageFor(model => model.Company_Name, null, new { style = "color:red" })*@
                                         <label id="lblCCompanyNameMsg" style="color:red;display:none"></label>
                                         @*@Html.HiddenFor(model => model.SQValue, ViewData["No"])*@
@@ -95,66 +106,56 @@
                                         {
                                             <input type="hidden" name="SQValue" id="SQValue" value="inquiry" />
                                         }
-
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">Sales Person<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                    <label class="col-sm-3 col-form-label">URL</label>
                                     <div class="col-sm-9">
-                                        <input type="hidden" id="hfSalespersonCode" value="@ViewBag.Salesperson_Code" />
-                                        @*<input type="hidden" id="hfSelectedSPCode" value="" />*@
-                                        @Html.HiddenFor(model => model.Salesperson_Code, new { @id = "hfSelectedSPCode" })
-                                        <select id="ddlSalesPerson" class="form-select"></select>
-                                        @*@Html.DropDownListFor(model => model.Salesperson_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSalesPerson", @class = "form-select" })*@
-                                        @Html.ValidationMessageFor(model => model.Salesperson_Code, null, new { style = "color:red" })
+                                        @Html.TextBoxFor(model => model.PCPL_URL, new { @class = "form-control", tabindex = "12" })
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row g-6">
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Address<span class="required" style="color: red; margin-left: 2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @id = "txtAddress" })
+                                        @Html.TextBoxFor(model => model.Address, new { @class = "form-control", @id = "txtAddress", tabindex = "2" })
                                         @*@Html.ValidationMessageFor(model => model.Address, null, new { style = "color:red" })*@
                                         <label id="lblCCompanyAddressMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">Secondary SP</label>
+                                    <label class="col-sm-3 col-form-label">PAN No</label>
                                     <div class="col-sm-9">
-                                        <input type="hidden" id="hfSecondarySPCode" value="@ViewBag.PCPL_Secondary_SP_Code" />
-                                        @Html.DropDownListFor(model => model.PCPL_Secondary_SP_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSecondarySP", @class = "form-select" })
+                                        @Html.TextBoxFor(model => model.P_A_N_No, new { @class = "form-control", @id = "PanNo", tabindex = "13", maxlength = "10" })
+                                        <label id="lblCCompanyPANNoMsg" style="color:red;display:none"></label>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Address2</label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Address_2, new { @class = "form-control", @id = "txtAddress1" })
+                                        @Html.TextBoxFor(model => model.Address_2, new { @class = "form-control", @id = "txtAddress1", tabindex = "3" })
                                         <label id="lblCCompanyAddressMsg1" style="color:red;display:none"></label>
-
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">Business Type</label>
+                                    <label class="col-sm-3 col-form-label">GST No</label>
                                     <div class="col-sm-9">
-                                        <input type="hidden" id="hfBusinessTypeNo" value="@ViewBag.Business_Type_No" />
-                                        @Html.DropDownListFor(model => model.Business_Type_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlBusinessType", @class = "form-select" })
+                                        @Html.TextBoxFor(model => model.GST_Registration_No, new { @class = "form-control", @id = "GSTNo", tabindex = "14" })
+                                        @*@Html.ValidationMessageFor(model => model.GST_Registration_No, null, new { style = "color:red" })*@
+                                        <label id="lblCCompanyGSTNoMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
                             </div>
@@ -164,48 +165,45 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Pincode<span class="required" style="color: red; margin-left: 2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Post_Code, new { @id = "txtPincode", @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.Post_Code, new { @id = "txtPincode", @class = "form-control", tabindex = "4" })
                                         @*@Html.ValidationMessageFor(model => model.Post_Code, null, new { style = "color:red" })*@
                                         <label id="lblCCompanyPincodeMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">Industry Group</label>
+                                    <label class="col-sm-3 col-form-label">Sales Person<span class="required" style="color: red; margin-left: 2px">*</span></label>
                                     <div class="col-sm-9">
-                                        <input type="hidden" id="hfIndustryNo" value="@ViewBag.Industry_No" />
-                                        @Html.DropDownListFor(model => model.Industry_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlIndustry", @class = "form-select" })
+                                        <input type="hidden" id="hfSalespersonCode" value="@ViewBag.Salesperson_Code" />
+                                        @*<input type="hidden" id="hfSelectedSPCode" value="" />*@
+                                        @Html.HiddenFor(model => model.Salesperson_Code, new { @id = "hfSelectedSPCode" })
+                                        <select id="ddlSalesPerson" class="form-select" tabindex="15"></select>
+                                        @*@Html.DropDownListFor(model => model.Salesperson_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSalesPerson", @class = "form-select" })*@
+                                        @Html.ValidationMessageFor(model => model.Salesperson_Code, null, new { style = "color:red" })
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
                                         <input type="hidden" id="hfAreaCode" value="@ViewBag.Area_Code" />
-                                        @Html.DropDownListFor(model => model.Area_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlArea", @class = "form-select" })
+                                        @Html.DropDownListFor(model => model.Area_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlArea", @class = "form-select", tabindex = "5" })
                                         <label id="lblCCompanyAreaMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-
-                                    <label class="col-sm-3 col-form-label">Source Of Contact</label>
+                                    <label class="col-sm-3 col-form-label">Secondary SP</label>
                                     <div class="col-sm-9">
-                                        <input type="hidden" id="hfSourceOfContactNo" value="@ViewBag.Source_Of_Contact_No" />
-                                        @Html.DropDownListFor(model => model.Source_Of_Contact_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSourceOfContact", @class = "form-select" })
+                                        <input type="hidden" id="hfSecondarySPCode" value="@ViewBag.PCPL_Secondary_SP_Code" />
+                                        @Html.DropDownListFor(model => model.PCPL_Secondary_SP_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSecondarySP", @class = "form-select", tabindex = "16" })
                                     </div>
-
                                 </div>
-                            </div>
-                            <div class="col-md-6">
                             </div>
                         </div>
                         <div class="row g-3">
@@ -216,23 +214,20 @@
                                         <input type="hidden" id="hfPostCode" value="@ViewBag.Post_Code" />
                                         @*@Html.DropDownListFor(model => model.Post_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCity", @class = "form-select" })*@
                                         @*<input type="text" id="txtCity" class="form-control" />*@
-                                        @Html.TextBoxFor(model => model.City, new { @id = "txtCity", @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.City, new { @id = "txtCity", @class = "form-control", tabindex = "6" })
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">Assessee Code</label>
+                                    <label class="col-sm-3 col-form-label">Business Type<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Assessee_Code, new { @class = "form-control", @id = "txtAssesseeCode" })
-                                        @*@Html.ValidationMessageFor(model => model.P_A_N_No, null, new { style = "color:red" })*@
+                                        <input type="hidden" id="hfBusinessTypeNo" value="@ViewBag.Business_Type_No" />
+                                        @Html.DropDownListFor(model => model.Business_Type_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlBusinessType", @class = "form-select", tabindex = "17" })
                                     </div>
-
                                 </div>
                             </div>
                         </div>
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
@@ -241,18 +236,17 @@
                                         <input type="hidden" id="hfDistrict" value="@ViewBag.District" />
                                         @*@Html.DropDownListFor(model => model.District, Enumerable.Empty<SelectListItem>(), new { @id = "ddlDistrict", @class = "form-select" })*@
                                         @*<input type="text" id="txtDistrict" class="form-control" />*@
-                                        @Html.TextBoxFor(model => model.District, new { @id = "txtDistrict", @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.District, new { @id = "txtDistrict", @class = "form-control", tabindex = "7" })
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">Credit Limit</label>
+                                    <label class="col-sm-3 col-form-label">Industry Group<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Credit_Limit, new { Value = "0", @class = "form-control", @id = "txtCreditLimit", disabled = "disabled" })
+                                        <input type="hidden" id="hfIndustryNo" value="@ViewBag.Industry_No" />
+                                        @Html.DropDownListFor(model => model.Industry_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlIndustry", @class = "form-select", tabindex = "18" })
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -264,11 +258,21 @@
                                         <input type="hidden" id="hfStateCode" value="@ViewBag.State_Code" />
                                         @*@Html.DropDownListFor(model => model.State_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlState", @class = "form-select" })*@
                                         @*<input type="text" id="txtState" class="form-control" />*@
-                                        @Html.TextBoxFor(model => model.State_Code, new { @id = "txtState", @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.State_Code, new { @id = "txtState", @class = "form-control", tabindex = "8" })
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Source Of Contact<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="hidden" id="hfSourceOfContactNo" value="@ViewBag.Source_Of_Contact_No" />
+                                        @Html.DropDownListFor(model => model.Source_Of_Contact_No, Enumerable.Empty<SelectListItem>(), new { @id = "ddlSourceOfContact", @class = "form-select", tabindex = "19" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Country</label>
@@ -276,7 +280,16 @@
                                         <input type="hidden" id="hfCountryCode" value="@ViewBag.Country_Region_Code" />
                                         @*@Html.DropDownListFor(model => model.Country_Region_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCountry", @class = "form-select" })*@
                                         @*<input type="text" id="txtCountry" class="form-control" />*@
-                                        @Html.TextBoxFor(model => model.Country_Region_Code, new { @id = "txtCountry", @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.Country_Region_Code, new { @id = "txtCountry", @class = "form-control", tabindex = "9" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Assessee Code</label>
+                                    <div class="col-sm-9">
+                                        @Html.TextBoxFor(model => model.Assessee_Code, new { @class = "form-control", @id = "txtAssesseeCode", tabindex = "20" })
+                                        @*@Html.ValidationMessageFor(model => model.P_A_N_No, null, new { style = "color:red" })*@
                                     </div>
                                 </div>
                             </div>
@@ -286,21 +299,17 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Email<span class="required" style="color: red; margin-left: 2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.E_Mail, new { @class = "form-control", @id = "txtCompanyEmail" })
+                                        @Html.TextBoxFor(model => model.E_Mail, new { @class = "form-control", @id = "txtCompanyEmail", tabindex = "10" })
                                         @*@Html.ValidationMessageFor(model => model.E_Mail, null, new { style = "color:red" })*@
                                         <label id="lblCCompanyEmailMsg" style="color:red;display:none"></label>
                                     </div>
-                                    @*<div class="col-sm-1">
-                                            <i class="bx bx-mail-send"></i>
-                                        </div>*@
                                 </div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">URL</label>
+                                    <label class="col-sm-3 col-form-label">Credit Limit</label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.PCPL_URL, new { @class = "form-control" })
+                                        @Html.TextBoxFor(model => model.Credit_Limit, new { Value = "0", @class = "form-control", @id = "txtCreditLimit", disabled = "disabled", tabindex = "21" })
                                     </div>
                                 </div>
                             </div>
@@ -310,49 +319,36 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Phone No</label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Phone_No, new { @class = "form-control", @id = "txtPhoneNo" })
+                                        @Html.TextBoxFor(model => model.Phone_No, new { @class = "form-control", @id = "txtPhoneNo", tabindex = "11" })
                                         @*@Html.ValidationMessageFor(model => model.Phone_No, null, new { style = "color:red" })*@
                                         <label id="lblCCompanyPhoneNoMsg" style="color:red;display:none"></label>
                                     </div>
-                                    @*<div class="col-sm-1">
-                                            <i class="bx bx-phone-call"></i>
-                                            <i class="bx bx-message"></i>
-                                        </div>*@
                                 </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">PAN No</label>
-                                    <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.P_A_N_No, new { @class = "form-control", @id = "PanNo" })
-                                        @*@Html.ValidationMessageFor(model => model.P_A_N_No, null, new { style = "color:red" })*@
-                                        <label id="lblCCompanyPANNoMsg" style="color:red;display:none"></label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="row mb-3">
-                                    <label class="col-sm-3 col-form-label">GST No</label>
-                                    <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.GST_Registration_No, new { @class = "form-control", @id = "GSTNo" })
-                                        @*@Html.ValidationMessageFor(model => model.GST_Registration_No, null, new { style = "color:red" })*@
-                                        <label id="lblCCompanyGSTNoMsg" style="color:red;display:none"></label>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="col-md-6"></div>
                         </div>
+                        @*// Add the button*@
+                        @if (ViewBag.Contactscount > 0)
+                        {
+                            <div class="d-flex justify-content-end mt-3">
+                                <button id="btnSave" class="btn btn-success me-2" tabindex="34" onclick="return CheckContactValues()" type="submit">
+                                    <i class="bx bxs-save"></i> Save
+                                </button>
+
+                                <a href="/SPContacts/ContactCompanyList" tabindex="35" class="btn btn-danger">
+                                    <i class="lni lni-close"></i> Cancel
+                                </a>
+                            </div>
+                        }
 
                         <h6 class="mb-0 font-weight-bold">Contact Person</h6>
                         <hr />
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Contact_Name, new { @class = "form-control", @id = "txtContactName", @Name = "txtContactName" })
+                                        @Html.TextBoxFor(model => model.Contact_Name, new { @class = "form-control", @id = "txtContactName", @Name = "txtContactName", tabindex = "22" })
                                         @Html.ValidationMessageFor(model => model.Contact_Name, null, new { style = "color:red" })
                                         <label id="lblContactNameMsg" style="color:red;display:none"></label>
                                     </div>
@@ -362,7 +358,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Is Primary</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.Is_Primary, new { @id = "chkIsPrimary" })
+                                        @Html.CheckBoxFor(model => model.Is_Primary, new { @id = "chkIsPrimary", tabindex = "26" })
                                     </div>
                                 </div>
                             </div>
@@ -373,7 +369,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Mobile_Phone_No, new { Value = "", @class = "form-control", @id = "txtMobilePhoneNo", @Name = "txtMobilePhoneNo" })
+                                        @Html.TextBoxFor(model => model.Mobile_Phone_No, new { Value = "", @class = "form-control", @id = "txtMobilePhoneNo", @Name = "txtMobilePhoneNo", tabindex = "23" })
                                         @Html.ValidationMessageFor(model => model.Mobile_Phone_No, null, new { style = "color:red" })
                                         <label id="lblContactMobileMsg" style="color:red;display:none"></label>
                                     </div>
@@ -383,7 +379,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Allow Login</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.PCPL_Allow_Login, new { @id = "chkAllowLogin" })
+                                        @Html.CheckBoxFor(model => model.PCPL_Allow_Login, new { @id = "chkAllowLogin", tabindex = "27" })
                                     </div>
                                 </div>
                             </div>
@@ -394,7 +390,7 @@
                                     @*<label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>*@
                                     <label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.Contact_EMail, new { @class = "form-control", @id = "txtContactEmail", @Name = "txtContactEmail" })
+                                        @Html.TextBoxFor(model => model.Contact_EMail, new { @class = "form-control", @id = "txtContactEmail", @Name = "txtContactEmail", tabindex = "24" })
                                         @Html.ValidationMessageFor(model => model.Contact_EMail, null, new { style = "color:red" })
                                         <label id="lblContactEmailMsg" style="color:red;display:none"></label>
                                     </div>
@@ -405,7 +401,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin", @checked = "checked" })
+                                        @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin", @checked = "checked", tabindex = "28" })
                                     </div>
                                 </div>
                             </div>
@@ -416,7 +412,7 @@
                                     <label class="col-sm-3 col-form-label">Department<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
                                         <input type="hidden" id="hfDepartmentCode" value="@ViewBag.PCPL_Department_Code" />
-                                        @Html.DropDownListFor(model => model.PCPL_Department_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlDepartment", @class = "form-select", @Name = "ddlDepartment" })
+                                        @Html.DropDownListFor(model => model.PCPL_Department_Code, Enumerable.Empty<SelectListItem>(), new { @id = "ddlDepartment", @class = "form-select", @Name = "ddlDepartment", tabindex = "25" })
                                         <label id="lblDeptMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
@@ -425,7 +421,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.PCPL_Job_Responsibility, new { @class = "form-control", @id = "txtJobResponsibility", @Name = "txtJobResponsibility" })
+                                        @Html.TextBoxFor(model => model.PCPL_Job_Responsibility, new { @class = "form-control", @id = "txtJobResponsibility", @Name = "txtJobResponsibility", tabindex = "29" })
                                         @Html.ValidationMessageFor(model => model.PCPL_Job_Responsibility, null, new { style = "color:red" })
                                         <label id="lblJobResponsibilityMsg" style="color:red;display:none"></label>
                                     </div>
@@ -459,9 +455,9 @@
                             <div class="row g-3">
                                 <div class="col-md-12">
                                     <div class="row mb-3" align="right">
-                                        <div class="card-box table-responsive">
+                                        <div class="card-box table-responsive company-contact-table-wrapper">
                                             <center>
-                                                <table class="table table-striped" style="width:70%">
+                                                <table class="table table-striped company-contact-table">
                                                     <thead>
                                                         <tr>
                                                             <th></th>
@@ -543,7 +539,7 @@
                                         <input id="hfProdNo" name="hfProdNo" value="" style="display:none" />
                                         <label class="col-sm-3 col-form-label">Product</label>
                                         <div class="col-sm-9">
-                                            <input id="txtProductName" type="text" class="form-control" /><br />
+                                            <input id="txtProductName" type="text" tabindex="30" class="form-control" /><br />
 
                                             @*<select id="ddlProducts" class="form-select"></select>*@
                                         </div>
@@ -552,7 +548,7 @@
                                 <div class="col-md-6">
                                     <div class="row mb-3">
                                         <div class="col-sm-3">
-                                            <button type="button" id="btnAddProd" class="btn btn-secondary">Add</button>
+                                            <button type="button" id="btnAddProd" , tabindex="31" class="btn btn-secondary">Add</button>
                                             &nbsp;
                                             <button id="btnAddContactProdSpinner" class="btn btn-primary" type="button" disabled style="display:none">
                                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -568,9 +564,9 @@
                                 <div class="row g-3">
                                     <div class="col-md-12">
                                         <div class="row mb-3" align="right">
-                                            <div class="card-box table-responsive verticalScroll">
+                                            <div class="card-box table-responsive verticalScroll company-contact-products-wrapper" data-auto-scale-height="table" data-auto-scale-offset="32">
                                                 <center>
-                                                    <table id="tblContactProds" class="table table-striped" style="width:30%">
+                                                    <table id="tblContactProds" class="table table-striped company-contact-products-table">
                                                         <thead>
                                                             <tr>
                                                                 <th></th>
@@ -602,216 +598,8 @@
                                 </div>
                             }
 
-                            @*<h6 class="mb-0 font-weight-bold">Daily Visit Plan</h6>
-                                <hr />
-
-                                <h6 class="mb-0 font-weight-bold">Business Plan</h6>
-                                <hr />
-
-                                <h6 class="mb-0 font-weight-bold">Sales Quote</h6>
-                                <hr />*@
-
-                            <!-- -->
-                            @*<div class="card">
-                                    <div class="card-body">
-                                        <div class="accordion accordion-flush" id="accordionFlushExample">
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header" id="flush-DailyVisitPlan">
-                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseDailyVisitPlan" aria-expanded="false" aria-controls="flush-collapseDailyVisitPlan">
-                                                        Daily Visit Plan
-                                                    </button>
-                                                </h2>
-                                                <div id="flush-collapseDailyVisitPlan" class="accordion-collapse collapse" aria-labelledby="flush-DailyVisitPlan" data-bs-parent="#accordionFlushExample">
-                                                    <div class="accordion-body">
-                                                        <div class="row g-3">
-                                                            <div class="col-md-3">
-                                                                <div class="row mb-3">
-                                                                    <label class="col-sm-3 col-form-label">From Date</label>
-                                                                    <div class="col-sm-9">
-                                                                        <input type="date" id="txtDailyVisitFDate" class="form-control" />
-                                                                        <label id="lblDailyVisitFDateMsg" class="form-label" style="color:red;display:none">Please Select From Date</label>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="row mb-3">
-                                                                    <label class="col-sm-3 col-form-label">To Date</label>
-                                                                    <div class="col-sm-9">
-                                                                        <input type="date" id="txtDailyVisitTDate" class="form-control" />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <button id="btnDailyVisitListSpinner" class="btn btn-primary" type="button" disabled style="display:none">
-                                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                                    <span class="visually-hidden">Loading...</span>
-                                                                </button>
-                                                                &nbsp;
-                                                                <button id="btnDailyVisitShowAll" class="btn btn-primary" type="button">Show All</button>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                            </div>
-                                                        </div>
-                                                        <br />
-                                                        <div class="row g-3">
-                                                            <div class="col-md-12 verticalScroll">
-                                                                <div class="row mb-3">
-                                                                    <div class="col-sm-12">
-
-                                                                        <table class="table mb-0 table-striped">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Date</th>
-                                                                                    <th>Type</th>
-                                                                                    <th>Sub Type</th>
-                                                                                    <th>Customer</th>
-                                                                                    <th>Contact Person</th>
-                                                                                    <th>Event</th>
-                                                                                    <th>Topic</th>
-                                                                                    <th>Visit Mode</th>
-                                                                                    <th>Feedback</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody id="tblContactDailyVisit">
-                                                                            </tbody>
-                                                                        </table>
-
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header" id="flush-BusinessPlan">
-                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseBusinessPlan" aria-expanded="false" aria-controls="flush-collapseBusinessPlan">
-                                                        Business Plan
-                                                    </button>
-                                                </h2>
-                                                <div id="flush-collapseBusinessPlan" class="accordion-collapse collapse" aria-labelledby="flush-BusinessPlan" data-bs-parent="#accordionFlushExample">
-                                                    <div class="accordion-body">
-
-                                                        <div class="row g-3">
-                                                            <div class="col-md-4">
-                                                                <table>
-                                                                    <tr>
-                                                                        <td><label class="form-label">Financial Year:</label></td>
-                                                                        <td>&nbsp;</td>
-                                                                        <td><select id="ddlFinancialYear" class="form-select"></select></td>
-                                                                    </tr>
-                                                                </table>
-                                                            </div>
-                                                        </div>
-                                                        <br />
-                                                        <div class="row g-3">
-                                                            <div class="col-md-12 verticalScroll">
-                                                                <div class="row mb-3">
-                                                                    <div class="col-sm-12">
-
-                                                                        <table class="table mb-0 table-striped">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th hidden></th>
-                                                                                    <th>Product Name</th>
-                                                                                    <th colspan="4" scope="col" align="center" style="font-weight:bold">Prev. Financial Year (<label id="lblDetailsPrevYear"></label>)</th>
-                                                                                    <th colspan="4" scope="col" align="center" style="font-weight:bold">Financial Year (<label id="lblDetailsYearGrid"></label>)</th>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th hidden></th>
-                                                                                    <th></th>
-                                                                                    <th scope="col">Demand<br />Qty</th>
-                                                                                    <th scope="col">Target<br />Qty</th>
-                                                                                    <th scope="col">Achieved<br />Qty</th>
-                                                                                    <th scope="col">Last Year<br />Sale(&#8377;)</th>
-                                                                                    <th scope="col">Demand<br />Qty</th>
-                                                                                    <th scope="col">Target<br />Qty</th>
-                                                                                    <th scope="col">Avg Price</th>
-                                                                                    <th scope="col">Target<br />Revenue</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody id="tblDetailsContactBusinessPlan">
-                                                                            </tbody>
-                                                                        </table>
-
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header" id="flush-SalesQuote">
-                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseSalesQuote" aria-expanded="false" aria-controls="flush-collapseSalesQuote">
-                                                        Sales Quotes
-                                                    </button>
-                                                </h2>
-                                                <div id="flush-collapseSalesQuote" class="accordion-collapse collapse" aria-labelledby="flush-SalesQuote" data-bs-parent="#accordionFlushExample">
-                                                    <div class="accordion-body">
-                                                        <div class="row g-3">
-                                                            <div class="col-md-3">
-                                                                <div class="row mb-3">
-                                                                    <label class="col-sm-3 col-form-label">From Date</label>
-                                                                    <div class="col-sm-9">
-                                                                        <input type="date" id="txtSQListFromDate" class="form-control" />
-                                                                        <label id="lblSQListFDateMsg" class="form-label" style="color:red;display:none">Please Select From Date</label>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="row mb-3">
-                                                                    <label class="col-sm-3 col-form-label">To Date</label>
-                                                                    <div class="col-sm-9">
-                                                                        <input type="date" id="txtSQListToDate" class="form-control" />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <button id="btnSQListSpinner" class="btn btn-primary" type="button" disabled style="display:none">
-                                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                                    <span class="visually-hidden">Loading...</span>
-                                                                </button>
-                                                                &nbsp;
-                                                                <button id="btnSQListShowAll" class="btn btn-primary" type="button">Show All</button>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                            </div>
-                                                        </div>
-                                                        <div class="row g-3">
-                                                            <div class="col-md-12">
-                                                                <div class="card-box table-responsive verticalScroll">
-                                                                    <center>
-                                                                        <table class="table table-striped" style="width:30%">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Quote No</th>
-                                                                                    <th>Quote Date</th>
-                                                                                    <th>Customer</th>
-                                                                                    <th>Payment Terms</th>
-                                                                                    <th>Schedule Order</th>
-                                                                                    <th>Products</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody id="tblContactSQ">
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </center>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>*@
-
-
-                            <!-- -->
                         }
-                        <!-- -->
+
                     </div>
                 </div>
                 <div class="toolbar">
@@ -829,26 +617,31 @@
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="visually-hidden">Loading...</span>
                         </button>
-                        &nbsp;
+                        <!--&nbsp;-->
                         @*ShowProcessImg()*@
-                        <button id="btnSave" class="btn btn-success" onclick="return CheckContactValues()" type="submit"><i class="bx bxs-save"></i> Save</button>
-                        &nbsp;
-                        <a href="/SPContacts/ContactCompanyList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
-                        &nbsp;
+                        @if (ViewBag.Contactscount == 0)
+                        {
+                            <div class="d-flex justify-content-end mt-3">
+                                <button id="btnSave" class="btn btn-success me-2" tabindex="34" onclick="return CheckContactValues()" type="submit">
+                                    <i class="bx bxs-save"></i> Save
+                                </button>
 
+                                <a href="/SPContacts/ContactCompanyList" tabindex="35" class="btn btn-danger">
+                                    <i class="lni lni-close"></i> Cancel
+                                </a>
+                            </div>
+                        }
                         <div class="left-actions">
-                            <button id="btnCreateSQ" type="button" class="btn btn-purple" style="display:none">
+                            <button id="btnCreateSQ" type="button" , tabindex="32" class="btn btn-purple" style="display:none">
                                 Create SalesQuote
                             </button>
 
-                            <button id="btnCreateInq" type="button" class="btn btn-purple" style="display:none">
+                            <button id="btnCreateInq" type="button" tabindex="33" class="btn btn-purple" style="display:none">
                                 Create Inquiry
                             </button>
                         </div>
                     </div>
                 </div>
-
-
             }
         </div>
     </div>

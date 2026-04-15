@@ -156,7 +156,7 @@
 
                                 <div class="row g-3">
                                     <div class="col-md-12">
-                                        @{ bool canEditTransportQty = Model.DocumentType == "Sales Order" || Model.DocumentType == "Sales Return" || Model.DocumentType == "Purchase Order" || Model.DocumentType == "Transfer Order"; }
+                                        @{ bool canEditTransportQty = Model.DocumentType == "Sales Order" || Model.DocumentType == "Sales Return" || Model.DocumentType == "Purchase Order" || Model.DocumentType == "Purchase Return" || Model.DocumentType == "Transfer Order"; }
                                         @{ string transportQtyLabel = Model.DocumentType == "Purchase Order" ? "Qty to Receive" : "Transport Qty"; }
                                         @{ string shipQtyLabel = Model.DocumentType == "Purchase Order" ? "Received Qty" : "Shipped Qty"; }
                                         <table class="table mb-0 table-striped">

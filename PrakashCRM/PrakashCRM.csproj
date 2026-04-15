@@ -288,6 +288,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ChartsController.cs" />
+    <Compile Include="Controllers\GRNDocumentAttacment.cs" />
     <Compile Include="Controllers\SPActivitiesController.cs" />
     <Compile Include="Controllers\SPAdminBusinessPlanController.cs" />
     <Compile Include="Controllers\SPBranchesController.cs" />
@@ -320,6 +321,7 @@
     <Compile Include="Controllers\SPWarehouseController.cs" />
     <Compile Include="Filters\GlobalSiteActivityFilterAttribute.cs" />
     <Compile Include="Filters\GlobalSiteErrorFilterAttribute.cs" />
+    <Compile Include="Security\TrustedDeviceStore.cs" />
     <Compile Include="Security\UserTokenStore.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -1193,6 +1195,7 @@
     <Content Include="Scripts\appjs\MarketUpdate.js" />
     <Content Include="Scripts\appjs\Notification.js" />
     <Content Include="Scripts\appjs\NotificationList.js" />
+    <Content Include="Scripts\appjs\UserNotifications.js" />
     <Content Include="Scripts\appjs\OSPaymentList.js" />
     <Content Include="Scripts\appjs\PendingBusinessPlanApproval.js" />
     <Content Include="Scripts\appjs\SalesQuote.js" />
@@ -1332,6 +1335,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
+    <Content Include="Views\Home\ErrorStatus.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\_SalespersonMasterLayout.cshtml" />
     <Content Include="Views\Home\ContactList.cshtml" />
@@ -1369,6 +1373,7 @@
     <Content Include="Views\SPMenus\Menu.cshtml" />
     <Content Include="Views\SPNotification\Notification.cshtml" />
     <Content Include="Views\SPNotification\NotificationSetupList.cshtml" />
+    <Content Include="Views\SPNotification\UserNotifications.cshtml" />
     <Content Include="Views\SPFeedback\FeedbackList.cshtml" />
     <Content Include="Views\SPInquiry\InquiryList.cshtml" />
     <Content Include="Views\SPSiteActivity\SiteActivityList.cshtml" />
@@ -1429,6 +1434,7 @@
     <Folder Include="SalesQuotePrint\" />
     <Folder Include="temp\" />
     <Folder Include="Views\Base\" />
+    <Folder Include="Views\GRNDocumentAttacment\" />
     <Folder Include="Views\Inquiry\" />
     <Folder Include="Views\SPBranches\" />
     <Folder Include="Views\SPLocations\" />
@@ -1467,7 +1473,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>57751</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44338/</IISUrl>
+          <IISUrl>https://localhost:44337/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

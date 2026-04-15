@@ -4,6 +4,8 @@
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
 }
 
+<link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
+
 <div class="page-content">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
@@ -23,6 +25,13 @@
         </div>
     </div>
     <hr />
+    <div id="customerOutstandingPageSection" class="position-relative">
+        <div id="customerOutstandingLoader" class="customer-outstanding-loader d-none">
+            <div class="customer-outstanding-loader-content app-loader-card">
+                <span class="app-loader-spinner customer-outstanding-loader-spinner" role="status" aria-label="Loading"></span>
+                <div class="app-loader-text">Loading data...</div>
+            </div>
+        </div>
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
@@ -30,7 +39,8 @@
                     <div>
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <table class="table mb-0 table-striped">
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                <table id="dataList" class="table mb-0 table-striped">
                                     <thead>
                                         <tr>
                                             <th></th>
@@ -52,6 +62,7 @@
                                             <td><a id="tblInvBranch1Rec" class="clsPointer"></a></td>
                                         </tr>
                                     </tbody>
+                                    <tfoot></tfoot>
                                     @*<thead>
                                             <tr>
                                                 <th ></th>
@@ -66,12 +77,40 @@
                                         <tbody id="tblCustomerData">
                                         </tbody>*@
                                 </table>
+                                <input id="hdnCustomerOutstandingCount" style="display:none" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div>
+                <div class="row">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row row-cols-auto g-3">
+                                    <div class="col">
+                                        <label class="col-form-label" style="font-weight:bold">Per Page Records: </label>
+                                    </div>
+                                    <div class="col">
+                                        <select id="ddlRecPerPage" class="form-select">
+                                            <option value="10" selected>10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <ul class="pagination pagination-lg pager" id="myPager"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
     </div>
 </div>
 <div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsModalLabel" aria-hidden="true">

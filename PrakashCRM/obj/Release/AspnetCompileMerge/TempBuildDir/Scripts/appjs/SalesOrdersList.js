@@ -7,6 +7,7 @@ $(document).ready(function () {
     $('#btnAllOrders').removeClass('btn-outline-secondary').addClass('btn-outline-primary');
     $('#btnOpenOrders').removeClass('btn-outline-primary').addClass('btn-outline-secondary');
     allOpenFilter = "All";
+    applyNotificationOrderFilter();
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter, allOpenFilter);
 
     $('#ddlRecPerPage').change(function () {
@@ -48,7 +49,7 @@ $(document).ready(function () {
             else {
                 switch ($('#ddlOperator').val()) {
                     case 'Equal':
-                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT") {
+                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST") {
                             filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                         }
                         else {
@@ -56,7 +57,7 @@ $(document).ready(function () {
                         }
                         break;
                     case 'Not Equal':
-                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT") {
+                        if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST") {
                             filter = $('#ddlField').val() + ' ne ' + '\'' + $('#txtSearch').val() + '\'';
                         }
                         else {
@@ -106,7 +107,7 @@ $(document).ready(function () {
         else {
             switch ($('#ddlOperator').val()) {
                 case 'Equal':
-                    if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT") {
+                    if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST") {
                         filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                     }
                     else {
@@ -114,7 +115,7 @@ $(document).ready(function () {
                     }
                     break;
                 case 'Not Equal':
-                    if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "Amount_Including_VAT") {
+                    if ($('#ddlField').val() != "Amount" && $('#ddlField').val() != "PCPL_Amount_Including_GST") {
                         filter = $('#ddlField').val() + ' ne ' + '\'' + $('#txtSearch').val() + '\'';
                     }
                     else {
@@ -224,8 +225,8 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter, allOpenFil
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
 
-                    var rowData = "<tr><td></td><td>" + item.No + "</td><td>" + item.Document_Date + "</td><td align='right'>" + commaSeparateNumber(item.Amount.toFixed(2)) + "</td><td align='right'>" + commaSeparateNumber(item.Amount_Including_VAT.toFixed(2)) + "</td>";
-
+                    var rowStyle = notificationOrderNo && item.No === notificationOrderNo ? " style='background:#fff3cd'" : "";
+                    var rowData = "<tr" + rowStyle + "><td></td><td>" + item.No + "</td><td>" + item.Sell_to_Customer_No + "</td><td>" + item.Sell_to_Customer_Name + "</td><td>" + item.Document_Date + "</td><td>" + commaSeparateNumber(item.Amount.toFixed(2)) + "</td><td>" + commaSeparateNumber(item.PCPL_Amount_Including_GST.toFixed(2)) + "</td>";
                     if (item.Status == "Open") {
                         rowData += "<td><span class='badge bg-warning text-dark'>" + item.Status + "</span></td>";
                     }
@@ -470,4 +471,39 @@ function ShowErrMsg(errMsg) {
         msg: errMsg
     });
 
+}
+var notificationOrderNo = "";
+
+function getQueryStringValue(key) {
+    var query = window.location.search || '';
+    if (query.indexOf('?') === 0) {
+        query = query.substring(1);
+    }
+
+    if (!query) {
+        return '';
+    }
+
+    var pairs = query.split('&');
+    for (var i = 0; i < pairs.length; i++) {
+        var parts = pairs[i].split('=');
+        if (decodeURIComponent(parts[0] || '') === key) {
+            return decodeURIComponent((parts[1] || '').replace(/\+/g, ' ')).trim();
+        }
+    }
+
+    return '';
+}
+
+function applyNotificationOrderFilter() {
+    notificationOrderNo = getQueryStringValue('notificationOrderNo');
+    if (!notificationOrderNo) {
+        return;
+    }
+
+    filter = "No eq '" + notificationOrderNo.replace(/'/g, "''") + "'";
+    $('#ddlField').val('No');
+    $('#ddlOperator').val('Equal');
+    $('#txtSearch').val(notificationOrderNo);
+    $('#orderInfo').html("<span class='badge bg-light-warning text-dark'>Showing order " + notificationOrderNo + " from notification</span>");
 }

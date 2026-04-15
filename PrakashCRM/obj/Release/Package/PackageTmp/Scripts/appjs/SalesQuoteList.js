@@ -21,6 +21,7 @@ function buildScheduleStatusFilter() {
 $(document).ready(function () {
 
     filter += buildScheduleStatusFilter();
+    applyNotificationQuoteFilter();
 
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
@@ -751,6 +752,8 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPSalesQuotes/';
 
+    showPageDataLoader();
+
     var SPCode = "";
     if ($('#hdnSPCodesOfReportingPersonUser').val() == "" || $('#hdnSPCodesOfReportingPersonUser').val() == null) {
         SPCode = $('#hdnLoggedInUserSPCode').val();
@@ -788,7 +791,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     }
                 }
                 $('#tableBody').empty();
+                var matchedNotificationItem = null;
                 $.each(data, function (index, item) {
+                    if (notificationQuoteNo && item.No === notificationQuoteNo) {
+                        matchedNotificationItem = item;
+                    }
 
                     // Normalize approval status to avoid case/spacing mismatches
                     var approvalStatus = (item.PCPL_Status || '').toString().trim();
@@ -916,10 +923,24 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 }
                 dataTableFunction(orderBy, orderDir);
 
+                if (notificationQuoteNo && matchedNotificationItem && !hasOpenedNotificationQuote) {
+                    hasOpenedNotificationQuote = true;
+                    EditSalesQuote(
+                        matchedNotificationItem.No,
+                        matchedNotificationItem.TPTPL_Schedule_status,
+                        matchedNotificationItem.PCPL_Status,
+                        "Edit",
+                        $('#hdnLoggedInUserRole').val());
+                    return;
+                }
+
                 if (data.length == 0) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                hidePageDataLoader();
             },
             error: function () {
                 alert("error");
@@ -1335,7 +1356,6 @@ function ShowInProcessQtyDetails(SQNo, QtyCount) {
 function ResetSchOrdrDetails() {
 
     $('#txtScheduleDate').val("");
-    $('#txtDocumentDate').val("");
     $('#txtExternalDocNo').val("");
     $('#ddlUsers').val('-1');
     $('#tblProdsForSchOrdr').empty();
@@ -1709,4 +1729,37 @@ function ShowErrMsg(errMsg) {
         msg: errMsg
     });
 
+}
+var notificationQuoteNo = "";
+var hasOpenedNotificationQuote = false;
+
+function getQueryStringValue(key) {
+    var query = window.location.search || '';
+    if (query.indexOf('?') === 0) {
+        query = query.substring(1);
+    }
+
+    if (!query) {
+        return '';
+    }
+
+    var pairs = query.split('&');
+    for (var i = 0; i < pairs.length; i++) {
+        var parts = pairs[i].split('=');
+        if (decodeURIComponent(parts[0] || '') === key) {
+            return decodeURIComponent((parts[1] || '').replace(/\+/g, ' ')).trim();
+        }
+    }
+
+    return '';
+}
+
+function applyNotificationQuoteFilter() {
+    notificationQuoteNo = getQueryStringValue('notificationQuoteNo');
+    if (!notificationQuoteNo) {
+        return;
+    }
+
+    var quoteFilter = "No eq '" + notificationQuoteNo.replace(/'/g, "''") + "'";
+    filter = filter ? (filter + ' and ' + quoteFilter) : quoteFilter;
 }

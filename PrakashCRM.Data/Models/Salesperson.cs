@@ -413,7 +413,19 @@ namespace PrakashCRM.Data.Models
         public string Status { get; set; }
 
         public bool PCPL_Enable_OTP_On_Login { get; set; }
-        public bool OTPEmailSent { get; set; } 
+        public bool OTPEmailSent { get; set; }
+
+        public bool RequireOtpVerification { get; set; }
+
+        public bool TrustedDeviceRecognized { get; set; }
+
+        public bool ClearTrustedDeviceState { get; set; }
+
+        public string TrustedDeviceToken { get; set; }
+
+        public string TrustedDeviceExpiresUtc { get; set; }
+
+        public string RedirectUrl { get; set; }
     }
 
     public class ContactNoOTPForLoginProfile : ContactNoOTPForLogin
@@ -445,6 +457,22 @@ namespace PrakashCRM.Data.Models
 
         public string Role { get; set; }
     }
+
+    public class LoginOtpVerificationResult
+    {
+        public bool IsSuccess { get; set; }
+
+        public string LoggedInUser { get; set; }
+
+        public bool ClearTrustedDeviceState { get; set; }
+
+        public string TrustedDeviceToken { get; set; }
+
+        public string TrustedDeviceExpiresUtc { get; set; }
+
+        public string RedirectUrl { get; set; }
+    }
+
     public class SPSalespeoplePurchaser
     {
         public string Code { get; set; }

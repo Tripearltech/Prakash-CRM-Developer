@@ -1,0 +1,1835 @@
+﻿@using Newtonsoft.Json
+@{
+    // Session check at layout level
+    if (Session["loggedInUserEmail"] == null)
+    {
+        Response.Redirect("~/Account/Login");
+    }
+}
+@{
+    var menuUrlMap = new Dictionary<string, string>
+{
+    
+        // Dashboard
+        { "Dashboard", "/SPDashboard/Index" },
+
+        // Contacts
+        { "Contact List", "/SPContacts/ContactCompanyList" },
+        { "Web Contact List", "#" },
+        { "Customer List", "/SPCustomers/CustomerList" },
+        { "Item Price Change", "/SPItems/ItemPriceChange" },
+
+        // Inquiry
+        { "Inquiry List", "/SPInquiry/InquiryList" },
+        { "Web Inquiry List", "#" },
+
+        // Sales
+        { "Sales Quote List", "/SPSalesQuotes/SalesQuoteList" },
+        { "Sales Quote Status", "/SPSalesQuotes/SalesQuoteStatus" },
+        { "Web Sales Quote List", "#" },
+        { "Dispatch Details", "/SPSalesQuotes/DispatchDetails" },
+
+        // Sales Order
+        { "Sales Orders List", "/SPSalesOrders/SalesOrdersList" },
+
+        // Sales Invoice
+        { "Sales Invoice List", "/SPPostedSalesInvoice/PostedSalesInvoiceList" },
+
+        // Business Plan
+        { "Admin Business Plan", "/SPAdminBusinessPlan/AdminBusinessPlan" },
+        { "Assign Business Plan", "/SPBusinessPlan/AssignBusinessPlan" },
+        { "Create Business Plan", "/SPBusinessPlan/BusinessPlanContactList" },
+        { "Business Plan Report", "/SPBusinessPlan/BusinessPlanReport" },
+        { "Business Plan Approval", "/SPBusinessPlan/BusinessPlanStatusSPWise" },
+
+        // Visit Entry
+        { "Year Month Plan", "/SPVisitEntry/YearMonthPlanList" },
+        { "Week Plan List", "/SPVisitEntry/WeekPlanList" },
+        { "Daily Visit List", "/SPVisitEntry/DailyVisitList" },
+
+        // Warehouse
+        { "Ongoing Task List", "/SPWarehouse/WarehouseList" },
+        { "Closed Task List", "/SPWarehouse/WarehouseClosedList" },
+
+        // GRN
+        { "GRN List", "/SPGRN/GRNList" },
+
+        // OS Payment
+        { "Outstanding Payment List", "/SPOutstandingPayment/OutstandingPaymentList" },
+        { "Collection Report", "/SPOutstandingPayment/OutstandingDetails" },
+
+        // Reports
+        { "Inventory View Report", "/SPReports/InventoryView" },
+        { "Customer Ledger Entry", "/SPReports/CustomerLedgerEntry" },
+        { "Customer Outstanding", "/SPReports/CustomerOutsatnding" },
+        { "Business Type Sales Performance", "/SPReports/BusinessTypeSalesPerformance" },
+        { "Industry Wise Sales Performance", "/SPReports/IndustryWiseSalesPerformance" },
+        { "Stock Management", "/SPReports/StockManagement" },
+        { "Market Update", "/SPMarketUpdate/MarketUpdateList" },
+        { "Complaint", "/SPReports/Complaint" },
+        { "Support Sales Data", "/SPReports/SupportSaleData" },
+        { "Site Activity", "/SPSiteActivity/SiteActivityList" },
+        { "Site Error", "/SPSiteError/SiteErrorList" },
+        { "Complain Report from Daily Visit Plan", "/SPReports/ComplaintReportDailyVisitPlan" },
+        { "Inquiry Management", "/SPReports/InquiryManagement" },
+        { "Daily Visit Expense", "/SPVisitEntry/DailyVisitExpenseReport" },
+        { "Transporter Dashboard", "/SPReports/TransporterDashboard" },
+        { "Task Performance", "/SPReports/TaskPerformance" },
+        { "Sales Performance", "/SPReports/SalesPerformance" },
+        { "Daily Visit Month Wise", "/SPReports/DailyVisitMonthWise" },
+        { "Web Site Log", "/SPReports/WebsiteLog" },
+        { "Site Configuration", "#" },
+
+        // Setup
+        { "User Master", "/SalesPerson/SalesPersonList" },
+        { "Role Master", "/SPRoles/RoleList" },
+        { "Menu Master", "/SPMenus/MenuList" },
+        { "Role Wise Menu", "/SPRoleRights/RoleRights" },
+        { "Notification Setup", "/SPNotification/NotificationSetupList" },
+        { "User Role Relation", "/SPRoles/UserRoleRelationList" },
+
+        // Feedback
+        { "Feedback Question", "/SPFeedback/FeedBackQuestion" },
+        { "Feedback List", "/SPFeedback/FeedbackList" },
+        { "Customer Satisfaction", "/SPFeedback/CustomerSatisfaction" },
+        { "Feedback Chart", "/SPFeedback/FeedbackChart" }
+    };
+
+    var menuIconMap = new Dictionary<string, string>
+{
+        { "Dashboard", "bx bx-tachometer" },
+        { "Contacts", "bx bx-user-pin" },
+        { "Inquiry", "bx bx-phone-call" },
+        { "Sales Quote", "bx bx-file" },
+        { "Sales Orders", "bx bx-cart" },
+        { "Sales Invoices", "bx bx-receipt" },
+        { "Warehouse", "bx bx-store-alt" },
+        { "GRN", "bx bx-package" },
+        { "OS Payment", "bx bx-rupee" },
+        { "Reports", "bx bx-line-chart" },
+        { "Setup", "bx bx-wrench" }
+    };
+
+    var menuSectionMap = new Dictionary<string, string>
+{
+        { "Dashboard", "DASHBOARD" },
+
+        { "Contacts", "MASTER DATA" },
+        { "Customer List", "MASTER DATA" },
+
+        { "Inquiry", "OPERATIONS" },
+        { "Sales Quote", "OPERATIONS" },
+        { "Sales Orders", "OPERATIONS" },
+
+        { "Warehouse", "WAREHOUSE" },
+        { "OS Payment", "FINANCE" },
+
+        { "Reports", "REPORTS" },
+        { "Setup", "SETUP & LOGS" }
+    };
+}
+
+
+
+
+<!doctype html>
+<html>
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--favicon-->
+    <title>Welcome Prakash Chemicals</title>
+    <link rel="shortcut icon" href="@Url.Content("~/Layout/assets/images/login-images/favicon-1.ico")" type="image/x-icon">
+    <link rel="icon" href="@Url.Content("~/Layout/assets/images/login-images/favicon-1.ico")" type="image/x-icon">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+
+    <!-- Highcharts (local) -->
+    <script src="~/Layout/assets/plugins/highcharts/js/highcharts.js"></script>
+    <script src="~/Layout/assets/plugins/highcharts/js/highcharts-more.js"></script>
+    <script src="~/Layout/assets/plugins/highcharts/js/highcharts-3d.js"></script>
+    <script src="~/Layout/assets/plugins/highcharts/js/cylinder.js"></script>
+    <script src="~/Layout/assets/plugins/highcharts/js/funnel3d.js"></script>
+
+    <!-- jQuery (local) - required by highcharts-custom.script.js -->
+    <script src="~/Scripts/jquery-3.7.1.min.js"></script>
+
+    <script src="~/Layout/assets/plugins/highcharts/js/highcharts-custom.script.js"></script>
+
+    @*<script src="~/Layout/assets/plugins/highcharts/js/highcharts.js"></script>
+        <script src="~/Layout/assets/plugins/highcharts/js/highcharts-more.js"></script>
+        <script src="~/Layout/assets/plugins/highcharts/js/highcharts-3d.js"></script>
+        <script src="~/Layout/assets/plugins/highcharts/js/funnel3d.js"></script>*@
+    @Styles.Render("~/bundles/commoncss")
+    @Styles.Render("~/bundles/mainlayoutcss")
+
+</head>
+
+<body>
+    <!--wrapper-->
+    <input type="hidden" id="hdnSiteErrorLogUrl" value='@Url.Action("LogClientError", "SPSiteError")' />
+    <div class="wrapper">
+        <!--sidebar wrapper -->
+        <!--<div class="sidebar-wrapper" data-simplebar="true">
+        <div class="sidebar-header">
+            <div>
+                <img src="~/Layout/assets/images/login-images/forfavicon-3.png" alt="logo icon" width="50px" />
+            </div>
+            <div>
+                <h4 class="logo-text" style="color:darkgreen">PRAKASH</h4>
+            </div>
+            <div class="toggle-icon ms-auto">
+                <i class='bx bx-first-page'></i>
+            </div>
+        </div>
+        <!--navigation-->
+        <!--<ul class="metismenu" id="menu">
+        <li>
+            <a href="/SPDashboard/Index">
+                <div class="parent-icon">
+                    <i class='bx bx-tachometer'></i>
+                </div>
+                <div class="menu-title">Dashboard</div>
+            </a>
+        </li>
+        <li class="formasterdata">
+        <li class="menu-label">Master Data</li>
+        <li class="forcontact">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-user-pin'></i>
+                </div>
+                <div class="menu-title">Contacts</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPContacts/ContactCompanyList"><i class="bx bx-right-arrow-alt"></i>Contact List</a>
+                    <a href="#"><i class="bx bx-right-arrow-alt"></i>Web Contact List</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forcontact">
+            <a href="/SPCustomers/CustomerList">
+                <div class="parent-icon">
+                    <i class='bx bx-group'></i>
+                </div>
+                <div class="menu-title">Customer List</div>
+            </a>
+        </li>
+        <li class="forcontact">
+            <a href="/SPItems/ItemPriceChange">
+                <div class="parent-icon">
+                    <i class='bx bx-group'></i>
+                </div>
+                <div class="menu-title">Item Price Change</div>
+            </a>
+        </li>
+        <li class="menu-label">Operations</li>
+        <li class="forSalesperson">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-phone-call'></i>
+                </div>
+                <div class="menu-title">Inquiry</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPInquiry/InquiryList"><i class="bx bx-right-arrow-alt"></i>Inquiry List</a>
+                </li>
+                <li>
+                    <a href="#"><i class="bx bx-right-arrow-alt"></i>Web Inquiry List</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forsalesquote">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-file'></i>
+                </div>
+                <div class="menu-title">Sales Quote</div>
+            </a>
+            <ul>
+                <li class="forSalesperson">
+                    <a href="/SPSalesQuotes/SalesQuoteList"><i class="bx bx-right-arrow-alt"></i>Sales Quote List</a>
+                </li>
+                <li class="forApproved">
+                    <a href="/SPSalesQuotes/SalesQuoteStatus"><i class="bx bx-right-arrow-alt"></i>Sales Quote Status</a>
+                </li>
+                <li class="forSalesperson">
+                    <a href="/SPSalesQuotes/DispatchDetails"><i class="bx bx-right-arrow-alt"></i>Dispatch Details</a>
+                </li>
+                <li class="forSalesperson">
+                    <a href="#"><i class="bx bx-right-arrow-alt"></i>Web SalesQuote List</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forSalesperson">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-file'></i>
+                </div>
+                <div class="menu-title">Sales Orders</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPSalesOrders/SalesOrdersList"><i class="bx bx-right-arrow-alt"></i>Sales Order List</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forfinance forsalesinvoice">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-file'></i>
+                </div>
+                <div class="menu-title">Sales Invoices</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPPostedSalesInvoice/PostedSalesInvoiceList"><i class="bx bx-right-arrow-alt"></i>Sales Invoice List</a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="forbusinessplan">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-bar-chart'></i>
+                </div>
+                <div class="menu-title">Business Plan</div>
+            </a>
+            <ul>
+                <li class="foradmin">
+                    <a href="/SPAdminBusinessPlan/AdminBusinessPlan">
+                        <i class="bx bx-right-arrow-alt"></i>Admin Business Plan
+                    </a>
+                </li>
+                <li class="foradmin">
+                    <a href="/SPBusinessPlan/AssignBusinessPlan">
+                        <i class="bx bx-right-arrow-alt"></i>Assign Business Plan
+                    </a>
+                </li>
+                <li class="forSalesperson">
+                    <a href="/SPBusinessPlan/BusinessPlanContactList">
+                        <i class="bx bx-right-arrow-alt"></i>Create Business Plan
+                    </a>
+                </li>
+                <li class="forSalesperson">
+                    <a href="/SPBusinessPlan/BusinessPlanReport">
+                        <i class="bx bx-right-arrow-alt"></i>Business Plan Report
+                    </a>
+                </li>
+                <li class="foradmin">
+                    <a href="/SPBusinessPlan/BusinessPlanStatusSPWise">
+                        <i class="bx bx-right-arrow-alt"></i>Business Plan Approval
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+
+        <li class="forSalesperson">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-show-alt'></i>
+                </div>
+                <div class="menu-title">Visit Entry</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPVisitEntry/YearMonthPlanList"><i class="bx bx-right-arrow-alt"></i>Year Month Plan</a>
+                </li>
+                <li>
+                    <a href="/SPVisitEntry/WeekPlanList"><i class="bx bx-right-arrow-alt"></i>Week Plan</a>
+                </li>
+                <li>
+                    <a href="/SPVisitEntry/DailyVisitList"><i class="bx bx-right-arrow-alt"></i>Daily Visit</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forwarehouse">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon">
+                    <i class="bx bx-store-alt"></i>
+                </div>
+                <div class="menu-title">Warehouse</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPWarehouse/WarehouseList"><i class="bx bx-right-arrow-alt"></i>Ongoing Task List</a>
+                </li>
+                <li>
+                    <a href="/SPWarehouse/WarehouseClosedList"><i class="bx bx-right-arrow-alt"></i>Closed Task List</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forwarehouse">
+            <a class="has-arrow" href="javascript:;">
+                <div class="parent-icon">
+                    <i class="bx bx-store-alt"></i>
+                </div>
+                <div class="menu-title">GRN</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPGRN/GRNList"><i class="bx bx-right-arrow-alt"></i>List</a>
+                </li>
+            </ul>
+        </li>
+        <li class="forfinance">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-rupee'></i>
+                </div>
+                <div class="menu-title">OS Payment</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPOutstandingPayment/OutstandingPaymentList"><i class="bx bx-right-arrow-alt"></i>OS Payment List</a>
+                </li>
+                <li>
+                    <a href="/SPOutstandingPayment/OutstandingDetails"><i class="bx bx-right-arrow-alt"></i>Collection Report</a>
+                </li>
+            </ul>
+        </li>-->
+        <!-- Reports Section -->
+        <!--<li class="forreports">
+        <div class="menu-label">Reports</div>
+        <a href="javascript:;" class="has-arrow">
+            <div class="parent-icon">
+                <i class='bx bx-line-chart'></i>
+            </div>
+            <div class="menu-title">Reports</div>
+        </a>
+        <ul>
+            <li class="forfinance">
+                <a href="/SPReports/InventoryView"><i class="bx bx-right-arrow-alt"></i>Inventory View Report</a>
+            </li>
+            <li class="forfinance">
+                <a href="/SPReports/CustomerLedgerEntry"><i class="bx bx-right-arrow-alt"></i>Customer Ledger Entry</a>
+            </li>
+            <li class="forfinance">
+                <a href="/SPReports/CustomerOutsatnding"><i class="bx bx-right-arrow-alt"></i>Customer Outstanding</a>
+            </li>-->
+        @*<li class="forSalesperson">
+                <a href="#"><i class="bx bx-right-arrow-alt"></i>Feedback Report</a>
+            </li>*@
+        <!--<li class="foradmin2">
+                        <a href="/SPReports/BusinessTypeSalesPerformance"><i class="bx bx-right-arrow-alt"></i>Business Type Sales Performance</a>
+                    </li>
+                    <li class="foradmin2">
+                        <a href="/SPReports/IndustryWiseSalesPerformance"><i class="bx bx-right-arrow-alt"></i>Industry Wise Sales Performance</a>
+                    </li>
+                    <li class="Salesper">
+                        <a href="/SPReports/StockManagement"><i class="bx bx-right-arrow-alt"></i>Stock Management</a>
+                    </li>
+
+                    <li class="forSalesperson">
+                        <a href="/SPMarketUpdate/MarketUpdateList"><i class="bx bx-right-arrow-alt"></i>Market Update</a>
+                    </li>
+                    <li class="foradmin2">
+                        <a href="/SPReports/Complaint"><i class="bx bx-right-arrow-alt"></i>Complaint</a>
+                    </li>
+                    <li class="foradmin2">
+                        <a href="/SPReports/SupportSaleData"><i class="bx bx-right-arrow-alt"></i>Support SaleData</a>
+                    </li>
+                    <li class="foradmin">
+                        <a href="/SPSiteError/SiteErrorList"><i class="bx bx-right-arrow-alt"></i>Site Error</a>
+                    </li>
+                    <li class="foradmin">
+                        <a href="/SPSiteActivity/SiteActivityList"><i class="bx bx-right-arrow-alt"></i>Site Activity</a>
+                    </li>
+                    <li class="foradmin3">
+                        <a href="/SPReports/ComplaintReportDailyVisitPlan"><i class="bx bx-right-arrow-alt"></i>Complain Report from Daily Visit Plan</a>
+                    </li>
+                    <li class="forSalesperson">
+                        <a href="/SPReports/InquiryManagement"><i class="bx bx-right-arrow-alt"></i>Inquiry Management</a>
+                    </li>
+                    <li class="forSalesperson">
+                        <a href="/SPVisitEntry/DailyVisitExpenseReport"><i class="bx bx-right-arrow-alt"></i>Daily Visit Expense</a>
+                    </li>
+                    <li class="foradmin2">
+                        <a href="/SPReports/TransporterDashboard"><i class="bx bx-right-arrow-alt"></i>Transporter Dashboard</a>
+                    </li>
+                    <li class="foradmin2">
+                        <a href="/SPReports/TaskPerformance"><i class="bx bx-right-arrow-alt"></i>Task Performance</a>
+                    </li>
+                    <li class="Salesper">
+                        <a href="/SPReports/SalesPerformance"><i class="bx bx-right-arrow-alt"></i>Sales Performance</a>
+                    </li>
+            </li>
+
+            <li class="forSalesperson">
+                <a href="/SPReports/DailyVisitMonthWise"><i class="bx bx-right-arrow-alt"></i>Daily Visit Month Wise</a>
+            </li>
+            <li class="foradmin1">
+                <a href="/SPReports/WebsiteLog"><i class="bx bx-right-arrow-alt"></i>Web Site Log</a>
+            </li>
+            <li class="foradmin1">
+                <a href="#"><i class="bx bx-right-arrow-alt"></i>Site Configuration</a>
+            </li>
+        </ul>
+        </li>
+
+        <li class="menu-label">Setup & Logs</li>
+        <li class="foradmins">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-wrench'></i>
+                </div>
+                <div class="menu-title">Setup</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SalesPerson/SalesPersonList"><i class="bx bx-right-arrow-alt"></i>User Master</a>
+                </li>
+                <li>
+                    <a href="/SPRoles/RoleList"><i class="bx bx-right-arrow-alt"></i>Role Master</a>
+                </li>
+                <li>
+                    <a href="/SPMenus/MenuList"><i class="bx bx-right-arrow-alt"></i>Menu Master</a>
+                </li>
+                <li>
+                    <a href="/SPRoleRights/RoleRights"><i class="bx bx-right-arrow-alt"></i>Role Wise Menu</a>
+                </li>
+                <li>
+                    <a href="/SPNotification/NotificationSetupList"><i class="bx bx-right-arrow-alt"></i>NotificationSetup List</a>
+                </li>
+                <li>
+                    <a href="/SPRoles/UserRoleRelationList"><i class="bx bx-right-arrow-alt"></i>User RoleRelation List</a>
+                </li>
+            </ul>
+        </li>
+        <li style="display:block" class="forFeedback">-->
+        @*hide for live Mihir*@
+        <!--<a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class='bx bx-file-find'></i>
+                </div>
+                <div class="menu-title">Feedback & Charts</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/SPFeedback/FeedbackList"><i class="bx bx-right-arrow-alt"></i>Feedback List</a>
+                </li>
+                <li>
+                    <a href="/SPFeedback/FeedBackQuestion"><i class="bx bx-right-arrow-alt"></i>Feedback Question</a>
+                </li>
+                <li>
+                    <a href="/SPFeedback/CustomerSatisfaction"><i class="bx bx-right-arrow-alt"></i>Customer Satisfaction</a>
+                </li>
+                <li>
+                    <a href="/SPFeedback/FeedbackChart"><i class="bx bx-right-arrow-alt"></i>Feedback Chart</a>
+                </li>
+            </ul>
+        <li style="display:none">-->
+        @*hide for live Mihir*@
+        @*<a href="javascript:;">
+                    <div class="parent-icon">
+                        <i class='bx bx-file-find'></i>
+                    </div>
+                    <div class="menu-title">Website Log</div>
+                </a>
+            </li>
+            </ul>*@
+        <!--end navigation-->
+        <!--</div>-->
+        <!--end sidebar wrapper -->
+        <!-- sidebar wrapper -->
+        <div class="sidebar-wrapper" data-simplebar="true">
+            <div class="sidebar-header">
+                <div>
+                    <img src="~/Layout/assets/images/login-images/forfavicon-3.png" alt="logo icon" width="50px" />
+                </div>
+                <div>
+                    <h4 class="logo-text" style="color:darkgreen">PRAKASH</h4>
+                </div>
+                <div class="toggle-icon ms-auto">
+                    <i class='bx bx-first-page'></i>
+                </div>
+            </div>
+
+            <!-- navigation -->
+            <ul class="metismenu" id="dynamicMenu">
+                <!-- Dynamic menu will be injected here -->
+            </ul>
+            <!-- end navigation -->
+        </div>
+        <!-- end sidebar wrapper -->
+        <!--start header -->
+        <header>
+            <div class="topbar d-flex align-items-center">
+                <nav class="navbar navbar-expand gap-3">
+                    <div class="mobile-toggle-menu">
+                        <i class='bx bx-menu'></i>
+                    </div>
+                    <div>
+                        <input id="hfUserEmail" value="@Session["loggedInUserEmail"]" style="display:none" />
+                        @if (Session["loggedInUserRole"] != null)
+                        {
+                            <input id="hfUserRole" value="@Session["loggedInUserRole"]" style="display:none" />
+                        }
+                        else
+                        {
+                            <input id="hfUserRole" value="" style="display:none" />
+                        }
+
+                        <h5 class="logo-text" style="font-size:15px">Welcome @Session["loggedInUserFName"] @Session["loggedInUserLName"]</h5>
+                    </div>
+                    <div class="search-bar flex-grow-1">
+                        <div class="position-relative search-bar-box">
+                            <form>
+                                <input type="text" class="form-control search-control" autofocus placeholder="Type to search..."> <span class="position-absolute top-50 search-show translate-middle-y"><i class='bx bx-search'></i></span>
+                                <span class="position-absolute top-50 search-close translate-middle-y"><i class='bx bx-x'></i></span>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="top-menu ms-auto">
+                        <ul class="navbar-nav align-items-center gap-1">
+                            <li class="nav-item dropdown dropdown-large">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="alert-count">4</span>
+                                    <i class='bx bx-bell'></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:;">
+                                        <div class="msg-header">
+                                            <p class="msg-header-title">Notifications</p>
+                                            <p class="msg-header-clear ms-auto">Marks all as read</p>
+                                        </div>
+                                    </a>
+                                    <div class="header-notifications-list">
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-primary text-primary">
+                                                    <i class="bx bx-group"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">
+                                                        New Customer<span class="msg-time float-end">
+                                                            14 Sec
+                                                            ago
+                                                        </span>
+                                                    </h6>
+                                                    <p class="msg-info">new inquiry for Acetic acid</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-danger text-danger">
+                                                    <i class="bx bx-cart-alt"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">
+                                                        Salesperson <span class="msg-time float-end">
+                                                            2 min
+                                                            ago
+                                                        </span>
+                                                    </h6>
+                                                    <p class="msg-info">Customer's Inquiry Converted to Quote</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-success text-success">
+                                                    <i class="bx bx-file"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">
+                                                        Salesperson<span class="msg-time float-end">
+                                                            19 min
+                                                            ago
+                                                        </span>
+                                                    </h6>
+                                                    <p class="msg-info">Customer's Order Scheduled</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-warning text-warning">
+                                                    <i class="bx bx-send"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">
+                                                        Salesperson<span class="msg-time float-end">
+                                                            28 min
+                                                            ago
+                                                        </span>
+                                                    </h6>
+                                                    <p class="msg-info">Customer's Invoice Generated</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <a href="javascript:;">
+                                        <div class="text-center msg-footer">View All Notifications</div>
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown dropdown-large">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="alert-count">2</span>
+                                    <i class='bx bx-rupee'></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:;">
+                                        <div class="msg-header">
+                                            <p class="msg-header-title">Updates</p>
+                                            <p class="msg-header-clear ms-auto">Marks all as read</p>
+                                        </div>
+                                    </a>
+                                    <div class="header-message-list">
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-online">
+                                                    <img src="~/Layout/assets/images/avatars/avatar-1.png" class="msg-avatar" alt="user avatar">
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">
+                                                        Salesperson <span class="msg-time float-end">
+                                                            5 sec
+                                                            ago
+                                                        </span>
+                                                    </h6>
+                                                    <p class="msg-info">Acetic acid, new price is 52</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-online">
+                                                    <img src="~/Layout/assets/images/avatars/avatar-2.png" class="msg-avatar" alt="user avatar">
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">
+                                                        Salesperson <span class="msg-time float-end">
+                                                            14
+                                                            sec ago
+                                                        </span>
+                                                    </h6>
+                                                    <p class="msg-info">Ethyl acetate, new price is 75</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <a href="javascript:;">
+                                        <div class="text-center msg-footer">View All Updates</div>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="user-box dropdown px-3">
+                        <a class="d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                            @if (Session["SPProfileImage"] == null)
+                            {
+                                <img src="~/SPProfileImages/UserProfileImage.png" class="user-img" alt="user avatar" />
+                            }
+                            else
+                            {
+                                <img src="@Session["SPProfileImage"].ToString()" class="user-img" alt="user avatar">
+                            }
+
+                            <div class="user-info ps-3">
+                                <p class="user-name mb-0">@Session["loggedInUserFName"].ToString() @Session["loggedInUserLName"].ToString()</p>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="/SalesPerson/Profile"><i class="bx bx-user"></i><span>Profile</span></a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/Account/ChangePassword"><i class="bx bx-key"></i><span>Change Password</span></a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href='@Url.Action("Logout", "Account")'><i class='bx bx-log-out-circle'></i><span>Logout</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <!--end header -->
+        <!--start page wrapper -->
+        <div class="page-wrapper">
+            @RenderBody()
+        </div>
+        <!--end page wrapper -->
+        <!--start overlay-->
+        <div class="overlay toggle-icon"></div>
+        <!--end overlay-->
+        <!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+        <!--End Back To Top Button-->
+        <footer class="page-footer">
+            <p class="mb-0">Copyright © 2024. All rights reserved.</p>
+        </footer>
+    </div>
+    <!--end wrapper-->
+    <!--start switcher-->
+    <div class="switcher-wrapper">
+        <div class="switcher-btn">
+            <i class='bx bx-cog bx-spin'></i>
+        </div>
+        <div class="switcher-body">
+            <div class="d-flex align-items-center">
+                <h5 class="mb-0 text-uppercase">Theme Customizer</h5>
+                <button type="button" class="btn-close ms-auto close-switcher" aria-label="Close"></button>
+            </div>
+            <hr />
+            <h6 class="mb-0">Theme Styles</h6>
+            <hr />
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="lightmode" checked>
+                    <label class="form-check-label" for="lightmode">Light</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="darkmode">
+                    <label class="form-check-label" for="darkmode">Dark</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="semidark">
+                    <label class="form-check-label" for="semidark">Semi Dark</label>
+                </div>
+            </div>
+            <hr />
+            <div class="form-check">
+                <input class="form-check-input" type="radio" id="minimaltheme" name="flexRadioDefault">
+                <label class="form-check-label" for="minimaltheme">Minimal Theme</label>
+            </div>
+            <hr />
+            <h6 class="mb-0">Header Colors</h6>
+            <hr />
+            <div class="header-colors-indigators">
+                <div class="row row-cols-auto g-3">
+                    <div class="col">
+                        <div class="indigator headercolor1" id="headercolor1"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor2" id="headercolor2"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor3" id="headercolor3"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor4" id="headercolor4"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor5" id="headercolor5"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor6" id="headercolor6"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor7" id="headercolor7"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator headercolor8" id="headercolor8"></div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <h6 class="mb-0">Sidebar Backgrounds</h6>
+            <hr />
+            <div class="header-colors-indigators">
+                <div class="row row-cols-auto g-3">
+                    <div class="col">
+                        <div class="indigator sidebarcolor1" id="sidebarcolor1"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor2" id="sidebarcolor2"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor3" id="sidebarcolor3"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor4" id="sidebarcolor4"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor5" id="sidebarcolor5"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor6" id="sidebarcolor6"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor7" id="sidebarcolor7"></div>
+                    </div>
+                    <div class="col">
+                        <div class="indigator sidebarcolor8" id="sidebarcolor8"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end switcher-->
+
+    <script src="~/Scripts/jquery-3.7.1.min.js"></script>
+
+    <!-- Common JS (was ~/bundles/commonjs) -->
+    <script src="~/Layout/assets/js/pace.min.js"></script>
+    <script src="~/Layout/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Layout/assets/plugins/simplebar/js/simplebar.min.js"></script>
+    <script src="~/Layout/assets/plugins/metismenu/js/metisMenu.min.js"></script>
+    <script src="~/Layout/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="~/Layout/assets/js/app.js"></script>
+    <script src="~/Layout/assets/plugins/notifications/js/lobibox.min.js"></script>
+    <script src="~/Layout/assets/plugins/notifications/js/notifications.min.js"></script>
+    <script src="~/Layout/assets/plugins/notifications/js/notification-custom-script.js"></script>
+    <script src="~/Layout/assets/plugins/autocomplete/jquery.autocomplete.js"></script>
+
+    <!-- Main layout JS (was ~/bundles/mainlayoutjs) -->
+    <script src="~/Layout/assets/plugins/datatables/jquery.datatables.min.js"></script>
+    <script src="~/Layout/assets/plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="~/Layout/assets/plugins/datetimepicker/js/picker.js"></script>
+    <script src="~/Layout/assets/plugins/datetimepicker/js/picker.date.js"></script>
+    <script src="~/Scripts/appjs/commonListTable.js"></script>
+
+    <script src="~/Scripts/appjs/Permissions.js"></script>
+    @*<script>
+            $(document).ready(function () {
+                var role = $('#hfUserRole').val().trim();
+
+                // Admin
+                if (role === "Admin") {
+                    $('.foradmin, .forreports, .forFeedback, .forcontact, .foradmin1').show();
+                    $('li.menu-label:contains("Operations")').hide();
+                    $('.forSalesperson, .forsalesinvoice, .forbusinessplan, .forwarehouse, .forfinance, .forApproved, .forsalesquote, .foradmin2, .Salesper, .foradmin3').hide();
+                    return;
+                }
+
+
+                // HOD
+                if (role === "HOD") {
+                    $('.forSalesperson, .forwarehouse, .forreports, .forfinance, .forbusinessplan, .formasterdata,.foradmin,.forFeedback,.forcontact,.forApproved,.foradmin2,.foradmin3').show();
+                    $('.foradmins,.Salesper').hide(); // Hide Setup & Logs menu
+                    $('li.menu-label:contains("Setup & Logs")').hide();
+                    return;
+                }
+
+                // Salesperson
+                if (role === "Salesperson") {
+                    $('.forSalesperson, .forsalesinvoice, .forbusinessplan, .forreports,.forFeedback,.forcontact,.forApproved,.forfinance,.Salesper').show();
+                    $('.foradmin, .forwarehouse, .formasterdata,.foradmins,.foradmin1,.forApproved,.foradmin3').hide();
+                    $('li.menu-label:contains("Setup & Logs")').hide(); /*.forfinance:not(.forsalesinvoice)*/
+                    return;
+                }
+
+                // Logistics-Manager
+                if (role === "Logisitics-Manager") {
+                    $('.forwarehouse').show();
+                    $('.foradmin, .forSalesperson, .forreports, .forfinance, .forbusinessplan, .formasterdata,.foradmins,.forFeedback,.forcontact,.forApproved,.forsalesquote,.Salesper,.foradmin3').hide();
+                    $('li.menu-label:contains("Setup & Logs")').hide();
+                    $('li.menu-label:contains("Reports")').hide();
+                    $('li.menu-label:contains("Master Data")').hide();
+                    $('#salesQuoteMenu').hide();
+                    return;
+                }
+
+                // Finance
+                if (role === "Finance") {
+                    $('.forfinance,.forApproved').show();
+                    $('.foradmin, .forSalesperson, .forwarehouse, .forbusinessplan, .formasterdata,.foradmins,.forFeedback,.forcontact,.forreport,.foradmin1,.Salesper').hide();
+                    $('li.menu-label:contains("Setup & Logs")').hide();
+                    $('li.menu-label:contains("Master Data")').hide();
+                    return;
+                }
+            });
+        </script>*@
+
+
+
+    <script type="application/json" id="roleMenuJson">
+        @Html.Raw(JsonConvert.SerializeObject(Session["RoleWiseMenuData"]).Replace("</", "<\\/"))
+    </script>
+    <script type="application/json" id="menuUrlMapJson">
+        @Html.Raw(JsonConvert.SerializeObject(menuUrlMap).Replace("</", "<\\/"))
+    </script>
+    <script type="application/json" id="menuIconMapJson">
+        @Html.Raw(JsonConvert.SerializeObject(menuIconMap).Replace("</", "<\\/"))
+    </script>
+    <script type="application/json" id="menuSectionMapJson">
+        @Html.Raw(JsonConvert.SerializeObject(menuSectionMap).Replace("</", "<\\/"))
+    </script>
+
+    <script>
+    function readJsonScript(id, fallback) {
+        var el = document.getElementById(id);
+        if (!el) return fallback;
+        var txt = (el.textContent || el.innerText || '').trim();
+        if (!txt) return fallback;
+        try { return JSON.parse(txt); } catch (e) { return fallback; }
+    }
+
+    // expose as globals (used by menu rendering and other pages like SPMenu.js)
+    window.roleMenu = readJsonScript('roleMenuJson', null);
+    window.menuUrlMap = readJsonScript('menuUrlMapJson', {});
+    window.menuIconMap = readJsonScript('menuIconMapJson', {});
+    window.menuSectionMap = readJsonScript('menuSectionMapJson', {});
+
+    var roleMenu = window.roleMenu;
+    var menuUrlMap = window.menuUrlMap;
+    var menuIconMap = window.menuIconMap;
+    var menuSectionMap = window.menuSectionMap;
+
+    function hasAnyRights(p) {
+        if (!p) return true; // fail-open if payload doesn't carry permissions
+        return !!(p.read || p.create || p.update || p.delete || p.Read || p.Create || p.Update || p.Delete);
+    }
+
+    function getChildPerms(child) {
+        if (!child) return null;
+        var p = child.permissions || child.Permissions || null;
+        if (!p) return null;
+        // normalize in case payload uses PascalCase
+        return {
+            read: !!(p.read || p.Read || p.view || p.View || p.View_Rights || p.Read_Rights || p.Full_Rights),
+            create: !!(p.create || p.Create || p.add || p.Add || p.Add_Rights || p.Insert_Rights || p.Full_Rights),
+            update: !!(p.update || p.Update || p.edit || p.Edit || p.Edit_Rights || p.Modify_Rights || p.Full_Rights),
+            delete: !!(p.delete || p.Delete || p.Delete_Rights || p.Remove_Rights || p.Full_Rights)
+        };
+    }
+
+    function normalizeNavKey() {
+        var parts = [];
+        for (var i = 0; i < arguments.length; i++) {
+            var value = arguments[i];
+            if (value === null || value === undefined) {
+                parts.push('');
+                continue;
+            }
+
+            parts.push(value.toString().trim().toLowerCase());
+        }
+
+        return parts.join('|');
+    }
+
+    function getChildRoute(child) {
+        if (!child) return '';
+
+        if (menuUrlMap && child.menuName && menuUrlMap[child.menuName]) {
+            return menuUrlMap[child.menuName];
+        }
+
+        if (child.controller && child.action) {
+            return '/' + child.controller + '/' + child.action;
+        }
+
+        return '';
+    }
+
+    function getUniqueChildren(children) {
+        if (!Array.isArray(children) || children.length === 0) return [];
+
+        var seenChildren = {};
+        var uniqueChildren = [];
+
+        children.forEach(function (child) {
+            if (!child) return;
+
+            var childKey = normalizeNavKey(
+                child.menuId,
+                child.menuName,
+                child.controller,
+                child.action,
+                getChildRoute(child)
+            );
+
+            if (seenChildren[childKey]) return;
+
+            seenChildren[childKey] = true;
+            uniqueChildren.push(child);
+        });
+
+        return uniqueChildren;
+    }
+
+    $(document).ready(function () {
+
+        if (!roleMenu || !roleMenu.roles) return;
+
+        let menuHtml = '';
+        let renderedSections = {};
+        let renderedNavEntries = {};
+
+        roleMenu.roles.forEach(role => {
+
+            role.menus.forEach(menu => {
+
+                // normalize children: ignore blank/invalid child items
+                const children = (menu.children && Array.isArray(menu.children))
+                    ? menu.children.filter(c => c && c.menuName && c.menuName.toString().trim().length > 0)
+                    : [];
+
+                // Only render children that the user can at least VIEW (or has any rights for).
+                const visibleChildren = (children.length > 0)
+                    ? children.filter(c => hasAnyRights(getChildPerms(c)))
+                    : [];
+                const uniqueVisibleChildren = getUniqueChildren(visibleChildren);
+
+                let section = null;
+
+                if (uniqueVisibleChildren.length > 0) {
+                    for (let i = 0; i < uniqueVisibleChildren.length; i++) {
+                        let childName = uniqueVisibleChildren[i].menuName;
+                        if (menuSectionMap[childName]) {
+                            section = menuSectionMap[childName];
+                            break;
+                        }
+                    }
+                }
+
+                if (!section) {
+                    section = menuSectionMap[menu.menuName];
+                }
+
+                if (section && !renderedSections[section]) {
+                    menuHtml += `<li class="menu-label">${section}</li>`;
+                    renderedSections[section] = true;
+                }
+
+                let icon = menuIconMap[menu.menuName] || 'bx bx-folder';
+
+                // If this is a single/leaf menu (no children) -> render as direct link (no dropdown/arrow)
+                if (children.length === 0) {
+
+                    // Enforce view for leaf menus as well (e.g., Dashboard).
+                    try {
+                        if (window.PermissionService && typeof window.PermissionService.getForMenuName === 'function') {
+                            var lp = window.PermissionService.getForMenuName(menu.menuName);
+                            if (lp && lp.resolved === true) {
+                                var any = !!(lp.read || lp.create || lp.update || lp.delete);
+                                if (!any) return;
+                            }
+                        }
+                    } catch (e) { }
+
+                    let url = '#';
+
+                    // Prefer explicit mapping by name (covers Dashboard etc.)
+                    if (menuUrlMap && menuUrlMap[menu.menuName]) {
+                        url = menuUrlMap[menu.menuName];
+                    }
+                    else if (menu.action === 'Navigation') {
+                        // keep fallback behavior
+                        url = '#';
+                    }
+                    else if (menu.controller && menu.action) {
+                        url = '/' + menu.controller + '/' + menu.action;
+                    }
+
+                    if (!url || url === '#') url = 'javascript:;';
+
+                    const leafKey = normalizeNavKey(menu.menuId, menu.menuName, url);
+                    if (renderedNavEntries[leafKey]) {
+                        return;
+                    }
+
+                    renderedNavEntries[leafKey] = true;
+
+                    menuHtml += `
+                        <li>
+                            <a href="${url}">
+                                <div class="parent-icon">
+                                    <i class="${icon}"></i>
+                                </div>
+                                <div class="menu-title">${menu.menuName}</div>
+                            </a>
+                        </li>
+                    `;
+
+                    return;
+                }
+
+                // Parent menus with children: if user cannot see any child, skip the parent.
+                if (uniqueVisibleChildren.length === 0) {
+                    return;
+                }
+
+                // If parent has exactly one visible child and the child's name matches the parent,
+                // render a single direct-link item (prevents showing Dashboard twice).
+                const collapseSingleSameChild = (function () {
+                    if (uniqueVisibleChildren.length !== 1) return false;
+                    const child = uniqueVisibleChildren[0];
+                    const parentName = (menu && menu.menuName) ? menu.menuName.toString().trim().toLowerCase() : '';
+                    const childName = (child && child.menuName) ? child.menuName.toString().trim().toLowerCase() : '';
+                    if (!parentName || !childName) return false;
+                    return parentName === childName;
+                })();
+
+                if (collapseSingleSameChild) {
+                    const child = uniqueVisibleChildren[0];
+                    let url = '#';
+
+                    // Prefer explicit mapping by name
+                    if (menuUrlMap && menuUrlMap[child.menuName]) {
+                        url = menuUrlMap[child.menuName];
+                    }
+                    else if (child.controller && child.action) {
+                        url = '/' + child.controller + '/' + child.action;
+                    }
+                    else if (menuUrlMap && menuUrlMap[menu.menuName]) {
+                        url = menuUrlMap[menu.menuName];
+                    }
+                    else if (menu.controller && menu.action) {
+                        url = '/' + menu.controller + '/' + menu.action;
+                    }
+
+                    if (!url || url === '#') url = 'javascript:;';
+
+                    const collapsedLeafKey = normalizeNavKey(menu.menuId, child.menuId, menu.menuName, child.menuName, url);
+                    if (renderedNavEntries[collapsedLeafKey]) {
+                        return;
+                    }
+
+                    renderedNavEntries[collapsedLeafKey] = true;
+
+                    menuHtml += `
+                        <li>
+                            <a href="${url}">
+                                <div class="parent-icon">
+                                    <i class="${icon}"></i>
+                                </div>
+                                <div class="menu-title">${menu.menuName}</div>
+                            </a>
+                        </li>
+                    `;
+
+                    return;
+                }
+
+                const parentKey = normalizeNavKey(
+                    menu.menuId,
+                    menu.menuName,
+                    uniqueVisibleChildren.map(child => normalizeNavKey(child.menuId, child.menuName, child.controller, child.action, getChildRoute(child))).join('||')
+                );
+                if (renderedNavEntries[parentKey]) {
+                    return;
+                }
+
+                renderedNavEntries[parentKey] = true;
+
+                // Parent menus with children -> keep dropdown
+                menuHtml += `
+                    <li>
+                        <a href="javascript:;" class="has-arrow">
+                            <div class="parent-icon">
+                                <i class="${icon}"></i>
+                            </div>
+                            <div class="menu-title">${menu.menuName}</div>
+                        </a>
+                        <ul>
+                `;
+
+                // 🔹 Child Menus
+ if (uniqueVisibleChildren.length > 0) {
+                 uniqueVisibleChildren.forEach(child => {
+
+                     // READ/VIEW permission check (show if any rights exist)
+                     var perms = getChildPerms(child);
+                     if (!hasAnyRights(perms)) return;
+                     {
+
+                         let url = '#';
+
+                         // Prefer explicit mapping by name
+                         if (menuUrlMap && menuUrlMap[child.menuName]) {
+                             url = menuUrlMap[child.menuName];
+                         }
+                         else if (child.action === 'Navigation') {
+                             url = '#';
+                         }
+                         else {
+                             // fallback (future-safe)
+                             url = '/' + child.controller + '/' + child.action;
+                         }
+
+
+                         menuHtml += `
+                         <li>
+                             <a href="${url}">
+                                 <i class="bx bx-right-arrow-alt"></i>
+                                 ${child.menuName}
+                             </a>
+                         </li>
+                     `;
+                     }
+                 });
+             }
+
+             menuHtml += `
+                 </ul>
+             </li>
+         `;
+         });
+     });
+        $('#dynamicMenu').html(menuHtml);
+        $('#dynamicMenu').metisMenu();
+
+        // ---- DEFAULT PAGE-LEVEL PERMISSIONS (create/update/delete/view) ----
+        try {
+            if (window.PermissionService && typeof window.PermissionService.getForCurrentPage === 'function') {
+                var fallbackMenuName = null;
+                try {
+                    fallbackMenuName = window.__permFallbackMenuName || null;
+                } catch (e) { fallbackMenuName = null; }
+
+                var perms = window.PermissionService.getForCurrentPage(fallbackMenuName);
+                window.currentPagePerms = perms;
+
+                // Install DOM guards (e.g., disable edit icons when no update rights)
+                try {
+                    if (typeof window.PermissionService.installDomGuards === 'function') {
+                        window.PermissionService.installDomGuards(perms);
+                    }
+                } catch (e) { }
+
+                // ---- DASHBOARD-SPECIFIC (STRICT): enable only when permission exists ----
+                // If permissions are not resolved, default DISABLE these create actions.
+                try {
+                    function disableButton($btn) {
+                        if (!$btn || !$btn.length) return;
+                        $btn.prop('disabled', true).css({ 'pointer-events': 'none', 'opacity': 0.55 });
+                    }
+
+                    function enableButton($btn) {
+                        if (!$btn || !$btn.length) return;
+                        $btn.prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
+                    }
+
+                    // Market Update actions live on Dashboard => gate by current page create/update.
+                    var dashCanCreate = !!(perms && perms.resolved === true && perms.create);
+                    var dashCanSave = !!(perms && perms.resolved === true && (perms.create || perms.update));
+
+                    var $muAdd = $('#btnAddMUpdate');
+                    if ($muAdd.length && !dashCanCreate) disableButton($muAdd);
+                    var $muSave = $('#modalMarketUpdate #btnSave');
+                    if ($muSave.length && !dashCanSave) disableButton($muSave);
+
+                    // Daily Visit buttons navigate to another page => gate by that target page create right.
+                    var $dvCreate = $('#btnCreateDV');
+                    var $dvCreate1 = $('#btnCreateDV1');
+                    if ($dvCreate.length || $dvCreate1.length) {
+                        var dvCanCreate = false;
+                        function permBool(v) {
+                            if (v === true || v === false) return v;
+                            if (v === null || v === undefined) return false;
+                            if (typeof v === 'number') return v !== 0;
+                            if (typeof v === 'string') {
+                                var s = v.trim().toLowerCase();
+                                if (!s) return false;
+                                if (s === 'true' || s === '1' || s === 'yes' || s === 'y') return true;
+                                if (s === 'false' || s === '0' || s === 'no' || s === 'n') return false;
+                            }
+                            return !!v;
+                        }
+                        if (window.PermissionService) {
+                            // Prefer the actual create page
+                            if (typeof window.PermissionService.getForControllerAction === 'function') {
+                                var dvPerms = window.PermissionService.getForControllerAction('SPVisitEntry', 'DailyVisit');
+                                dvCanCreate = !!(dvPerms && dvPerms.resolved === true && dvPerms.create);
+
+                                // Fallback: some payloads only include the list route
+                                if (!dvCanCreate) {
+                                    var dvListPerms = window.PermissionService.getForControllerAction('SPVisitEntry', 'DailyVisitList');
+                                    dvCanCreate = !!(dvListPerms && dvListPerms.resolved === true && dvListPerms.create);
+                                }
+                            }
+
+                            // Fallback by menu name mapping (if controller/action isn't present)
+                            if (!dvCanCreate && typeof window.PermissionService.getForMenuName === 'function') {
+                                var byName = window.PermissionService.getForMenuName('Daily Visit List');
+                                dvCanCreate = !!(byName && byName.resolved === true && byName.create);
+                            }
+
+                            if (!dvCanCreate && typeof window.PermissionService.getForMenuName === 'function') {
+                                var byName2 = window.PermissionService.getForMenuName('Daily Visit');
+                                dvCanCreate = !!(byName2 && byName2.resolved === true && byName2.create);
+                            }
+
+                            // Last-resort fallback: menu name varies across environments.
+                            // If we still can't resolve, scan payload for any menu containing 'Daily Visit'.
+                            if (!dvCanCreate && window.roleMenu && Array.isArray(window.roleMenu.roles)) {
+                                try {
+                                    window.roleMenu.roles.forEach(function (r) {
+                                        (r.menus || []).forEach(function (m) {
+                                            (m.children || []).forEach(function (c) {
+                                                var name = (c && c.menuName) ? c.menuName.toString() : '';
+                                                if (!name) return;
+                                                if (name.toLowerCase().indexOf('daily visit') < 0) return;
+                                                var p = c.permissions || c.Permissions || c || {};
+                                                var hasFull = permBool(p.Full_Rights) || permBool(p.full) || permBool(p.Full) || permBool(p.fullRights);
+                                                var canCreate = permBool(p.create) || permBool(p.Create) || permBool(p.add) || permBool(p.Add) || permBool(p.Add_Rights) || permBool(p.Insert_Rights) || hasFull;
+                                                if (canCreate) dvCanCreate = true;
+                                            });
+                                        });
+                                    });
+                                } catch (e) { }
+                            }
+                        }
+
+                        if ($dvCreate.length) (dvCanCreate ? enableButton($dvCreate) : disableButton($dvCreate));
+                        if ($dvCreate1.length) (dvCanCreate ? enableButton($dvCreate1) : disableButton($dvCreate1));
+                    }
+                } catch (e) { }
+
+                var resolved = (perms && typeof perms.resolved === 'boolean') ? perms.resolved : true;
+
+                // IMPORTANT:
+                // - If we can resolve rights => enforce strictly.
+                // - If we cannot resolve rights => do not force-disable controls (avoid false negatives).
+                var allowCreate = !!(perms && resolved === true && perms.create);
+                var allowUpdate = !!(perms && resolved === true && perms.update);
+                var allowDelete = !!(perms && resolved === true && perms.delete);
+                var allowSave = !!(perms && resolved === true && (perms.create || perms.update));
+
+                if (resolved === true) {
+                    var hasAny = !!(perms && (perms.read || perms.create || perms.update || perms.delete));
+                    if (!hasAny) {
+                        // If the user has no rights at all for this page, redirect to dashboard.
+                        var dash = (window.menuUrlMap && window.menuUrlMap['Dashboard']) ? window.menuUrlMap['Dashboard'] : '/SPDashboard/Index';
+                        try {
+                            if (window.Lobibox && Lobibox.notify) {
+                                Lobibox.notify('error', {
+                                    pauseDelayOnHover: true,
+                                    size: 'mini',
+                                    rounded: true,
+                                    delayIndicator: false,
+                                    icon: 'bx bx-x-circle',
+                                    continueDelayOnInactiveTab: false,
+                                    position: 'top right',
+                                    msg: 'You do not have View rights for this page'
+                                });
+                            }
+                        } catch (e) { }
+                        window.location.href = dash;
+                        return;
+                    }
+                }
+
+                function shouldSkipId(idLower) {
+                    // Avoid touching spinners or purely UI helpers.
+                    return idLower.endsWith('spinner') || idLower.indexOf('search') >= 0 || idLower.indexOf('export') >= 0 || idLower.indexOf('clear') >= 0;
+                }
+
+                function applyToElements(matchFn, allowed, $scope) {
+                    var $targets = $scope && $scope.length
+                        ? $scope.find('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]')
+                            .addBack('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]')
+                        : $('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]');
+
+                    $targets.each(function () {
+                        var idLower = ((this.id || '') + '').toLowerCase();
+                        var onclickLower = '';
+                        try {
+                            onclickLower = ((this.getAttribute && (this.getAttribute('onclick') || '')) || '').toString().toLowerCase();
+                        } catch (e) { }
+
+                        if (idLower && shouldSkipId(idLower)) return;
+                        if (!matchFn(idLower, this, onclickLower)) return;
+
+                        if (window.ElementStateService && typeof window.ElementStateService.setEnabled === 'function') {
+                            window.ElementStateService.setEnabled(this, !!allowed, { disabledOpacity: 0.55 });
+                        } else if (!allowed) {
+                            // fallback
+                            $(this).css({ 'pointer-events': 'none', 'opacity': 0.55 });
+                            if ('disabled' in this) this.disabled = true;
+                        }
+                    });
+                }
+
+                function applyCrudDisables($scope) {
+                    // CREATE
+                    applyToElements(function (idLower, el, onclickLower) {
+                        // These buttons are permissioned by their target page (Daily Visit), not the current page.
+                        if (idLower === 'btncreatedv' || idLower === 'btncreatedv1') return false;
+                        return (idLower.indexOf('add') >= 0 || idLower.indexOf('new') >= 0 || idLower.indexOf('create') >= 0 || idLower.indexOf('insert') >= 0) ||
+                            (onclickLower.indexOf('add') >= 0 || onclickLower.indexOf('new') >= 0 || onclickLower.indexOf('create') >= 0 || onclickLower.indexOf('insert') >= 0);
+                    }, allowCreate, $scope);
+
+                    // UPDATE
+                    applyToElements(function (idLower, el, onclickLower) {
+                        // Avoid misclassifying CREATE buttons like 'btnAddMUpdate' (contains 'update').
+                        if (idLower.indexOf('add') >= 0 || idLower.indexOf('new') >= 0 || idLower.indexOf('create') >= 0 || idLower.indexOf('insert') >= 0) {
+                            return false;
+                        }
+                        return (idLower.indexOf('edit') >= 0 || idLower.indexOf('update') >= 0) ||
+                            (onclickLower.indexOf('edit') >= 0 || onclickLower.indexOf('update') >= 0);
+                    }, allowUpdate, $scope);
+
+                    // DELETE
+                    applyToElements(function (idLower, el, onclickLower) {
+                        if (idLower.indexOf('delete') >= 0 || idLower.indexOf('remove') >= 0) return true;
+                        return onclickLower.indexOf('delete') >= 0 || onclickLower.indexOf('remove') >= 0;
+                    }, allowDelete, $scope);
+
+                    // SAVE
+                    applyToElements(function (idLower, el, onclickLower) {
+                        return idLower.indexOf('save') >= 0 || onclickLower.indexOf('save') >= 0;
+                    }, allowSave, $scope);
+                }
+
+                // Apply once for current DOM (only when permission resolution succeeded)
+                if (resolved === true) {
+                    applyCrudDisables(null);
+                }
+
+                // Re-apply for dynamically injected controls (AJAX/partials/modals)
+                try {
+                    var _permDebounce = null;
+                    var observer = new MutationObserver(function (mutations) {
+                        if (_permDebounce) clearTimeout(_permDebounce);
+                        _permDebounce = setTimeout(function () {
+                            // Apply to whole document (safe), but still reasonably cheap due to ID filtering.
+                            if (resolved === true) {
+                                applyCrudDisables(null);
+                            }
+                        }, 50);
+                    });
+                    if (document && document.body) {
+                        observer.observe(document.body, { childList: true, subtree: true });
+                    }
+                } catch (e) { }
+            }
+        } catch (e) {
+            // fail-open
+        }
+    });
+    </script>
+
+    <script>
+        (function () {
+            var logUrl = $('#hdnSiteErrorLogUrl').val();
+            var isLoggingSiteError = false;
+            var sentErrors = {};
+            var lastActionContext = null;
+
+            function shouldSkip(url) {
+                if (!url) return false;
+                var normalizedUrl = (url + '').toLowerCase();
+                return normalizedUrl.indexOf('/spsiteerror/logclienterror') >= 0 || normalizedUrl.indexOf('/spsiteerror/logerror') >= 0;
+            }
+
+            function buildKey(payload) {
+                return [payload.Error_Code, payload.Source, payload.Exception_Message, payload.Web_URL].join('|');
+            }
+
+            function getRecentActionContext() {
+                if (!lastActionContext || !lastActionContext.timestamp) return null;
+                if ((new Date().getTime() - lastActionContext.timestamp) > 15000) return null;
+                return lastActionContext;
+            }
+
+            function markActionContext(actionName, triggerText) {
+                lastActionContext = {
+                    actionName: actionName || 'Action',
+                    triggerText: triggerText || '',
+                    timestamp: new Date().getTime()
+                };
+            }
+
+            function detectActionName($element) {
+                if (!$element || !$element.length) return '';
+
+                var id = (($element.attr('id') || '') + '').toLowerCase();
+                var cls = (($element.attr('class') || '') + '').toLowerCase();
+                var text = (($element.text() || $element.val() || '') + '').toLowerCase().trim();
+                var combined = [id, cls, text].join(' ');
+
+                if (combined.indexOf('save') >= 0) return 'Save';
+                if (combined.indexOf('update') >= 0) return 'Update';
+                if (combined.indexOf('edit') >= 0) return 'Edit';
+                if (combined.indexOf('submit') >= 0) return 'Submit';
+
+                return '';
+            }
+
+            function hookShowErrMsg() {
+                try {
+                    if (typeof window.ShowErrMsg !== 'function') return;
+                    if (window.ShowErrMsg.__siteErrorWrapped === true) return;
+
+                    var originalShowErrMsg = window.ShowErrMsg;
+                    var wrappedShowErrMsg = function (errMsg) {
+                        try {
+                            var actionContext = getRecentActionContext();
+                            if (actionContext && errMsg) {
+                                sendSiteError({
+                                    Error_Code: 'ACTION_ERR',
+                                    Exception_Message: errMsg,
+                                    Exception_Stack_Trace: actionContext.triggerText || '',
+                                    Source: 'Client ' + actionContext.actionName,
+                                    Description: 'Severity: High | Action: ' + actionContext.actionName,
+                                    Web_URL: window.location.pathname + window.location.search
+                                });
+                            }
+                        } catch (e) { }
+
+                        return originalShowErrMsg.apply(this, arguments);
+                    };
+
+                    wrappedShowErrMsg.__siteErrorWrapped = true;
+                    wrappedShowErrMsg.__original = originalShowErrMsg;
+                    window.ShowErrMsg = wrappedShowErrMsg;
+                } catch (e) { }
+            }
+
+            function hookShowErrorMsg() {
+                try {
+                    if (typeof window.ShowErrorMsg !== 'function') return;
+                    if (window.ShowErrorMsg.__siteErrorWrapped === true) return;
+
+                    var originalShowErrorMsg = window.ShowErrorMsg;
+                    var wrappedShowErrorMsg = function (errMsg) {
+                        try {
+                            var actionContext = getRecentActionContext();
+                            if (actionContext && errMsg) {
+                                sendSiteError({
+                                    Error_Code: 'ACTION_ERR',
+                                    Exception_Message: errMsg,
+                                    Exception_Stack_Trace: actionContext.triggerText || '',
+                                    Source: 'Client ' + actionContext.actionName,
+                                    Description: 'Severity: High | Action: ' + actionContext.actionName,
+                                    Web_URL: window.location.pathname + window.location.search
+                                });
+                            }
+                        } catch (e) { }
+
+                        return originalShowErrorMsg.apply(this, arguments);
+                    };
+
+                    wrappedShowErrorMsg.__siteErrorWrapped = true;
+                    wrappedShowErrorMsg.__original = originalShowErrorMsg;
+                    window.ShowErrorMsg = wrappedShowErrorMsg;
+                } catch (e) { }
+            }
+
+            function captureMessageFromDom() {
+                try {
+                    var actionContext = getRecentActionContext();
+                    if (!actionContext) return;
+
+                    var selectors = [
+                        '#lblMsg',
+                        '[id$="lblMsg"]',
+                        '#modalErrDetails',
+                        '#InvalidOTPMsg',
+                        '.validation-summary-errors',
+                        '.field-validation-error'
+                    ];
+
+                    for (var i = 0; i < selectors.length; i++) {
+                        var $elements = $(selectors[i]);
+                        for (var j = 0; j < $elements.length; j++) {
+                            var $element = $($elements[j]);
+                            var text = ($element.text() || '').trim();
+                            if (!text) continue;
+                            if (!$element.is(':visible') && selectors[i] !== '.validation-summary-errors' && selectors[i] !== '.field-validation-error') continue;
+
+                            sendSiteError({
+                                Error_Code: 'ACTION_ERR',
+                                Exception_Message: text,
+                                Exception_Stack_Trace: actionContext.triggerText || '',
+                                Source: 'Client ' + actionContext.actionName,
+                                Description: 'Severity: High | Action: ' + actionContext.actionName,
+                                Web_URL: window.location.pathname + window.location.search
+                            });
+                            return;
+                        }
+                    }
+                } catch (e) { }
+            }
+
+            function sendSiteError(payload) {
+                try {
+                    if (!logUrl || isLoggingSiteError) return;
+                    if (!payload || shouldSkip(payload.Web_URL)) return;
+
+                    payload.Error_Code = payload.Error_Code || 'CLIENT_ERR';
+                    payload.Exception_Message = payload.Exception_Message || 'Unhandled client error';
+                    payload.Exception_Stack_Trace = payload.Exception_Stack_Trace || '';
+                    payload.Source = payload.Source || 'Client';
+                    payload.IP_Address = payload.IP_Address || '';
+                    payload.Browser = payload.Browser || navigator.userAgent || '';
+                    payload.Description = payload.Description || 'Severity: High';
+                    payload.Web_URL = payload.Web_URL || window.location.pathname + window.location.search;
+
+                    var errorKey = buildKey(payload);
+                    if (sentErrors[errorKey]) return;
+                    sentErrors[errorKey] = true;
+
+                    isLoggingSiteError = true;
+
+                    $.ajax({
+                        url: logUrl,
+                        type: 'POST',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(payload)
+                    }).always(function () {
+                        isLoggingSiteError = false;
+                    });
+                } catch (e) {
+                    isLoggingSiteError = false;
+                }
+            }
+
+            window.logClientSiteError = sendSiteError;
+
+            window.addEventListener('error', function (event) {
+                var target = event && event.target;
+
+                if (target && target !== window) {
+                    var sourceUrl = target.src || target.href || window.location.pathname;
+                    if (shouldSkip(sourceUrl)) return;
+
+                    sendSiteError({
+                        Error_Code: 'RESOURCE_ERR',
+                        Exception_Message: 'Resource load error',
+                        Exception_Stack_Trace: sourceUrl,
+                        Source: 'Client Resource',
+                        Description: 'Severity: Medium',
+                        Web_URL: sourceUrl
+                    });
+                    return;
+                }
+
+                sendSiteError({
+                    Error_Code: 'JS_ERR',
+                    Exception_Message: event && event.message ? event.message : 'JavaScript error',
+                    Exception_Stack_Trace: event && event.error && event.error.stack ? event.error.stack : ((event && event.filename ? event.filename : '') + ' Line: ' + (event && event.lineno ? event.lineno : '0')),
+                    Source: 'Client Script',
+                    Description: 'Severity: High',
+                    Web_URL: window.location.pathname + window.location.search
+                });
+            }, true);
+
+            window.addEventListener('unhandledrejection', function (event) {
+                var reason = event ? event.reason : null;
+                var message = 'Unhandled promise rejection';
+                var stack = '';
+
+                if (typeof reason === 'string') {
+                    message = reason;
+                } else if (reason) {
+                    message = reason.message || message;
+                    stack = reason.stack || '';
+                }
+
+                sendSiteError({
+                    Error_Code: 'PROMISE_ERR',
+                    Exception_Message: message,
+                    Exception_Stack_Trace: stack,
+                    Source: 'Client Promise',
+                    Description: 'Severity: High',
+                    Web_URL: window.location.pathname + window.location.search
+                });
+            });
+
+            $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
+                var failedUrl = settings && settings.url ? settings.url : window.location.pathname;
+                if (shouldSkip(failedUrl)) return;
+
+                sendSiteError({
+                    Error_Code: 'AJAX_ERR',
+                    Exception_Message: thrownError || ('AJAX request failed with status ' + (jqxhr ? jqxhr.status : '0')),
+                    Exception_Stack_Trace: jqxhr && jqxhr.responseText ? jqxhr.responseText.substring(0, 2000) : '',
+                    Source: 'Client AJAX',
+                    Description: 'Severity: High | Status: ' + (jqxhr ? jqxhr.status : '0'),
+                    Web_URL: failedUrl
+                });
+            });
+
+            $(document).on('click', 'button, input[type="button"], input[type="submit"], a', function () {
+                try {
+                    var $element = $(this);
+                    var actionName = detectActionName($element);
+                    if (!actionName) {
+                        var rawText = (($element.text() || $element.val() || '') + '').toLowerCase().trim();
+                        if (rawText.indexOf('login') >= 0) actionName = 'Login';
+                        else if (rawText.indexOf('verify') >= 0) actionName = 'Verify';
+                    }
+                    if (!actionName) return;
+
+                    markActionContext(actionName, ($element.text() || $element.val() || '').trim());
+                    setTimeout(hookShowErrMsg, 0);
+                    setTimeout(hookShowErrorMsg, 0);
+                    setTimeout(captureMessageFromDom, 1200);
+                } catch (e) { }
+            });
+
+            $(document).on('submit', 'form', function () {
+                try {
+                    markActionContext('Save', (this && this.id) ? this.id : 'form-submit');
+                    setTimeout(hookShowErrMsg, 0);
+                    setTimeout(hookShowErrorMsg, 0);
+                    setTimeout(captureMessageFromDom, 1200);
+                } catch (e) { }
+            });
+
+            hookShowErrMsg();
+            hookShowErrorMsg();
+            setInterval(hookShowErrMsg, 1500);
+            setInterval(hookShowErrorMsg, 1500);
+
+            if (window.MutationObserver && document.body) {
+                try {
+                    var observer = new MutationObserver(function () {
+                        captureMessageFromDom();
+                    });
+                    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'] });
+                } catch (e) { }
+            }
+
+            if (window.fetch) {
+                var originalFetch = window.fetch;
+                window.fetch = function () {
+                    var fetchArgs = arguments;
+                    var requestUrl = fetchArgs && fetchArgs[0];
+
+                    return originalFetch.apply(window, fetchArgs).then(function (response) {
+                        var resolvedUrl = '';
+                        try {
+                            resolvedUrl = response && response.url ? response.url : (typeof requestUrl === 'string' ? requestUrl : (requestUrl && requestUrl.url ? requestUrl.url : window.location.pathname));
+                        } catch (e) {
+                            resolvedUrl = window.location.pathname;
+                        }
+
+                        if (response && !response.ok && !shouldSkip(resolvedUrl)) {
+                            sendSiteError({
+                                Error_Code: 'FETCH_ERR',
+                                Exception_Message: 'Fetch request failed with status ' + response.status,
+                                Exception_Stack_Trace: response.statusText || '',
+                                Source: 'Client Fetch',
+                                Description: 'Severity: High | Status: ' + response.status,
+                                Web_URL: resolvedUrl
+                            });
+                        }
+
+                        return response;
+                    }).catch(function (error) {
+                        var failedUrl = typeof requestUrl === 'string' ? requestUrl : (requestUrl && requestUrl.url ? requestUrl.url : window.location.pathname);
+                        if (!shouldSkip(failedUrl)) {
+                            sendSiteError({
+                                Error_Code: 'FETCH_ERR',
+                                Exception_Message: error && error.message ? error.message : 'Fetch request exception',
+                                Exception_Stack_Trace: error && error.stack ? error.stack : '',
+                                Source: 'Client Fetch',
+                                Description: 'Severity: High',
+                                Web_URL: failedUrl
+                            });
+                        }
+
+                        throw error;
+                    });
+                };
+            }
+        })();
+    </script>
+
+
+</body>
+</html>

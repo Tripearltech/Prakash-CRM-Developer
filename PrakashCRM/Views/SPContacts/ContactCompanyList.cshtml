@@ -5,15 +5,70 @@
 }
 
 <style>
+    .contact-list-page .contact-list-toolbar-card {
+        position: sticky;
+        top: calc(var(--app-shell-topbar-height, 60px) + 1rem);
+        z-index: 1015;
+    }
+
+    .contact-list-page .contact-list-toolbar-card .card-body {
+        background: #fff;
+    }
+
+    .contact-list-page .contact-list-table-wrapper {
+        overflow: auto;
+        position: relative;
+    }
+
+    .contact-list-page .contact-list-filter-toolbar {
+        justify-content: flex-end;
+        align-items: center;
+        row-gap: 12px;
+    }
+
+    .contact-list-page .contact-list-filter-toolbar .form-select,
+    .contact-list-page .contact-list-filter-toolbar .form-control,
+    .contact-list-page .contact-list-filter-toolbar .btn {
+        min-height: 38px;
+    }
+
+    .contact-list-page .contact-list-filter-toolbar #ddlField,
+    .contact-list-page .contact-list-filter-toolbar #ddlOperator {
+        min-width: 180px;
+    }
+
+    .contact-list-page .contact-list-filter-toolbar #txtSearch {
+        min-width: 240px;
+    }
+
+    .contact-list-page .contact-list-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1010;
+        background: #fff;
+        box-shadow: inset 0 -1px 0 #dee2e6;
+    }
+
+    .contact-list-page .contact-list-table thead th.sorting,
+    .contact-list-page .contact-list-table thead th.sorting_asc,
+    .contact-list-page .contact-list-table thead th.sorting_desc {
+        background: #fff;
+    }
+
+    .contact-list-page .contact-list-table {
+        margin-bottom: 0;
+    }
 
     .verticalScroll {
         padding: 15px;
         overflow-y: auto;
-        height: 250px;
+        min-height: 180px;
+        max-height: min(320px, calc(var(--app-viewport-height, 100vh) - 260px));
     }
 
     .ck-content, textarea {
-        height: 270px;
+        min-height: clamp(180px, 28vh, 270px);
+        max-height: min(420px, calc(var(--app-viewport-height, 100vh) - 220px));
         padding: 15px;
         overflow-y: auto;
     }
@@ -28,10 +83,23 @@
         display: none
     }*/
 
+    @@media (max-width: 991.98px) {
+        .contact-list-page .contact-list-filter-toolbar {
+            justify-content: flex-start;
+        }
+
+        .contact-list-page .contact-list-filter-toolbar #ddlField,
+        .contact-list-page .contact-list-filter-toolbar #ddlOperator,
+        .contact-list-page .contact-list-filter-toolbar #txtSearch {
+            min-width: 100%;
+            width: 100%;
+        }
+    }
+
 </style>
 
 <link href="~/Content/appcss/paginationFilterCss.css" rel="stylesheet" />
-<div class="page-content">
+<div class="page-content contact-list-page">
     <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
         <div class="ps-3">
             <nav aria-label="breadcrumb">
@@ -45,7 +113,7 @@
         </div>
     </div>
     <hr />
-    <div class="card">
+    <div class="card contact-list-toolbar-card">
         <div class="card-body">
 
             <div class="row">
@@ -83,7 +151,7 @@
                         </div>
 
                         <div class="col-md-10">
-                            <div class="row row-cols-auto g-3" style="float:right">
+                            <div class="row row-cols-auto g-3 contact-list-filter-toolbar">
                                 <div class="col">
                                     <label class="col-form-label">Filter:</label>
                                 </div>
@@ -139,8 +207,8 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
-                <table id="dataList" class="display responsive nowrap" style="width:100%">
+            <div class="table-responsive contact-list-table-wrapper" data-auto-scale-height="table" data-auto-scale-offset="32">
+                <table id="dataList" class="display responsive nowrap contact-list-table" style="width:100%">
                     <thead>
                         <tr>
                             <th></th>
@@ -168,7 +236,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                    </tbody>
+                    @*</tbody>
                     <tfoot>
                         <tr>
                             <th></th>
@@ -194,7 +262,7 @@
                             <th>PAN No</th>
                             <th>Feedback</th>
                         </tr>
-                    </tfoot>
+                    </tfoot>*@
                 </table>
                 <input id="hdnItemSpecMSDSCOA" style="display:none" />
                 <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"]" style="display:none" />

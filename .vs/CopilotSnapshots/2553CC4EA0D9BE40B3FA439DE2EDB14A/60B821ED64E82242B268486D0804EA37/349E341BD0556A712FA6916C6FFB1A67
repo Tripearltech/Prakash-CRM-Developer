@@ -1,0 +1,2242 @@
+﻿﻿
+@{
+    ViewBag.Title = "SalesQuote";
+    Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+}
+
+<style>
+    .InqProdCls, .EditCls,
+    .CostSheetCls, .SQLineCls {
+        cursor: pointer;
+    }
+
+    .SQverticalScroll {
+        padding: 15px;
+        overflow-y: auto;
+        height: 500px;
+    }
+</style>
+<div class="page-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/SPDashboard/Index"><i class="bx bx-tachometer"></i>&nbsp;Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/SPSalesQuotes/SalesQuoteList"> Sales Quote List </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Sales Quote
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label id="lblInqNo" style="display:none"></label>
+                            <input id="hfInqNo" value="" style="display:none" />
+                            <input id="hfUOM" name="hfUOM" value="" style="display:none" />
+                            <input id="hfiteminvstatus" value="NotInInventory" style="display:none" />
+                            <input id="hfEntryNo" value="0" style="display:none" />
+                            <input id="hfQty" value="0" style="display:none" />
+                            <input id="hfIDList" value="0" style="display:none" />
+                            <input id="hfMargin" value="0" style="display:none" />
+                            <input id="hfCurrentID" value="" style="display:none" />
+                            <input id="hfAEDAmt" value="0" style="display:none" />
+                            <input id="hfAdditionalAED" value="0" style="display:none" />
+                            <input id="hfInterestRate" name="hfInterestRate" value="" style="display:none" />
+                            <label id="lblInterestRate" style="display:none"></label>
+                            <input id="hfInterestAmt" value="0" style="display:none" />
+                            <input id="hfUsedCreditLimit" value="" style="display:none" />
+                            <input id="hfCreditDays" value="0" style="display:none" />
+                            <input id="hfPaymentTerms" value="" style="display:none" />
+                            <input id="hfShiptoCode" value="" style="display:none" />
+                            <input id="hfJobtoCode" value="" style="display:none" />
+                            <input id="hfAdditionalCreditDays" value="0" style="display:none" />
+                            <input id="hfTradeDiscount" value="0" style="display:none" />
+                            <input id="hfConsigneeDiscount" value="0" style="display:none" />
+                            <input id="hfQuantityDiscount" value="0" style="display:none" />
+                            <input id="hfNavCustomerNo" value="" style="display:none" />
+                            <input id="hfContactDetails" name="hfContactDetails" value="" style="display:none" />
+                            <input id="hfContactCompanyNo" name="hfContactCompanyNo" value="" style="display:none" />
+                            <input id="hfContactPersonNo" name="hfContactPersonNo" value="" style="display:none" />
+                            <input id="hfCustomerNo" name="hfCustomerNo" value="" style="display:none" />
+                            <input id="hfCustPANNo" name="hfCustPANNo" value="" style="display:none" />
+                            <input id="hfSalesPersonCode" value="" style="display:none" />
+                            <input id="hfDailyVisitNo" value="" style="display:none" />
+                            <input id="hfProdLineNo" name="hfProdLineNo" value="" style="display:none" />
+                            <input id="hfSQProdLineNo" name="hfSQProdLineNo" value="" style="display:none" />
+                            <input id="hfProdNo" name="hfProdNo" value="" style="display:none" />
+                            <input id="hfItemNo" name="hfItemNo" value="" style="display:none" />
+                            <input id="hfProdNoEdit" name="hfProdNoEdit" value="" style="display:none" />
+                            <input id="hfItemName" name="hfItemName" value="" style="display:none" />
+                            <input id="hfUnitPriceEdit" name="hfUnitPriceEdit" value="" style="display:none" />
+                            <input id="hfSavedPackingStyle" name="hfSavedPackingStyle" value="" style="display:none" />
+                            <input id="hfNoSeriesCode" name="hfNoSeriesCode" value="" style="display:none" />
+                            <input id="hfLocationCode" name="hfLocationCode" value="" style="display:none" />
+                            <input id="hfSavedLocationCode" name="hfSavedLocationCode" value="" style="display:none" />
+                            <input id="hfSalesQuoteResDetails" name="hfSalesQuoteResDetails" value="" style="display:none" />
+                            <input id="hfSavedInquiryNo" name="hfSavedInquiryNo" value="" style="display:none" />
+                            <input id="hfSavedQuoteDate" name="hfSavedQuoteDate" value="" style="display:none" />
+                            <input id="hfCustomerName" name="hfCustomerName" value="" style="display:none" />
+                            <input id="hfSavedCustomerName" name="hfSavedCustomerName" value="" style="display:none" />
+                            <input id="hfSavedShiptoCode" name="hfSavedShiptoCode" value="" style="display:none" />
+                            <input id="hfSavedJobtoCode" name="hfSavedJobtoCode" value="" style="display:none" />
+                            <input id="hfSavedContactPersonNo" name="hfSavedContactPersonNo" value="" style="display:none" />
+                            <input id="hfSavedPaymentTerms" name="hfSavedPaymentTerms" value="" style="display:none" />
+                            <input id="hfSavedIncoTerms" name="hfSavedIncoTerms" value="" style="display:none" />
+                            <input id="hfInqProdPackingStyle" name="hfInqProdPackingStyle" value="" style="display:none" />
+                            <input id="hfSavedTransportMethod" name="hfSavedTransportMethod" value="" style="display:none" />
+                            <input id="hfCostSheetFlag" name="hfCostSheetFlag" value="" style="display:none" />
+                            <input id="hfSavedTotalCost" name="hfSavedTotalCost" value="" style="display:none" />
+                            <input id="hfSavedMargin" name="hfSavedMargin" value="" style="display:none" />
+                            <input id="hfSQEdit" name="hfSQEdit" value="false" style="display:none" />
+                            <input id="hfSalesQuoteNo" name="hfSalesQuoteNo" value="false" style="display:none" />
+                            <input id="hfCustomerTemplateCode" name="hfCustomerTemplateCode" value="" style="display:none" />
+                            <input id="hfPaymentTermsDays" value="0" style="display:none" />
+                            <input id="hfPurchaseDays" value="0" style="display:none" />
+                            <input id="hfSavedItemVendorNo" name="hfSavedItemVendorNo" value="" style="display:none" />
+                            <input id="hfSQProdLineNoForShortclose" name="hfSQProdLineNoForShortclose" value="" style="display:none" />
+                            <input id="hfIsLiquidProd" name="hfIsLiquidProd" value="" style="display:none" />
+                            <input id="hfNetWeight" name="hfNetWeight" value="" style="display:none" />
+                            <input id="hfGrossWeight" name="hfGrossWeight" value="" style="display:none" />
+                            <input id="hfApprovalFor" name="hfApprovalFor" value="" style="display:none" />
+                            <input id="hfPostCode" name="hfPostCode" value="" style="display:none" />
+                            <input id="hfAreaCode" name="hfAreaCode" value="" style="display:none" />
+                            <input type="hidden" id="hfFromPincode1" value="" style="display:none" />
+                            <input type="hidden" id="hfFromPincode2" value="" style="display:none" />
+                            <input type="hidden" id="hfToPincode1" value="" style="display:none" />
+                            <input type="hidden" id="hfToPincode2" value="" style="display:none" />
+                            <input type="hidden" id="hfDropshipment" value="" style="display:none" />
+                            <input type="hidden" id="hfPackingUnit" value="" style="display:none" />
+                            <input type="hidden" id="hfLocationCode" value="" style="display:none" />
+
+                        </div>
+                    </div>
+                    <br />
+
+                    <div id="dvSQApproveRejectBtn" style="display:none">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-12" align="right">
+                                <button id="btnApproveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Loading...</span>
+                                </button>
+                                &nbsp;
+                                <button id="btnApprove" type="button" class="btn btn-outline-success px-5" onclick="ApproveRejectSQ('Approve','')">
+                                    <i class='bx bx-check mr-1'></i>Approve
+                                </button>
+                                &nbsp;
+                                <button id="btnReject" type="button" class="btn btn-outline-danger px-5">
+                                    <i class='bx bx-x mr-1'></i>Reject
+                                </button>
+                                <button type="button" class="btn btn-danger" id="btnCancel"
+                                        onclick="window.location.href='/SPSalesQuotes/SalesQuoteStatus'">
+                                    <i class="lni lni-close"></i> Cancel
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <h6 class="mb-0 font-weight-bold">Quote Details</h6>
+                    <hr />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Inquiry</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtInqNo" value="" class="form-control " readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Select Location<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    @*<select id="ddlNoSeries" class="form-select"></select>*@
+                                    <select id="ddlLocations" class="form-select"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Quote Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="date" id="txtSalesQuoteDate" value="" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Quote Valid<br />Untill Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <input type="date" id="txtSQValidUntillDate" value="" class="form-control" />
+                                    <label id="lblSQValidUntillDate" style="color:red"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Customer Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-7">
+                                    <input type="text" id="txtCustomerName" value="" class="form-control" />
+                                </div>
+                                <div class="col-sm-1">
+                                    <button id="btnAddNewContactCompany" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Company"></button>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button id="btnShowCustTrans" type="button" class="btn btn-primary bx bx-show-alt" title="View Last Three Transaction Of Customer"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Contact Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-8">
+                                    <select id="ddlContactName" class="form-select"></select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person" disabled></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Total Credit Limit</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtTotalCreditLimit" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Available Credit Limit</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtAvailableCreditLimit" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Outstanding Due</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="txtOutstandingDue" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Contact Company Address<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                <div class="col-sm-9">
+                                    <select id="ddlConsigneeAddress" class="form-select"></select>
+                                    <input id="hfConsigneeAdd" name="hfConsigneeAdd" style="display:none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label id="lblBillTo" class="col-sm-3 col-form-label">Bill-to Address</label>
+                                <div class="col-sm-8">
+                                    <select id="ddlBillTo" class="form-select"></select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button id="btnAddNewBillTo" type="button" class="btn btn-primary bx bx-plus" title="Add New Bill-to Address" disabled></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label id="lblShipTo" class="col-sm-3 col-form-label">Delivery-to Address</label>
+                                <div class="col-sm-8">
+                                    <select id="ddlDeliveryTo" class="form-select"></select>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button id="btnAddNewJobTo" type="button" class="btn btn-primary bx bx-plus" title="Add New Delivery-to Address" disabled></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <div id="dvIsShortclose" style="display:none">
+                                        <label id="lblIsShortclose" class="col-sm-3 col-form-label">Is Shortclose</label>
+                                        <div class="col-sm-9">
+                                            <input type="checkbox" id="chkIsShortclose" class="form-check-input" />
+                                            <input id="hfShortcloseType" style="display:none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                            </div>
+                        </div>*@
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <table id="tblInquiryLineItems" class="table mb-0 table-striped" style="display:none">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Product Name</th>
+                                        <th scope="col">Qty</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row g-3" style="display:none">
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label id="lblExcise" class="col-sm-3 col-form-label">Excise</label>
+                                <div class="col-sm-9">
+                                    <select id="ddlExcise" class="form-select">
+                                        <option value="-1">---Select---</option>
+                                        <option value="Inclusive">Inclusive</option>
+                                        <option value="Exclusive" selected>Exclusive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <label id="lblExcise" class="col-sm-3 col-form-label">Payment Method</label>
+                                <div class="col-sm-9">
+                                    <select id="ddlPaymentMethods" class="form-select">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dvInquiryLineDetails" style="display:none">
+
+                        <h6 class="mb-0 font-weight-bold">Inquiry Line Items</h6>
+                        <hr />
+
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table class="table table-striped">
+
+                                            <thead>
+                                                <tr>
+                                                    <th hidden></th>
+                                                    <th hidden>Product No</th>
+                                                    <th>Product Name</th>
+                                                    <th>Qty</th>
+                                                    <th>Packing Style</th>
+                                                    <th>UOM</th>
+                                                    <th>Delivery Date</th>
+                                                    <th>Payment Terms</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblInqProdDetails">
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div id="tblsalesqoute">
+                        <div id="dvSQLineDetails" style="display:block">
+                            <h6 class="mb-0 font-weight-bold">Quote Line Details</h6>
+                            <hr />
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Product Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-8">
+                                            <input id="hfIsLiquidProd" value="false" style="display:none" />
+                                            <input id="txtProductName" type="text" class="form-control" />
+                                            <br />
+                                            <input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All
+                                            &nbsp;&nbsp;
+                                            <input type="checkbox" id="chkIsLiquidProd" class="form-check-input" />&nbsp;Is Liquid Product
+                                            @*@Html.TextBoxFor(model => model.Description, new { @id = "txtProductName", @class = "form-control" })*@
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <button id="btnShowProdTrans" type="button" class="btn btn-primary bx bx-show-alt" title="View Last Three Transaction Of Product Based On Customer"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Packing Style<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <select class="form-select" id="ddlPackingStyle">
+                                            </select>
+                                            @*@Html.DropDownListFor(model => model.Packing_Style, Enumerable.Empty<SelectListItem>(), new { @id = "ddlPackingStyle", @class = "form-select" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="dvLiquidProdFields" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Net Weight<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-3">
+                                                <input id="txtNetWeight" type="text" class="form-control" />
+                                                <label id="lblNetWeightErrMsg" class="form-label" style="color:red;display:none">Net Weight should be <= Gross Weight</label>
+                                            </div>
+                                            <label class="col-sm-3 col-form-label">Gross Weight</label>
+                                            <div class="col-sm-3">
+                                                <label id="lblGrossWeight" class="form-label"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-2 col-form-label">Concentrate%<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-3">
+                                                <input id="txtConcentratePercent" type="text" class="form-control" />
+                                            </div>
+                                            <label class="col-sm-3 col-form-label">Liquid Rate<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-4">
+                                                <input id="txtLiquidRate" type="text" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Quantity<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-5">
+                                            <input id="txtProdQty" type="text" class="form-control" />
+
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input type="text" id="txtUOM" class="form-control" disabled />
+                                            @*<label id="lblUOM" class="form-label">UOM</label>*@
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <button type="button" id="btnShowLocDet" class="btn btn-primary bx bx-show-alt" title="Check Available Quantity"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Basic Purchase Cost<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtBasicPurchaseCost" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Basic_Purchase_Cost, new { @id = "txtBasicPurchaseCost", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Inco Terms<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-8">
+                                            <select id="ddlIncoTerms" class="form-select"></select>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <button id="btnAddNewIncoTerms" type="button" class="btn btn-primary bx bx-plus" title="Add New Inco Terms"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Payment Terms<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlPaymentTerms" class="form-select"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label id="lblTransMethod" class="col-sm-3 col-form-label">Transport Method</label>
+                                        <div class="col-sm-8">
+                                            <select id="ddlTransportMethod" class="form-select">
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-1">
+                                            <button id="btnShowTPDet" type="button" class="btn btn-primary bx bx-show-alt" title="View Transport Details"></button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Sales Price<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtSalesPrice" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Sales_Price, new { @id = "txtSalesPrice", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Transport Cost (Freight)</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtTransportCost" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Transport_Cost, new { @id = "txtTransportCost", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Sales Discount</label>
+
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtSalesDiscount" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Sales_Discount, new { @id = "txtSalesDiscount", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Commission</label>
+                                        <div class="col-sm-1">
+                                            <input type="checkbox" id="chkIsCommission" class="form-check-input" />
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <select id="ddlCommissionPerUnitPercent" class="form-select" disabled>
+                                                <option value="-1">---Select---</option>
+                                                <option value="Per Unit">Per Unit</option>
+                                                <option value="%">Percentage</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <input type="text" id="txtCommissionPercent" class="form-control" disabled />
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input type="text" id="txtCommissionAmt" class="form-control" disabled />
+                                            @*@Html.TextBoxFor(model => model.Commission, new { @id = "txtCommission", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+
+                                        <label class="col-sm-3 col-form-label">Delivery Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input id="txtDeliveryDate" type="date" class="form-control" />
+                                            @*@Html.TextBoxFor(x => x.Delivery_Date, new { Value = Model.Delivery_Date, @class = "form-control datepicker", autocomplete = "off", @alt = "Delivery Date" })*@
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Commission Payable</label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlCommissionPayable" class="form-select" disabled>
+                                            </select>
+                                            @*@Html.DropDownListFor(model => model.Commission_Payable, Enumerable.Empty<SelectListItem>(), new { @id = "ddlCommissionPayable", @class = "form-select" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Credit Days</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtCreditDays" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Credit_Days, new { @id = "txtCreditDays", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+
+                                        <label class="col-sm-3 col-form-label">Margin</label>
+                                        <div class="col-sm-7">
+                                            <input type="text" id="txtMargin" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Margin, new { @id = "txtMargin", @class = "form-control" })*@
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <span id="spnMarginPercent" runat="server">0%</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Interest</label>
+                                        <div class="col-sm-6">
+                                            <input type="text" id="txtInterest" class="form-control" />
+                                        </div>
+                                        <div class="col-sm-3">
+
+                                            @*@Html.LabelFor(model => model.Interest, new { @id = "txtInterest", @class = "form-label" })*@
+                                            @*<label id="lblInterest" class="form-label"></label>*@
+                                            <label id="lblInterestRate" class="form-label"> (Int.Rate: <span id="spnInterestRate" runat="server" title="Interest Rate">0</span>% )</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Drop Shipment</label>
+                                        <div class="col-sm-9">
+                                            <input type="checkbox" id="chkDropShipment" class="form-check-input" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Total Cost</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtTotalCost" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Total_Cost, new { @id = "txtInsurance", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">MRP Price<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtMRPPrice" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.PCPL_MRP_Price, new { @id = "txtBasicPurchaseCost", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dvVendors" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Vendor</label>
+                                            <div class="col-sm-9">
+                                                <select id="ddlItemVendors" class="form-select"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                    </div>
+                                </div>
+                            </div>
+                            @*<div class="row g-3">
+
+                                </div>*@
+
+                            <div class="row g-3" style="display:none">
+                                <div class="col-md-6">
+                                    <label class="col-sm-3 col-form-label">GST Place of Supply</label>
+                                    <div class="col-sm-9">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-8"></div>
+                                        <div class="col-sm-4" align="right">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        <button id="btnSaveProd" type="button" class="btn btn-primary"><i class="bx bxs-save"></i> Save Product</button>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <button id="btnResetProdDetails" type="button" class="btn btn-danger"><i class="lni lni-close"></i> Clear</button>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h6 class="mb-0 font-weight-bold">SalesQuote Line Items</h6>
+                        <hr />
+
+                        <div class="row g-3">
+                            @*style="overflow-x:auto"*@
+                            <div class="col-md-12">
+                                @*tblSalesQuoteTempLineItems*@
+                                <div class="table-responsive">
+                                    <table id="dataList" class="display responsive nowrap" style="width: 100%; display: none">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th></th>
+                                                <th>Update Action</th>
+                                                <th>Not Update</th>
+                                                <th>Product No</th>
+                                                <th>Product Name</th>
+                                                <th>Qty</th>
+                                                <th>UOM</th>
+                                                <th>Packing Style</th>
+                                                <th>Basic Purchase Cost</th>
+                                                <th>Margin</th>
+                                                <th>New Price</th>
+                                                <th>New Margin</th>
+                                                <th>Sales Price</th>
+                                                <th>Payment Terms</th>
+                                                <th>Inco Terms</th>
+                                                <th>Price Updated</th>
+                                                <th>Transport Method</th>
+                                                <th>Transport Cost</th>
+                                                <th>Sales Discount</th>
+                                                <th>Commission(%/Per Unit)</th>
+                                                <th>Commission Percent</th>
+                                                <th>Commission Amount</th>
+                                                <th>Credit Days</th>
+                                                <th>Interest</th>
+                                                <th>Drop Shipment</th>
+                                                <th hidden></th>
+                                                <th hidden></th>
+                                                <th>Margin Percent</th>
+                                                <th>Commission Payable</th>
+                                                <th hidden></th>
+                                                <th>IsLiquid Prod</th> @*30*@
+                                                <th>Concentrate%</th> @*31*@
+                                                <th>NetWeight</th> @*32*@
+                                                <th>LiquidRate</th> @*33*@
+                                                <th>Drop Shipment Vendor</th>
+                                                <th>MRP Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblProducts">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- -->
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-8">
+                                    <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                                    <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                    <input type="hidden" id="hdnSalespersonEmail" value="" />
+                                    <input id="hdnLoggedInUserRole" value="@Session["loggedInUserRole"]" style="display:none" />
+                                    <input id="hdnLoggedInUserEmail" value="@Session["loggedInUserEmail"]" style="display:none" />
+                                    <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
+                                    <input id="hdnApprovalFor" value="" style="display:none" />
+                                    <input id="hdnCustBalanceLCY" value="" style="display:none" />
+                                    <input type="hidden" id="hdnSalesQuoteAction" value="@Session["SalesQuoteAction"]" />
+                                    <input type="hidden" id="hdnSalesQuoteActionErr" value="@Session["SalesQuoteActionErr"]" />
+                                </div>
+                                <div class="col-sm-4" align="right">
+                                    <table>
+                                        <tr>
+                                            <td id="btnFinancehide">
+                                                <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
+                                            </td>
+                                            <td></td>
+                                            <td id="btnFinancehide1">
+                                                <a href="/SPSalesQuotes/SalesQuoteList" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dvSQAprJustificationDetails" style="display:none">
+
+                        <h6 class="mb-0 font-weight-bold">SalesQuote Approval Details</h6>
+                        <hr />
+
+                        <div id="dvAprDetailsFinanceUser" style="display:none">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <table class="table mb-0 table-striped">
+                                                <tr>
+                                                    <td style="font-weight:bold" width="30%">Customer Name</td>
+                                                    <td id="AprDetailsCustName" width="70%"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-weight:bold" width="30%">Justification For</td>
+                                                    <td id="AprDetailsApprovalFor" width="70%"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-weight:bold" width="30%">Justification Reason</td>
+                                                    <td id="AprDetailsJustificationReason" width="70%"></td>
+                                                </tr>
+                                            </table>
+                                            <br />
+                                            <table class="table mb-0 table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Trader/Mfg</th>
+                                                        <th>Total Expo</th>
+                                                        <th>Overdue</th>
+                                                        <th>Avg Delay Days</th>
+                                                        <th>Approve/Reject</th>
+                                                        <th>Location</th>
+                                                        <th>Class Customer</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td id="tdTraderMfg"></td>
+                                                        <td id="tdTotalExpo"></td>
+                                                        <td id="tdOverdue"></td>
+                                                        <td id="tdAvgDelayDays"></td>
+                                                        <td id="tdDetailsStatus"></td>
+                                                        <td id="tdDetailsLocationCode"></td>
+                                                        <td id="tdClassCustomer"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+
+
+                    <div id="dvcustomerOutStanding" style="display:none">
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <div class="accordion-item">
+
+                                <h6 id="lblOutstandingValue" class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" style="font-weight:bold" width="30%" data-bs-toggle="collapse" data-bs-target="#flush-collapsecustomerOutstanding" aria-expanded="false" aria-controls="flush-collapsecustomerOutstanding">
+                                        Customer OutStanding/Over-Due Report
+                                    </button>
+                                </h6>
+                            </div>
+
+                            <div id="flush-collapsecustomerOutstanding" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    @*<div id="tblCSOutstandingDuelist" style="display:none">*@
+                                    <div class="row g-3">
+                                        <div class="col-md-12">
+                                            <div class="row mb-3">
+                                                <div class="col-sm-12">
+                                                    <table class="table mb-0 table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Document Type</th>
+                                                                <th scope="col">Bill No</th>
+                                                                <th scope="col">Bill Date</th>
+                                                                <th scope="col">Product Name</th>
+                                                                <th scope="col">Payment Terms</th>
+                                                                <th scope="col">Due Date</th>
+                                                                <th scope="col">Invoice Amount</th>
+                                                                <th scope="col">Remain Amount</th>
+                                                                <th scope="col">Total Days</th>
+                                                                <th scope="col">Overdue Days</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tblCSOutstandingDuelist">
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*</div>*@
+                        </div>
+                    </div>
+                    <div id="dvSQJustificationDetails" style="display:none">
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <br />
+                            <div class="accordion-item">
+
+
+                                <h6 class="mb-0 font-weight-bold accordion-header">
+                                    <button class="accordion-button collapsed" id="lblJustificationTitle" type="button" style="font-weight:bold" width="30%" data-bs-toggle="collapse" data-bs-target="#flush-collapsejustification" aria-expanded="false" aria-controls="flush-collapsejustification">
+                                    </button>
+                                </h6>
+
+                                <div id="flush-collapsejustification" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <div class="row mb-3">
+                                                    <div class="col-sm-12">
+                                                        <table class="table mb-0 table-striped">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">Target Date</th>
+                                                                    <th scope="col">Sales Quote No</th>
+                                                                    <th scope="col">Justification</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tblSQJustificationDetails">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- -->
+            <div class='loader' id='divImage' style="display:none">
+                <!-- MODAL CONTENT -->
+                <div class='loader-content'>
+                    <img alt="Loading... Please wait!" src="~/Layout/assets/images/login-images/load-image-2.gif" width="100" height="100" />
+                </div>
+            </div>
+            <div class="modal" id="modalSQDetails" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div id="dvTransDetails" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <table class="table mb-0 table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Invoice No.</th>
+                                                            <th scope="col">Product Name</th>
+                                                            <th scope="col">Qty in MT</th>
+                                                            <th scope="col">Price in Rs/MT</th>
+                                                            <th scope="col">Margin in Rs/MT</th>
+                                                            <th scope="col">Freight in Rs/MT</th>
+                                                            <th scope="col">Invoice Amount in Rs</th>
+                                                            <th scope="col">Invoice Date</th>
+                                                            <th scope="col">Payment Terms</th>
+                                                            <th scope="col">Due Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tblCustTrans">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="dvLocationDet" style="display:none" class="SQverticalScroll">
+                                <div class="row g-3">
+
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Select Location</label>
+                                            <div class="col-sm-9">
+                                                <select id="ddlQtyPopupLocCode" class="form-select">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <table class="table mb-0 table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th hidden scope="col"></th>
+                                                            <th scope="col">Manufacturer</th>
+                                                            <th scope="col">Lot No</th>
+                                                            <th scope="col">Available Qty</th>
+                                                            <th scope="col">Requested Qty</th>
+                                                            @*<th scope="col">Required Qty</th>*@
+                                                            <th scope="col">Unit Cost</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tblInvDetails">
+                                                    </tbody>
+                                                </table>
+                                                <input id="txtMrpFromILE" style="display:none" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="dvTransportDet" style="display:none">
+
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <table class="table mb-0 table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Effective Date</th>
+                                                            <th scope="col">UOM</th>
+                                                            <th scope="col">Standard Weight</th>
+                                                            <th scope="col">Rate Weight</th>
+                                                            <th scope="col">Above Weight</th>
+                                                            <th scope="col">Vehicle Type</th>
+                                                            <th scope="col">Transporter Type</th>
+                                                            <th scope="col">Select</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tbltansportermethod">
+                                                        <tr>
+                                                            <td colspan="8">
+                                                                <center>No Records Found</center>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="dvPurchaseDis" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <table class="table mb-0 table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Vendor Name</th>
+                                                            <th scope="col">Min Qty</th>
+                                                            <th scope="col">Max Qty</th>
+                                                            <th scope="col">Trade Discount</th>
+                                                            <th scope="col">Qty Discount</th>
+                                                            <th scope="col">Consignee Discount</th>
+                                                            <th scope="col">Distance Discount</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tblPurDis">
+                                                        <tr>
+                                                            <td>Vendor 1</td>
+                                                            <td>0.00</td>
+                                                            <td>101.00</td>
+                                                            <td>0.00</td>
+                                                            <td>0.00</td>
+                                                            <td>450.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- -->
+                            <div id="dvAddIncoTerms" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">IncoTerm Code</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtIncoTermCode" class="form-control" maxlength="10" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Inco Term</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtIncoTerm" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <label id="lblIncoTermAddMsg" style="display:none"></label>
+                            <label id="lblInvQtyAddMsg" style="display:none"></label>
+                            @*<button type="button" id="btnAddQty" class="btn btn-primary" style="display:none">Add</button>*@
+                            <button type="button" id="btnAddIncoTerm" class="btn btn-primary" style="display:none">Add</button>
+                            <button type="button" id="btnCancelIncoTerm" class="btn btn-danger" style="display:none">Cancel</button>
+                            <button id="btnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal" id="modalJustification" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="JustificationTitle" class="modal-title"></h5>
+                            <input id="hfJustificationType" style="display:none" />
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="row g-3" id="Justification1" style="display:none">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Negative Credit Limit Justification :</label>
+                                        <div class="col-sm-9">
+                                            <textarea id="txtJustification1" class="form-control"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3" id="targetDate" style="display:none">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Target Date:</label>
+                                        <div class="col-sm-9">
+                                            <input id="txtTargetDate" type="date" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3" id="Justification2" style="display:none">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Negative Margin Justification :</label>
+                                        <div class="col-sm-9">
+                                            <textarea id="txtJustification2" class="form-control"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*<div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Target Date:</label>
+                                            <div class="col-sm-9">
+                                                <input id="txtTargetDate" type="date" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnConfirmSaveSQSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="visually-hidden">Loading...</span>
+                            </button>
+                            &nbsp;
+                            <button id="btnConfirmSaveSQ" type="button" class="btn btn-primary">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalCostSheet" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Cost Sheet</h5>
+                            <button type="button" id="btnCloseCostSheet" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <table>
+                                                <tr>
+                                                    <td><label class="form-label" style="font-weight:bold">Sales Quote No:  </label></td>
+                                                    <td><label class="form-label" id="lblCostSheetSQNo"></label></td>
+                                                    <td>&nbsp;</td>
+                                                    <td><label class="form-label" style="font-weight:bold">Item Line No:  </label></td>
+                                                    <td><label class="form-label" id="lblCostSheetItemLineNo"></label></td>
+                                                    <td>&nbsp;</td>
+                                                    <td><label class="form-label" style="font-weight:bold">Item Name:  </label></td>
+                                                    <td><label class="form-label" id="lblCostSheetItemName"></label></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <table class="table mb-0 table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th hidden></th>
+                                                        <th scope="col">Charge Item</th>
+                                                        <th scope="col">Description</th>
+                                                        <th scope="col">Quantity</th>
+                                                        <th scope="col">Cost Per Unit</th>
+                                                        <th scope="col">Amount</th>
+                                                        <th hidden scope="col"></th>
+                                                        <th hidden scope="col">Post to G/L</th>
+                                                        <th hidden scope="col">Revenue</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tblCostSheetDetails">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12" align="right">
+                                            <table>
+                                                <tr>
+                                                    <td align="right"><label class="form-label" style="font-weight:bold">Sales Price: </label></td>
+                                                    <td>&nbsp;</td>
+                                                    <td><label class="form-label" id="lblCostSheetSalesPrice"></label></td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right"><label class="form-label" style="font-weight:bold">Total Unit Price: </label></td>
+                                                    <td>&nbsp;</td>
+                                                    <td><label class="form-label" id="lblCostSheetTotalUnitPrice"></label></td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right"><label class="form-label" style="font-weight:bold">Margin: </label></td>
+                                                    <td>&nbsp;</td>
+                                                    <td><label class="form-label" id="lblCostSheetMargin"></label></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <label id="lblCostSheetErrMsg" class="form-label" style="color: red; display: none"></label>
+                            <button id="btnSaveCostSheet" type="button" class="btn btn-primary">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalCostSheetMsg" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Cost Sheet</h5>
+                            <button id="btnCloseCostSheetMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <center>
+                                <div id="dvCostSheetMsg" style="display:none">
+                                    <img id="resIcon" />
+                                    <br />
+                                    <label id="resMsg" class="form-label"></label>
+                                </div>
+                                <div id="dvUpdateCostSheetMsg" style="display:none">
+                                    <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                                    <br />
+                                    <label class="form-label">Cost Sheet Saved Successfully.</label>
+                                </div>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalSQMsg" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sales Quote</h5>
+                            <button id="btnCloseSQMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <center>
+                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                                <br />
+                                <label id="lblSQMsg" class="form-label"></label>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalShortclose" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 id="ShortcloseTitle" class="modal-title"></h5>
+                            <button id="btnCloseModalShortclose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Shortclose Reason<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlShortcloseReason" class="form-select">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div id="dvShortcloseRemarks" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Shortclose Remarks<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtShortcloseRemarks" class="form-control"></textarea>
+                                                <input id="hfSCRemarksSetupValue" value="" style="display:none" />
+                                                <input id="hfShortcloseWithRemarks" value="" style="display:none" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input id="hfShortcloseType" style="display:none" />
+                            <label id="lblShortcloseErrMsg" class="form-label" style="color: red; display: none"></label>
+                            &nbsp;
+                            <button id="btnShortcloseSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="visually-hidden">Loading...</span>
+                            </button>
+                            &nbsp;
+                            <button id="btnShortclose" type="button" class="btn btn-primary">Shortclose</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalSQ" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <input id="hfAddNewDetails" style="display:none" />
+                            <h5 class="modal-title">Add New Contact Person<br />In Selected Company</h5>
+                            <button id="btnCloseModalSQ" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div id="dvAddNewCPerson" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtCPersonName" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtCPersonMobile" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            @*<label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>*@
+                                            <label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtCPersonEmail" class="form-control" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Department<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                @*<input type="hidden" id="hfDepartmentCode" value="@ViewBag.PCPL_Department_Code" />*@
+                                                <select id="ddlDepartment" class="form-select"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtJobResponsibility" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Allow Login</label>
+                                            <div class="col-sm-9">
+                                                <input type="checkbox" id="chkAllowLogin" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
+                                            <div class="col-sm-9">
+                                                <input type="checkbox" id="chkEnableOTPOnLogin" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Is Primary</label>
+                                            <div class="col-sm-9">
+                                                <input type="checkbox" id="chkIsPrimary" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dvAddNewShiptoAddress" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddName" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtNewShiptoAddress" class="form-control" maxlength="100"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address2</label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtNewShiptoAddress2" class="form-control" maxlength="50"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddPostCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Country/Region</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddCountryCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">State</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddState" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">District</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddDistrict" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">City</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddCity" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <select id="ddlNewShiptoAddArea" class="form-select"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewShiptoAddGSTNo" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="dvAddNewJobtoAddress" style="display:none">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddName" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtNewJobtoAddress" class="form-control" maxlength="100"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address2</label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtNewJobtoAddress2" class="form-control" maxlength="50"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddPostCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Country/Region</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddCountryCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">State</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddState" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">District</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddDistrict" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">City</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddCity" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <select id="ddlNewJobtoAddArea" class="form-select"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddGSTNo" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <label id="lblMsg" style="display:none" class="form-label"></label>
+                            &nbsp;
+                            <button id="btnAddSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="visually-hidden">Loading...</span>
+                            </button>
+                            &nbsp;
+                            <button id="btnConfirmAdd" class="btn btn-primary" type="button">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalShortcloseMsg" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Shortclose</h5>
+                            <button id="btnCloseShortcloseMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <center>
+                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                                <br />
+                                <label id="lblSQShortclose" class="form-label"></label>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" style="color:red">Error</h5>
+                            <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="color:red" align="center">
+                            <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                            <br /><br />
+                            <h6 id="modalErrDetails" style="color:red"></h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalRejectRemarks" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Reject Remarks</h5>
+                            <button id="btnCloseModalRejectRemarks" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Remarks</label>
+                                        <div class="col-sm-9">
+                                            <textarea id="txtRejectRemarks" class="form-control"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="padding-bottom:0px">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12" align="right">
+                                            <label id="lblRemarksMsg" class="col-form-label" style="color:red"></label>
+                                            &nbsp;
+                                            <button id="btnRejectSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                <span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            &nbsp;
+                                            <button id="btnConfirmReject" type="button" class="btn btn-primary">Reject</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal" id="modalApproveRejectMsg" tabindex="-1" aria-hidden="true" style="display:none">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sales Quote Approval</h5>
+                            <button id="btnCloseApproveRejectMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <center>
+                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                                <br />
+                                <label id="lblApproveRejectMsg" class="form-label"></label>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@Scripts.Render("~/bundles/jquery")
+<script src="~/Scripts/appjs/SalesQuote.js"></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.js")' type='text/javascript'></script>
+<script src='@Url.Content("~/Scripts/jquery.validate.unobtrusive.js")' type='text/javascript'></script>
+<script src="~/Scripts/appjs/json2.js"></script>
+<script src="~/Layout/vendors/raphael/raphael.min.js"></script>
+<script src="~/Layout/vendors/morris.js/morris.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#btnAddNewContactCompany').click(function () {
+            window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")');
+        });
+
+        $('#btnShowCustTrans').click(function () {
+            debugger
+            //var location = $('#ddlLocations').val();
+            //var Loc = location.split("_");
+            //var loc = Loc[0];
+            $('#modalSQDetails').css('display', 'block');
+            $('.modal-title').text('Last Three Transaction Of Customer');
+            $('#dvTransDetails').css('display', 'block');
+            $('#btnAddIncoTerm').css('display', 'none');
+            $('#btnCancelIncoTerm').css('display', 'none');
+            $('#lblIncoTermAddMsg').css('display', 'none');
+            $('#btnClose').css('display', 'block');
+
+            $.ajax(
+                {
+                    url: '/SPSalesQuotes/GetLastThreeTrans?CustNo=' + $('#hfCustomerNo').val() + /*'&LocCode=' + loc +*/ '&TransType=CustTrans&ProdNo=' + $('#hfProdNo').val(),
+                    type: 'GET',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+                        var CustTransTR = "";
+                        $('#tblCustTrans').empty();
+                        if (data.length > 0) {
+                            $.each(data, function (index, item) {
+                                CustTransTR = CustTransTR + "<tr><td>" + item.Document_No + "</td><td>" + item.Description + "</td><td>" + item.Quantity + "</td><td>" + parseFloat(item.Unit_Price).toFixed(2) + "</td><td>" + item.PCPL_Margin + "</td><td>" + item.PCPL_Freight_Charges + "</td><td>" + item.PCPL_Amount_Including_GST + "</td><td>" + item.Posting_Date + "</td><td>" + item.PCPL_Payment_Terms + "</td><td>" + item.PCPL_Due_Date + "</td></tr>";
+                            });
+
+                            $('#tblCustTrans').append(CustTransTR);
+                        }
+                        else {
+                            $('#tblCustTrans').append("<tr><td colspan=10 align='center'>No Records</td></tr>");
+                        }
+
+                    },
+                    error: function () {
+                        //alert("error");
+                    }
+                }
+            );
+        });
+
+        $('#btnShowProdTrans').click(function () {
+            $('#modalSQDetails').css('display', 'block');
+            $('.modal-title').text('Last Three Transaction Of Product');
+            $('#dvTransDetails').css('display', 'block');
+            $('#btnAddIncoTerm').css('display', 'none');
+            $('#btnCancelIncoTerm').css('display', 'none');
+            $('#lblIncoTermAddMsg').css('display', 'none');
+            $('#btnClose').css('display', 'block');
+           /* var location = $('#ddlLocations').val();
+            var Loc = location.split("_");
+            var loc = Loc[0];*/
+            $.ajax(
+                {
+                    url: '/SPSalesQuotes/GetLastThreeTrans?CustNo=' + $('#hfCustomerNo').val() /*+ '&LocCode=' + loc*/ + '&TransType=ProdTrans&ProdNo=' + $('#hfProdNo').val(),
+                    type: 'GET',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+                        var CustTransTR = "";
+                        $('#tblCustTrans').empty();
+
+                        if (data.length > 0) {
+
+                            $.each(data, function (index, item) {
+                                CustTransTR = CustTransTR + "<tr><td>" + item.Document_No + "</td><td>" + item.Description + "</td><td>" + item.Quantity + "</td><td>" + parseFloat(item.Unit_Price).toFixed(2) + "</td><td>" + item.PCPL_Margin + "</td><td>" + item.PCPL_Freight_Charges + "</td><td>" + item.PCPL_Amount_Including_GST + "</td><td>" + item.Posting_Date + "</td><td>" + item.PCPL_Payment_Terms + "</td><td>" + item.PCPL_Due_Date + "</td></tr>";
+                            });
+                            $('#tblCustTrans').append(CustTransTR);
+                        }
+                        else {
+                            $('#tblCustTrans').append("<tr><td colspan=10 align='center'>No Records</td></tr>");
+                        }
+
+                    },
+                    error: function () {
+                        //alert("error");
+                    }
+                }
+            );
+
+        });
+
+        $('#btnShowLocDet').click(function () {
+
+            $('#modalSQDetails').css('display', 'block');
+            $('.modal-title').text('Available Quantity');
+            $('#dvLocationDet').css('display', 'block');
+
+            $('#ddlQtyPopupLocCode').empty();
+
+            var LocCodeOpts = "<option value='-1'>---Select---</option>";
+            LocCodeOpts += "<option value='" + $('#ddlLocations').val() + "'>" +
+                $('#ddlLocations option:selected').text() + "</option>";
+
+            $('#ddlQtyPopupLocCode').append(LocCodeOpts);
+            $('#ddlQtyPopupLocCode').val($('#ddlLocations').val());
+            var qty = $("#txtProdQty").val();
+            var location = $('#ddlLocations').val();
+             var Loc = location.split("_");
+             var loc = Loc[0];
+
+            $.ajax({
+                url: '/SPSalesQuotes/GetAvailableQuantity?ProdNo=' + $('#hfProdNo').val() + '&LocationCode=' + loc,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+
+                    $('#tblInvDetails').empty();
+                    var rows = "";
+
+                    if (data && data.length > 0) {
+
+                        $.each(data, function (index, item) {
+                            var costActual = parseFloat(item.Cost_Amount_Actual) || 0;
+                            var totalqty = qty > 0 ? (costActual / qty) : 0;
+
+                            rows += "<tr>" + "<td>" + item.PCPL_Mfg_Name + "</td>" + "<td>" + item.Lot_No + "</td>" + "<td>" + qty + "</td>" + "<td>" + totalqty.toFixed(2) + "</td><td>0</td></tr>";
+                        });
+
+                    } else {
+                        rows = "<tr><td colspan='7' style='text-align:center'>No Records Available</td></tr>";
+                    }
+
+                    $('#tblInvDetails').append(rows);
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                    alert("Error loading data");
+                }
+            });
+        });
+
+
+        $('#btnClose,.btn-close,#btnCancelIncoTerm').click(function () {
+            $('#modalSQDetails').css('display', 'none');
+            $('.modal-title').text('');
+            $('#dvTransDetails').css('display', 'none');
+            $('#dvLocationDet').css('display', 'none');
+            $('#dvTransportDet').css('display', 'none');
+            $('#dvPurchaseDis').css('display', 'none');
+            $('#dvAddIncoTerms').css('display', 'none');
+            $('#modalJustification').css('display', 'none');
+            $('#lblInvQtyAddMsg').css('display', 'none');
+        });
+
+        $('#btnShowTPDet').click(function () {
+            $('#modalSQDetails').css('display', 'block');
+            $('.modal-title').text('Select Area');
+            $('#dvTransportDet').css('display', 'block');
+            $('#btnAddIncoTerm').css('display', 'none');
+            $('#btnCancelIncoTerm').css('display', 'none');
+            $('#lblIncoTermAddMsg').css('display', 'none');
+            $('#btnClose').css('display', 'block');
+        });
+
+        $('#btnShowPurchaseDis').click(function () {
+            $('#modalSQDetails').css('display', 'block');
+            $('.modal-title').text('Purchase Discount');
+            $('#dvPurchaseDis').css('display', 'block');
+            $('#btnAddIncoTerm').css('display', 'none');
+            $('#btnCancelIncoTerm').css('display', 'none');
+            $('#lblIncoTermAddMsg').css('display', 'none');
+            $('#btnClose').css('display', 'block');
+
+            $.ajax(
+                {
+                    url: '/SPSalesQuotes/GetPurDiscountDetails?ProdNo=' + $('#hfProdNo').val(),
+                    type: 'GET',
+                    contentType: 'application/json',
+                    success: function (data) {
+
+                        var PurDisTR = "";
+
+                        if (data.length > 0) {
+
+                            $.each(data, function (index, item) {
+                                PurDisTR = PurDisTR + "<tr><td>" + item.Vendor_Name + "</td><td>" + item.Minimum_Quantity + "</td><td>" + item.Maximum_Quantity + "</td><td>" + item.Trade_Disount_Amount + "</td><td>" + item.Qty_Discount_Amount + "</td><td>" + item.Consignee_Discount_Amount + "</td><td>" + item.Distance_Discount_Amount + "</td></tr>";
+                            });
+
+                        }
+                        else {
+
+                            PurDisTR = PurDisTR + "<tr><td colspan='7' style='text-align:center'>No Records Availalbe</td></tr>";
+                        }
+
+                        $('#tblPurDis').empty();
+                        $('#tblPurDis').append(PurDisTR);
+
+                    },
+                    error: function () {
+                        //alert("error");
+                    }
+                }
+            );
+
+        });
+
+        $('#btnAddNewIncoTerms').click(function () {
+
+            $('#modalSQDetails').css('display', 'block');
+            $('.modal-title').text('Add Inco Terms');
+            $('#dvAddIncoTerms').css('display', 'block');
+            $('#btnAddIncoTerm').css('display', 'block');
+            $('#btnCancelIncoTerm').css('display', 'block');
+            $('#lblIncoTermAddMsg').css('display', 'none');
+            $('#btnClose').css('display', 'none');
+
+        });
+        debugger;
+        $('#btnSave').click(function () {
+            var errMsg = CheckFieldValues();
+            if (errMsg != "") {
+
+                ShowErrMsg(errMsg);
+            }
+            else {
+                var negativemargin = false;
+
+                $("#tblProducts TR[id^='ProdTR_']").each(function () {
+
+                    var rowMargin = parseAmount($(this).find("TD").eq(11).html());
+
+                    if (rowMargin < 0) {
+                        negativemargin = true;
+                        return false;
+                    }
+
+
+
+                });
+                var margin1 = negativemargin ? -1 : 1;
+                $("#hfMargin").val(margin1);
+               var creditLimit = parseAmount($('#txtAvailableCreditLimit').val());
+                var margin = $('#hfMargin').val();
+
+                if (creditLimit < 0 && margin < 0) {
+
+                    $('#JustificationTitle').text("Justification For Negative Credit Limit And Margin");
+                    $('#hfJustificationFor').val("Justification For Negative Credit Limit And Margin");
+                    $('#hfApprovalFor').val("Both");
+
+                    $('#Justification1').show();
+                    $('#Justification2').show();
+                    $('#targetDate').show();
+                    $('#modalJustification').show();
+
+                }
+                else if (creditLimit < 0 && margin >= 0) {
+
+                    $('#JustificationTitle').text("Justification For Negative Credit Limit");
+                    $('#hfJustificationFor').val("Justification For Credit Limit");
+                    $('#hfApprovalFor').val("Negative Credit Limit");
+
+                    $('#Justification1').show();
+                    $('#Justification2').hide();
+                    $('#targetDate').show();
+                    $('#modalJustification').show();
+
+                }
+                else if (creditLimit >= 0 && margin < 0) {
+
+                    $('#JustificationTitle').text("Justification For Negative Margin");
+                    $('#hfJustificationFor').val("Justification For Negative Margin");
+                    $('#hfApprovalFor').val("Negative Margin");
+
+                    $('#Justification1').hide();
+                    $('#Justification2').show();
+                    $('#targetDate').hide();
+                    $('#modalJustification').show();
+
+                }
+                else {
+
+                    SaveSalesQuote();
+                }
+            }
+
+        });
+        debugger;
+
+        $('#btnConfirmSaveSQ').click(function () {
+
+            SaveSalesQuote();
+
+        });
+
+    });
+    debugger;
+    function parseAmount(value) {
+        if (!value) return 0;
+        return parseFloat(value.replace(/,/g, ''));
+    }
+    function SaveSalesQuote() {
+        $('#divImage').show();
+        $('#btnConfirmSaveSQSpinner').show();
+
+        var salesquoteheader = {};
+        var productDetails_ = [];
+
+        // Header Info
+        salesquoteheader.IsSQEdit = $('#hfSQEdit').val();
+        salesquoteheader.QuoteNo = $('#hfSalesQuoteNo').val();
+        salesquoteheader.NoSeriesCode = $('#hfNoSeriesCode').val();
+        salesquoteheader.InquiryNo = $('#txtInqNo').val();
+        var location = $('#ddlLocations').val();
+        var Loc = location.split("_");
+        var loc = Loc[0];
+        salesquoteheader.LocationCode = loc;
+        salesquoteheader.OrderDate = $('#txtSalesQuoteDate').val();
+        salesquoteheader.ContactCompanyNo = $('#hfContactCompanyNo').val();
+        salesquoteheader.ContactCompanyName = $('#txtCustomerName').val();
+        salesquoteheader.ContactPersonNo = $('#ddlContactName').val();
+        salesquoteheader.ContactPersonName = $('#ddlContactName option:selected').text();
+        salesquoteheader.CustomerNo = $('#hfCustomerNo').val();
+        salesquoteheader.TotalCreditLimit = $('#txtTotalCreditLimit').val();
+        salesquoteheader.UsedCreditLimit = $('#hfUsedCreditLimit').val();
+        salesquoteheader.AvailableCreditLimit = $('#txtAvailableCreditLimit').val();
+        salesquoteheader.OutstandingDue = $('#txtOutstandingDue').val();
+        salesquoteheader.PaymentMethodCode = $('#ddlPaymentMethods').val();
+        salesquoteheader.TransportMethodCode = $('#ddlTransportMethod').val();
+
+        const PaymentTermsDetails = $('#ddlPaymentTerms').val().split('_');
+        salesquoteheader.PaymentTermsCode = PaymentTermsDetails[0];
+        salesquoteheader.ShipmentMethodCode = $('#ddlIncoTerms').val();
+        salesquoteheader.ConsigneeAddress = $('#ddlConsigneeAddress').val();
+        salesquoteheader.ShiptoCode = $('#ddlBillTo').val();
+        salesquoteheader.JobtoCode = $('#ddlDeliveryTo').val();
+        salesquoteheader.JobtoAddress = $('#ddlDeliveryTo option:selected').text();
+        salesquoteheader.CustomerTemplateCode = $('#hfCustomerTemplateCode').val();
+        salesquoteheader.JustificationFor = $('#JustificationTitle').text();
+        salesquoteheader.JustificationDetails = $('#txtJustification1').val();
+        salesquoteheader.JustificationDetails = $('#txtJustification2').val();
+        salesquoteheader.ApprovalFor = $('#hfApprovalFor').val();
+        salesquoteheader.TargetDate = $('#txtTargetDate').val();
+        salesquoteheader.ValidUntillDate = $('#txtSQValidUntillDate').val();
+        salesquoteheader.PCPL_Packing_MRP_Price = $('#txtMRPPrice').val();
+
+        // Product Details
+        $("#tblProducts TR[id^='ProdTR_']").each(function () {
+            var productDetails = {};
+
+            // Safely parse boolean for liquid product
+            var tdVal = $(this).find("TD").eq(30).html();
+            //var isLiquidProd = (tdVal && tdVal.toLowerCase() === "true");
+            var isLiquidProd = $(this).find("TD").eq(28).html()
+
+            productDetails.No = $(this).find("TD").eq(2).html();
+            productDetails.ProductName = $(this).find("TD").eq(3).html();
+            productDetails.Quantity = parseFloat($(this).find("TD").eq(4).html()) || 0;
+            productDetails.Unit_Price = parseFloat($(this).find("TD").eq(8).html()) || 0;
+
+            // Use Packing Style CODE (value) instead of text
+            productDetails.PCPL_Packing_Style_Code = $(this).find("TD").eq(6).attr("data-code") || $(this).find("TD").eq(6).html();
+            productDetails.PCPL_MRP = $(this).find("TD").eq(7).html();
+            productDetails.Delivery_Date = $(this).find("TD").eq(9).html();
+            productDetails.PCPL_Total_Cost = $(this).find("TD").eq(10).html();
+            productDetails.PCPL_Margin = $(this).find("TD").eq(11).html();
+            productDetails.PCPL_Transport_Method = $(this).find("TD").eq(14).html();
+            productDetails.PCPL_Transport_Cost = $(this).find("TD").eq(15).html();
+            productDetails.PCPL_Sales_Discount = $(this).find("TD").eq(16).html();
+
+            productDetails.PCPL_Commission_Type = $(this).find("TD").eq(17).html() || "";
+            productDetails.PCPL_Commission = parseFloat($(this).find("TD").eq(18).html()) || 0;
+            productDetails.PCPL_Commission_Amount = parseFloat($(this).find("TD").eq(19).html()) || 0;
+            productDetails.PCPL_Credit_Days = parseFloat($(this).find("TD").eq(20).html()) || 0;
+            productDetails.PCPL_Interest = parseFloat($(this).find("TD").eq(21).html()) || 0;
+            productDetails.PCPL_Commission_Payable = ($(this).find("TD").eq(26).html() === " ") ? "" : $(this).find("TD").eq(26).html();
+            productDetails.PCPL_Packing_MRP_Price = ($(this).find("TD").eq(33).html() === " ") ? "" : $(this).find("TD").eq(33).html();
+            var prodNo = productDetails.No;
+            var dropShipHtml = $("#" + prodNo + "_DropShipment").html();
+            if (dropShipHtml === "Yes") {
+                productDetails.Drop_Shipment = true;
+                productDetails.PCPL_Vendor_No = $(this).find("TD").eq(32).html();
+                if (productDetails.PCPL_Vendor_No == " ") productDetails.PCPL_Vendor_No = "";
+            } else {
+                productDetails.Drop_Shipment = false;
+                productDetails.PCPL_Vendor_No = "";
+            }
+
+
+            if ($('#ddlInquiries').val() != "-1") {
+                productDetails.InqProdLineNo = $("#" + prodNo + "_InqProdLineNo").html();
+                productDetails.Line_No = $("#" + prodNo + "_InqProdLineNo").html();
+            } else {
+                productDetails.Line_No = $("#" + prodNo + "_InqProdLineNo").html();
+            }
+
+            if ($('#hfSQEdit').val() === "true") {
+                productDetails.Line_No = $("#" + prodNo + "_SQLineNo").html();
+            }
+            // temproary need to check and change the line number
+
+            var marginPercent = $("#" + prodNo + "_MarginPercent").html() || "0%";
+            marginPercent = marginPercent.replace('%', '');
+            productDetails.PCPL_Margin_Percent = parseFloat(marginPercent) || 0;
+
+            // Liquid Product Details
+            productDetails.IsLiquidProd = isLiquidProd;
+            if (isLiquidProd) {
+                productDetails.PCPL_Concentration_Rate_Percent = parseFloat($(this).find("TD").eq(29).html()) || 0;
+                productDetails.Net_Weight = parseFloat($(this).find("TD").eq(30).html()) || 0;
+                productDetails.PCPL_Liquid_Rate = parseFloat($(this).find("TD").eq(31).html()) || 0;
+            } else {
+                productDetails.PCPL_Concentration_Rate_Percent = "";
+                productDetails.Net_Weight = 0;
+                productDetails.PCPL_Liquid_Rate = "";
+            }
+
+            productDetails_.push(productDetails);
+        });
+
+        salesquoteheader.Products = productDetails_;
+
+        // AJAX POST
+        $.ajax({
+            type: "POST",
+            url: "/SPSalesQuotes/PostSalesQuote",
+            data: JSON.stringify(salesquoteheader),
+            contentType: "application/json; charset=utf-8",
+            success: function (responseMsg) {
+                $('#divImage').hide();
+                $('#hfSalesQuoteResDetails').val(responseMsg);
+
+                const responseMsg_ = responseMsg.split(',');
+                if ($('#hfSalesQuoteResDetails').val() != "") {
+                    var actionMsg = ($('#hfSQEdit').val() === "true")
+                        ? responseMsg_[0] + " - Sales Quote Updated Successfully"
+                        : responseMsg_[0] + " - Sales Quote Created Successfully";
+
+                    $('#modalJustification').hide();
+                    $('#btnConfirmSaveSQSpinner').hide();
+                    $('#hfSQEdit').val("false");
+                    $('#modalSQMsg').show();
+                    $('#lblSQMsg').text(actionMsg);
+                } else {
+                    window.location.reload(false);
+                }
+            },
+            error: function (err) {
+                $('#divImage').hide();
+                $('#btnConfirmSaveSQSpinner').hide();
+                console.error("Error saving Sales Quote:", err);
+                alert("Failed to save Sales Quote. Check console for details.");
+            }
+        });
+    }
+
+
+
+    function RedirectToSQApproval() {
+        window.location.replace('@Url.Action("SalesQuoteList", "SPSalesQuotes")');
+    }
+
+</script>

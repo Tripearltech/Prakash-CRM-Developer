@@ -785,8 +785,9 @@ function ValidateGRNData() {
 }
 //Start Function
 // Create the GRN Document Attchment Function 
+var grnAttachmentTableId = 6505;
 var grnAttachmentStore = {};
-var grnAttachmentState = {rowKey: '', rowContext: null, files: [], viewerFiles: [], viewerIndex: 0, viewerZoom: 1, viewerMode: 'single'};
+var grnAttachmentState = {rowKey: '', rowContext: null, files: [], viewerFiles: [], viewerIndex: 0, viewerZoom: 1, viewerMode: 'single', isLoading: false};
 var grnAttachmentIdSeed = 0;
 
 function InitializeGRNAttachmentUi() {
@@ -884,6 +885,197 @@ function IsGRNAttachmentImage(ext) {
     return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].indexOf((ext || '').toLowerCase()) >= 0;
 }
 
+function IsGRNAttachmentPdf(ext, contentType) {
+    var normalizedContentType = (contentType || '').toLowerCase();
+    return (ext || '').toLowerCase() === 'pdf' || normalizedContentType.indexOf('application/pdf') === 0;
+}
+
+function NormalizeGRNAttachmentExtension(extension) {
+    var normalizedExtension = (extension || '').toString().trim().toLowerCase();
+    if (normalizedExtension === '') {
+        return '';
+    }
+
+    return normalizedExtension.indexOf('.') === 0 ? normalizedExtension : '.' + normalizedExtension;
+}
+
+function BuildGRNAttachmentDisplayName(fileName, fileExtension) {
+    var normalizedFileName = (fileName || '').toString().trim();
+    var normalizedExtension = NormalizeGRNAttachmentExtension(fileExtension);
+
+    if (normalizedFileName === '') {
+        return normalizedExtension ? ('attachment' + normalizedExtension) : 'attachment';
+    }
+
+    if (normalizedExtension && normalizedFileName.toLowerCase().slice(-normalizedExtension.length) !== normalizedExtension) {
+        return normalizedFileName + normalizedExtension;
+    }
+
+    return normalizedFileName;
+}
+
+function GetGRNAttachmentMimeType(ext, contentType) {
+    var normalizedContentType = (contentType || '').toLowerCase();
+    if (normalizedContentType !== '') {
+        return normalizedContentType;
+    }
+
+    switch ((ext || '').toLowerCase()) {
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'png':
+            return 'image/png';
+        case 'gif':
+            return 'image/gif';
+        case 'bmp':
+            return 'image/bmp';
+        case 'webp':
+            return 'image/webp';
+        case 'svg':
+            return 'image/svg+xml';
+        case 'pdf':
+            return 'application/pdf';
+        case 'doc':
+            return 'application/msword';
+        case 'docx':
+            return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        case 'xls':
+            return 'application/vnd.ms-excel';
+        case 'xlsx':
+            return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        default:
+            return 'application/octet-stream';
+    }
+}
+
+function NormalizeGRNAttachmentBase64(base64Text) {
+    if (!base64Text) {
+        return '';
+    }
+
+    var normalized = base64Text.toString().trim();
+    var base64Marker = ';base64,';
+    var markerIndex = normalized.indexOf(base64Marker);
+    if (markerIndex >= 0) {
+        normalized = normalized.substring(markerIndex + base64Marker.length);
+    }
+
+    return normalized.replace(/\s/g, '');
+}
+
+function EstimateGRNAttachmentSizeFromBase64(base64Text) {
+    var normalized = NormalizeGRNAttachmentBase64(base64Text);
+    if (!normalized) {
+        return 0;
+    }
+
+    var padding = 0;
+    if (normalized.slice(-2) === '==') {
+        padding = 2;
+    }
+    else if (normalized.slice(-1) === '=') {
+        padding = 1;
+    }
+
+    return Math.max(0, Math.floor((normalized.length * 3) / 4) - padding);
+}
+
+function BuildGRNAttachmentPreviewUrl(base64Text, contentType) {
+    var normalized = NormalizeGRNAttachmentBase64(base64Text);
+    if (!normalized) {
+        return '';
+    }
+
+    try {
+        var binaryString = window.atob(normalized);
+        var bytes = new Uint8Array(binaryString.length);
+        for (var index = 0; index < binaryString.length; index += 1) {
+            bytes[index] = binaryString.charCodeAt(index);
+        }
+
+        var blob = new Blob([bytes], { type: contentType || 'application/octet-stream' });
+        if (window.URL && window.URL.createObjectURL) {
+            return window.URL.createObjectURL(blob);
+        }
+    }
+    catch (error) {
+    }
+
+    return 'data:' + (contentType || 'application/octet-stream') + ';base64,' + normalized;
+}
+
+function BuildGRNAttachmentDeleteKey(file) {
+    return [
+        file.bcAttachmentId || 0,
+        file.tableId || grnAttachmentTableId,
+        file.lotNo || '',
+        file.documentType || '',
+        file.lineNo || 0
+    ].join('|');
+}
+
+function MapBusinessCentralAttachmentToFile(attachment) {
+    var sourceFileName = attachment.FileName || attachment.File_Name || '';
+    var sourceFileExtension = attachment.FileExtension || attachment.File_Extension || '';
+    var sourceContentType = attachment.ContentType || attachment.contentType || '';
+    var sourceBase64 = attachment.Base64 || attachment.Base64Text || '';
+    var sourceLotNo = attachment.LotNo || attachment.No || '';
+    var sourceItemNo = attachment.ItemNo || attachment.Item_No || '';
+    var sourceTableId = attachment.Table_ID || attachment.TableId || grnAttachmentTableId;
+    var sourceRecordId = attachment.ID || attachment.RecordId || 0;
+    var sourceDocumentType = attachment.DocumentType || attachment.Document_Type || '';
+    var sourceLineNo = attachment.LineNo || attachment.Line_No || 0;
+    var sourceAttachedDate = attachment.AttachedDate || attachment.Attached_Date || '';
+    var normalizedExtension = NormalizeGRNAttachmentExtension(sourceFileExtension);
+    var displayName = BuildGRNAttachmentDisplayName(sourceFileName, normalizedExtension);
+    var ext = GetGRNAttachmentExtension(displayName);
+    var contentType = GetGRNAttachmentMimeType(ext, sourceContentType);
+    var normalizedBase64 = NormalizeGRNAttachmentBase64(sourceBase64);
+
+    return {
+        id: NextGRNAttachmentId(),
+        name: displayName,
+        size: EstimateGRNAttachmentSizeFromBase64(normalizedBase64),
+        ext: ext,
+        url: BuildGRNAttachmentPreviewUrl(normalizedBase64, contentType),
+        uploadedAt: (sourceAttachedDate || '').toString().trim() || new Date().toLocaleString('en-IN'),
+        rawFile: null,
+        isUploaded: true,
+        isPersisted: true,
+        base64: normalizedBase64,
+        contentType: contentType,
+        fileExtension: normalizedExtension,
+        serverFileName: sourceFileName || '',
+        lotNo: sourceLotNo || '',
+        itemNo: sourceItemNo || '',
+        tableId: sourceTableId,
+        bcAttachmentId: sourceRecordId,
+        documentType: sourceDocumentType || '',
+        lineNo: sourceLineNo || 0,
+        deleteKey: [
+            sourceRecordId,
+            sourceTableId,
+            sourceLotNo || '',
+            sourceDocumentType || '',
+            sourceLineNo || 0
+        ].join('|')
+    };
+}
+
+function MergeGRNAttachmentFiles(existingFiles, fetchedFiles) {
+    var localFiles = $.grep(existingFiles || [], function (file) {
+        return !file.isPersisted;
+    });
+
+    return (fetchedFiles || []).concat(localFiles);
+}
+
+function SetGRNAttachmentLoadingState(isLoading) {
+    grnAttachmentState.isLoading = !!isLoading;
+    RenderGRNAttachmentFileList();
+}
+
 function FormatGRNAttachmentSize(size) {
     var fileSize = parseFloat(size) || 0;
     var units = ['B', 'KB', 'MB', 'GB'];
@@ -937,12 +1129,37 @@ function ResolveGRNAttachmentRowKey($row) {
     return rowKey;
 }
 
+function ResolveGRNAttachmentVariantCode($row, $cells) {
+    var variantCode = ($row.attr('data-variant-code') || '').trim();
+    if (variantCode !== '') {
+        return variantCode;
+    }
+
+    variantCode = $.trim(
+        $row.find('input[name*="Variant"], input[id*="Variant"], input[name*="variant"], input[id*="variant"], select[name*="Variant"], select[id*="Variant"], select[name*="variant"], select[id*="variant"]').first().val() || ''
+    );
+    if (variantCode !== '') {
+        return variantCode;
+    }
+
+    variantCode = $.trim(
+        $('#hdnVariantCode').val() ||
+        $('#Variant_Code').val() ||
+        $('#lblVariantCode').text() ||
+        $('#lblVariant').text() ||
+        ''
+    );
+
+    return variantCode;
+}
+
 function GetGRNAttachmentRowContext($row) {
     var $cells = $row.find('td');
     var lotNo = $.trim($cells.eq(3).find('input').val() || $cells.eq(3).text() || '');
+    var variantCode = ResolveGRNAttachmentVariantCode($row, $cells);
 
     return {
-        entryNo: ($cells.eq(0).text() || '').trim(), lineNo: ($cells.eq(1).text() || '').trim(), itemNo: ($cells.eq(2).text() || '').trim(), lotNo: lotNo, rowKey: ResolveGRNAttachmentRowKey($row)
+        entryNo: ($cells.eq(0).text() || '').trim(), lineNo: ($cells.eq(1).text() || '').trim(), itemNo: ($cells.eq(2).text() || '').trim(), lotNo: lotNo, variantCode: variantCode, rowKey: ResolveGRNAttachmentRowKey($row)
     };
 }
 
@@ -980,7 +1197,7 @@ function UpdateGRNAttachmentButtons() {
     });
 }
 
-function OpenGRNAttachmentPanel(button) {
+async function OpenGRNAttachmentPanel(button) {
     var $row = $(button).closest('tr');
     if (!$row.length || IsGRNTemplateTrackingRow($row)) {
         return;
@@ -996,12 +1213,26 @@ function OpenGRNAttachmentPanel(button) {
 
     grnAttachmentState.rowKey = context.rowKey;
     grnAttachmentState.rowContext = context;
+    grnAttachmentState.isLoading = false;
     grnAttachmentState.files = CloneGRNAttachmentFiles(grnAttachmentStore[context.rowKey]);
 
     $('#grnAttachmentError').text('');
     $('body').addClass('grn-attachment-open');
     $('#grnAttachmentOverlay').css('display', 'flex');
     RenderGRNAttachmentFileList();
+
+    try {
+        SetGRNAttachmentLoadingState(true);
+        await LoadPersistedGRNAttachments(context);
+    }
+    catch (error) {
+        $('#grnAttachmentError').text(error && error.message ? error.message : 'Unable to load attachments.');
+    }
+    finally {
+        if (grnAttachmentState.rowKey === context.rowKey) {
+            SetGRNAttachmentLoadingState(false);
+        }
+    }
 }
 
 function CloseGRNAttachmentPanel() {
@@ -1010,6 +1241,7 @@ function CloseGRNAttachmentPanel() {
     SetGRNAttachmentSaveState(false); // call Save Function
     grnAttachmentState.rowKey = '';
     grnAttachmentState.rowContext = null;
+    grnAttachmentState.isLoading = false;
     grnAttachmentState.files = [];
     if ($('#grnAttachmentViewer').css('display') === 'none') {
         $('body').removeClass('grn-attachment-open');
@@ -1109,12 +1341,50 @@ function HandleGRNAttachmentFiles(fileList) {
     RenderGRNAttachmentFileList();
 }
 
-function RemoveGRNAttachmentFile(fileId) {
+async function RemoveGRNAttachmentFile(fileId) {
+    var selectedFile = null;
+    $.each(grnAttachmentState.files, function (_, file) {
+        if (file.id === fileId) {
+            selectedFile = file;
+            return false;
+        }
+    });
+
+    if (!selectedFile) {
+        return;
+    }
+
+    $('#grnAttachmentError').text('');
+
+    if (selectedFile.isPersisted && selectedFile.bcAttachmentId) {
+        try {
+            await DeletePersistedGRNAttachment(selectedFile);
+        }
+        catch (error) {
+            $('#grnAttachmentError').text(error && error.message ? error.message : 'Unable to delete attachment.');
+            return;
+        }
+    }
+
     grnAttachmentState.files = $.grep(grnAttachmentState.files, function (file) {
         return file.id !== fileId;
     });
 
+    if (grnAttachmentState.rowKey) {
+        if (grnAttachmentState.files.length > 0) {
+            grnAttachmentStore[grnAttachmentState.rowKey] = CloneGRNAttachmentFiles(grnAttachmentState.files);
+        }
+        else {
+            delete grnAttachmentStore[grnAttachmentState.rowKey];
+        }
+    }
+
+    UpdateGRNAttachmentButtons();
     RenderGRNAttachmentFileList();
+
+    if (selectedFile.isPersisted && selectedFile.bcAttachmentId) {
+        ShowActionMsg('Attachment deleted successfully.');
+    }
 }
 
 function RenderGRNAttachmentFileList() {
@@ -1139,18 +1409,25 @@ function RenderGRNAttachmentFileList() {
     var $list = $('#grnAttachmentFileList');
     $list.empty();
 
+    if (grnAttachmentState.isLoading) {
+        $list.append('<div class="grn-attachment-empty"><span class="grn-attachment-spinner grn-attachment-spinner-dark" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span>Loading saved attachments...</div>');
+        return;
+    }
+
     if (fileCount === 0) {
         $list.append('<div class="grn-attachment-empty">No attachments yet. Upload files above.</div>');
         return;
     }
 
     $.each(grnAttachmentState.files, function (index, file) {
-        var previewMarkup = IsGRNAttachmentImage(file.ext)
+        var hasImagePreview = IsGRNAttachmentImage(file.ext) && !!file.url;
+        var previewMarkup = hasImagePreview
             ? '<img src="' + EncodeGRNAttachmentValue(file.url) + '" alt="' + EncodeGRNAttachmentValue(file.name) + '" style="width:44px;height:44px;object-fit:cover;border-radius:10px;cursor:pointer;" onclick="OpenGRNAttachmentViewer(' + index + ')">'
             : '<div class="grn-attachment-file-badge" style="cursor:pointer;" onclick="OpenGRNAttachmentViewer(' + index + ')">' + EncodeGRNAttachmentValue((file.ext || 'file').toUpperCase()) + '</div>';
 
-        var uploadStatus = file.isUploaded ? 'Uploaded' : 'Pending upload';
-        var rowHtml = '<div class="grn-attachment-file-row">' + '<div class="grn-attachment-file-main">' + previewMarkup + '<div style="min-width:0;">' + '<span class="grn-attachment-file-name" title="' + EncodeGRNAttachmentValue(file.name) + '">' + EncodeGRNAttachmentValue(file.name) + '</span>' + '<span class="grn-attachment-file-meta">' + EncodeGRNAttachmentValue(FormatGRNAttachmentSize(file.size)) + ' • ' + EncodeGRNAttachmentValue(file.uploadedAt) + ' • ' + EncodeGRNAttachmentValue(uploadStatus) + '</span>' + '</div>' + '</div>' + '<div class="d-flex align-items-center gap-2">' + '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="OpenGRNAttachmentViewer(' + index + ')">View</button>' + '<button type="button" class="btn btn-sm btn-outline-danger" onclick="RemoveGRNAttachmentFile(\'' + EncodeGRNAttachmentValue(file.id) + '\')">Remove</button>' + '</div>' + '</div>';
+        var uploadStatus = file.isPersisted ? 'Saved' : (file.isUploaded ? 'Uploaded' : 'Pending upload');
+        var removeLabel = file.isPersisted ? 'Delete' : 'Remove';
+        var rowHtml = '<div class="grn-attachment-file-row">' + '<div class="grn-attachment-file-main">' + previewMarkup + '<div style="min-width:0;">' + '<span class="grn-attachment-file-name" title="' + EncodeGRNAttachmentValue(file.name) + '">' + EncodeGRNAttachmentValue(file.name) + '</span>' + '<span class="grn-attachment-file-meta">' + EncodeGRNAttachmentValue(FormatGRNAttachmentSize(file.size)) + ' • ' + EncodeGRNAttachmentValue(file.uploadedAt) + ' • ' + EncodeGRNAttachmentValue(uploadStatus) + '</span>' + '</div>' + '</div>' + '<div class="d-flex align-items-center gap-2">' + '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="OpenGRNAttachmentViewer(' + index + ')">View</button>' + '<button type="button" class="btn btn-sm btn-outline-danger" onclick="RemoveGRNAttachmentFile(\'' + EncodeGRNAttachmentValue(file.id) + '\')">' + removeLabel + '</button>' + '</div>' + '</div>';
 
         $list.append(rowHtml);
     });
@@ -1180,7 +1457,7 @@ function SetGRNAttachmentSaveState(isSaving) {
 }
 
 async function UploadGRNAttachmentFiles(files, context) {
-    var uploadUrl = '/SPGRN/UploadGRNDocumentAttachment';
+    var uploadUrl = '/GRNDocumentAttacment/UploadGRNDocumentAttachment';
     var uploadedFiles = [];
 
     if (typeof window.FormData === 'undefined') {
@@ -1195,6 +1472,7 @@ async function UploadGRNAttachmentFiles(files, context) {
         formData.append('lotNo', context.lotNo || '');
         formData.append('itemNo', context.itemNo || '');
         formData.append('FileName', file.name || '');
+        formData.append('variantCode', context.variantCode || '');
 
         var responseBody = await UploadGRNAttachmentRequest(uploadUrl, formData);
         var currentUploadedFiles = $.isArray(responseBody) ? responseBody : [responseBody];
@@ -1207,6 +1485,28 @@ async function UploadGRNAttachmentFiles(files, context) {
     }
 
     return uploadedFiles;
+}
+
+async function LoadPersistedGRNAttachments(context) {
+    var attachments = await FetchGRNAttachmentRequest('/GRNDocumentAttacment/GetGRNDocumentAttachments', {
+        tableId: grnAttachmentTableId,
+        itemNo: context.itemNo || '',
+        lotNo: context.lotNo || ''
+    });
+
+    if (grnAttachmentState.rowKey !== context.rowKey) {
+        return;
+    }
+
+    var fetchedFiles = $.map($.isArray(attachments) ? attachments : [], function (attachment) {
+        return MapBusinessCentralAttachmentToFile(attachment);
+    });
+
+    var mergedFiles = MergeGRNAttachmentFiles(grnAttachmentStore[context.rowKey], fetchedFiles);
+    grnAttachmentStore[context.rowKey] = CloneGRNAttachmentFiles(mergedFiles);
+    grnAttachmentState.files = CloneGRNAttachmentFiles(mergedFiles);
+    UpdateGRNAttachmentButtons();
+    RenderGRNAttachmentFileList();
 }
 
 function UploadGRNAttachmentRequest(uploadUrl, formData) {
@@ -1255,6 +1555,85 @@ function UploadGRNAttachmentRequest(uploadUrl, formData) {
             }
         });
     });
+}
+
+function FetchGRNAttachmentRequest(fetchUrl, requestData) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: fetchUrl,
+            type: 'GET',
+            data: requestData,
+            cache: false,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr) {
+                reject(new Error(ResolveGRNAttachmentAjaxError(xhr, 'Attachment fetch failed.')));
+            }
+        });
+    });
+}
+
+function DeleteGRNAttachmentRequest(deleteUrl, payload) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: deleteUrl,
+            type: 'POST',
+            data: JSON.stringify(payload),
+            contentType: 'application/json; charset=utf-8',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr) {
+                reject(new Error(ResolveGRNAttachmentAjaxError(xhr, 'Attachment delete failed.')));
+            }
+        });
+    });
+}
+
+async function DeletePersistedGRNAttachment(file) {
+    return DeleteGRNAttachmentRequest('/GRNDocumentAttacment/DeleteGRNDocumentAttachment', {
+        Table_ID: file.tableId || grnAttachmentTableId,
+        ItemNo: file.itemNo || '',
+        LotNo: file.lotNo || '',
+        ID: file.bcAttachmentId || 0,
+        DocumentType: file.documentType || '',
+        LineNo: file.lineNo || 0,
+        AttachmentId: file.deleteKey || BuildGRNAttachmentDeleteKey(file),
+        FileName: file.serverFileName || file.name || ''
+    });
+}
+
+function ResolveGRNAttachmentAjaxError(xhr, fallbackMessage) {
+    if (xhr && xhr.status === 401) {
+        return 'Session expired. Please login again.';
+    }
+
+    var responseText = xhr && xhr.responseText ? xhr.responseText : '';
+    var responseJson = xhr && xhr.responseJSON ? xhr.responseJSON : null;
+
+    if (!responseJson && responseText) {
+        try {
+            responseJson = JSON.parse(responseText);
+        }
+        catch (e) {
+            responseJson = null;
+        }
+    }
+
+    if (responseJson) {
+        return responseJson.Message || responseJson.message || responseJson.error || responseJson.details || fallbackMessage;
+    }
+
+    return responseText || fallbackMessage;
 }
 
 function OpenGRNAttachmentViewer(index) {
@@ -1337,7 +1716,8 @@ function RenderGRNAttachmentViewer() {
     var total = files.length;
     var file = total > 0 ? files[grnAttachmentState.viewerIndex] : null;
     var isSingleMode = grnAttachmentState.viewerMode === 'single';
-    var hasImagePreview = file && IsGRNAttachmentImage(file.ext);
+    var hasImagePreview = file && IsGRNAttachmentImage(file.ext) && !!file.url;
+    var hasPdfPreview = file && IsGRNAttachmentPdf(file.ext, file.contentType) && !!file.url;
 
     $('#grnViewerCounter').text(total > 0 ? (grnAttachmentState.viewerIndex + 1) + ' / ' + total : '');
     $('#grnViewerFileName').text(file ? file.name : '');
@@ -1356,11 +1736,19 @@ function RenderGRNAttachmentViewer() {
     if (isSingleMode && file) {
         if (hasImagePreview) {
             $('#grnViewerImage').attr('src', file.url).show();
+            $('#grnViewerPdf').hide().attr('src', '');
             $('#grnViewerNoPreview').hide();
             ApplyGRNAttachmentViewerZoom();
         }
+        else if (hasPdfPreview) {
+            $('#grnViewerImage').hide().attr('src', '');
+            $('#grnViewerPdf').attr('src', file.url).show();
+            $('#grnViewerNoPreview').hide();
+            $('#grnViewerZoomLabel').text('100%');
+        }
         else {
             $('#grnViewerImage').hide().attr('src', '');
+            $('#grnViewerPdf').hide().attr('src', '');
             $('#grnViewerNoPreview').show();
             $('#grnViewerZoomLabel').text('100%');
         }
@@ -1369,6 +1757,7 @@ function RenderGRNAttachmentViewer() {
     }
     else {
         $('#grnViewerImage').hide().attr('src', '');
+        $('#grnViewerPdf').hide().attr('src', '');
         $('#grnViewerNoPreview').hide();
     }
 

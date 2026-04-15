@@ -189,5 +189,49 @@ namespace PrakashCRM.Service.Controllers
 
             return user;
         }
+
+        [HttpGet]
+        [Route("GetUserNotifications")]
+        public SPUserNotificationFeedResponse GetUserNotifications(string userNo, int skip = 0, int top = 5, bool includeRead = false, string category = "", string excludeCategory = "")
+        {
+            NotificationService notificationService = new NotificationService();
+            return notificationService.GetNotifications(userNo, skip, top, includeRead, category, excludeCategory);
+        }
+
+        [HttpGet]
+        [Route("GetAllUserNotifications")]
+        public SPUserNotificationFeedResponse GetAllUserNotifications(string userNo, int skip = 0, int top = 50, bool includeRead = true, string category = "", string excludeCategory = "")
+        {
+            NotificationService notificationService = new NotificationService();
+            return notificationService.GetNotifications(userNo, skip, top, includeRead, category, excludeCategory);
+        }
+
+        [HttpPost]
+        [Route("MarkNotificationRead")]
+        public IHttpActionResult MarkNotificationRead([FromBody] SPNotificationReadRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Id))
+                return BadRequest("Notification id is required.");
+
+            var userNo = string.Empty;
+            var pairs = Request.GetQueryNameValuePairs();
+            if (pairs != null)
+                userNo = pairs.FirstOrDefault(x => x.Key.Equals("userNo", StringComparison.OrdinalIgnoreCase)).Value;
+
+            NotificationService notificationService = new NotificationService();
+            var result = notificationService.MarkAsRead(userNo, request.Id);
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("MarkAllNotificationsRead")]
+        public IHttpActionResult MarkAllNotificationsRead(string userNo)
+        {
+            NotificationService notificationService = new NotificationService();
+            var result = notificationService.MarkAllAsRead(userNo);
+
+            return Ok(result);
+        }
     }
 }

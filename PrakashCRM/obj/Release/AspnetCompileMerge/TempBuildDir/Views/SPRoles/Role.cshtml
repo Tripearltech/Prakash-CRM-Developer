@@ -33,6 +33,19 @@
                     <div>
                         <div class="row g-3">
                             <div class="col-md-6">
+                                @if (Session["isRoleEdit"] != null && Convert.ToBoolean(Session["isRoleEdit"]) == true)
+                                {
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">No</label>
+                                        <div class="col-sm-9">
+                                            @Html.TextBoxFor(model => model.No, new { @class = "form-control", @readonly = "readonly" })
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @Html.HiddenFor(model => model.No)
+                                }
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Role<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
@@ -62,6 +75,8 @@
                 <div class="toolbar">
                     <div class=" text-end g-3">
                         <input type="hidden" id="hdnRoleAction" value="@Session["RoleAction"]" />
+                        <input type="hidden" id="hdnIsRoleEdit" value="@(Session["isRoleEdit"] != null && Convert.ToBoolean(Session["isRoleEdit"]) ? "true" : "false")" />
+                        <input type="hidden" id="hdnRoleNo" value="@(Session["RoleNo"] ?? "")" />
                         <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
                         <button id="btnSave" class="btn btn-success" type="submit"><i class="bx bxs-save"></i> Save</button>
                         &nbsp;

@@ -1,6 +1,28 @@
 ﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
 
 $(document).ready(function () {
+    //validateForm
+    $('#PanNo').on('keyup', function () {
+        var pan = $(this).val().toUpperCase();
+        $(this).val(pan);
+
+        var panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
+        // Agar user ne typing start ki hai
+        if (pan.length > 0 && pan.length < 10) {
+            $('#lblCCompanyPANNoMsg')
+                .text("PAN must be 10 characters")
+                .show();
+        }
+        else if (pan.length === 10 && !panRegex.test(pan)) {
+            $('#lblCCompanyPANNoMsg')
+                .text("Invalid PAN format (Ex: ABCDE1234F)")
+                .show();
+        }
+        else {
+            $('#lblCCompanyPANNoMsg').hide();
+        }
+    });
 
     $('#btnAddContact').click(function () {
 
@@ -19,12 +41,20 @@ $(document).ready(function () {
                 apiUrl + 'AddNewContactOfCompany?CompanyNo=' + CompanyNo + '&SPCode=' + SPCode + '&Name=' + $('#txtContactName').val() + '&Mobile_Phone_No=' + $('#txtMobilePhoneNo').val() + '&E_Mail=' + $('#txtContactEmail').val() + '&PCPL_Department_Code=' + $('#ddlDepartment').val() + '&PCPL_Job_Responsibility=' + $('#txtJobResponsibility').val() + '&PCPL_Allow_Login=' + $('#chkAllowLogin').prop('checked') + '&PCPL_Enable_OTP_On_Login=' + $('#chkEnableOTPOnLogin').prop('checked') + '&Is_Primary=' + $('#chkIsPrimary').prop('checked') + '&isEdit=false',
                 function (data) {
                     if (data) {
+                        var errMsg = CheckCPersonFieldValues();
 
-                        $('#btnAddContactSpinner').css('display', 'none');
-                        var actionMsg = "Contact Added Successfully";
-                        ShowActionMsg(actionMsg);
+                        if (errMsg !== "") {
+                            $('#btnAddContactSpinner').hide();
+                            ShowErrMsg(errMsg);
+                            return false;
+                        }
+                        else {
+                            $('#btnAddContactSpinner').css('display', 'none');
+                            var actionMsg = "Contact Added Successfully";
+                            ShowActionMsg(actionMsg);
 
-                        location.reload(true);
+                            location.reload(true);
+                        }
                     }
                 }
             );
@@ -35,6 +65,7 @@ $(document).ready(function () {
                 apiUrl + 'UpdateContactOfCompany?No=' + $('#hdfContactNo').val() + '&SPCode=' + $('#ddlSalesPerson').val() + '&Name=' + $('#txtContactName').val() + '&Mobile_Phone_No=' + $('#txtMobilePhoneNo').val() + '&E_Mail=' + $('#txtContactEmail').val() + '&PCPL_Department_Code=' + $('#ddlDepartment').val() + '&PCPL_Job_Responsibility=' + $('#txtJobResponsibility').val() + '&PCPL_Allow_Login=' + $('#chkAllowLogin').prop('checked') + '&PCPL_Enable_OTP_On_Login=' + $('#chkEnableOTPOnLogin').prop('checked') + '&Is_Primary=' + $('#chkIsPrimary').prop('checked') + '&Company_No=' + $('#hdfContactCompanyNo').val(),
                 function (data) {
                     if (data) {
+
 
                         $('#btnAddContactSpinner').css('display', 'none');
                         var actionMsg = "Contact Updated Successfully";
@@ -49,8 +80,6 @@ $(document).ready(function () {
     });
 
     if ($('#hdnCompanyContactAction').val() != "") {
-
-        //$('#divImage').hide();
         $('#btnSaveSpinner').hide();
 
         var CompanyContactActionDetails = 'Contact Company ' + $('#hdnCompanyContactAction').val() + ' Successfully';
@@ -66,16 +95,12 @@ $(document).ready(function () {
     }
 
     if ($('#hdnCompanyContactActionErr').val() != "") {
-
-        //$('#divImage').hide();
         $('#btnSaveSpinner').hide();
 
         var CompanyContactActionErr = $('#hdnCompanyContactActionErr').val();
 
         $('#modalErrMsg').css('display', 'block');
         $('#modalErrDetails').text(CompanyContactActionErr);
-        
-        /*ShowErrMsg(CompanyContactActionErr);*/
 
         $.get('NullContactSession', function (data) {
 
@@ -90,97 +115,36 @@ $(document).ready(function () {
 
     });
 
-    /*$('#GSTNo').change(function () {
-        debugger;
-        var str = $('#GSTNo').val();
-        //if (str.match(/[a-z]/g) && str.match(/[A-Z]/g) && str.match(/[0-9]/g) && str.match(/[^a-zA-Z\d]/g) && str.length == 15) {
-        if ((str.match(/[a-z]/g) || str.match(/[A-Z]/g)) && str.match(/[0-9]/g) && str.length >= 15) {
-            //document.getElementById('lblGSTValMsg').innerText = "";
-        }
-        else {
-
-            //document.getElementById('lblGSTValMsg').innerText = "GSTNo should have 15 Character & Special Character not allowed.";
-
-            var msg = "GSTNo should have 15 Character & Special Character not allowed.";
-            ShowErrMsg(msg);
-
-            $('#GSTNo').val('');
-            $('#GSTNo').focus();
-        }
-    });*/
-
-    //$('#GSTNo').blur(function () {
-
-    //    if ($('#PanNo').val().length > 0 && $('#GSTNo').val().length == 15) {
-
-    //        var GSTNo = $('#GSTNo').val();
-    //        if (!GSTNo.includes($('#PanNo').val())) {
-    //            $('#GSTNo').val("");
-    //            var errMsg = "GST No should contains PAN No";
-    //            ShowErrMsg(errMsg)
-    //        }
-
-    //    }
-
-    //});
-
     $('#chkAllowLogin').on('change', function () {
 
         if ($('#chkAllowLogin').is(':checked') == true) {
             $('#chkEnableOTPOnLogin').prop('disabled', false);
         }
         else {
-            $('#chkEnableOTPOnLogin').prop('disabled', true);
+            $('#chkEnableOTPOnLogin').prop('disabled', false);
         }
-
-        //if ($('#chkAllowLogin').val() == "true") {
-        //    $('#chkEnableOTPOnLogin').prop('disabled', false);
-        //}
-        //else {
-        //    $('#chkEnableOTPOnLogin').prop('disabled', true);
-        //}
 
     });
 
-    //$('#PanNo').change(function () {
-    //    debugger;
-    //    var str = $('#PanNo').val();
-    //    //if (str.match(/[a-z]/g) && str.match(/[A-Z]/g) && str.match(/[0-9]/g) && str.match(/[^a-zA-Z\d]/g) && str.length == 15) {
-    //    if (str.match(/[a-z]/g) && str.match(/[A-Z]/g) && str.match(/[0-9]/g) && str.length >= 10) {
-    //        document.getElementById('lblPanValMsg').innerText = "";
-    //    }
-    //    else {
-
-    //        document.getElementById('lblPanValMsg').innerText = "PanNo should have 10 Character & Special Character not allowed.";
-    //        $('#PanNo').val('');
-    //        $('#PanNo').focus();
-    //    }
-    //});
-
-    //searchName_autocomplete();
     BindPincodeMin2Char();
     BindCompany();
-    //BindCountry();
-    //BindState();
-    //BindPostCodes(); //for city
     BindArea();
-    //BindDistrict();
     BindIndustry();
     BindBusinessType();
     BindSalesPerson();
     BindSourceofContacts();
     BindDepartment();
-    
+
 
     var UrlVars = getUrlVars();
 
     if (UrlVars["No"] != undefined && UrlVars["No"] != "") {
 
-        BindProducts();
+        autocomplete_productName();
         BindContactSQ("", "");
         BindFinancialYear();
-        BindContactDailyVisit("","");
-        
+        BindContactDailyVisit("", "");
+
     }
 
     $('#txtPincode').blur(function () {
@@ -189,16 +153,13 @@ $(document).ready(function () {
             $('#ddlArea').empty();
             $('#ddlArea').append("<option value='-1'>---Select---</option>");
             $("#txtCountry,#txtState,#txtDistrict,#txtCity").val("");
-            //$("#txtState").val("");
-            //$("#txtDistrict").val("");
-            //$("#txtCity").val("");
         }
 
     });
 
     $('#btnAddProd').click(function () {
 
-        if ($('#ddlProducts').val() == "-1") {
+        if ($('#txtProductName').val() == "") {
 
             var msg = "Please select product.";
             ShowErrMsg(msg);
@@ -206,14 +167,10 @@ $(document).ready(function () {
         }
         else {
 
-            //$('#tblContactProds').css('display', 'block');
-            //var ProdTR = "<tr><td><a class='DeleteContactCls' onclick='DeleteContact(this);'><i class='bx bx-trash'></i></a></td><td>" + $('#ddlProducts').val() + "</td><td>" + $('#ddlProducts option:selected').text() + "</td></tr>";
-            //$('#tblContactProds > tbody').append(ProdTR);
-
             $('#btnAddContactProdSpinner').css('display', 'block');
 
             $.post(
-                apiUrl + 'AddContactProducts?CCompanyNo=' + $('#hfCCompanyNo').val() + '&ProdNo=' + $('#ddlProducts').val() + '&SPCode=' + $('#hfSelectedSPCode').val() +
+                apiUrl + 'AddContactProducts?CCompanyNo=' + $('#hfCCompanyNo').val() + '&ProdNo=' + $('#hfProdNo').val() + '&SPCode=' + $('#hfSelectedSPCode').val() +
                 '&CustomerNo=' + $('#hfCustomerNo').val(),
                 function (data) {
                     if (data) {
@@ -271,9 +228,13 @@ $(document).ready(function () {
 
     var UrlVars = getUrlVars();
 
-    if (UrlVars["No"] != undefined) {
+    if ($("#SQValue").val() == "inquiry") {
+
+    }
+    else if (UrlVars["No"] != undefined) {
 
         $('#btnCreateSQ').css('display', 'block');
+        $('#btnCreateInq').css('display', 'block');
 
     }
 
@@ -342,7 +303,7 @@ $(document).ready(function () {
         location.reload(true);
 
     });
-    
+
 });
 
 function EditContact(obj) {
@@ -397,6 +358,7 @@ function EditContact(obj) {
 }
 
 function BindPincodeMin2Char() {
+    debugger
     if (typeof ($.fn.autocomplete) === 'undefined') { return; }
     console.log('init_autocomplete');
 
@@ -409,6 +371,12 @@ function BindPincodeMin2Char() {
             type: "POST"
         },
         onSelect: function (suggestion) {
+            //  IsActive check — disable / enable dropdown
+            if (suggestion.isActive === false) {
+                $("#ddlNewShiptoAddArea").prop("disabled", true);
+            } else {
+                $("#ddlNewShiptoAddArea").prop("disabled", false);
+            }
             jQuery("#hfPostCode").val(suggestion.value);
 
             var citydis = suggestion.data.split(",");
@@ -486,39 +454,39 @@ function DeleteProduct(obj) {
 
     //if (isdelete) {
 
-        $.post(apiUrl + 'DeleteContactProduct?contactNo=' + contactno + '&prodNo=' + prodno,
+    $.post(apiUrl + 'DeleteContactProduct?contactNo=' + contactno + '&prodNo=' + prodno,
 
-            function (data) {
+        function (data) {
 
-                if (data) {
+            if (data) {
 
-                    var responseMsg = data;
+                var responseMsg = data;
 
-                    if (responseMsg.includes("Error_:")) {
+                if (responseMsg.includes("Error_:")) {
 
-                        const responseMsgDetails = responseMsg.split(':');
-                        $('#btnSchOrderSpinner').hide();
-                        $('#modalErrMsg').css('display', 'block');
-                        $('#modalErrDetails').text(responseMsgDetails[1]);
+                    const responseMsgDetails = responseMsg.split(':');
+                    $('#btnSchOrderSpinner').hide();
+                    $('#modalErrMsg').css('display', 'block');
+                    $('#modalErrDetails').text(responseMsgDetails[1]);
 
-                    }
-                    else if (responseMsg.includes("Error : ")) {
+                }
+                else if (responseMsg.includes("Error : ")) {
 
-                        const errDetails = responseMsg.split(':');
-                        $('#modalErrMsg').css('display', 'block');
-                        $('#modalErrDetails').text(errDetails[1].trim());
+                    const errDetails = responseMsg.split(':');
+                    $('#modalErrMsg').css('display', 'block');
+                    $('#modalErrDetails').text(errDetails[1].trim());
 
-                    }
-                    else {
+                }
+                else {
 
-                        $('#modalDeleteContactProdMsg').css('display', 'block');
-                        $('#lblDeleteProdMsg').text("Contact Product " + responseMsg);
-                        $('#lblDeleteProdMsg').css('color', 'green');
+                    $('#modalDeleteContactProdMsg').css('display', 'block');
+                    $('#lblDeleteProdMsg').text("Contact Product " + responseMsg);
+                    $('#lblDeleteProdMsg').css('color', 'green');
 
-                    }
                 }
             }
-        );
+        }
+    );
 
     //}
 }
@@ -924,7 +892,7 @@ function GetDetailsByCode(pincode) {
 
     //$("#ddlCountry").prop("disabled", false);
     //$("#ddlCountry").val("-1");
-    pincode = jQuery("#hfPostCode").val();
+    pincode = jQuery("#txtPincode").val();
     if (pincode != "") {
         //$.ajax(
         //    {
@@ -994,22 +962,37 @@ function GetDetailsByCode(pincode) {
         //);
     }
 }
+function autocomplete_productName() {
 
-function BindProducts() {
+    if (typeof ($.fn.autocomplete) === 'undefined') { return; }
+    console.log('init_autocomplete');
+
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
+
     $.get(apiUrl + 'GetAllProducts', function (data) {
 
         if (data != null) {
+            let products = {};
 
-            var i;
-            var ProdOpts = "<option value='-1'>---Select---</option>";
-
-            for (i = 0; i < data.length; i++) {
-                ProdOpts = ProdOpts + "<option value='" + data[i].No + "'>" + data[i].Description + "</option>";
+            for (let i = 0; i < data.length; i++) {
+                products[data[i].No] = data[i].Description.trim();
             }
+            var productArray = $.map(products, function (value, key) {
+                return {
+                    value: value,
+                    data: key
+                };
+            });
+            $("#txtProductName").autocomplete({
+                lookup: productArray,
+                onSelect: function (selecteditem) {
 
-            $('#ddlProducts').append(ProdOpts);
+                    $('#hfProdNo').val((selecteditem.data));
+
+                }
+            });
+
         }
     });
 
@@ -1103,7 +1086,7 @@ function BindContactBusinessPlan(PlanYear) {
 
         const PlanYear_ = PlanYear.split('-');
         $('#lblDetailsPrevYear').text((parseInt(PlanYear_[0]) - 1) + "-" + PlanYear_[0]);
-        
+
         var TROpts = "";
         var i;
         $('#tblDetailsContactBusinessPlan').empty();
@@ -1133,7 +1116,7 @@ function BindContactBusinessPlan(PlanYear) {
 function BindContactDailyVisit(FromDate, ToDate) {
 
     $('#btnDailyVisitListSpinner').show();
-    $.get('/SPContacts/GetContactDailyVisits?SPCode=' + $('#hfSalespersonCode').val() + '&FromDate=' + FromDate + '&ToDate=' + ToDate, function (data) {
+    $.get('/SPContacts/GetContactDailyVisits?SPCode=' + $('#hfSalespersonCode').val() + '&FromDate=' + FromDate + '&ToDate=' + ToDate + '&CCompanyNo=' + $('#hdnCompanyNo').val(), function (data) {
 
         var TROpts = "";
         var i;
@@ -1208,6 +1191,11 @@ function ShowSQProds(SQNo) {
     );
 
 }
+$('#txtAddress').on('keyup', function () {
+    CheckContactValues();
+}); $('#txtAddress1').on('keyup', function () {
+    CheckContactValues();
+});
 
 function CheckContactValues() {
 
@@ -1221,161 +1209,133 @@ function CheckContactValues() {
     var emailformat = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     var companyemail = $('#txtCompanyEmail').val();
     var contactemail = $('#txtContactEmail').val();
+    var address = $('#txtAddress').val().trim();
+    var address1 = $('#txtAddress1').val().trim();
 
     if (phoneno.length > 0) {
         if (!(phoneno.match(numbers) && phoneno.length == 10)) {
-            $('#lblCCompanyPhoneNoMsg').text("Phone No should be in numeric and in 10 digit");
-            $('#lblCCompanyPhoneNoMsg').css('display', 'block');
+            $('#lblCCompanyPhoneNoMsg').text("Phone No should be in numeric and in 10 digit").show();
             flag = false;
+        } else {
+            $('#lblCCompanyPhoneNoMsg').text("").hide();
         }
-        else {
-            $('#lblCCompanyPhoneNoMsg').text("");
-            $('#lblCCompanyPhoneNoMsg').css('display', 'none');
-        }
-    }
-    
-    if ($('#txtCustomerName').val() == "") {
-        $('#lblCCompanyNameMsg').text("Please Fill Company Name");
-        $('#lblCCompanyNameMsg').css('display', 'block');
-        flag = false;
-    }
-    else {
-        $('#lblCCompanyNameMsg').text("");
-        $('#lblCCompanyNameMsg').css('display', 'none');
     }
 
-    if ($('#txtAddress').val() == "") {
-        $('#lblCCompanyAddressMsg').text("Please Fill Company Address");
-        $('#lblCCompanyAddressMsg').css('display', 'block');
+    if ($('#txtCustomerName').val() == "") {
+        $('#lblCCompanyNameMsg').text("Please Fill Company Name").show();
         flag = false;
+    } else {
+        $('#lblCCompanyNameMsg').text("").hide();
     }
-    else {
-        $('#lblCCompanyAddressMsg').text("");
-        $('#lblCCompanyAddressMsg').css('display', 'none');
+
+    if (address === "") {
+        $('#lblCCompanyAddressMsg').text("Please Fill Company Address").show();
+        flag = false;
+    } else if (address.length > 50) {
+        $('#lblCCompanyAddressMsg').text("Address cannot exceed 50 characters").show();
+        flag = false;
+    } else {
+        $('#lblCCompanyAddressMsg').text("").hide();
+    }
+
+    if (address1.length > 50) {
+        $('#lblCCompanyAddressMsg1').text("Address2 cannot exceed 50 characters").show();
+        flag = false;
+    } else {
+        $('#lblCCompanyAddressMsg1').text("").hide();
     }
 
     if ($('#txtCompanyEmail').val() == "") {
-        $('#lblCCompanyEmailMsg').text("Please Fill Company Email");
-        $('#lblCCompanyEmailMsg').css('display', 'block');
+        $('#lblCCompanyEmailMsg').text("Please Fill Company Email").show();
         flag = false;
     }
     else if (!companyemail.match(emailformat)) {
-        $('#lblCCompanyEmailMsg').text("Please Fill Valid Email");
-        $('#lblCCompanyEmailMsg').css('display', 'block');
+        $('#lblCCompanyEmailMsg').text("Please Fill Valid Email").show();
         flag = false;
     }
     else {
-        $('#lblCCompanyEmailMsg').text("");
-        $('#lblCCompanyEmailMsg').css('display', 'none');
+        $('#lblCCompanyEmailMsg').text("").hide();
     }
 
     if ($('#txtPincode').val() == "") {
-        $('#lblCCompanyPincodeMsg').text("Please Fill Pincode");
-        $('#lblCCompanyPincodeMsg').css('display', 'block');
+        $('#lblCCompanyPincodeMsg').text("Please Fill Pincode").show();
         flag = false;
-    }
-    else {
-        $('#lblCCompanyPincodeMsg').text("");
-        $('#lblCCompanyPincodeMsg').css('display', 'none');
+    } else {
+        $('#lblCCompanyPincodeMsg').text("").hide();
     }
 
     if ($('#ddlArea').val() == "-1") {
-        $('#lblCCompanyAreaMsg').text("Please Fill Area");
-        $('#lblCCompanyAreaMsg').css('display', 'block');
+        $('#lblCCompanyAreaMsg').text("Please Select Area").show();
         flag = false;
+    } else {
+        $('#lblCCompanyAreaMsg').text("").hide();
     }
-    else {
-        $('#lblCCompanyAreaMsg').text("");
-        $('#lblCCompanyAreaMsg').css('display', 'none');
-    }
-    
+
     if ($('#PanNo').val().length > 0 && $('#PanNo').val().length != 10) {
-        $('#lblCCompanyPANNoMsg').text("PAN No. should be in 10 character");
-        $('#lblCCompanyPANNoMsg').css('display', 'block');
+        $('#lblCCompanyPANNoMsg').text("PAN No. should be in 10 character").show();
         flag = false;
-    }
-    else {
-        $('#lblCCompanyPANNoMsg').text("");
-        $('#lblCCompanyPANNoMsg').css('display', 'none');
+    } else {
+        $('#lblCCompanyPANNoMsg').text("").hide();
     }
 
     if ($('#GSTNo').val().length > 0 && $('#GSTNo').val().length != 15) {
-        $('#lblCCompanyGSTNoMsg').text("GST No. should be in 15 character");
-        $('#lblCCompanyGSTNoMsg').css('display', 'block');
+        $('#lblCCompanyGSTNoMsg').text("GST No. should be in 15 character").show();
         flag = false;
     }
     else if (!$('#GSTNo').val().includes($('#PanNo').val())) {
-        $('#lblCCompanyGSTNoMsg').text("GST No should contains PAN No");
-        $('#lblCCompanyGSTNoMsg').css('display', 'block');
+        $('#lblCCompanyGSTNoMsg').text("GST No should contains PAN No").show();
         flag = false;
     }
     else {
-        $('#lblCCompanyGSTNoMsg').text("");
-        $('#lblCCompanyGSTNoMsg').css('display', 'none');
+        $('#lblCCompanyGSTNoMsg').text("").hide();
     }
 
     if ($('#hfIsCompanyContactEdit').val() == "False") {
 
         if ($('#txtContactName').val() == "") {
-            $('#lblContactNameMsg').text("Please Fill Contact Name");
-            $('#lblContactNameMsg').css('display', 'block');
+            $('#lblContactNameMsg').text("Please Fill Contact Name").show();
             flag = false;
-        }
-        else {
-            $('#lblContactNameMsg').text("");
-            $('#lblContactNameMsg').css('display', 'none');
+        } else {
+            $('#lblContactNameMsg').text("").hide();
         }
 
         if ($('#txtMobilePhoneNo').val() == "") {
-            $('#lblContactMobileMsg').text("Please Fill Contact Mobile No");
-            $('#lblContactMobileMsg').css('display', 'block');
+            $('#lblContactMobileMsg').text("Please Fill Contact Mobile No").show();
             flag = false;
         }
         else if (!(mobilephoneno.match(numbers) && mobilephoneno.length == 10)) {
-            $('#lblContactMobileMsg').text("Mobile No should be in numeric and in 10 digit");
-            $('#lblContactMobileMsg').css('display', 'block');
+            $('#lblContactMobileMsg').text("Mobile No should be in numeric and in 10 digit").show();
             flag = false;
         }
         else {
-            $('#lblContactMobileMsg').text("");
-            $('#lblContactMobileMsg').css('display', 'none');
+            $('#lblContactMobileMsg').text("").hide();
         }
 
         if ($('#txtContactEmail').val() == "") {
-            $('#lblContactEmailMsg').text("Please Fill Contact Email");
-            $('#lblContactEmailMsg').css('display', 'block');
+            $('#lblContactEmailMsg').text("Please Fill Contact Email").show();
             flag = false;
         }
         else if (!contactemail.match(emailformat)) {
-            $('#lblContactEmailMsg').text("Please Fill Valid Email");
-            $('#lblContactEmailMsg').css('display', 'block');
+            $('#lblContactEmailMsg').text("Please Fill Valid Email").show();
             flag = false;
         }
         else {
-            $('#lblContactEmailMsg').text("");
-            $('#lblContactEmailMsg').css('display', 'none');
+            $('#lblContactEmailMsg').text("").hide();
         }
 
         if ($('#ddlDepartment').val() == "-1") {
-            $('#lblDeptMsg').text("Please Select Department");
-            $('#lblDeptMsg').css('display', 'block');
+            $('#lblDeptMsg').text("Please Select Department").show();
             flag = false;
-        }
-        else {
-            $('#lblDeptMsg').text("");
-            $('#lblDeptMsg').css('display', 'none');
+        } else {
+            $('#lblDeptMsg').text("").hide();
         }
 
         if ($('#txtJobResponsibility').val() == "") {
-            $('#lblJobResponsibilityMsg').text("Please Fill Job Responsibility");
-            $('#lblJobResponsibilityMsg').css('display', 'block');
+            $('#lblJobResponsibilityMsg').text("Please Fill Job Responsibility").show();
             flag = false;
+        } else {
+            $('#lblJobResponsibilityMsg').text("").hide();
         }
-        else {
-            $('#lblJobResponsibilityMsg').text("");
-            $('#lblJobResponsibilityMsg').css('display', 'none');
-        }
-
     }
 
     if (flag == false) {
@@ -1384,6 +1344,112 @@ function CheckContactValues() {
 
     return flag;
 }
+
+
+// =============================
+// LIVE AUTO-HIDE VALIDATION
+// =============================
+$(function () {
+
+    $('#txtCustomerName').on('input', function () {
+        if ($(this).val().trim() !== "") $('#lblCCompanyNameMsg').text("").hide();
+    });
+
+    $('#txtAddress').on('input', function () {
+        let v = $(this).val().trim();
+        if (v !== "" && v.length <= 50) $('#lblCCompanyAddressMsg').text("").hide();
+    });
+
+    $('#txtAddress1').on('input', function () {
+        if ($(this).val().length <= 50) $('#lblCCompanyAddressMsg1').text("").hide();
+    });
+
+    $('#txtCompanyEmail').on('input', function () {
+        let r = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (r.test($(this).val())) $('#lblCCompanyEmailMsg').text("").hide();
+    });
+
+    $('#txtPhoneNo').on('input', function () {
+        if (/^[0-9]{10}$/.test($(this).val())) $('#lblCCompanyPhoneNoMsg').text("").hide();
+    });
+
+    $('#txtMobilePhoneNo').on('input', function () {
+        if (/^[0-9]{10}$/.test($(this).val())) $('#lblContactMobileMsg').text("").hide();
+    });
+
+    $('#txtContactEmail').on('input', function () {
+        let r = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (r.test($(this).val())) $('#lblContactEmailMsg').text("").hide();
+    });
+
+    $('#txtPincode').on('input', function () {
+        if ($(this).val().trim() !== "") $('#lblCCompanyPincodeMsg').text("").hide();
+    });
+
+    $('#ddlArea').on('change', function () {
+        if ($(this).val() !== "-1") $('#lblCCompanyAreaMsg').text("").hide();
+    });
+
+    $('#PanNo').on('input', function () {
+        if ($(this).val().length === 10) $('#lblCCompanyPANNoMsg').text("").hide();
+    });
+
+    $('#GSTNo').on('input', function () {
+        let g = $(this).val();
+        if (g.length === 15 && g.includes($('#PanNo').val()))
+            $('#lblCCompanyGSTNoMsg').text("").hide();
+    });
+
+    $('#txtContactName').on('input', function () {
+        if ($(this).val().trim() !== "") $('#lblContactNameMsg').text("").hide();
+    });
+
+    $('#ddlDepartment').on('change', function () {
+        if ($(this).val() !== "-1") $('#lblDeptMsg').text("").hide();
+    });
+
+    $('#txtJobResponsibility').on('input', function () {
+        if ($(this).val().trim() !== "") $('#lblJobResponsibilityMsg').text("").hide();
+    });
+
+});
+
+
+function CheckCPersonFieldValues() {
+
+    var errMsg = "";
+
+    if ($('#txtContactName').val() == "") {
+        errMsg += "Please enter Contact Person Name.\n";
+    }
+
+    var mobile = $('#txtMobilePhoneNo').val();
+    if (mobile == "") {
+        errMsg += "Please enter Mobile No.\n";
+    }
+    else if (!/^\d{10}$/.test(mobile)) {
+        errMsg += "Mobile No must be exactly 10 digits.\n";
+    }
+
+    var email = $('#txtContactEmail').val();
+    if (email == "") {
+        errMsg += "Please enter Email.\n";
+    }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errMsg += "Please enter a valid Email address.\n";
+    }
+
+    if ($('#ddlDepartment').val() == "-1") {
+        errMsg += "Please select Department.\n";
+    }
+
+    if ($('#txtJobResponsibility').val() == "") {
+        errMsg += "Please enter Job Responsibility.\n";
+    }
+
+    return errMsg;
+}
+
 
 
 //function ShowProcessImg() {

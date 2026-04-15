@@ -225,6 +225,10 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPBusinessPlan/';
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     //$.get(apiUrl + 'GetApiRecordsCount?page=CustWiseForPendingApproval&SPNo=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=Business_Plan_Customer_Wise&filter=' + filter, function (data) {
 
     $.get(apiUrl + 'GetApiRecordsCount?page=CustWiseForPendingApproval&SPNo=' + SPCode + '&LoggedInUserNo=' + $('#hdnLoggedInUserNo').val() + '&apiEndPointName=Business_Plan_Customer_Wise&filter=' + filter, function (data) {
@@ -301,6 +305,11 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('ul.pager li').remove();
                 }
 
+            },
+            complete: function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
             },
             error: function () {
                 alert("error");
@@ -535,6 +544,10 @@ function ShowCustBusinessPlan(PlanYear, CustNo, CustName) {
     $('#lblDetailsPrevYear').text((parseInt(PlanYear_[0]) - 1) + "-" + PlanYear_[0]);
     $('#lblDetailsCustName').text(CustName);
 
+    if (typeof showPageDataLoader === 'function') {
+        showPageDataLoader();
+    }
+
     $.get(apiUrl + 'GetCustomerBusinessApproved?SPCode=' + SPCode + '&CustomerNo=' + CustNo + '&PlanYear=' + PlanYear, function (data) {
 
         var TROpts = "";
@@ -559,6 +572,10 @@ function ShowCustBusinessPlan(PlanYear, CustNo, CustName) {
 
         $('#tblDetailsCustBusinessPlan').append(TROpts);
 
+    }).always(function () {
+        if (typeof hidePageDataLoader === 'function') {
+            hidePageDataLoader();
+        }
     });
 
 }

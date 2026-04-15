@@ -4,18 +4,29 @@ let InquiryLineForUpdate = {};
 
 $(document).ready(function () {
 
-    if ($('#hfInquiryAction').val() != "") {
+    // Always start with main action buttons enabled on Inquiry page
+    try {
+        $('#btnSaveProd, #btnSave').prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
+    } catch (e) { }
 
+    // Ensure add-new buttons are always enabled on Inquiry page
+    try {
+        $('#btnAddNewContactCompany, #btnAddNewContactPerson, #btnAddNewBillTo, #btnAddNewJobTo')
+            .prop('disabled', false)
+            .css({ 'pointer-events': '', 'opacity': '' });
+    } catch (e2) { }
+
+    if ($('#hfInquiryAction').val() != "") {
         $('#divImage').hide();
         var InquiryActionDetails = $('#hfInquiryAction').val();
         var actionType = 'success';
-
         var actionMsg = InquiryActionDetails;
         ShowActionMsg(actionMsg);
 
-        $.get('NullInqSession', function (data) {
-
-        });
+        // Ensure buttons remain enabled after action completes
+        $("#btnSaveProd").prop('disabled', false);
+        $("#btnSave").prop('disabled', false);
+        $.get('NullInqSession', function (data) { });
     }
 
     if ($('#hfInquiryActionErr').val() != "") {
@@ -50,7 +61,7 @@ $(document).ready(function () {
 
     BindCompany();
     GetCustomerTemplateCode();
-    
+
     $('#ddlContact').append($('<option value="">---Select---</option>'));
     $('#ddlConsignee').append($('<option value="">---Select---</option>'));
     BindPaymentTerms();
@@ -78,8 +89,7 @@ $(document).ready(function () {
         $('#dvInquiryLineDetails').css('display', 'none');
     }
 
-    $('#txtCustomerName').blur(function () {
-
+    $('#txtCustomerName').change(function () {
         if ($('#txtCustomerName').val() == "") {
 
             $('#hfContactCompanyNo').val("");
@@ -116,7 +126,7 @@ $(document).ready(function () {
 
     }
 
-    $('#txtProductName').blur(function () {
+    $('#txtProductName').change(function () {
 
         GetProductDetails($('#txtProductName').val());
 
@@ -134,7 +144,7 @@ $(document).ready(function () {
         var numbers = /^[0-9]+$/;
         var prodQty = $('#txtProdQty').val();
 
-        if ($('#txtProductName').val() == "-1" || $('#txtProdQty').val() == "" || $('#txtUOM').val() == "" || $('#txtDeliveryDate').val() == "" ||
+        if ($('#txtProductName').val() == "-1" || $('#txtProdQty').val() == "" || $('#txtUOM').val() == "" ||
             $('#ddlPackingStyle').val() == "-1" || $('#txtProDetailsPaymentTerms').val() == "") {
 
             ErrMsg = "Please fill product details";
@@ -153,12 +163,12 @@ $(document).ready(function () {
             ShowErrMsg(ErrMsg);
 
         }
-        else if ($('#txtDeliveryDate').val() < curDate) {
+        //else if ($('#txtDeliveryDate').val() < curDate) {
 
-            ErrMsg = "Please add delivery date after current date";
-            ShowErrMsg(ErrMsg);
+        //    ErrMsg = "Please add delivery date after current date";
+        //    ShowErrMsg(ErrMsg);
 
-        }
+        //}
         else {
 
             var prodOpts = "";
@@ -177,7 +187,7 @@ $(document).ready(function () {
             }
 
             prodOpts = "<td><a class='InqLineCls' onclick='EditInqProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-edit'></i></a>&nbsp;" +
-            "<a class='InqLineCls' onclick='DeleteInqProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-trash'></i></a></td><td hidden>" + $('#hfProdNo').val() +
+                "<a class='InqLineCls' onclick='DeleteInqProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-trash'></i></a></td><td hidden>" + $('#hfProdNo').val() +
                 "</td><td>" + $('#txtProductName').val() + "</td><td>" + $('#txtProdQty').val() + "</td><td>" + $('#ddlPackingStyle').val() + "</td><td>" +
                 $('#txtUOM').val() + "</td><td>" + $('#txtDeliveryDate').val() + "</td><td>" + $('#txtProDetailsPaymentTerms').val() + "</td>";
 
@@ -216,7 +226,7 @@ $(document).ready(function () {
                 ShowActionMsg(actionMsg);
 
             });
-            location.reload(true);
+        location.reload(true);
 
     });
 
@@ -236,7 +246,7 @@ $(document).ready(function () {
         GetCustDetails($('#ddlCustomer').val());
         productName_autocomplete();
     });
-    
+
     $('#ddlProductName').change(function () {
 
         $('#hfProdNo').val($('#ddlProductName').val());
@@ -414,7 +424,7 @@ $(document).ready(function () {
                 var NewDeliveryToAddress = {};
 
                 NewDeliveryToAddress.Customer_No = $('#hfCustomerNo').val();
-                NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
+               // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
                 NewDeliveryToAddress.Address = $('#txtNewJobtoAddress').val();
                 NewDeliveryToAddress.Address_2 = $('#txtNewJobtoAddress2').val();
                 NewDeliveryToAddress.Post_Code = $('#txtNewJobtoAddPostCode').val();
@@ -466,92 +476,224 @@ $(document).ready(function () {
     });
 
 });
-
 function BindCompany() {
 
-    $.get(apiUrl + 'GetAllCompanyForDDL?SPNo=' + $('#hfSPNo').val(), function (data) {
-        if (data != null) {
+    $.get(
+        apiUrl + 'GetAllCompanyForDDL?SPNo=' + $('#hfSPNo').val()
+        + "&CompanyNo=" + $('#hfCompanyNo').val(),
+        function (data) {
 
-            var str1 = "";
-            var i;
-            for (i = 0; i < data.length; i++) {
-                str1 = str1 + '"' + data[i].No + '_' + data[i].PCPL_Primary_Contact_No + '"' + ":" + '"' + data[i].Name + '"' + ","
+            if (!data || data.length === 0) return;
+
+            // 1️⃣ Build company array
+            let companyArray = [];
+            for (let i = 0; i < data.length; i++) {
+                companyArray.push({
+                    value: data[i].Name,
+                    data: data[i].No + '_' + data[i].PCPL_Primary_Contact_No
+                });
             }
-            str1 = str1.substring(0, str1.length - 1);
-            str1 = "{" + str1 + "}";
 
-            let objFromStr = JSON.parse(str1);
-            var company = objFromStr;// { AA: "Abc", AO: "Abc", BB: "Bcd", CC: "Cde", DD: "Def", EE: "Efg", EH: "Ester", FF: "Fgh", GG: "Ghi"};
-            var companyArray = $.map(company, function (value, key) {
-                return {
-                    value: value,
-                    data: key
-                };
-            });
+            let cuscurrentValue = '';
 
+            // 2️⃣ Bind autocomplete
             $('#txtCustomerName').autocomplete({
                 lookup: companyArray,
                 onSelect: function (selecteditem) {
-
-                    //$('#hfCompany').val((selecteditem.data));
-
-                    const CompanyDetails_ = selecteditem.data.split('_');
-                    var CompanyNo = CompanyDetails_[0];
-                    var PrimaryContactNo = CompanyDetails_[1];
-
-                    $('#hfContactCompanyNo').val(CompanyNo);
-                    $('#hfPrimaryContactNo').val(PrimaryContactNo);
-                    $('#hfContactDetails').val(selecteditem.data);
-                    BindContact(selecteditem.data);
-                    BindConsigneeAddress(selecteditem.data);
-                    GetCustDetails(selecteditem.data);
-                    productName_autocomplete();
-                    $('#btnAddNewContactPerson').prop('disabled', false);
-                },
-
+                    cuscurrentValue = applyCustomerSelection(selecteditem, cuscurrentValue);
+                }
             });
 
-            //var opt = "<option value='-1'>---Select---</option>";
-            //var savedContactCompany = "";
-            
-            //for (i = 0; i < data.length - 1; i++) {
-
-            //    if ($('#hfContactDetails').val() != "") {
-            //        const savedContactDetails = $('#hfContactDetails').val().split('_');
-            //        if (data[i].No == savedContactDetails[0]) {
-            //            savedContactCompany = data[i].No + '_' + savedContactDetails[1];
-            //            opt += "<option value=\"" + savedContactCompany + "\">" + data[i].Name + "</option>";
-            //        }
-            //        else {
-            //            opt += "<option value=\"" + data[i].No + '_' + data[i].PCPL_Primary_Contact_No + "\">" + data[i].Name + "</option>";
-            //        }
-            //    }
-            //    else {
-            //        opt += "<option value=\"" + data[i].No + '_' + data[i].PCPL_Primary_Contact_No + "\">" + data[i].Name + "</option>";
-            //    }
-                
-            //}
-            //$('#ddlCustomer').append(opt);
-
-            if ($('#hfContactDetails').val() != "") {
-                //$('#ddlCustomer').val($('#hfContactDetails').val());
-                //$('#ddlCustomer').change();
-                //$('#ddlCustomer').prop('disabled', true);
-
-                const CompanyDetails_ = $('#hfContactDetails').val().split('_');
-                var CompanyNo = CompanyDetails_[0];
-
-                $('#hfContactCompanyNo').val(CompanyNo);
-                BindContact($('#hfContactDetails').val());
-                BindConsigneeAddress($('#hfContactDetails').val());
-                GetCustDetails($('#hfContactDetails').val());
-                productName_autocomplete();
+            // 3️⃣ FIRST: call bind function (sets hidden fields)
+            if ($('#hfContactDetails').val() == "" && companyArray.length > 0 && $('#hfCompanyNo').val() != ' ') {
+                cuscurrentValue = applyCustomerSelection(companyArray[0], cuscurrentValue);
             }
 
-        }
-    });
+            // 4️⃣ SECOND: now hidden field exists → update textbox
+            if ($('#hfContactDetails').val()) {
 
+                let match = companyArray.find(x =>
+                    x.data === $('#hfContactDetails').val()
+                );
+
+                if (match) {
+                    $('#txtCustomerName').val(match.value);
+                }
+            }
+        }
+    );
 }
+
+function applyCustomerSelection(selecteditem, cuscurrentValueRef) {
+
+    if (!selecteditem || !selecteditem.data) return cuscurrentValueRef;
+
+    let dataStr = selecteditem.data;
+    let customername = selecteditem.value;
+
+    const CompanyDetails_ = dataStr.split('_');
+    let CompanyNo = CompanyDetails_[0];
+    let PrimaryContactNo = CompanyDetails_[1];
+
+    if (selecteditem.value !== cuscurrentValueRef) {
+
+        cuscurrentValueRef = selecteditem.value;
+
+        $('#hfContactCompanyNo').val(CompanyNo);
+        $('#hfPrimaryContactNo').val(PrimaryContactNo);
+        $('#hfContactDetails').val(dataStr);
+        $('#txtCustomerName').val(customername);
+
+        BindContact(dataStr);
+        BindConsigneeAddress(dataStr);
+        GetCustDetails(dataStr);
+        productName_autocomplete();
+
+        $('#btnAddNewContactPerson').prop('disabled', false);
+        $('#txtCustomerName').trigger('change');
+    }
+
+    return cuscurrentValueRef;
+}
+
+//function BindCompany() {
+
+//    $.get(apiUrl + 'GetAllCompanyForDDL?SPNo=' + $('#hfSPNo').val() +
+//        "&CompanyNo=" + $('#hfCompanyNo').val(), function (data) {
+
+//            if (!data || data.length === 0) return;
+
+//            // Build object safely
+//            let company = {};
+//            for (let i = 0; i < data.length; i++) {
+//                company[data[i].No + '_' + data[i].PCPL_Primary_Contact_No] = data[i].Name;
+//            }
+
+//            // Convert to autocomplete array
+//            var companyArray = $.map(company, function (value, key) {
+//                return {
+//                    value: value,
+//                    data: key
+//                };
+//            });
+
+//            var cuscurrentValue = '';
+
+//            // 🔹 Autocomplete
+//            $('#txtCustomerName').autocomplete({
+//                lookup: companyArray,
+//                onSelect: function (selecteditem) {
+//                    cuscurrentValue = applyCustomerSelection(selecteditem);
+//                }
+//            });
+//                cuscurrentValue = applyCustomerSelection(companyArray);
+
+//            // 🔹 WITHOUT autocomplete (Edit / Pre-filled scenario)
+//            if ($('#hfContactDetails').val() !== "") {
+
+//                var selecteditem = {
+//                    value: $('#txtCustomerName').val(),
+//                    data: $('#hfContactDetails').val()
+//                };
+
+//            }
+//        });
+//}
+
+
+//function applyCustomerSelection(selecteditem) {
+
+//    var cuscurrentValueRef = "";
+
+//    const CompanyDetails_ = selecteditem.data.split('_');
+//    var CompanyNo = CompanyDetails_[0];
+//    var PrimaryContactNo = CompanyDetails_[1];
+
+//    if (selecteditem.value !== cuscurrentValueRef) {
+
+//        cuscurrentValueRef = selecteditem.value;
+
+//        $('#hfContactCompanyNo').val(CompanyNo);
+//        $('#hfPrimaryContactNo').val(PrimaryContactNo);
+//        $('#hfContactDetails').val(selecteditem.data);
+
+//        BindContact(selecteditem.data);
+//        BindConsigneeAddress(selecteditem.data);
+//        GetCustDetails(selecteditem.data);
+//        productName_autocomplete();
+
+//        $('#btnAddNewContactPerson').prop('disabled', false);
+//        $('#txtCustomerName').trigger('change');
+//    }
+
+//    return cuscurrentValueRef;
+//}
+
+
+//function BindCompany() {
+
+
+//    $.get(apiUrl + 'GetAllCompanyForDDL?SPNo=' + $('#hfSPNo').val() + "&CompanyNo=" + $('#hfCompanyNo').val(), function (data) {
+//        if (data != null) {
+
+//            var str1 = "";
+//            var i;
+//            for (i = 0; i < data.length; i++) {
+//                str1 = str1 + '"' + data[i].No + '_' + data[i].PCPL_Primary_Contact_No + '"' + ":" + '"' + data[i].Name + '"' + ","
+//            }
+//            str1 = str1.substring(0, str1.length - 1);
+//            str1 = "{" + str1 + "}";
+
+//            let objFromStr = JSON.parse(str1);
+//            var company = objFromStr;// { AA: "Abc", AO: "Abc", BB: "Bcd", CC: "Cde", DD: "Def", EE: "Efg", EH: "Ester", FF: "Fgh", GG: "Ghi"};
+//            var companyArray = $.map(company, function (value, key) {
+//                return {
+//                    value: value,
+//                    data: key
+//                };
+//            });
+//            var cuscurrentValue = '';
+//            $('#txtCustomerName').autocomplete({
+//                lookup: companyArray,
+//                onSelect: function (selecteditem) {
+
+//                    //$('#hfCompany').val((selecteditem.data));
+
+//                    const CompanyDetails_ = selecteditem.data.split('_');
+//                    var CompanyNo = CompanyDetails_[0];
+//                    var PrimaryContactNo = CompanyDetails_[1];
+//                    if (selecteditem.value != cuscurrentValue) {
+//                        cuscurrentValue = selecteditem.value
+//                        $('#hfContactCompanyNo').val(CompanyNo);
+//                        $('#hfPrimaryContactNo').val(PrimaryContactNo);
+//                        $('#hfContactDetails').val(selecteditem.data);
+//                        BindContact(selecteditem.data);
+//                        BindConsigneeAddress(selecteditem.data);
+//                        GetCustDetails(selecteditem.data);
+//                        productName_autocomplete();
+//                        $('#btnAddNewContactPerson').prop('disabled', false);
+//                        $('#txtCustomerName').trigger('change');
+//                    }
+//                },
+
+//            });
+
+
+//            if ($('#hfContactDetails').val() != "") {
+//                const CompanyDetails_ = $('#hfContactDetails').val().split('_');
+//                var CompanyNo = CompanyDetails_[0];
+
+//                $('#hfContactCompanyNo').val(CompanyNo);
+//                BindContact($('#hfContactDetails').val());
+//                BindConsigneeAddress($('#hfContactDetails').val());
+//                GetCustDetails($('#hfContactDetails').val());
+//                productName_autocomplete();
+//            }
+
+//        }
+//    });
+
+//}
 
 function BindContact(CompanyDetails) {
 
@@ -560,7 +702,7 @@ function BindContact(CompanyDetails) {
         const CompanyDetails_ = CompanyDetails.split('_');
         var CompanyNo = CompanyDetails_[0];
         var PrimaryContactNo = CompanyDetails_[1];
-        
+
         if (CompanyNo != "") {
             $.ajax(
                 {
@@ -604,7 +746,7 @@ function BindContact(CompanyDetails) {
         }
 
     }
-    
+
 }
 
 function BindDepartment() {
@@ -652,12 +794,13 @@ function EditInqProd(ProdTR) {
     //$('#ddlProductName').val(prodNo);
     $('#hfProdNo').val(prodNo);
     $('#txtProductName').val($("#" + ProdTR).find("TD").eq(2).html());
+    GetProductDetails($('#txtProductName').val());
     $('#txtProductName').blur();
     $('#txtProductName').prop('disabled', true);
     $('#txtProdQty').val(parseInt($("#" + ProdTR).find("TD").eq(3).html()));
     $('#hfEditPackingStyle').val($("#" + ProdTR).find("TD").eq(4).html());
     $('#txtDeliveryDate').val($("#" + ProdTR).find("TD").eq(6).html());
-    //$('#txtProDetailsPaymentTerms').val($("#" + ProdTR).find("TD").eq(7).html());
+    $('#txtProDetailsPaymentTerms').val($("#" + ProdTR).find("TD").eq(7).html());
     $('#txtProDetailsPaymentTerms').val($('#ddlPaymentTerms').val());
     $('#hfProdLineNo').val($("#" + ProdTR).find("TD").eq(8).html());
 
@@ -724,7 +867,7 @@ function GetCustDetails(companyDetails) {
                             }
 
                         }
-                        
+
                         $('#ddlBillTo').append(billtoAddOpts);
                         $('#ddlBillTo').val('-1');
 
@@ -737,7 +880,7 @@ function GetCustDetails(companyDetails) {
 
                         $('#ddlBillTo').attr('disabled', false);
                         $('#btnAddNewBillTo').prop('disabled', false);
-                        
+
                         $('#ddlShipTo option').remove();
                         var shiptoAdd = "<option value='-1'>---Select---</option>";
 
@@ -748,7 +891,7 @@ function GetCustDetails(companyDetails) {
                             }
 
                         }
-                        
+
                         $('#ddlShipTo').append(shiptoAdd);
                         $('#ddlShipTo').val('-1');
 
@@ -763,7 +906,7 @@ function GetCustDetails(companyDetails) {
                         $('#btnAddNewJobTo').prop('disabled', false);
 
                         $('#hfCustomerNo').val(data.CustNo);
-                        
+
                     }
                     else {
 
@@ -773,6 +916,9 @@ function GetCustDetails(companyDetails) {
                         $('#ddlBillTo').append(billtoAddOpts);
                         $('#ddlBillTo').val('-1');
                         $('#ddlBillTo').attr('disabled', true);
+                        $('#btnAddNewJobTo').prop('disabled', true);
+                        $('#btnAddNewBillTo').prop('disabled', true);
+
 
                         $('#ddlShipTo option').remove();
                         var shiptoAdd = "<option value='-1'>---Select---</option>";
@@ -799,7 +945,7 @@ function GetDetailsByCode(pincode) {
     pincode = jQuery("#hfPostCode").val();
 
     if (pincode != "") {
-        
+
         $.ajax(
             {
                 url: '/SPInquiry/GetAreasByPincodeForDDL?Pincode=' + pincode,
@@ -840,7 +986,7 @@ function GetDetailsByCode(pincode) {
                             });
 
                         }
-                        
+
                     }
                     else {
                         $('#ddlNewShiptoAddArea, #ddlNewJobtoAddArea').empty();
@@ -857,14 +1003,14 @@ function GetDetailsByCode(pincode) {
 }
 
 function BindProduct() {
-    
+
     $.ajax(
         {
             url: '/SPInquiry/GetAllProductForDDL',
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.length > 0) {
 
                     $('#ddlProduct').append($('<option value="">---Select---</option>'));
@@ -891,14 +1037,14 @@ function BindProduct() {
 }
 
 function BindPaymentTerms() {
-    
+
     $.ajax(
         {
             url: '/SPInquiry/GetAllPaymentTermsForDDL',
             type: 'GET',
             contentType: 'application/json',
             success: function (data) {
-                
+
                 if (data.length > 0) {
 
                     $('#ddlPaymentTerms').append($('<option value="-1">---Select---</option>'));
@@ -941,23 +1087,27 @@ function GetAndFillInquiryDetails(InqNo) {
     var apiUrl = $('#getServiceApiUrl').val() + 'SPInquiry/';
 
     $.get(apiUrl + 'GetInquiryFromInquiryNo?Inquiry_No=' + InqNo, function (data) {
-
         $('#hfInqEdit').val("true");
         $('#hfInqNo').val(data.Inquiry_No);
-        $('#txtInquiryDate').val(data.Inquiry_Date.substring(0,10));
+        $('#txtInquiryDate').val(data.Inquiry_Date.substring(0, 10));
         $('#txtInquiryDate').prop('readonly', true);
         $('#txtCustomerName').val(data.Contact_Company_Name);
         $('#txtCustomerName').prop('disabled', true);
         $('#hfContactDetails').val(data.Inquiry_Customer_Contact + "_" + data.PCPL_Contact_Person);
+        BindContact(data.Inquiry_Customer_Contact + "_" + data.PCPL_Contact_Person);
         BindCompany();
+        BindConsigneeAddress(data.Inquiry_Customer_Contact + "_" + data.PCPL_Contact_Person);
+        GetCustDetails(data.Inquiry_Customer_Contact + "_" + data.PCPL_Contact_Person);
         $('#hfSavedPaymentTermsCode').val(data.Payment_Terms);
         BindPaymentTerms();
         $('#ddlPaymentTerms').change();
         $('#hfSavedShiptoCode').val(data.Ship_to_Code);
         $('#hfSavedJobtoCode').val(data.PCPL_Job_to_Code);
         $('#txtRemarks').val(data.Inquiry_Status_Remarks);
-        
         BindInquiryLineDetails(InqNo);
+        // Always enable Save, Save Product, and Create SalesQuote if permission is granted
+        $("#btnSaveProd").prop('disabled', false);
+        $("#btnSave").prop('disabled', false);
 
     });
 
@@ -972,13 +1122,13 @@ function GetCustomerTemplateCode() {
         if (data != "") {
             $('#hfCustomerTemplateCode').val(data);
         }
-        
+
     });
 
 }
 
 function BindNewProductDetails() {
-    
+
     $.ajax(
         {
             url: '/SPInquiry/GetNewProductDetails',
@@ -991,10 +1141,10 @@ function BindNewProductDetails() {
                 }
                 $('#tableBody').empty();
                 $.each(data, function (index, item) {
-                    
+
                     var rowData = "<tr><td></td><td></td><td>" + item.Product_No + "</td><td>" + item.Quantity + "</td><td>" + item.Remarks + "</td><td>" + item.User_Code + "</td></tr>";
                     $('#tableBody').append(rowData);
-                    
+
                     $('#dataList').css('display', 'block');
                 });
                 if (firsload == 1) {
@@ -1015,7 +1165,7 @@ function BindNewProductDetails() {
 }
 
 function BindConsigneeAddress(CompanyNo) {
-    
+
     if (CompanyNo != "") {
         $.ajax(
             {
@@ -1023,12 +1173,12 @@ function BindConsigneeAddress(CompanyNo) {
                 type: 'GET',
                 contentType: 'application/json',
                 success: function (data) {
-                    
+
                     $('#ddlConsignee').empty();
                     $('#ddlConsignee').append($('<option value="">---Select---</option>'));
 
                     if (data.length > 0) {
-                        
+
                         $.each(data, function (i, data) {
                             if (data.IsDummy === true) {
                                 //$("#hfCustomerNo").val(data.CustomerNo);
@@ -1046,7 +1196,7 @@ function BindConsigneeAddress(CompanyNo) {
                         if ($('#hfSavedConsigneeCode').val() != "") {
                             $('#ddlConsignee').val($('#hfSavedConsigneeCode').val());
                         }
-                        
+
                         //if ($('#hfConsignee').val() != "") {
                         //    $("#ddlConsignee").val($('#hfConsignee').val());
                         //}
@@ -1157,7 +1307,6 @@ function GetCurrentDate() {
     return curDate;
 
 }
-
 function productName_autocomplete() {
 
     if (typeof ($.fn.autocomplete) === 'undefined') { return; }
@@ -1165,66 +1314,49 @@ function productName_autocomplete() {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPInquiry/';
 
-    //const contactDetails = $('#txtCustomerName').val().split('_');
-
-    //$.get(apiUrl + 'GetAllProducts?CCompanyNo=' + contactDetails[0], function (data) {
-
     if ($('#chkShowAllProducts').prop('checked')) {
         apiUrl += 'GetAllProductsForShowAllProd';
     }
     else {
         apiUrl += 'GetAllProducts?CCompanyNo=' + $('#hfContactCompanyNo').val();
     }
-    
+
     $.get(apiUrl, function (data) {
 
         if (data != null) {
-            let str1 = "";
 
-            var i;
-            for (i = 0; i < data.length; i++) {
+            let products = {};
 
+            for (let i = 0; i < data.length; i++) {
                 if ($('#chkShowAllProducts').prop('checked')) {
-                    str1 = str1 + '"' + data[i].No + '"' + ":" + '"' + data[i].Description + '"' + ",";
+                    products[data[i].No] = data[i].Description.trim();
+                } else {
+                    products[data[i].Item_No] = data[i].Item_Name.trim();
                 }
-                else {
-                    str1 = str1 + '"' + data[i].Item_No + '"' + ":" + '"' + data[i].Item_Name + '"' + ",";
-                }
- 
             }
-            str1 = str1.substring(0, str1.length - 1);
-            str1 = "{" + str1 + "}";
 
-            let objFromStr = JSON.parse(str1);
-
-            let products = objFromStr; // { AA: "Abc", AO: "Abc", BB: "Bcd", CC: "Cde", DD: "Def", EE: "Efg", EH: "Ester", FF: "Fgh", GG: "Ghi", HH: "Hij", II: "Ijk", JJ: "Jkl", JO: "Jim", KK: "Klm", LL: "Lmn", LT: "Lina", MH: "Marty", OF: "Otis", RB: "Robin" };
-
-            //var item = {"AB001":"abc", "AB002":"bcd"};
-
+            // Convert to array for autocomplete
             var productsArray = $.map(products, function (value, key) {
                 return {
                     value: value,
                     data: key
                 };
             });
-
+            var currentValue = '';
             $('#txtProductName').autocomplete({
                 lookup: productsArray,
                 onSelect: function (selecteditem) {
-                    $('#hfProdNo').val(selecteditem.data);
-
-                },
+                    if (selecteditem.value != currentValue) {
+                        currentValue = selecteditem.value
+                        $('#hfProdNo').val(selecteditem.data);
+                        $('#txtProductName').trigger('change');
+                    }
+                    //$('#hfProdNo').val(selecteditem.data);
+                }
             });
-
-            //$('#ddlProductName').empty();
-            //var opt = "<option value='-1'>---Select---</option>";
-            //for (i = 0; i < data.length; i++) {
-            //    opt += "<option value=\"" + data[i].Item_No + "\">" + data[i].Item_Name + "</option>";
-            //}
-            //$('#ddlProductName').append(opt);
         }
     });
-};
+}
 
 function GetProductDetails(productName) {
 
@@ -1240,7 +1372,7 @@ function GetProductDetails(productName) {
                     $('#hfProdNo').val(data.No);
 
                     $('#hfUOM').val(data.Base_Unit_of_Measure);
-                    $('#txtUOM').val(data.Base_Unit_of_Measure).attr('disabled',true);
+                    $('#txtUOM').val(data.Base_Unit_of_Measure).attr('disabled', true);
 
                     $('#ddlPackingStyle option').remove();
                     var packingstyleOpts = "<option value='-1'>---Select---</option>";
@@ -1260,7 +1392,7 @@ function GetProductDetails(productName) {
                     else {
                         $('#ddlPackingStyle').val('-1');
                     }
-                    
+
                 }
             },
             error: function () {
@@ -1292,7 +1424,7 @@ function BindInquiryLineDetails(InqNo) {
 
             $('#tblProducts').append(ProdTR);
         }
-        
+
     });
 
 }
@@ -1316,13 +1448,37 @@ function CheckCPersonFieldValues() {
 
     var errMsg = "";
 
-    if ($('#txtCPersonName').val() == "" || $('#txtCPersonMobile').val() == "" || $('#txtCPersonEmail').val() == "" || $('#ddlDepartment').val() == "-1" ||
-        $('#txtJobResponsibility').val() == "") {
-        errMsg = "Please Fill Details";
+    if ($('#txtCPersonName').val() == "") {
+        errMsg += "Please enter Contact Person Name.\n";
     }
-    
+
+    var mobile = $('#txtCPersonMobile').val();
+    if (mobile == "") {
+        errMsg += "Please enter Mobile No.\n";
+    }
+    else if (!/^\d{10}$/.test(mobile)) {
+        errMsg += "Mobile No must be exactly 10 digits.\n";
+    }
+
+    var email = $('#txtCPersonEmail').val();
+    if (email == "") {
+        errMsg += "Please enter Email.\n";
+    }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errMsg += "Please enter a valid Email address.\n";
+    }
+
+    if ($('#ddlDepartment').val() == "-1") {
+        errMsg += "Please select Department.\n";
+    }
+
+    if ($('#txtJobResponsibility').val() == "") {
+        errMsg += "Please enter Job Responsibility.\n";
+    }
+
     return errMsg;
 }
+
 
 function CheckNewBilltoAddressValues() {
 
@@ -1347,7 +1503,7 @@ function CheckNewDeliverytoAddressValues() {
 
     var errMsg = "";
 
-    if ($('#txtNewJobtoAddCode').val() == "" || $('#txtNewJobtoAddress').val() == "" || $('#txtNewJobtoAddPostCode').val() == "" ||
+    if (/*$('#txtNewJobtoAddCode').val() == "" ||*/ $('#txtNewJobtoAddress').val() == "" || $('#txtNewJobtoAddPostCode').val() == "" ||
         $('#ddlNewJobtoAddArea').val() == "-1" || $('#txtNewJobtoAddState').val() == "" || $('#txtNewJobtoAddGSTNo').val() == "") {
 
         errMsg = "Please Fill Details";
@@ -1362,8 +1518,7 @@ function CheckNewDeliverytoAddressValues() {
     return errMsg;
 }
 
-function ResetProdDetails()
-{
+function ResetProdDetails() {
     $('#txtProductName').val("");
     //$('#ddlProductName').val("-1");
     $('#txtProdQty').val("");
@@ -1422,7 +1577,7 @@ function EditInquiryLine(DocumentNo, LineNo, obj) {
     var UOM = row.find("[name=UOM]").text();
     var qty = row.find("[name=Qty]").text();
 
-    $('#txtProductName').val(prodName).attr('disabled',true);
+    $('#txtProductName').val(prodName).attr('disabled', true);
     $('#txtProdQty').val(qty);
     $('#txtUOM').val(UOM).attr('disabled', true);
 
@@ -1471,7 +1626,7 @@ function ResetNewBillToAddressDetails() {
 
 function ResetNewDeliveryToAddressDetails() {
 
-    $('#txtNewJobtoAddCode').val("");
+   // $('#txtNewJobtoAddCode').val("");
     $('#txtNewJobtoAddress').val("");
     $('#txtNewJobtoAddress2').val("");
     $('#txtNewJobtoAddPostCode').val("");
@@ -1497,6 +1652,14 @@ function BindPincodeMin2Char() {
             type: "POST"
         },
         onSelect: function (suggestion) {
+
+            // 👉 IsActive check — disable / enable dropdown
+            if (suggestion.isActive === false) {
+                $("#ddlNewShiptoAddArea").prop("disabled", true);
+            } else {
+                $("#ddlNewShiptoAddArea").prop("disabled", false);
+            }
+
             jQuery("#hfPostCode").val(suggestion.value);
 
             var citydis = suggestion.data.split(",");
@@ -1504,49 +1667,45 @@ function BindPincodeMin2Char() {
 
             if ($('#hfAddNewDetails').val() == "BillToAddress") {
 
-                jQuery("#txtNewShiptoAddCity").val(citydis[0]);
-                $("#txtNewShiptoAddCity").prop('readonly', true);
-                jQuery("#txtNewShiptoAddDistrict").val(citydis[1]);
-                $("#txtNewShiptoAddDistrict").prop('readonly', true);
+                jQuery("#txtNewShiptoAddCity").val(citydis[0]).prop('readonly', true);
+                jQuery("#txtNewShiptoAddDistrict").val(citydis[1]).prop('readonly', true);
 
-                jQuery("#txtNewShiptoAddCountryCode").val(statecountry[1]);
-                $("#txtNewShiptoAddCountryCode").prop('readonly', true);
-                jQuery("#txtNewShiptoAddState").val(statecountry[0]);
-                $("#txtNewShiptoAddState").prop('readonly', true);
+                jQuery("#txtNewShiptoAddCountryCode").val(statecountry[1]).prop('readonly', true);
+                jQuery("#txtNewShiptoAddState").val(statecountry[0]).prop('readonly', true);
+
                 GetDetailsByCode($('#txtNewShiptoAddPostCode').val());
-
             }
 
-            if ($('#hfAddNewDetails').val() == "DeliveryToAddress")
-            {
-                jQuery("#txtNewJobtoAddCity").val(citydis[0]);
-                $("#txtNewJobtoAddCity").prop('readonly', true);
-                jQuery("#txtNewJobtoAddDistrict").val(citydis[1]);
-                $("#txtNewJobtoAddDistrict").prop('readonly', true);
+            if ($('#hfAddNewDetails').val() == "DeliveryToAddress") {
 
-                jQuery("#txtNewJobtoAddCountryCode").val(statecountry[1]);
-                $("#txtNewJobtoAddCountryCode").prop('readonly', true);
-                jQuery("#txtNewJobtoAddState").val(statecountry[0]);
-                $("#txtNewJobtoAddState").prop('readonly', true);
-                GetDetailsByCode($('#txtNewJobtoAddPostCode').val());    
+                jQuery("#txtNewJobtoAddCity").val(citydis[0]).prop('readonly', true);
+                jQuery("#txtNewJobtoAddDistrict").val(citydis[1]).prop('readonly', true);
+
+                jQuery("#txtNewJobtoAddCountryCode").val(statecountry[1]).prop('readonly', true);
+                jQuery("#txtNewJobtoAddState").val(statecountry[0]).prop('readonly', true);
+
+                GetDetailsByCode($('#txtNewJobtoAddPostCode').val());
             }
 
             return false;
         },
-        select: function (event, ui) {
-        },
+
         transformResult: function (response) {
             return {
                 suggestions: jQuery.map(jQuery.parseJSON(response), function (item) {
                     return {
                         value: item.Code,
                         data: item.City + ',' + item.District_Code,
-                        id: item.PCPL_State_Code + ',' + item.Country_Region_Code
+                        id: item.PCPL_State_Code + ',' + item.Country_Region_Code,
+
+                        // 👉 Yahan IsActive pass kar diya
+                        isActive: item.IsActive
                     };
                 })
             };
-        },
+        }
     });
+
 
 }
 
@@ -1583,6 +1742,8 @@ function BindArea() {
     });
 
 }
+
+
 
 function ShowActionMsg(actionMsg) {
 

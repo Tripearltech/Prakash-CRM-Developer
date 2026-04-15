@@ -91,6 +91,8 @@ function getdata(filter) {
 
 function DrawChart(datamodel, question) {
     //debugger;
+    if (typeof window.Highcharts === 'undefined') return;
+    if (!document.getElementById('dvFeedbackChart')) return;
     Highcharts.chart('dvFeedbackChart', {
         chart: {
             height: 360,
@@ -165,7 +167,7 @@ function BindSalesPerson() {
                 if (data.length > 0) {
 
                     $('#ddlSalesPerson').append($('<option value="">---Select---</option>'));
-                    $.each(data, function (i, data) {
+                   $.each(data, function (i, data) {
                         $('<option>',
                             {
                                 value: data.Code,
@@ -173,7 +175,7 @@ function BindSalesPerson() {
                             }
                         ).html(data.Name).appendTo("#ddlSalesPerson");
                     });
-
+                   
                     //if ($('#hfSalespersonCode').val() != "") {
                     //    $("#ddlSalesPerson").val($('#hfSalespersonCode').val());
                     //}

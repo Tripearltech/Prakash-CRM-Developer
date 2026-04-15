@@ -231,8 +231,6 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
         $('#hdnContactCount').val(data);
     });
 
-    //url: '/SPBusinessPlan/GetContactCompanyListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
-
     $.ajax(
         {
             url: '/SPBusinessPlan/GetBusinessPlanCustWiseListData?page=CustWiseForPendingApproval&SPCode=' + SPCode + '&orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
@@ -244,6 +242,8 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     $('#dataList').DataTable().destroy();
                 }
                 $('#tableBody').empty();
+                $('#ftableBody tr:not(:first)').remove();
+                
                 var a = 0;
                 $.each(data, function (index, item) {
                     var rowData = "<tr><td></td>";
@@ -260,14 +260,6 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         "</td><td>" + item.Total_Demand_Qty + "</td><td>" + item.Targeted_Qty + "</td>";
 
                     if (item.Status == "Submitted") {
-
-                        //rowData += "<td><button id='btnApproveRejectSpinner" + a + "' class='btn btn-primary' type='button' disabled style='display:none'><span class='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>" +
-                        //    "<span class='visually-hidden'>Loading...</span></button>&nbsp;<button type='button' class='btn btn-outline-success px-5' onclick='ApproveRejectBusinessPlan(\"Approve\",\"" + item.Plan_Year + "\",\"" +
-                        //    item.Customer_No + "\",\"btnApproveRejectSpinner" + a + "\",\"" + item.Salesperson_Purchaser + "\")'>" +
-                        //    "<i class='bx bx-check mr-1'></i>Approve</button>&nbsp;<button type='button' class='btn btn-outline-danger px-5' onclick='ApproveRejectBusinessPlan(\"Reject\",\"" + item.Plan_Year + "\",\"" +
-                        //    item.Customer_No + "\",\"btnApproveRejectSpinner" + a + "\",\"" + item.Salesperson_Purchaser + "\")'>" +
-                        //    "<i class='bx bx-x mr-1'></i>Reject</button></td>";
-
                         rowData += "<td><span class='badge bg-primary'>Pending Approval</span></td>" +
                             "<td></td>";
                     }
@@ -286,8 +278,20 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                     //a += 1;
 
                     $('#tableBody').append(rowData);
-
                 });
+                // Futter table data on business approval List.
+                var unique = new Set();
+                var TROpts = "";
+
+                $.each(data, function (index, item) {
+                    if (!unique.has(item.Total_Target_Qty_SP)) {
+                        unique.add(item.Total_Target_Qty_SP);
+
+                        TROpts += "<tr>" + "<td></td>" + "<td></td>" + "<td></td>" + "<td>" + item.Prev_Year_Total_Demand_Qty_SP + "</td>" + "<td>" + item.Prev_Year_Total_Target_Qty_SP + "</td>" + "<td>" + item.Prev_Year_Total_Achieved_Qty + "</td>" + "<td>" + item.Total_Demand_Qty_SP + "</td>" + "<td>" + item.Total_Target_Qty_SP + "</td>" + "<td></td>" + "</tr>";
+                    }
+                });
+                $('#ftableBody').append(TROpts);
+
                 if (firsload == 1) {
                     pageMe();
                 }
@@ -531,7 +535,7 @@ function ShowCustBusinessPlan(PlanYear, CustNo, CustName) {
     $('#lblDetailsPrevYear').text((parseInt(PlanYear_[0]) - 1) + "-" + PlanYear_[0]);
     $('#lblDetailsCustName').text(CustName);
 
-    $.get(apiUrl + 'GetCustomerBusinessPlan?SPCode=' + SPCode + '&CustomerNo=' + CustNo + '&PlanYear=' + PlanYear, function (data) {
+    $.get(apiUrl + 'GetCustomerBusinessApproved?SPCode=' + SPCode + '&CustomerNo=' + CustNo + '&PlanYear=' + PlanYear, function (data) {
 
         var TROpts = "";
         var i;

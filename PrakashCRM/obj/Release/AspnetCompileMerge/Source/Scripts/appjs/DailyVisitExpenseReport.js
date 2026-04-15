@@ -111,7 +111,7 @@ $(document).ready(function () {
 });
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
-
+ debugger
     $.get(apiUrl + 'GetApiRecordsCount?SPCode=&Page=DailyVisitExpenseReport&apiEndPointName=DailyVisitExpensesDotNetAPI&filter=' + filter, function (data) {
         $('#hfDVExpenseCount').val(data);
     });
@@ -131,7 +131,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                 $.each(data, function (index, item) {
                     
                     /*var rowData = "<tr><td>" + item.Visit_Date + "</td><td>" + item.User_Code + "</td><td>" + convertToAmPm(item.Start_Time) + "</td><td>" + convertToAmPm(item.End_Time) + "</td><td>" + item.Total_Time + "</td><td>" + item.Personal_Visit_No + "</td><td>" + item.Start_km + "</td><td>" + item.End_km + "</td><td>" + item.Total_km + "</td></tr>";*/
-                    var rowData = "<tr><td>" + item.Visit_Date + "</td><td>" + item.User_Code + "</td><td>" + convertToAmPm(item.Start_Time) + "</td><td>" + convertToAmPm(item.End_Time) + "</td><td>" + item.Total_Time + "</td><td>" + item.No_of_Personal_Visit + "</td><td>" + item.Start_km + "</td><td>" + item.End_km + "</td><td>" + item.Total_km + "</td></tr>";
+                    var rowData = "<tr><td>" + item.Visit_Date + "</td><td>" + item.SalesPerson_Name + "</td><td>" + item.Contact_Company_Name + "</td><td>" + item.Daily_Visit_Plan_No + "</td><td>" + convertToAmPm(item.Start_Time) + "</td><td>" + convertToAmPm(item.End_Time) + "</td><td>" + item.Total_Time + "</td><td>" + item.No_of_Personal_Visit + "</td><td>" + item.Start_km + "</td><td>" + item.End_km + "</td><td>" + item.Total_km + "</td></tr>";
                     $('#tableBody').append(rowData);
                     // loop and do whatever with data
 
