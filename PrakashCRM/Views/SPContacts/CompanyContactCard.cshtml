@@ -358,7 +358,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Is Primary</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.Is_Primary, new { @id = "chkIsPrimary", tabindex = "26" })
+                                        @Html.CheckBoxFor(model => model.Is_Primary, new { @id = "chkIsPrimary", tabindex = "27" })
                                     </div>
                                 </div>
                             </div>
@@ -379,7 +379,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Allow Login</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.PCPL_Allow_Login, new { @id = "chkAllowLogin", tabindex = "27" })
+                                        @Html.CheckBoxFor(model => model.PCPL_Allow_Login, new { @id = "chkAllowLogin", tabindex = "28" })
                                     </div>
                                 </div>
                             </div>
@@ -401,7 +401,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin", @checked = "checked", tabindex = "28" })
+                                        @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin", @checked = "checked", tabindex = "29" })
                                     </div>
                                 </div>
                             </div>
@@ -417,17 +417,20 @@
                                     </div>
                                 </div>
                             </div>
+                           
+                        </div>
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.PCPL_Job_Responsibility, new { @class = "form-control", @id = "txtJobResponsibility", @Name = "txtJobResponsibility", tabindex = "29" })
+                                        @Html.TextBoxFor(model => model.PCPL_Job_Responsibility, new { @class = "form-control", @id = "txtJobResponsibility", @Name = "txtJobResponsibility", tabindex = "26" })
                                         @Html.ValidationMessageFor(model => model.PCPL_Job_Responsibility, null, new { style = "color:red" })
                                         <label id="lblJobResponsibilityMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
                             </div>
-
+ 
                         </div>
 
                         <input type="hidden" id="hdfCompanyNo" value="@Session["CompanyNo"].ToString()" />
@@ -619,8 +622,8 @@
                         </button>
                         <!--&nbsp;-->
                         @*ShowProcessImg()*@
-                        @if (ViewBag.Contactscount == 0)
-                        {
+                        @*@if (ViewBag.Contactscount == 0)
+                        {*@
                             <div class="d-flex justify-content-end mt-3">
                                 <button id="btnSave" class="btn btn-success me-2" tabindex="34" onclick="return CheckContactValues()" type="submit">
                                     <i class="bx bxs-save"></i> Save
@@ -630,7 +633,7 @@
                                     <i class="lni lni-close"></i> Cancel
                                 </a>
                             </div>
-                        }
+ 
                         <div class="left-actions">
                             <button id="btnCreateSQ" type="button" , tabindex="32" class="btn btn-purple" style="display:none">
                                 Create SalesQuote

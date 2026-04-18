@@ -365,11 +365,11 @@ namespace PrakashCRM.Service.Controllers
         // Customer Report DrowDown Api.
         [HttpGet]
         [Route("GetCustomerReport")]
-        public List<SPCustomerReport> GetCustomerReport(string prefix)
+        public List<SPCustomerReport> GetCustomerReport(string prefix, string salesPerson)
         {
             API ac = new API();
             List<SPCustomerReport> customerReports = new List<SPCustomerReport>();
-            var result = ac.GetData<SPCustomerReport>("CustomerCardDotNetAPI", "startswith(Name,'" + prefix + "')");
+            var result = ac.GetData<SPCustomerReport>("CustomerCardDotNetAPI", "startswith(Name,'" + prefix + "') and Salesperson_Code eq '" + salesPerson + "'");
 
             if (result != null && result.Result.Item1.value.Count > 0)
 

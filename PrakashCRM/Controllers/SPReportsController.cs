@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PrakashCRM.Data.Models;
@@ -286,8 +287,8 @@ namespace PrakashCRM.Controllers
         [HttpPost]
         public async Task<JsonResult> GetCustomerReport(string prefix)
         {
-            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerReport?prefix=" + prefix;
-
+            string SalesPerson = Session["loggedInUserSPCode"].ToString();
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerReport?prefix=" + prefix + "&salesPerson=" + SalesPerson;
             HttpClient client = new HttpClient();
             List<SPCustomerReport> customerReports = new List<SPCustomerReport>();
 

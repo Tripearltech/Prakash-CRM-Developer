@@ -327,17 +327,43 @@
         }
 
     });
+   
     function CheckCPersonFieldValues() {
 
         var errMsg = "";
 
-        if ($('#txtCPersonName').val() == "" || $('#txtCPersonMobile').val() == "" || $('#txtCPersonEmail').val() == "" || $('#ddlDepartment').val() == "-1" ||
-            $('#txtJobResponsibility').val() == "") {
-            errMsg = "Please Fill Details";
+        if ($('#txtCPersonName').val() == "") {
+            errMsg += "Please enter Contact Person Name.\n";
+        }
+
+        var mobile = $('#txtCPersonMobile').val();
+        if (mobile == "") {
+            errMsg += "Please enter Mobile No.\n";
+        }
+        else if (!/^\d{10}$/.test(mobile)) {
+            errMsg += "Mobile No must be exactly 10 digits.\n";
+        }
+
+        var email = $('#txtCPersonEmail').val();
+        if (email == "") {
+            errMsg += "Please enter Email.\n";
+        }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errMsg += "Please enter a valid Email address.\n";
+        }
+
+        if ($('#ddlDepartment').val() == "-1") {
+            errMsg += "Please select Department.\n";
+        }
+
+        if ($('#txtJobResponsibility').val() == "") {
+            errMsg += "Please enter Job Responsibility.\n";
         }
 
         return errMsg;
     }
+
+
     $('#btnConfirmAddCPerson').click(function () {
         debugger;
 
