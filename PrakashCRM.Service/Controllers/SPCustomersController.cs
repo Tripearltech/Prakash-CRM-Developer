@@ -26,9 +26,9 @@ namespace PrakashCRM.Service.Controllers
             var result = (dynamic)null;
 
             if(isExport)
-                result = ac.GetData<SPCustomersList>("CustomerCardDotNetAPI", filter);
+                result = ac.GetData<SPCustomersList>("pcplcustomers", filter,true);
             else
-                result = ac.GetData1<SPCustomersList>("CustomerCardDotNetAPI", filter, skip, top, orderby);
+                result = ac.GetData1<SPCustomersList>("pcplcustomers", filter, skip, top, orderby,true);
 
             if (result.Result.Item1.value != null && result.Result.Item1.value.Count > 0)
                 customers = result.Result.Item1.value;

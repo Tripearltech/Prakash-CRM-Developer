@@ -1,0 +1,478 @@
+﻿using Newtonsoft.Json;
+using PrakashCRM.Data.Models;
+using PrakashCRM.Service.Classes;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+
+namespace PrakashCRM.Service.Controllers
+{
+    [RoutePrefix("api/DocumentAttachment")]
+    public class DailyVisitAttachmentController : ApiController
+    {
+        [HttpPost]
+        [Route("Upload")]
+        public async Task<IHttpActionResult> Upload()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+
+                if (httpRequest.Files.Count == 0)
+                {
+                    return BadRequest("A file must be provided in the request.");
+                }
+
+                var file = httpRequest.Files[0];
+
+                if (file == null || file.ContentLength == 0)
+                {
+                    return BadRequest("The provided file is empty.");
+                }
+
+                var no = httpRequest.Form["no"];
+                var entryType = httpRequest.Form["entryType"];
+                var fileName = httpRequest.Form["FileName"];
+                var variantCode = httpRequest.Form["variantCode"] ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(no))
+                {
+                    return BadRequest("no must be provided in the form data.");
+                }
+
+                if (string.IsNullOrWhiteSpace(entryType))
+                {
+                    return BadRequest("entryType must be provided in the form data.");
+                }
+
+                if (string.IsNullOrWhiteSpace(fileName))
+                {
+                    return BadRequest("FileName must be provided in the form data.");
+                }
+
+                var responses = new List<FileUploadResponse>();
+
+                for (var index = 0; index < httpRequest.Files.Count; index++)
+                {
+                    var currentFile = httpRequest.Files[index];
+
+                    if (currentFile == null || currentFile.ContentLength == 0)
+                    {
+                        return BadRequest("One or more provided files are empty.");
+                    }
+
+                    byte[] bytes;
+                    using (var ms = new MemoryStream())
+                    {
+                        currentFile.InputStream.CopyTo(ms);
+                        bytes = ms.ToArray();
+                    }
+
+                    var base64 = Convert.ToBase64String(bytes);
+                    var normalizedFileName = Path.GetFileName(fileName);
+                    var resolvedExtension = Path.GetExtension(currentFile.FileName);
+                    if (string.IsNullOrWhiteSpace(resolvedExtension))
+                    {
+                        resolvedExtension = Path.GetExtension(normalizedFileName);
+                    }
+
+                    SaveAttachmentFile(bytes, no, entryType, normalizedFileName);
+
+                    responses.Add(new FileUploadResponse
+                    {
+                        FileName = Path.GetFileNameWithoutExtension(normalizedFileName),
+                        FileExtension = resolvedExtension,
+                        ContentType = ResolveContentType(resolvedExtension),
+                        Size = currentFile.ContentLength,
+                        Base64 = base64,
+                        LotNo = no,
+                        ItemNo = entryType,
+                        IsUploaded = true
+                    });
+                }
+
+                var docAttachmentJson = BuildDocAttachmentJson(responses);
+                // UpdateTrackingFlag(entryType, no, variantCode, docAttachmentJson); // Not needed for Daily Visit
+
+                // Update the Daily Visit record with DocAttachmentJson
+                await UpdateDailyVisitDocAttachmentJson(no, entryType, docAttachmentJson);
+
+                return Ok(new
+                {
+                    Attachments = responses.Select(response => new
+                    {
+                        response.FileName,
+                        response.FileExtension,
+                        ContentType = ResolveContentType(response.FileExtension),
+                        response.Base64,
+                        response.LotNo,
+                        response.ItemNo,
+                        response.IsUploaded
+                    }),
+                    //DocAttachmentJson = docAttachmentJson,
+                    //IsTrackingDocumentAttached = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, new
+                {
+                    details = ex.Message
+                });
+            }
+        }
+
+        private static void SaveAttachmentFile(byte[] fileBytes, string no, string entryType, string fileName)
+        {
+            var rootPath = HttpContext.Current.Server.MapPath("~/DailyVisitAttachment");
+            var safeEntryType = SanitizePathSegment(entryType);
+            var safeNo = SanitizePathSegment(no);
+            var safeFileName = SanitizeFileName(fileName);
+
+            var targetDirectory = Path.Combine(rootPath, safeEntryType, safeNo);
+            Directory.CreateDirectory(targetDirectory);
+
+            var targetFilePath = Path.Combine(targetDirectory, safeFileName);
+            File.WriteAllBytes(targetFilePath, fileBytes);
+        }
+
+        private static string SanitizePathSegment(string value)
+        {
+            var input = string.IsNullOrWhiteSpace(value) ? "blank" : value.Trim();
+
+            foreach (var invalidChar in Path.GetInvalidFileNameChars())
+            {
+                input = input.Replace(invalidChar, '_');
+            }
+
+            return input;
+        }
+
+        private static string SanitizeFileName(string value)
+        {
+            var input = string.IsNullOrWhiteSpace(value) ? "attachment" : Path.GetFileName(value.Trim());
+
+            foreach (var invalidChar in Path.GetInvalidFileNameChars())
+            {
+                input = input.Replace(invalidChar, '_');
+            }
+
+            return input;
+        }
+
+        private static string BuildDocAttachmentJson(IEnumerable<FileUploadResponse> responses)
+        {
+            var documents = new List<object>();
+            foreach (var response in responses)
+            {
+                documents.Add(new
+                {
+                    response.FileName,
+                    response.FileExtension,
+                    ContentType = ResolveContentType(response.FileExtension),
+                    response.Base64,
+                    DailyVisitNo = response.LotNo,
+                    EntryType = response.ItemNo,
+                    response.IsUploaded
+                });
+            }
+            return JsonConvert.SerializeObject(documents);
+        }
+
+        [Route("UpdateTrackingFlag")]
+        public LotNoInformationCard UpdateTrackingFlag(string itemNo, string lotNo, string variantCode, string docAttachmentJson)
+        {
+            var ac = new API();
+            var normalizedVariantCode = variantCode ?? string.Empty;
+            var response = new LotNoInformationCard
+            {
+                Item_No = itemNo,
+                Lot_No = lotNo,
+                Variant_Code = normalizedVariantCode,
+                DocAttachmentJson = docAttachmentJson,
+                IsTrackingDocumentAttached = true
+            };
+            var result = (dynamic)null;
+            var request = new LotNoInformationCard
+            {
+                Item_No = itemNo ?? string.Empty,
+                Lot_No = lotNo ?? string.Empty,
+                Variant_Code = normalizedVariantCode,
+                DocAttachmentJson = docAttachmentJson,
+                IsTrackingDocumentAttached = true
+            };
+
+            result = ac.PatchItem("LotNoInformationCard", request, response, "Item_No='" + itemNo + "',Lot_No='" + lotNo + "',Variant_Code='" + normalizedVariantCode + "'");
+            if (result.Result.Item1 != null)
+                response = result.Result.Item1;
+
+            response.Item_No = string.IsNullOrWhiteSpace(response.Item_No) ? itemNo : response.Item_No;
+            response.Lot_No = string.IsNullOrWhiteSpace(response.Lot_No) ? lotNo : response.Lot_No;
+            response.Variant_Code = response.Variant_Code ?? normalizedVariantCode;
+            response.DocAttachmentJson = string.IsNullOrWhiteSpace(response.DocAttachmentJson) ? docAttachmentJson : response.DocAttachmentJson;
+
+            if (result.Result.Item2 != null && result.Result.Item2.isSuccess)
+                response.IsTrackingDocumentAttached = true;
+
+            return response;
+        }
+
+        [HttpGet]
+        [Route("List")]
+        public async Task<IHttpActionResult> List(int tableId, string entryType, string no)
+        {
+            if (tableId <= 0)
+            {
+                return BadRequest("tableId must be greater than zero.");
+            }
+
+            if (string.IsNullOrWhiteSpace(entryType))
+            {
+                return BadRequest("entryType must be provided.");
+            }
+
+            if (string.IsNullOrWhiteSpace(no))
+            {
+                return BadRequest("no must be provided.");
+            }
+
+            var ac = new API();
+            var filter = BuildDocumentAttachmentFilter(tableId, entryType, no);
+            var result = await ac.GetData<BusinessCentralDocumentAttachment>("DocumentAttachments", filter).ConfigureAwait(false);
+
+            if (!result.err.isSuccess)
+            {
+                return Content(HttpStatusCode.BadGateway, new
+                {
+                    error = "Unable to fetch document attachments from Business Central.",
+                    details = result.err.message
+                });
+            }
+
+            var attachments = result.items?.value ?? new List<BusinessCentralDocumentAttachment>();
+            var formattedAttachments = new List<object>();
+
+            foreach (var attachment in attachments)
+            {
+                formattedAttachments.Add(new
+                {
+                    FileName = attachment.File_Name ?? string.Empty,
+                    FileExtension = NormalizeFileExtension(attachment.File_Extension),
+                    ContentType = ResolveContentType(attachment.File_Extension),
+                    Base64 = attachment.Base64Text ?? string.Empty,
+                    LotNo = attachment.No ?? string.Empty,
+                    ItemNo = attachment.Item_No ?? string.Empty,
+                    IsUploaded = true,
+                    ID = attachment.ID,
+                    Table_ID = attachment.Table_ID,
+                    DocumentType = attachment.Document_Type ?? string.Empty,
+                    LineNo = attachment.Line_No,
+                    //AttachmentId = BuildAttachmentIdentifier(attachment),
+                    AttachedDate = attachment.Attached_Date ?? string.Empty
+                });
+            }
+
+            return Ok(formattedAttachments);
+        }
+
+        [HttpPost]
+        [Route("Delete")]
+        public async Task<IHttpActionResult> DeleteAttachment([FromBody] GRNDocumentAttachmentDeleteRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest("Delete request payload is required.");
+            }
+
+            if (request.Table_ID <= 0)
+            {
+                return BadRequest("Table_ID must be greater than zero.");
+            }
+
+            if (request.ID <= 0)
+            {
+                return BadRequest("ID must be provided for delete.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.LotNo))
+            {
+                return BadRequest("LotNo must be provided for delete.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.DocumentType))
+            {
+                return BadRequest("DocumentType must be provided for delete.");
+            }
+
+            var ac = new API();
+            var deleteKey = BuildDocumentAttachmentKey(request);
+            var responseModel = new BusinessCentralDocumentAttachment();
+            var requestModel = new BusinessCentralDocumentAttachment
+            {
+                ID = request.ID,
+                Table_ID = request.Table_ID,
+                No = request.LotNo,
+                Document_Type = request.DocumentType,
+                Line_No = request.LineNo,
+                Item_No = request.ItemNo ?? string.Empty,
+                File_Name = request.FileName ?? string.Empty
+            };
+
+            var result = await ac.DeleteItem("DocumentAttachments", requestModel, responseModel, deleteKey).ConfigureAwait(false);
+            if (!result.Item2.isSuccess)
+            {
+                return Content(HttpStatusCode.BadGateway, new
+                {
+                    error = "Unable to delete document attachment from Business Central.",
+                    details = result.Item2.message
+                });
+            }
+
+            return Ok(new
+            {
+                success = true,
+                message = "Attachment deleted successfully."
+            });
+        }
+
+        private static string BuildDocumentAttachmentFilter(int tableId, string entryType, string no)
+        {
+            return $"Table_ID eq {tableId} and Daily_Visit_Entry_Type eq '{EscapeODataString(entryType)}' and No eq '{EscapeODataString(no)}'";
+        }
+
+        private static string BuildDocumentAttachmentKey(GRNDocumentAttachmentDeleteRequest request)
+        {
+            return $"ID={request.ID},Table_ID={request.Table_ID},No='{EscapeODataString(request.LotNo)}',Document_Type='{EscapeODataString(request.DocumentType)}',Line_No={request.LineNo}";
+        }
+
+        private static string BuildAttachmentIdentifier(BusinessCentralDocumentAttachment attachment)
+        {
+            return $"{attachment.ID}|{attachment.Table_ID}|{attachment.No}|{attachment.Document_Type}|{attachment.Line_No}";
+        }
+
+        private static string NormalizeFileExtension(string fileExtension)
+        {
+            if (string.IsNullOrWhiteSpace(fileExtension))
+            {
+                return string.Empty;
+            }
+
+            var normalized = fileExtension.Trim();
+            return normalized.StartsWith(".") ? normalized : "." + normalized;
+        }
+
+        private static string ResolveContentType(string fileExtension)
+        {
+            switch ((fileExtension ?? string.Empty).Trim().TrimStart('.').ToLowerInvariant())
+            {
+                case "jpg":
+                case "jpeg":
+                    return "image/jpeg";
+
+                case "png":
+                    return "image/png";
+
+                case "gif":
+                    return "image/gif";
+
+                case "bmp":
+                    return "image/bmp";
+
+                case "webp":
+                    return "image/webp";
+
+                case "svg":
+                    return "image/svg+xml";
+
+                case "pdf":
+                    return "application/pdf";
+
+                case "doc":
+                    return "application/msword";
+
+                case "docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+                case "xls":
+                    return "application/vnd.ms-excel";
+
+                case "xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                case "ppt":
+                    return "application/vnd.ms-powerpoint";
+
+                case "pptx":
+                    return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+                case "xml":
+                    return "application/xml";
+
+                case "txt":
+                    return "text/plain";
+
+                case "csv":
+                    return "text/csv";
+
+                default:
+                    return "application/octet-stream";
+            }
+        }
+
+        private static string EscapeODataString(string value)
+        {
+            return (value ?? string.Empty).Replace("'", "''").Trim();
+        }
+
+        private async Task UpdateDailyVisitDocAttachmentJson(string no, string entryType, string docAttachmentJson)
+        {
+            try
+            {
+                string _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+                string _tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
+                string _environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
+                string _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+
+                API ac = new API();
+                var accessToken = await ac.GetAccessToken();
+
+                using (var _httpClient = new HttpClient())
+                {
+                    string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + "DailyVisitsDotNetAPI");
+                    var requestUrl = encodeurl + "(No='" + EscapeODataString(no) + "',Entry_Type='" + EscapeODataString(entryType) + "')";
+                    var request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUrl);
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+                    _httpClient.DefaultRequestHeaders.Add("If-Match", "*");
+
+                    var patchData = new
+                    {
+                        DocAttachmentJson = docAttachmentJson,
+                        IsTrackingDocumentAttached = true
+                    };
+
+                    string ItemCardObjString = JsonConvert.SerializeObject(patchData);
+                    request.Content = new StringContent(ItemCardObjString, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await _httpClient.SendAsync(request);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        // Log or handle this error if needed
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Log exception, but do not throw on upload failure to avoid failing the attachment upload itself
+            }
+        }
+    }
+}

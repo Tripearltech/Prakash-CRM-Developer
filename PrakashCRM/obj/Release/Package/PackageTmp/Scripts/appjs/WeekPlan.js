@@ -2,6 +2,32 @@
 
 $(document).ready(function () {
 
+        let currentsDate = new Date();
+    let today = currentsDate.toISOString().split('T')[0];
+
+        // Default value
+        $('#txtWeekDate').val(today);
+
+        // Prevent past date selection (calendar level)
+        $('#txtWeekDate').attr('min', today);
+
+        // Change event validation
+        $('#txtWeekDate').change(function () {
+
+            let selectedDate = $(this).val();
+
+            if (selectedDate < today) {
+                $('#lblWeekDateMsg').text("You cannot select a past date");
+                $('#lblWeekDateMsg').show();
+
+                $(this).val(today); // reset
+            } else {
+                $('#lblWeekDateMsg').text("");
+                $('#lblWeekDateMsg').hide();
+            }
+
+        });
+
     if ($('#hdnWeekPlanAction').val() != "") {
 
         var actionMsg = 'Week Plan ' + $('#hdnWeekPlanAction').val() + ' Successfully';

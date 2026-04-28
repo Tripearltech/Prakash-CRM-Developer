@@ -251,6 +251,26 @@ namespace PrakashCRM.Data.Models
         public string Packing_Style_Description { get; set; }
     }
 
+    public class SPPackingStyleMaster
+    {
+        public string Code { get; set; }
+
+        public string Base_UOM { get; set; }
+
+        public decimal Conversion_Factor { get; set; }
+    }
+
+    public class SPPackingStyleConversionFactorResponse
+    {
+        public bool IsMatched { get; set; }
+
+        public string Code { get; set; }
+
+        public string Base_UOM { get; set; }
+
+        public double? Conversion_Factor { get; set; }
+    }
+
     public class SPInqLines
     {
         public string Document_No { get; set; }
@@ -332,6 +352,7 @@ namespace PrakashCRM.Data.Models
         public string Unit_of_Measure { get; set; }
         public string PCPL_Packing_Style_Code { get; set; }
         public decimal Quantity { get; set; }
+        public bool PCPL_Convert_Quote { get; set; }
         public string Delivery_Date { get; set; }
         public string PCPL_Payment_Terms { get; set; }
     }

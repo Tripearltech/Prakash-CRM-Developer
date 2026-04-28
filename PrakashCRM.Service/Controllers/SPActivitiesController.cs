@@ -18,7 +18,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPActivities> customers = new List<SPActivities>();
 
-            var result = ac.GetData<SPActivities>("CustomerCardDotNetAPI", "");
+            var result = ac.GetData<SPActivities>("pcplcustomers", "",true);
 
             if (result.Result.Item1.value.Count > 0)
                 customers = result.Result.Item1.value;

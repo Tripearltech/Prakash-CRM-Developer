@@ -364,17 +364,18 @@
                         @*@Html.TextBoxFor(model => model.Total_km, new { @id = "txtTotalKM", @class = "form-control" })*@
                     </div>
                 </div>
-                <!--<br /><br />
+                <br />
+            <br />
                 <h6 class="mb-0 text-uppercase">Attachment</h6>
                 <hr />
                 <div class="row g-3">
-                    <div class="col-md-1">
+                    @*<div class="col-md-1">
                         <label class="form-label">Document Name</label>
                     </div>
                     <div class="col-md-5">
-                        <input type="text" id="txtDocName" class="form-control" />-->
-                        @*@Html.TextBoxFor(model => model.Topic_Name, new { @id = "txtTopicName", @class = "form-control" })*@
-                    <!--</div>
+                        <input type="text" id="txtDocName" class="form-control" />
+                        @Html.TextBoxFor(model => model.Topic_Name, new { @id = "txtTopicName", @class = "form-control" })
+                    </div>*@
                     <div class="col-md-5">
                         <input type="file" id="AttachmentFile" class="form-control" />
                     </div>
@@ -392,37 +393,16 @@
                                     <tr>
                                         <th></th>
                                         <th scope="col">Document Name</th>
-                                        <th scope="col">File Name</th>
+                                        <th scope="col">File Extension</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tblAttachmentsDetails">
-                                    <tr>
-                                        <td></td>
-                                        <td>Document1</td>
-                                        <td>File1</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td>Document2</td>
-                                        <td>File2</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td>Document3</td>
-                                        <td>File3</td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <br />
-                    <div class="row g-3">
-                        <div class="col-md-12" align="right">
-                            <button id="btnFileUpload" type="button" class="btn btn-primary">Upload</button>
-                        </div>
-                    </div>
-
-                </div>-->
+                </div>
                 <br /><br />
                 <h6 class="mb-0 text-uppercase">Feedback</h6>
                 <hr />
@@ -767,6 +747,13 @@
             tags: true
         });
 
+        window.dailyVisitAttachmentUrls = {
+            get: '@Url.Content("~/DailyVisitAttachment/GetDocumentAttachments")',
+            upload: '@Url.Content("~/DailyVisitAttachment/UploadDocumentAttachment")',
+            delete: '@Url.Content("~/DailyVisitAttachment/DeleteDocumentAttachment")'
+        };
+        attachmentUrls = window.dailyVisitAttachmentUrls;
+
         $('#btnCustAdd').on('click', function () {
             var redirectUrl = $('#hdnRedirectContactCompanyList').val();
             var returnUrl = $('#hdnRedirectDailyVisit').val();
@@ -803,17 +790,18 @@
                 const subTypeDetails = $('#ddlSubType').val().split('_');
                 dailyvisit.Visit_SubType_No = subTypeDetails[0];
                 /*dailyvisit.Contact_Company_No = $('#ddlCustomerName').val();*/
-                if ($('#ddlCustomerName').val() != null) {
+                if ($('#ddlCustomerName').val() != null && $('#ddlCustomerName').val() !== '-1') {
                     const CCompanyDetails_ = $('#ddlCustomerName').val().split('__');
-                    dailyvisit.Contact_Company_No = CCompanyDetails_[0];
-                    CCompanyDetails.push(CCompanyDetails_[0]);
-                    CCompanyDetails.push(CCompanyDetails_[1]);
+                    dailyvisit.Contact_Company_No = CCompanyDetails_[0] || "";
+                    CCompanyDetails.push(CCompanyDetails_[0] || "");
+                    CCompanyDetails.push(CCompanyDetails_[1] || "");
                 }
                 else {
                     dailyvisit.Contact_Company_No = "";
                 }
 
-                dailyvisit.Contact_Person_No = $('#ddlContactPerson').val();
+                var contactPersonValue = $('#ddlContactPerson').val();
+                dailyvisit.Contact_Person_No = contactPersonValue && contactPersonValue !== '-1' ? contactPersonValue : "";
                 dailyvisit.Event_No = $('#ddlEventName').val();
                 dailyvisit.Topic_Name = $('#txtTopicName').val();
                 dailyvisit.Entry_Type = $('#hfEntryType').val();
@@ -911,52 +899,54 @@
                     custEmail = CCompanyDetails[1];
                 }
 
-                (async () => {
-                    try {
-                        const rawResponse = await fetch('/SPVisitEntry/PostDailyVisit?CustomerName=' + encodeURIComponent(custName) + '&CustEmail=' + encodeURIComponent(custEmail), {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(dailyvisit)
-                        });
-
-                        // API returns bool; handle both JSON and plain text
-                        var ok = false;
-                        var responseText = '';
-                        if (rawResponse && rawResponse.ok) {
-                            try {
-                                responseText = await rawResponse.text();
+                $.ajax({
+                    url: '/SPVisitEntry/PostDailyVisit?CustomerName=' + encodeURIComponent(custName) + '&CustEmail=' + encodeURIComponent(custEmail),
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dailyvisit),
+                    success: function (response) {
+                        if (response && response.success) {
+                            var savedNo = response.no || dailyvisit.No || $('#hfNo').val();
+                            dailyVisitNo = savedNo;
+                            if (!$('#hfNo').val()) {
+                                $('#hfNo').val(savedNo);
                             }
-                            catch (ex) { responseText = ''; }
 
-                            if ($.trim((responseText || '')).toLowerCase() === 'true') {
-                                ok = true;
-                            }
-                        }
+                            var completeSave = function (uploadSuccess) {
+                                if (uploadSuccess) {
+                                    if ($('#hfSelectedWeekPlanRowId').val() != "" && ($.trim($('#hfDailyVisitEdit').val()).toLowerCase() !== 'true')) {
+                                        MarkWeekPlanRowAsCompleted($('#hfSelectedWeekPlanRowId').val());
+                                    }
+                                    window.location.href = '/SPVisitEntry/DailyVisit';
+                                } else {
+                                    $('#modalErrMsg').css('display', 'block');
+                                    $('#modalErrDetails').text('Daily Visit saved but attachment upload failed. Please try uploading attachments again.');
+                                    $('#btnSaveSpinner').hide();
+                                    $('#btnSave').prop('disabled', false);
+                                }
+                            };
 
-                        if (ok) {
-                            if ($('#hfSelectedWeekPlanRowId').val() != "" && ($.trim($('#hfDailyVisitEdit').val()).toLowerCase() !== 'true')) {
-                                MarkWeekPlanRowAsCompleted($('#hfSelectedWeekPlanRowId').val());
+                            if (tempAttachments.length > 0) {
+                                UploadTempAttachmentsToAPI(savedNo, completeSave);
+                            } else {
+                                completeSave(true);
                             }
-                            window.location.href = '/SPVisitEntry/DailyVisit';
-                            return;
                         }
                         else {
-                            window.location.reload();
-                            return;
+                            $('#modalErrMsg').css('display', 'block');
+                            $('#modalErrDetails').text((response && response.message) ? response.message : 'Daily Visit save failed. Please try again.');
+                            $('#btnSaveSpinner').hide();
+                            $('#btnSave').prop('disabled', false);
                         }
-                    }
-                    catch (ex) {
+                    },
+                    error: function () {
                         $('#modalErrMsg').css('display', 'block');
                         $('#modalErrDetails').text('Daily Visit save failed. Please try again.');
-                    }
-                    finally {
                         $('#btnSaveSpinner').hide();
                         $('#btnSave').prop('disabled', false);
                     }
-                })();
+                });
 
             }
             else {

@@ -689,7 +689,7 @@ namespace PrakashCRM.Service.Classes
                 return null;
 
             API ac = new API();
-            var result = ac.GetData<SPSalesOrdersList>("SalesOrdersListDotNetAPI", "No eq '" + EscapeODataValue(orderNo) + "'");
+            var result = ac.GetData<SPSalesOrdersList>("salesorders", "No eq '" + EscapeODataValue(orderNo) + "'",true);
             var resultData = result.Result;
             return resultData.Item1 == null || resultData.Item1.value == null ? null : resultData.Item1.value.FirstOrDefault();
         }

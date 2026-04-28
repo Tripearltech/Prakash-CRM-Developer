@@ -626,7 +626,7 @@ namespace PrakashCRM.Service.Controllers
             if (filter == null)
                 filter = "";
 
-            var count = ac.CalculateCount(apiEndPointName, filter);
+            var count = ac.CalculateCount(apiEndPointName, filter, true);
 
             return Convert.ToInt32(count.Result);
         }

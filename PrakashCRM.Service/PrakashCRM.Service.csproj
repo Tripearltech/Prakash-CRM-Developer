@@ -243,6 +243,7 @@
     <Compile Include="Classes\PasswordResetTokenStore.cs" />
     <Compile Include="Classes\PasswordSecurity.cs" />
     <Compile Include="Classes\RazorRenderer.cs" />
+    <Compile Include="Controllers\DailyVisitAttachment.cs" />
     <Compile Include="Controllers\GRNDocumentAttachment.cs" />
     <Compile Include="Controllers\SPActivitiesController.cs" />
     <Compile Include="Controllers\SPAdminBusinessPlanController.cs" />
@@ -341,6 +342,7 @@
     <Folder Include="GRNDocumentAttachment\" />
     <Folder Include="Models\" />
     <Folder Include="Views\CRMWhatsAppAttachment\" />
+    <Folder Include="Views\DailyVisitAttachment\" />
     <Folder Include="Views\SupLedger\" />
     <Folder Include="WhatsApp\" />
   </ItemGroup>

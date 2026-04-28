@@ -16,6 +16,38 @@
     <link href="~/Content/appcss/LoginOTPCss.css" rel="stylesheet" />
     @Styles.Render("~/bundles/commoncss")
     <style>
+        .app-loader-card {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            min-width: 140px;
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 12px 32px rgba(33, 37, 41, 0.16);
+        }
+
+        .app-loader-spinner {
+            display: inline-block;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            border: 0.35rem solid rgba(152, 185, 219, 0.28);
+            border-top-color: #4f8fc9;
+            border-right-color: #8bc9c2;
+            box-sizing: border-box;
+            animation: appLoaderSpin 0.95s linear infinite;
+        }
+
+        .app-loader-text {
+            margin: 0;
+            color: #495057;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
         .login-page-data-loader {
             position: fixed;
             inset: 0;
@@ -35,6 +67,12 @@
             width: 3.5rem;
             height: 3.5rem;
             border-width: 0.4rem;
+        }
+
+        @@keyframes appLoaderSpin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -98,6 +136,7 @@
     <div id="divImage" class="login-page-data-loader" aria-hidden="true">
         <div class="login-page-data-loader__content app-loader-card">
             <span class="app-loader-spinner login-page-data-loader__spinner" role="status" aria-label="Loading"></span>
+            <p class="app-loader-text">Please wait...</p>
         </div>
     </div>
 

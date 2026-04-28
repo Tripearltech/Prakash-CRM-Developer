@@ -4,6 +4,20 @@
 var filter = "";
 var orderBy = 2;
 var orderDir = "desc";
+
+function togglePageLoader(show) {
+    if (show) {
+        if (typeof window.showPageDataLoader === 'function') {
+            window.showPageDataLoader();
+        }
+        return;
+    }
+
+    if (typeof window.hidePageDataLoader === 'function') {
+        window.hidePageDataLoader();
+    }
+}
+
 $(document).ready(function () {
 
     filter = "IsActive eq " + JSON.parse($('#ddlStatus').val());
@@ -143,6 +157,9 @@ $(document).ready(function () {
         $.ajax({
             url: apiUrl + 'DeleteMenu?No=' + encodeURIComponent(no),
             type: 'POST',
+            beforeSend: function () {
+                togglePageLoader(true);
+            },
             success: function (data) {
                 var ok = (data === true || data === 'true');
                 if (ok) {
@@ -169,6 +186,9 @@ $(document).ready(function () {
                     }
                 } catch (e) { }
                 ShowErrMsg(msg);
+            },
+            complete: function () {
+                togglePageLoader(false);
             }
         });
     });
@@ -183,10 +203,14 @@ $(document).ready(function () {
 var dtable;
 function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    togglePageLoader(true);
     $.get(apiUrl + 'GetApiRecordsCount?apiEndPointName=MenuListDotNetAPI&filter=' + filter, function (data) {
         $('#hdnMenuCount').val(data);
+    }).always(function () {
+        togglePageLoader(false);
     });
 
+    togglePageLoader(true);
     $.ajax(
         {
             url: '/SPMenus/GetMenuListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
@@ -222,6 +246,9 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
             },
             error: function () {
                 alert("error");
+            },
+            complete: function () {
+                togglePageLoader(false);
             }
         }
     );
@@ -399,6 +426,7 @@ function pageMe() {
 
 function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
+    togglePageLoader(true);
     $.ajax(
         {
             url: '/SPMenus/ExportListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
@@ -413,6 +441,9 @@ function exportGridData(skip, top, firsload, orderBy, orderDir, filter) {
             },
             error: function (data1) {
                 alert(data1);
+            },
+            complete: function () {
+                togglePageLoader(false);
             }
         }
     );

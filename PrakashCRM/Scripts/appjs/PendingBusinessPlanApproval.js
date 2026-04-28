@@ -9,28 +9,33 @@ $(document).ready(function () {
 
     var UrlVars = getUrlVars();
 
-    if (UrlVars["PlanYear"] != undefined && UrlVars["SPCode"] != undefined && UrlVars["SPName"] != undefined) {
+    PlanYear = decodeURIComponent(UrlVars["PlanYear"] || "");
+    SPCode = decodeURIComponent(UrlVars["SPCode"] || "");
+    SPName = decodeURIComponent(UrlVars["SPName"] || "");
 
-        PlanYear = UrlVars["PlanYear"];
-        SPCode = UrlVars["SPCode"];
-        SPName = UrlVars["SPName"];
-        SPName = SPName.replace("%20", " ");
+    console.log("SPCode:", SPCode);
+    console.log("PlanYear:", PlanYear);
 
-        const PlanYear_ = PlanYear.split('-');
-        var prevFinancialYear = (parseInt(PlanYear_[0]) - 1) + "-" + PlanYear_[0];
-
-        $('#lblPrevFinancialYear').text(prevFinancialYear);
-        $('#lblFinancialYear').text(PlanYear);
-        $('#lblFinancialYearGrid').text(PlanYear);
-        //$('#lblFinancialYear').text(PlanYear);
-        $('#lblSP').text(SPName);
-        filter += "Plan_Year eq '" + PlanYear + "' and Status eq '" + $('#ddlStatus').val() + "'";
-        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
+    if (!SPCode || !PlanYear) {
+        alert("SPCode or PlanYear missing in URL");
+        return;
     }
 
-    $('#ddlRecPerPage').change(function () {
-        bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
-    });
+    const PlanYear_ = PlanYear.split('-');
+    var prevFinancialYear = (parseInt(PlanYear_[0]) - 1) + "-" + PlanYear_[0];
+
+    $('#lblPrevFinancialYear').text(prevFinancialYear);
+    $('#lblFinancialYear').text(PlanYear);
+    $('#lblFinancialYearGrid').text(PlanYear);
+    $('#lblSP').text(SPName);
+
+    filter = "Plan_Year eq '" + PlanYear + "'";
+
+    if ($('#ddlStatus').val() != "-1") {
+        filter += " and StatusFilter eq '" + $('#ddlStatus').val() + "'";
+    }
+
+    bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 
     $('#ddlStatus').change(function () {
 
@@ -39,7 +44,7 @@ $(document).ready(function () {
         filter = "Plan_Year eq '" + PlanYear + "'";
 
         if ($('#ddlStatus').val() != "-1") {
-            filter += " and Status eq '" + $('#ddlStatus').val() + "'";
+            filter += " and StatusFilter eq '" + $('#ddlStatus').val() + "'";
         }
 
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
@@ -77,7 +82,7 @@ $(document).ready(function () {
             }
 
             if ($('#ddlStatus').val() != "-1" && filter != "") {
-                filter += " and Status eq '" + $('#ddlStatus').val() + "'";
+                filter += " and StatusFilter eq '" + $('#ddlStatus').val() + "'";
             }
 
             filter += " and Plan_Year eq '" + PlanYear + "'";
@@ -225,98 +230,120 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPBusinessPlan/';
 
-    if (typeof showPageDataLoader === 'function') {
-        showPageDataLoader();
-    }
+    $.ajax({
+        url: '/SPBusinessPlan/GetBusinessPlanCustWiseListData?page=CustWiseForPendingApproval&SPCode=' + SPCode +
+            '&orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter +
+            '&skip=' + skip + '&top=' + top,
+        type: 'GET',
 
-    //$.get(apiUrl + 'GetApiRecordsCount?page=CustWiseForPendingApproval&SPNo=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=Business_Plan_Customer_Wise&filter=' + filter, function (data) {
+        success: function (data) {
 
-    $.get(apiUrl + 'GetApiRecordsCount?page=CustWiseForPendingApproval&SPNo=' + SPCode + '&LoggedInUserNo=' + $('#hdnLoggedInUserNo').val() + '&apiEndPointName=Business_Plan_Customer_Wise&filter=' + filter, function (data) {
-        $('#hdnContactCount').val(data);
-    });
+            // ✅ destroy safely
+            if ($.fn.DataTable.isDataTable('#dataList')) {
+                $('#dataList').DataTable().clear().destroy();
+            }
 
-    $.ajax(
-        {
-            url: '/SPBusinessPlan/GetBusinessPlanCustWiseListData?page=CustWiseForPendingApproval&SPCode=' + SPCode + '&orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (data) {
+            $('#tableBody').empty();
 
-                if ($.fn.dataTable.isDataTable('#dataList')) {
-                    $('#dataList').DataTable().destroy();
-                }
-                $('#tableBody').empty();
-                $('#ftableBody tr:not(:first)').remove();
-                
-                var a = 0;
-                $.each(data, function (index, item) {
-                    var rowData = "<tr><td></td>";
+            var totalPrevDemand = 0;
+            var totalPrevTarget = 0;
+            var totalPrevAchieved = 0;
+            var totalDemand = 0;
+            var totalTarget = 0;
 
-                    if (item.Status == "Submitted") {
-                        rowData += "<td><input type='checkbox' id=\"chk_" + item.Plan_Year + "_" + item.Customer_No + "_" + item.Salesperson_Purchaser + "\" class='form-check-input'></td>";
-                    }
-                    else {
-                        rowData += "<td></td>";
-                    }
+            $.each(data, function (index, item) {
 
-                    rowData += "<td><a style='cursor:pointer' onclick='ShowCustBusinessPlan(\"" + item.Plan_Year + "\",\"" + item.Customer_No + "\",\"" + item.Customer_Name + "\")'>"
-                        + item.Customer_Name + "</a></td><td>" + item.Prev_Year_Demand_Qty + "</td><td>" + item.Prev_Year_Target_Qty + "</td><td>" + item.Prev_Year_Achieved_Qty + 
-                        "</td><td>" + item.Total_Demand_Qty + "</td><td>" + item.Targeted_Qty + "</td>";
+                var row = "<tr>";
 
-                    if (item.Status == "Submitted") {
-                        rowData += "<td><span class='badge bg-primary'>Pending Approval</span></td>" +
-                            "<td></td>";
-                    }
-                    else if (item.Status == "Approved") {
+                // 1
+                row += "<td></td>";
 
-                        rowData += "<td><span class='badge bg-success'>Approved</span></td>" +
-                            "<td></td>";
-                    }
-                    else if (item.Status == "Rejected") {
-
-                        rowData += "<td><span class='badge bg-danger'>Rejected</span></td>" + 
-                            "<td>" + item.Rejected_Reason + "</td>";
-                    }
-
-                    rowData += "</tr>";
-                    //a += 1;
-
-                    $('#tableBody').append(rowData);
-                });
-                // Futter table data on business approval List.
-                var unique = new Set();
-                var TROpts = "";
-
-                $.each(data, function (index, item) {
-                    if (!unique.has(item.Total_Target_Qty_SP)) {
-                        unique.add(item.Total_Target_Qty_SP);
-
-                        TROpts += "<tr>" + "<td></td>" + "<td></td>" + "<td></td>" + "<td>" + item.Prev_Year_Total_Demand_Qty_SP + "</td>" + "<td>" + item.Prev_Year_Total_Target_Qty_SP + "</td>" + "<td>" + item.Prev_Year_Total_Achieved_Qty + "</td>" + "<td>" + item.Total_Demand_Qty_SP + "</td>" + "<td>" + item.Total_Target_Qty_SP + "</td>" + "<td></td>" + "</tr>";
-                    }
-                });
-                $('#ftableBody').append(TROpts);
-
-                if (firsload == 1) {
-                    pageMe();
-                }
-                dataTableFunction(orderBy, orderDir);
-
-                if (data.length == 0) {
-                    $('ul.pager li').remove();
+                // 2 checkbox
+                if (item.Status == "Submitted") {
+                    row += "<td><input type='checkbox' id='chk_" + item.Plan_Year + "_" + item.Customer_No + "_" + item.Salesperson_Purchaser + "'></td>";
+                } else {
+                    row += "<td></td>";
                 }
 
-            },
-            complete: function () {
-                if (typeof hidePageDataLoader === 'function') {
-                    hidePageDataLoader();
+                // 3
+                row += "<td><a style='cursor:pointer' onclick='ShowCustBusinessPlan(\"" + item.Plan_Year + "\",\"" + item.Customer_No + "\",\"" + item.Customer_Name + "\")'>" + (item.Customer_Name || '') + "</a></td>";
+
+                // values
+                var prevDemand = parseFloat(item.Prev_Year_Demand_Qty || 0);
+                var prevTarget = parseFloat(item.Prev_Year_Target_Qty || 0);
+                var prevAchieved = parseFloat(item.Prev_Year_Achieved_Qty || 0);
+                var demand = parseFloat(item.Total_Demand_Qty || 0);
+                var target = parseFloat(item.Targeted_Qty || 0);
+
+                // totals
+                totalPrevDemand += prevDemand;
+                totalPrevTarget += prevTarget;
+                totalPrevAchieved += prevAchieved;
+                totalDemand += demand;
+                totalTarget += target;
+
+                // 4–8
+                row += "<td>" + prevDemand.toFixed(3) + "</td>";
+                row += "<td>" + prevTarget.toFixed(3) + "</td>";
+                row += "<td>" + prevAchieved.toFixed(3) + "</td>";
+                row += "<td>" + demand.toFixed(3) + "</td>";
+                row += "<td>" + target.toFixed(3) + "</td>";
+
+                // status
+                if (item.Status == "Submitted") {
+                    row += "<td><span class='badge bg-primary'>Pending</span></td>";
+                } else if (item.Status == "Approved") {
+                    row += "<td><span class='badge bg-success'>Approved</span></td>";
+                } else if (item.Status == "Rejected") {
+                    row += "<td><span class='badge bg-danger'>Rejected</span></td>";
+                } else {
+                    row += "<td></td>";
                 }
-            },
-            error: function () {
-                alert("error");
+
+                // remarks
+                row += "<td>" + (item.Rejected_Reason || '') + "</td>";
+
+                row += "</tr>";
+
+                $('#tableBody').append(row);
+            });
+
+            // ✅ FOOTER FIX (manual display)
+            $('#lblPrevDemand').text(totalPrevDemand.toFixed(3));
+            $('#lblPrevTarget').text(totalPrevTarget.toFixed(3));
+            $('#lblPrevAchieved').text(totalPrevAchieved.toFixed(3));
+            $('#lblDemand').text(totalDemand.toFixed(3));
+            $('#lblTarget').text(totalTarget.toFixed(3));
+
+            // ✅ DataTable init (correct place)
+            $('#dataList').DataTable({
+                paging: false,
+                searching: false,
+                info: false,
+                ordering: false,
+                autoWidth: false,
+                destroy: true
+            });
+
+            if (firsload == 1) {
+                pageMe();
+            }
+
+            if (data.length == 0) {
+                $('ul.pager li').remove();
+            }
+        },
+
+        error: function () {
+            alert("Error loading data");
+        },
+
+        complete: function () {
+            if (typeof hidePageDataLoader === 'function') {
+                hidePageDataLoader();
             }
         }
-    );
-
+    });
 }
 
 function dataTableFunction(orderBy, orderDir) {

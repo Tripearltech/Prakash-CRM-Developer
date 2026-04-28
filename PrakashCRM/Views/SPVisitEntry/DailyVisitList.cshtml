@@ -72,7 +72,7 @@
                                 <div class="col">
                                     <input id="txtToDate" type="date" class="form-control" style="display:none">
                                     <div id="dvtxtSearch" class="position-relative">
-                                        <input id="txtSearch" type="text" class="form-control ps-5" placeholder="Search..."> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                                        <input id="txtSearch" type="text" class="form-control ps-5"> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -98,8 +98,8 @@
     </div>
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
-                <table id="dataList" class="display responsive nowrap" style="width:100%">
+            <div class="table-responsive contact-list-table-wrapper" data-auto-scale-height="table" data-auto-scale-offset="32">
+                <table id="dataList" class="display responsive nowrap contact-list-table" style="width:100%">
                     <thead>
                         <tr>
                             <th></th>
@@ -136,40 +136,6 @@
                     </thead>
                     <tbody id="tableBody">
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th>Date</th>
-                            <th>DV No.</th>
-                            <th>Type</th>
-                            <th>Sub Type</th>
-                            <th>Customer</th>
-                            <th>Contact Person</th>
-                            <th>Event</th>
-                            <th>Topic</th>
-                            <th>Visit Mode</th>
-                            <th>Feedback</th>
-                            <th>Remarks</th>
-                            <th>Market Update</th>
-                            <th>Payment Date</th>
-                            <th>Payment Amt</th>
-                            <th>Payment Remarks</th>
-                            <th>Complain</th>
-                            <th>Complain Date</th>
-                            <th>Root Analysis</th>
-                            <th>Root Analysis Date</th>
-                            <th>Corrective Action</th>
-                            <th>Corrective Action Date</th>
-                            <th>Preventive Action</th>
-                            <th>Preventive Action Date</th>
-                            <th>Complain Invoice</th>
-                            <th>Compalain Products</th>
-                            <th>Complain Assign To</th>
-                            <th>Is PDC</th>
-                        </tr>
-                    </tfoot>
                 </table>
                 <input id="hdnWeekPlanNo" style="display:none" />
                 <input id="hdnDVPCount" style="display:none" />

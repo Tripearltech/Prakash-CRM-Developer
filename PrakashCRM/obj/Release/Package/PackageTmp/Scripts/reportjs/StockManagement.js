@@ -72,6 +72,26 @@ function BranchWiseProducts(branchName) {
             let totals = {};
 
             if (data.BranchProductWise.length > 0) {
+                let productSet = new Set();
+
+                $.each(data.BranchProductWise, function (index, item) {
+                    if (item.Description) {
+                        productSet.add(item.Description.trim());
+                    }
+                });
+
+                // Convert to array
+                let productList = Array.from(productSet);
+                productList.sort((a, b) => a.localeCompare(b));
+                // Bind dropdown
+                let dropdown = $('#ddlProductSearch'); // 👈 apna dropdown id
+                dropdown.empty();
+
+                dropdown.append('<option value="">--Select Product--</option>');
+
+                productList.forEach(function (prod) {
+                    dropdown.append(`<option value="${prod}">${prod}</option>`);
+                });
                 $.each(data.BranchProductWise, function (index, item) {
                     let location = item.Location_Code;
                     if (!groupData[location]) {
@@ -100,12 +120,12 @@ function BranchWiseProducts(branchName) {
                        <td></td>
                        <td></td>
                        <td></td>
-                       </tr>`;  
+                       </tr>`;
 
                     });
-                  if (totals[locations]){
-                      let total = totals[locations];
-                      rowData += `<tr class="branch-row">
+                    if (totals[locations]) {
+                        let total = totals[locations];
+                        rowData += `<tr class="branch-row">
                <td></td>
                <td style="font-weight: bold;">Location Total</td>
                <td>${total.Location_Code}</td><td>${total.Inventory}</td>
@@ -133,7 +153,7 @@ function BranchWiseProducts(branchName) {
              <td>${item.Qty_on_Purch_Order}</td><td>${item.Qty_on_Sales_Order}</td>
              <td>${item.Closing_Stock}</td>
            <td>${item.Packing_Unit}</td><td>${item.Packing_MRP_Price}</td>
-           <td>${item.Expected_Receipt_Qty}</td><td>${item.Expected_Shipment_Qty}</td>
+           <td>${item.Expected_Shipment_Qty}</td><td>${item.Expected_Receipt_Qty}</td>
          </tr>`;
                 });
                 $("#ftableBody").append(rowData1);
@@ -153,9 +173,19 @@ function BranchWiseProducts(branchName) {
                 const $subRows = $branchRow.nextUntil('tr.branch-row');
 
                 if ($subRows.filter(':visible').length > 0) {
+
+
+                    $branchRow.find('td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7)')
+                        .css('font-weight', 'normal');
+
                     $subRows.slideUp(300);
                     $icon.removeClass('bx-minus-circle').addClass('bx-plus-circle');
                 } else {
+
+
+                    $branchRow.find('td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7)')
+                        .css('font-weight', 'bold');
+
                     if ($subRows.find('tr[data-packing="true"]').length === 0) {
                         $subRows.remove();
                         loadProductPackingStyle($branchRow, branchName, product, bi, targetId);
@@ -172,6 +202,8 @@ function BranchWiseProducts(branchName) {
             }
         }
     });
+
+
 }
 
 function loadProductPackingStyle($branchRow, branchName, product, bi, targetId) {
@@ -195,7 +227,7 @@ function loadProductPackingStyle($branchRow, branchName, product, bi, targetId) 
                             <td>${ps.Inventory}</td><td>${ps.Qty_on_Purch_Order}</td>
                             <td>${ps.Qty_on_Sales_Order}</td><td>${ps.Closing_Stock}</td>
                             <td>${ps.Packing_Unit}</td><td>${ps.Packing_MRP_Price}</td>
-                            <td>${ps.Expected_Receipt_Qty}</td><td>${ps.Expected_Shipment_Qty}</td>
+                            <td>${ps.Expected_Shipment_Qty}</td><td>${ps.Expected_Receipt_Qty}</td>
                         </tr>`;
                 });
             }
@@ -207,3 +239,23 @@ function loadProductPackingStyle($branchRow, branchName, product, bi, targetId) 
         }
     });
 }
+
+$('#btnSearchProduct').click(function () {
+
+    let val = $('#ddlProductSearch').val().toLowerCase();
+
+    $('#tbleStockProductManagement tr').each(function () {
+        let product = $(this).find('td:nth-child(2)').text().toLowerCase();
+
+        $(this).toggle(product.includes(val));
+    });
+
+});
+
+$('#btnClearProduct').click(function () {
+
+    $('#ddlProductSearch').val('');
+
+    $('#tbleStockProductManagement tr').show();
+
+});

@@ -14,6 +14,7 @@ using System.Net.Http.Headers;
 using System.Web.Configuration;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Web.Http.Results;
 using Microsoft.SqlServer.Server;
 
@@ -187,14 +188,14 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPVEContactCompany> companies = new List<SPVEContactCompany>();
 
-            var result = ac.GetData<SPVEContactCompany>("ContactDotNetAPI", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'"); // and Contact_Business_Relation eq 'Customer'
+            var result = ac.GetData<SPVEContactCompany>("pcplcontacts", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'", true); // and Contact_Business_Relation eq 'Customer'
 
             if (result.Result.Item1.value.Count > 0)
                 companies = result.Result.Item1.value;
 
             List<SPVEContactCompany> company2 = new List<SPVEContactCompany>();
 
-            var result2 = ac.GetData<SPVEContactCompany>("ContactDotNetAPI", "PCPL_Secondary_SP_Code eq '" + SPCode + "' and Salesperson_Code ne '" + SPCode + "' and Type eq 'Company'");
+            var result2 = ac.GetData<SPVEContactCompany>("pcplcontacts", "PCPL_Secondary_SP_Code eq '" + SPCode + "' and Salesperson_Code ne '" + SPCode + "' and Type eq 'Company'", true);
 
             if (result2 != null && result2.Result.Item1.value.Count > 0)
             {
@@ -228,7 +229,7 @@ namespace PrakashCRM.Service.Controllers
             SPContact resCPerson = new SPContact();
             errorDetails ed = new errorDetails();
 
-            var result = ac.PostItem("ContactDotNetAPI", reqCPerson, resCPerson);
+            var result = ac.PostItem("pcplcontacts", reqCPerson, resCPerson, true);
 
             if (result.Result.Item1 != null)
                 resCPerson = result.Result.Item1;
@@ -245,7 +246,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPVEContactPerson> contacts = new List<SPVEContactPerson>();
 
-            var result = ac.GetData<SPVEContactPerson>("ContactDotNetAPI", "Type eq 'Person' and Company_No eq '" + CompanyNo + "'"); // and Contact_Business_Relation eq 'Customer'
+            var result = ac.GetData<SPVEContactPerson>("pcplcontacts", "Type eq 'Person' and Company_No eq '" + CompanyNo + "'", true); // and Contact_Business_Relation eq 'Customer'
 
             if (result.Result.Item1.value.Count > 0)
                 contacts = result.Result.Item1.value;
@@ -299,6 +300,48 @@ namespace PrakashCRM.Service.Controllers
 
             if (result.Result.Item1.value.Count > 0)
                 weekplans = result.Result.Item1.value;
+
+            if (weekplans.Count > 0)
+            {
+                List<SPDailyVisit> actualDailyVisits = new List<SPDailyVisit>();
+                var dailyVisitResult = ac.GetData<SPDailyVisit>("DailyVisitsDotNetAPI", "Date eq " + date + " and Salesperson_Code eq '" + SPCode + "' and Entry_Type eq 'ENTRY'");
+
+                if (dailyVisitResult != null && dailyVisitResult.Result.Item1 != null && dailyVisitResult.Result.Item1.value.Count > 0)
+                    actualDailyVisits = dailyVisitResult.Result.Item1.value;
+
+                var usedWeekPlanKeys = new HashSet<string>(actualDailyVisits
+                    .Where(item => item != null)
+                    .Select(BuildDailyVisitUsageKey)
+                    .Where(key => !string.IsNullOrWhiteSpace(key)), StringComparer.OrdinalIgnoreCase);
+
+                Dictionary<string, int> actualVisitCountByBaseKey = actualDailyVisits
+                    .Where(item => item != null)
+                    .GroupBy(BuildDailyVisitBaseKey, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+
+                Dictionary<string, int> planCountByBaseKey = weekplans
+                    .Where(item => item != null)
+                    .GroupBy(BuildDailyVisitBaseKey, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => group.Count(), StringComparer.OrdinalIgnoreCase);
+
+                foreach (SPVEWeekSalesPlan weekplan in weekplans)
+                {
+                    string exactKey = BuildDailyVisitUsageKey(weekplan);
+                    string baseKey = BuildDailyVisitBaseKey(weekplan);
+                    bool isExactMatch = usedWeekPlanKeys.Contains(exactKey);
+                    bool isFullyConsumedForBaseKey = !string.IsNullOrWhiteSpace(baseKey)
+                        && actualVisitCountByBaseKey.ContainsKey(baseKey)
+                        && planCountByBaseKey.ContainsKey(baseKey)
+                        && actualVisitCountByBaseKey[baseKey] >= planCountByBaseKey[baseKey];
+                    bool isSinglePlanMatch = !string.IsNullOrWhiteSpace(baseKey)
+                        && actualVisitCountByBaseKey.ContainsKey(baseKey)
+                        && planCountByBaseKey.ContainsKey(baseKey)
+                        && planCountByBaseKey[baseKey] == 1
+                        && actualVisitCountByBaseKey[baseKey] >= 1;
+
+                    weekplan.IsDailyVisitCreated = isExactMatch || isFullyConsumedForBaseKey || isSinglePlanMatch;
+                }
+            }
 
             return weekplans;
         }
@@ -859,6 +902,222 @@ namespace PrakashCRM.Service.Controllers
             return resWeekSalesPlan;
         }
 
+        private static bool TryParseVisitDate(string value, out DateTime parsedDate)
+        {
+            parsedDate = DateTime.MinValue;
+
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+            string[] supportedFormats = { "yyyy-MM-dd", "dd-MM-yyyy", "yyyy-M-d", "dd-M-yyyy", "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-ddTHH:mm:ss.fff", "MM/dd/yyyy", "M/d/yyyy" };
+
+            return DateTime.TryParseExact(value, supportedFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate)
+                || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDate)
+                || DateTime.TryParse(value, CultureInfo.CurrentCulture, DateTimeStyles.None, out parsedDate);
+        }
+
+        private static string NormalizeUsageKeyPart(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToUpperInvariant();
+        }
+
+        private static string NormalizeUsageKeyDate(string value)
+        {
+            return TryParseVisitDate(value, out DateTime parsedDate)
+                ? parsedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                : NormalizeUsageKeyPart(value);
+        }
+
+        private static string NormalizeUsageKeyWeekNo(string value)
+        {
+            return int.TryParse(value, out int parsedWeekNo)
+                ? parsedWeekNo.ToString(CultureInfo.InvariantCulture)
+                : NormalizeUsageKeyPart(value);
+        }
+
+        private static string NormalizeUsageKeyWeekNo(int value)
+        {
+            return value <= 0 ? string.Empty : value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private static string BuildDailyVisitUsageKey(
+            string financialYear,
+            string visitDate,
+            string weekNo,
+            string weekStartDate,
+            string weekEndDate,
+            string visitType,
+            string visitSubType,
+            string contactCompanyNo,
+            string contactPersonNo,
+            string modeOfVisit,
+            string eventNo,
+            string topicName,
+            string purVisit)
+        {
+            return string.Join("|", new[]
+            {
+                NormalizeUsageKeyPart(financialYear),
+                NormalizeUsageKeyDate(visitDate),
+                NormalizeUsageKeyWeekNo(weekNo),
+                NormalizeUsageKeyDate(weekStartDate),
+                NormalizeUsageKeyDate(weekEndDate),
+                NormalizeUsageKeyPart(visitType),
+                NormalizeUsageKeyPart(visitSubType),
+                NormalizeUsageKeyPart(contactCompanyNo),
+                NormalizeUsageKeyPart(contactPersonNo),
+                NormalizeUsageKeyPart(modeOfVisit),
+                NormalizeUsageKeyPart(eventNo),
+                NormalizeUsageKeyPart(topicName),
+                NormalizeUsageKeyPart(purVisit)
+            });
+        }
+
+        private static string BuildDailyVisitUsageKey(SPVEWeekSalesPlan weekPlan)
+        {
+            if (weekPlan == null)
+                return string.Empty;
+
+            return BuildDailyVisitUsageKey(
+                weekPlan.Financial_Year,
+                weekPlan.Week_Plan_Date,
+                weekPlan.Week_No,
+                weekPlan.Week_Start_Date,
+                weekPlan.Week_End_Date,
+                weekPlan.Visit_Type,
+                weekPlan.Visit_Sub_Type,
+                weekPlan.Contact_Company_No,
+                weekPlan.Contact_Person_No,
+                weekPlan.Mode_of_Visit,
+                weekPlan.Event_No,
+                weekPlan.Topic_Name,
+                weekPlan.Pur_Visit);
+        }
+
+        private static string BuildDailyVisitUsageKey(SPDailyVisit dailyVisit)
+        {
+            if (dailyVisit == null)
+                return string.Empty;
+
+            return BuildDailyVisitUsageKey(
+                dailyVisit.Financial_Year,
+                dailyVisit.Date,
+                NormalizeUsageKeyWeekNo(dailyVisit.Week_No),
+                dailyVisit.Week_Start_Date,
+                dailyVisit.Week_End_Date,
+                dailyVisit.Visit_Type,
+                dailyVisit.Visit_SubType_No,
+                dailyVisit.Contact_Company_No,
+                dailyVisit.Contact_Person_No,
+                dailyVisit.Mode_of_Visit,
+                dailyVisit.Event_No,
+                dailyVisit.Topic_Name,
+                dailyVisit.Pur_Visit);
+        }
+
+        private static string BuildDailyVisitBaseKey(
+            string visitDate,
+            string weekNo,
+            string weekStartDate,
+            string weekEndDate,
+            string visitType,
+            string visitSubType)
+        {
+            return string.Join("|", new[]
+            {
+                NormalizeUsageKeyDate(visitDate),
+                NormalizeUsageKeyWeekNo(weekNo),
+                NormalizeUsageKeyDate(weekStartDate),
+                NormalizeUsageKeyDate(weekEndDate),
+                NormalizeUsageKeyPart(visitType),
+                NormalizeUsageKeyPart(visitSubType)
+            });
+        }
+
+        private static string BuildDailyVisitBaseKey(SPVEWeekSalesPlan weekPlan)
+        {
+            if (weekPlan == null)
+                return string.Empty;
+
+            return BuildDailyVisitBaseKey(
+                weekPlan.Week_Plan_Date,
+                weekPlan.Week_No,
+                weekPlan.Week_Start_Date,
+                weekPlan.Week_End_Date,
+                weekPlan.Visit_Type,
+                weekPlan.Visit_Sub_Type);
+        }
+
+        private static string BuildDailyVisitBaseKey(SPDailyVisit dailyVisit)
+        {
+            if (dailyVisit == null)
+                return string.Empty;
+
+            return BuildDailyVisitBaseKey(
+                dailyVisit.Date,
+                NormalizeUsageKeyWeekNo(dailyVisit.Week_No),
+                dailyVisit.Week_Start_Date,
+                dailyVisit.Week_End_Date,
+                dailyVisit.Visit_Type,
+                dailyVisit.Visit_SubType_No);
+        }
+
+        private List<SPDailyVisit> GetActualDailyVisits(API ac, string spCode, string fromDate = "", string toDate = "")
+        {
+            List<SPDailyVisit> dailyVisits = new List<SPDailyVisit>();
+
+            if (string.IsNullOrWhiteSpace(spCode))
+                return dailyVisits;
+
+            string filter = "Salesperson_Code eq '" + spCode + "' and Entry_Type eq 'ENTRY'";
+
+            if (!string.IsNullOrWhiteSpace(fromDate))
+                filter += " and Date ge " + fromDate;
+
+            if (!string.IsNullOrWhiteSpace(toDate))
+                filter += " and Date le " + toDate;
+
+            var result = ac.GetData<SPDailyVisit>("DailyVisitsDotNetAPI", filter);
+
+            if (result != null && result.Result.Item1 != null && result.Result.Item1.value.Count > 0)
+                dailyVisits = result.Result.Item1.value;
+
+            return dailyVisits;
+        }
+
+        private static int CountDistinctDailyVisits(IEnumerable<SPDailyVisit> dailyVisits)
+        {
+            return dailyVisits
+                .Where(item => item != null)
+                .Select(item => item.No)
+                .Where(no => !string.IsNullOrWhiteSpace(no))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count();
+        }
+
+        private static string BuildVisitTypeSubTypeKey(string visitType, string visitSubType)
+        {
+            return (visitType ?? string.Empty) + "|" + (visitSubType ?? string.Empty);
+        }
+
+        private SPWeekPlanNoDetails ResolveWeekForVisitDate(API ac, string spCode, string visitDate)
+        {
+            if (string.IsNullOrWhiteSpace(spCode) || !TryParseVisitDate(visitDate, out DateTime parsedVisitDate))
+                return null;
+
+            var result = ac.GetData<SPWeekPlanNoDetails>("WeeklyPlanSalesPersonWise", "Sales_Person_Code eq '" + spCode + "'");
+
+            if (result == null || result.Result.Item1 == null || result.Result.Item1.value.Count == 0)
+                return null;
+
+            return result.Result.Item1.value.FirstOrDefault(item =>
+            {
+                if (!TryParseVisitDate(item.Week_Start_Date, out DateTime startDate) || !TryParseVisitDate(item.Week_End_Date, out DateTime endDate))
+                    return false;
+
+                return parsedVisitDate.Date >= startDate.Date && parsedVisitDate.Date <= endDate.Date;
+            });
+        }
+
         [Route("GetWeekPlanNoDetailsForList")]
         public List<SPWeekPlanNoDetails> GetWeekPlanNoDetailsForList(string SPCode)
         {
@@ -870,6 +1129,33 @@ namespace PrakashCRM.Service.Controllers
             if (result.Result.Item1.value.Count > 0)
                 weekPlanDetails = result.Result.Item1.value;
 
+            if (weekPlanDetails.Count > 0)
+            {
+                var parsedWeeks = weekPlanDetails
+                    .Select(item => new
+                    {
+                        Week = item,
+                        HasStart = TryParseVisitDate(item.Week_Start_Date, out DateTime startDate),
+                        StartDate = startDate,
+                        HasEnd = TryParseVisitDate(item.Week_End_Date, out DateTime endDate),
+                        EndDate = endDate
+                    })
+                    .Where(item => item.HasStart && item.HasEnd).ToList();
+
+                if (parsedWeeks.Count > 0)
+                {
+                    string fromDate = parsedWeeks.Min(item => item.StartDate).ToString("yyyy-MM-dd");
+                    string toDate = parsedWeeks.Max(item => item.EndDate).ToString("yyyy-MM-dd");
+                    List<SPDailyVisit> actualDailyVisits = GetActualDailyVisits(ac, SPCode, fromDate, toDate);
+
+                    foreach (var parsedWeek in parsedWeeks)
+                    {
+                        parsedWeek.Week.Total_Actual_Visits = CountDistinctDailyVisits(
+                            actualDailyVisits.Where(visit => TryParseVisitDate(visit.Date, out DateTime visitDate) && visitDate.Date >= parsedWeek.StartDate.Date && visitDate.Date <= parsedWeek.EndDate.Date));
+                    }
+                }
+            }
+
             return weekPlanDetails;
         }
 
@@ -877,10 +1163,8 @@ namespace PrakashCRM.Service.Controllers
         public List<SPWeekPlanDetailsTypeWise> GetWeekPlanDetailsTypeSubTypeWise(string SPCode, int WeekNo, string FromDate, string ToDate)
         {
             API ac = new API();
-            SPWeekPlanDetailsTypeWise WeekPlanDetailsTypeWise;
             List<SPWeekPlanDetailsTypeWise> WeekPlanDetailsTypeWiseList = new List<SPWeekPlanDetailsTypeWise>();
             List<WeekPlanTypeWiseTotal> WeekPlanTypeWiseTotal = new List<WeekPlanTypeWiseTotal>();
-            List<WeekPlanTypeWiseTotalActual> weekPlanTypeWiseTotalActual = new List<WeekPlanTypeWiseTotalActual>();
             string[] FromDateDetails = FromDate.Split('-');
             string FromDate_ = FromDateDetails[2] + '-' + FromDateDetails[1] + '-' + FromDateDetails[0];
 
@@ -893,51 +1177,55 @@ namespace PrakashCRM.Service.Controllers
             if (result.Result.Item1.value.Count > 0)
                 WeekPlanTypeWiseTotal = result.Result.Item1.value;
 
-            var result1 = ac.GetData<WeekPlanTypeWiseTotalActual>("WeeklyvisittotalsTypeWiseActual", "Salesperson_Code eq '" + SPCode + "' and Week_No_ eq " + WeekNo + " and Week_Start_Date eq " + FromDate_ + " and Week_End_Date eq " + ToDate_);
+            List<SPDailyVisit> actualDailyVisits = GetActualDailyVisits(ac, SPCode, FromDate_, ToDate_);
+            Dictionary<string, List<SPDailyVisit>> actualVisitLookup = actualDailyVisits.Where(item => item != null).GroupBy(item => BuildVisitTypeSubTypeKey(item.Visit_Type, item.Visit_SubType_No)).ToDictionary(group => group.Key, group => group.ToList());
 
-            if (result1.Result.Item1.value.Count > 0)
-                weekPlanTypeWiseTotalActual = result1.Result.Item1.value;
+            HashSet<string> processedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            if (WeekPlanTypeWiseTotal.Count > 0)
+            for (int a = 0; a < WeekPlanTypeWiseTotal.Count; a++)
             {
-                for (int a = 0; a < WeekPlanTypeWiseTotal.Count; a++)
+                var planRow = new SPWeekPlanDetailsTypeWise
                 {
+                    Visit_Type = WeekPlanTypeWiseTotal[a].Visit_Type,
+                    Visit_Sub_Type = WeekPlanTypeWiseTotal[a].Visit_Sub_Type,
+                    Visit_Name = WeekPlanTypeWiseTotal[a].Visit_Name,
+                    Visit_SubType_Name = WeekPlanTypeWiseTotal[a].Visit_SubType_Name,
+                    DailyVisitPlanCount = WeekPlanTypeWiseTotal[a].DailyVisitPlanCount
+                };
 
-                    WeekPlanDetailsTypeWise = new SPWeekPlanDetailsTypeWise();
+                string lookupKey = BuildVisitTypeSubTypeKey(planRow.Visit_Type, planRow.Visit_Sub_Type);
 
-                    WeekPlanDetailsTypeWise.Visit_Type = WeekPlanTypeWiseTotal[a].Visit_Type;
-                    WeekPlanDetailsTypeWise.Visit_Sub_Type = WeekPlanTypeWiseTotal[a].Visit_Sub_Type;
-                    WeekPlanDetailsTypeWise.Visit_Name = WeekPlanTypeWiseTotal[a].Visit_Name;
-                    WeekPlanDetailsTypeWise.Visit_SubType_Name = WeekPlanTypeWiseTotal[a].Visit_SubType_Name;
-                    WeekPlanDetailsTypeWise.DailyVisitPlanCount = WeekPlanTypeWiseTotal[a].DailyVisitPlanCount;
-
-                    WeekPlanDetailsTypeWiseList.Add(WeekPlanDetailsTypeWise);
-                    //WeekPlanDetailsTypeWise[a].Visit_Name = WeekPlanTypeWiseTotal[a].Visit_Name;
-                    //WeekPlanDetailsTypeWise[a].Visit_SubType_Name = WeekPlanTypeWiseTotal[a].Visit_SubType_Name;
-                    //WeekPlanDetailsTypeWise[a].DailyVisitPlanCount = WeekPlanTypeWiseTotal[a].DailyVisitPlanCount;
-
-                }
-
-                if (weekPlanTypeWiseTotalActual.Count > 0)
+                if (actualVisitLookup.ContainsKey(lookupKey))
                 {
-                    for (int b = 0; b < weekPlanTypeWiseTotalActual.Count; b++)
-                    {
-                        if (WeekPlanDetailsTypeWiseList[b].Visit_Name == weekPlanTypeWiseTotalActual[b].Visit_Name &&
-                            WeekPlanDetailsTypeWiseList[b].Visit_SubType_Name == weekPlanTypeWiseTotalActual[b].Visit_SubType_Name)
-                        {
-                            WeekPlanDetailsTypeWiseList[b].DailyVisitActualCount = weekPlanTypeWiseTotalActual[b].DailyVisitPlanCount;
-                        }
-
-                    }
+                    planRow.DailyVisitActualCount = CountDistinctDailyVisits(actualVisitLookup[lookupKey]);
+                    processedKeys.Add(lookupKey);
                 }
                 else
                 {
-                    for (int b = 0; b < WeekPlanTypeWiseTotal.Count; b++)
-                    {
-                        WeekPlanDetailsTypeWiseList[b].DailyVisitActualCount = 0;
-                    }
+                    planRow.DailyVisitActualCount = 0;
                 }
 
+                WeekPlanDetailsTypeWiseList.Add(planRow);
+            }
+
+            foreach (var actualVisitGroup in actualVisitLookup)
+            {
+                if (processedKeys.Contains(actualVisitGroup.Key))
+                    continue;
+
+                SPDailyVisit sampleVisit = actualVisitGroup.Value.FirstOrDefault();
+                if (sampleVisit == null)
+                    continue;
+
+                WeekPlanDetailsTypeWiseList.Add(new SPWeekPlanDetailsTypeWise
+                {
+                    Visit_Type = sampleVisit.Visit_Type,
+                    Visit_Sub_Type = sampleVisit.Visit_SubType_No,
+                    Visit_Name = sampleVisit.Visit_Name,
+                    Visit_SubType_Name = sampleVisit.Visit_SubType_Name,
+                    DailyVisitPlanCount = 0,
+                    DailyVisitActualCount = CountDistinctDailyVisits(actualVisitGroup.Value)
+                });
             }
 
             return WeekPlanDetailsTypeWiseList;
@@ -1000,21 +1288,6 @@ namespace PrakashCRM.Service.Controllers
 
             return weekPlan;
         }
-
-        //[Route("GetInquiryFromInquiryNo")]
-        //public SPInquiry GetInquiryFromInquiryNo(string Inquiry_No)
-        //{
-        //    API ac = new API();
-        //    SPInquiry inquiry = new SPInquiry();
-
-        //    var result = ac.GetData<SPInquiry>("InquiryDotNetAPI", "Inquiry_No eq '" + Inquiry_No + "'");
-
-        //    if (result.Result.Item1.value.Count > 0)
-        //        inquiry = result.Result.Item1.value[0];
-
-        //    return inquiry;
-        //}
-
         [HttpPost]
         [Route("DeleteWeekPlan")]
         public bool DeleteWeekPlan(string No)
@@ -1032,6 +1305,7 @@ namespace PrakashCRM.Service.Controllers
                 weekPlan = result.Result.Item1.value[0];
                 //weekPlanDel.Week_Date = weekPlan.Week_Date;
                 weekPlanDel.Contact_Company_No = weekPlan.Contact_Company_No;
+
                 weekPlanDel.Visit_Type = weekPlan.Visit_Type;
                 weekPlanDel.Visit_Sub_Type = weekPlan.Visit_Sub_Type;
                 weekPlanDel.Pur_Visit = weekPlan.Pur_Visit;
@@ -1075,6 +1349,27 @@ namespace PrakashCRM.Service.Controllers
 
             if (string.IsNullOrWhiteSpace(resolvedEntryType))
                 resolvedEntryType = "ENTRY";
+            // unplannd visit to total actul visit
+            int resolvedWeekNo = dailyVisitDetails.Week_No;
+            string resolvedWeekStartDate = dailyVisitDetails.Week_Start_Date;
+            string resolvedWeekEndDate = dailyVisitDetails.Week_End_Date;
+
+            if (resolvedWeekNo == 0 || string.IsNullOrWhiteSpace(resolvedWeekStartDate) || string.IsNullOrWhiteSpace(resolvedWeekEndDate))
+            {
+                SPWeekPlanNoDetails resolvedWeek = ResolveWeekForVisitDate(ac, dailyVisitDetails.Salesperson_Code, dailyVisitDetails.Date);
+
+                if (resolvedWeek != null)
+                {
+                    if (resolvedWeekNo == 0 && int.TryParse(resolvedWeek.Week_No, out int parsedWeekNo))
+                        resolvedWeekNo = parsedWeekNo;
+
+                    if (string.IsNullOrWhiteSpace(resolvedWeekStartDate))
+                        resolvedWeekStartDate = resolvedWeek.Week_Start_Date;
+
+                    if (string.IsNullOrWhiteSpace(resolvedWeekEndDate))
+                        resolvedWeekEndDate = resolvedWeek.Week_End_Date;
+                }
+            }
 
             reqDailyVisit.Financial_Year = dailyVisitDetails.Financial_Year;
             reqDailyVisit.Date = dailyVisitDetails.Date;
@@ -1105,9 +1400,9 @@ namespace PrakashCRM.Service.Controllers
             reqDailyVisit.Remarks = dailyVisitDetails.Remarks == null || dailyVisitDetails.Remarks == "" ? "" : dailyVisitDetails.Remarks;
             reqDailyVisit.Event_No = dailyVisitDetails.Event_No == "-1" ? "" : dailyVisitDetails.Event_No;
             reqDailyVisit.Topic_Name = dailyVisitDetails.Topic_Name == null || dailyVisitDetails.Topic_Name == "" ? "" : dailyVisitDetails.Topic_Name;
-            reqDailyVisit.Week_No = dailyVisitDetails.Week_No;
-            reqDailyVisit.Week_Start_Date = dailyVisitDetails.Week_Start_Date;
-            reqDailyVisit.Week_End_Date = dailyVisitDetails.Week_End_Date;
+            reqDailyVisit.Week_No = resolvedWeekNo;
+            reqDailyVisit.Week_Start_Date = resolvedWeekStartDate;
+            reqDailyVisit.Week_End_Date = resolvedWeekEndDate;
             reqDailyVisit.Entry_Type = resolvedEntryType;
             reqDailyVisit.Is_PDC = dailyVisitDetails.Is_PDC;
             reqDailyVisit.Pur_Visit = dailyVisitDetails.Pur_Visit;
@@ -1139,7 +1434,7 @@ namespace PrakashCRM.Service.Controllers
                     reqDailyVisitExp.Total_Time = dailyVisitDetails.dailyVisitExpense.Total_Time == null || dailyVisitDetails.dailyVisitExpense.Total_Time == "" ? "" : dailyVisitDetails.dailyVisitExpense.Total_Time;
                     reqDailyVisitExp.Start_km = dailyVisitDetails.dailyVisitExpense.Start_km;
                     reqDailyVisitExp.End_km = dailyVisitDetails.dailyVisitExpense.End_km;
-                    reqDailyVisitExp.Total_km = dailyVisitDetails.dailyVisitExpense.Total_km ;
+                    reqDailyVisitExp.Total_km = dailyVisitDetails.dailyVisitExpense.Total_km;
                     reqDailyVisitExp.User_Code = resDailyVisit.Salesperson_Code;
                     reqDailyVisitExp.IsActive = true;
 
@@ -1174,7 +1469,7 @@ namespace PrakashCRM.Service.Controllers
                             reqDailyPlanProd.Daily_Visit_Plan_No = resDailyVisit.No;
                             reqDailyPlanProd.Product_No = dailyVisitDetails.dailyVisitProds[a].Product_No;
                             reqDailyPlanProd.Quantity = dailyVisitDetails.dailyVisitProds[a].Quantity;
-                            reqDailyPlanProd.Weekly_No = dailyVisitDetails.Week_No == 0 ? "" : dailyVisitDetails.Week_No.ToString();
+                            reqDailyPlanProd.Weekly_No = resolvedWeekNo == 0 ? "" : resolvedWeekNo.ToString();
                             reqDailyPlanProd.Financial_Year = dailyVisitDetails.Financial_Year;
                             reqDailyPlanProd.Competitor = dailyVisitDetails.dailyVisitProds[a].Competitor == null || dailyVisitDetails.dailyVisitProds[a].Competitor == "" ? "" : dailyVisitDetails.dailyVisitProds[a].Competitor;
                             reqDailyPlanProd.IsActive = true;
@@ -1351,6 +1646,48 @@ namespace PrakashCRM.Service.Controllers
 
                 if (!string.IsNullOrWhiteSpace(toEmail))
                     emailService.SendEmail(toEmail, ccEmail, "Complain Prevention Action Details - Daily Visit Plan - PrakashCRM", sbMailBody.ToString());
+            }
+
+            // Populate DocAttachmentJson with attachment data from Business Central
+            if (resDailyVisit != null && !string.IsNullOrWhiteSpace(resDailyVisit.No) && ed != null && ed.isSuccess)
+            {
+                try
+                {
+                    var attachmentFilter = $"Table_ID eq 50007 and Daily_Visit_Entry_Type eq '{EscapeODataString(resolvedEntryType)}' and No eq '{EscapeODataString(resDailyVisit.No)}'";
+                    var attachmentResult = ac.GetData<BusinessCentralDocumentAttachment>("DocumentAttachments", attachmentFilter);
+                    
+                    if (attachmentResult != null && attachmentResult.Result.Item1 != null && attachmentResult.Result.Item1.value != null)
+                    {
+                        var attachments = attachmentResult.Result.Item1.value;
+                        var formattedAttachments = new List<object>();
+
+                        foreach (var attachment in attachments)
+                        {
+                            formattedAttachments.Add(new
+                            {
+                                FileName = attachment.File_Name ?? string.Empty,
+                                FileExtension = NormalizeFileExtension(attachment.File_Extension),
+                                ContentType = ResolveContentType(attachment.File_Extension),
+                                Base64 = attachment.Base64Text ?? string.Empty,
+                                DailyVisitNo = attachment.No ?? string.Empty,
+                                EntryType = resolvedEntryType,
+                                IsUploaded = true
+                            });
+                        }
+
+                        // Serialize to JSON string
+                        resDailyVisit.DocAttachmentJson = Newtonsoft.Json.JsonConvert.SerializeObject(formattedAttachments);
+                    }
+                    else
+                    {
+                        resDailyVisit.DocAttachmentJson = Newtonsoft.Json.JsonConvert.SerializeObject(new List<object>());
+                    }
+                }
+                catch
+                {
+                    // If attachment fetch fails, set empty JSON array
+                    resDailyVisit.DocAttachmentJson = Newtonsoft.Json.JsonConvert.SerializeObject(new List<object>());
+                }
             }
 
             return resDailyVisit;
@@ -2585,6 +2922,50 @@ namespace PrakashCRM.Service.Controllers
 
         //    return invoiceprods;
         //}
+
+        private static string NormalizeFileExtension(string fileExtension)
+        {
+            if (string.IsNullOrWhiteSpace(fileExtension))
+                return string.Empty;
+
+            return fileExtension.Trim().StartsWith(".") ? fileExtension.Trim().ToLowerInvariant() : "." + fileExtension.Trim().ToLowerInvariant();
+        }
+
+        private static string ResolveContentType(string fileExtension)
+        {
+            fileExtension = NormalizeFileExtension(fileExtension);
+
+            switch (fileExtension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".pdf":
+                    return "application/pdf";
+                case ".doc":
+                    return "application/msword";
+                case ".docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case ".xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case ".xls":
+                    return "application/vnd.ms-excel";
+                case ".txt":
+                    return "text/plain";
+                default:
+                    return "application/octet-stream";
+            }
+        }
+
+        private static string EscapeODataString(string value)
+        {
+            if (value == null)
+                return string.Empty;
+
+            return value.Replace("'", "''");
+        }
 
     }
 }

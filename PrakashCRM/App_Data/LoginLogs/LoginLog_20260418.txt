@@ -1,0 +1,7 @@
+DateTime: 2026-04-18 23:28:57
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------

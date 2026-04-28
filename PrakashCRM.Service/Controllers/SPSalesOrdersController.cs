@@ -35,7 +35,7 @@ namespace PrakashCRM.Service.Controllers
                     filter = filter + " and Salesperson_Code eq '" + SPCode + "' and Status eq 'Open'";
             }
 
-            result = ac.GetData1<SPSalesOrdersList>("SalesOrdersListDotNetAPI", filter, skip, top, orderby); // and Contact_Business_Relation eq 'Customer'
+            result = ac.GetData1<SPSalesOrdersList>("salesorders", filter, skip, top, orderby,true); // and Contact_Business_Relation eq 'Customer'
 
             if (result.Result.Item1.value.Count > 0)
                 salesorders = result.Result.Item1.value;

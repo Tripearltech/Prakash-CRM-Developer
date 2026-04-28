@@ -784,6 +784,7 @@ namespace PrakashCRM.Data.Models
         public double New_Price { get; set; }
         public double New_Margin { get; set; }
         public bool Price_Updated { get; set; }
+        public bool PCPL_Convert_Quote { get; set; }
 
         public double PCPL_Interest { get; set; }
 
@@ -861,6 +862,7 @@ namespace PrakashCRM.Data.Models
         public double New_Price { get; set; }
         public double New_Margin { get; set; }
         public bool Price_Updated { get; set; }
+        public bool PCPL_Convert_Quote { get; set; }
 
         public double PCPL_Interest { get; set; }
 
@@ -1001,6 +1003,7 @@ namespace PrakashCRM.Data.Models
         public double New_Price { get; set; }
         public double New_Margin { get; set; }
         public bool Price_Updated { get; set; }
+        public bool PCPL_Convert_Quote { get; set; }
 
         public double PCPL_Interest { get; set; }
 
@@ -1800,12 +1803,15 @@ namespace PrakashCRM.Data.Models
         public string Product_Name { get; set; }
         public string Terms { get; set; }
         public string Due_Date { get; set; }
-        public decimal Invoice_Amount { get; set; }
+        public double Invoice_Amount { get; set; }
         public double Remain_Amount { get; set; }
         public double Total_Days { get; set; }
         public double Overdue_Days { get; set; }
         public string Customer_Name { get; set; }
         public string Customer_No { get; set; }
+        public string SalesPerson_Name { get; set; }
+        public string SalesPerson_No { get; set; }
+        public string PO_No { get; set; }
     }
 
     public class TransporterRateMethods

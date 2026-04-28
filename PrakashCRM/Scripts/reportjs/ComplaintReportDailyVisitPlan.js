@@ -2,7 +2,15 @@
 var orderBy = 2;
 var orderDir = "asc";
 var filter = "";
+var allCustomers = [];
+var currentFromDate = "";
+var currentToDate = "";
+var currentSearch = "";
+
 $(document).ready(function () {
+    // Load customer data on page load
+    LoadCustomerData();
+
     var fromdate = "";
     var todate = "";
     var search = "";
@@ -10,7 +18,105 @@ $(document).ready(function () {
     $('#ddlRecPerPage').change(function () {
         ComplaintReportDailyVisitPlanList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, fromdate, todate, search);
     });
+
+    // Show full customer list on focus
+    $('#TxtSearch').on('focus', function () {
+        var dropdown = $('#customerDropdown');
+        if (allCustomers.length > 0 && $('#TxtSearch').val() === '') {
+            dropdown.empty();
+            allCustomers.forEach(function (customer) {
+                dropdown.append('<div class="dropdown-item" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; background: #f9f9f9;">' + customer + '</div>');
+            });
+            dropdown.show();
+        }
+    });
+
+    // Autocomplete for customer search
+    $('#TxtSearch').on('input', function () {
+        var searchValue = $(this).val().toLowerCase();
+        var dropdown = $('#customerDropdown');
+
+        if (searchValue.length > 0) {
+            var filtered = allCustomers.filter(function (customer) {
+                return customer.toLowerCase().includes(searchValue);
+            });
+
+            if (filtered.length > 0) {
+                dropdown.empty();
+                filtered.forEach(function (customer) {
+                    dropdown.append('<div class="dropdown-item" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #ddd; background: #f9f9f9;">' + customer + '</div>');
+                });
+                dropdown.show();
+            } else {
+                dropdown.empty();
+                dropdown.hide();
+            }
+        } else {
+            // Show full list again when cleared
+            if (allCustomers.length > 0) {
+                dropdown.empty();
+                allCustomers.forEach(function (customer) {
+                    dropdown.append('<div class="dropdown-item" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #ddd; background: #f9f9f9;">' + customer + '</div>');
+                });
+                dropdown.show();
+            } else {
+                dropdown.empty();
+                dropdown.hide();
+            }
+        }
+    });
+
+    // Handle dropdown item selection
+    $(document).on('click', '#customerDropdown .dropdown-item', function () {
+        var selectedCustomer = $(this).text();
+        $('#TxtSearch').val(selectedCustomer);
+        $('#customerDropdown').hide();
+    });
+
+    // Hide dropdown when clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#TxtSearch, #customerDropdown').length) {
+            $('#customerDropdown').hide();
+        }
+    });
 });
+
+function LoadCustomerData() {
+    // Try to load from API, but fallback to empty array if fails
+    $.ajax({
+        url: '/SPReports/GetCustomerReport?prefix=&salesPerson=' + $('#hdnLoggedInUserSPCode').val(),
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
+            if (data && data.length > 0) {
+                allCustomers = data.map(function (item) {
+                    return item.Customer_Name || item.CustomerName || '';
+                }).filter(function (name) {
+                    return name.length > 0;
+                });
+                allCustomers = [...new Set(allCustomers)]; // Remove duplicates
+            }
+        },
+        error: function () {
+            // If API fails, customer list will be populated from report data
+            console.log('LoadCustomerData API failed, will load from report data');
+        }
+    });
+}
+
+function ExtractCustomersFromReport(data) {
+    // Extract unique customer names from report data
+    if (data && data.length > 0) {
+        var customers = data.map(function (item) {
+            return item.Contact_Company_Name || item.Customer_Name || item.CustomerName || '';
+        }).filter(function (name) {
+            return name.length > 0;
+        });
+
+        // Merge with existing customers and remove duplicates
+        allCustomers = [...new Set([...allCustomers, ...customers])];
+    }
+}
 
 function ComplaintReportDailyVisitPlanList(skip, top, firsload, orderBy, orderDir, fromdate, todate, search) {
 
@@ -41,11 +147,20 @@ function ComplaintReportDailyVisitPlanList(skip, top, firsload, orderBy, orderDi
         success: function (data) {
 
             $("#tblComplaintReportDailyVisitPlan").empty();
+
+            // Extract customers from report data
+            ExtractCustomersFromReport(data);
+
             var rowData = "";
 
             if (data && data.length > 0) {
 
                 $.each(data, function (index, item) {
+                    
+                    // Filter by customer name if search parameter contains customer name
+                    if (search && search !== "" && item.Contact_Company_Name && !item.Contact_Company_Name.toLowerCase().includes(search.toLowerCase())) {
+                        return; // Skip this record
+                    }
 
                     const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
 
@@ -193,6 +308,9 @@ $("#SearchBtn").on('click', function () {
                 $("#Tdatevalidate").text("");
 
             }
+            currentFromDate = fromdate;
+            currentToDate = todate;
+            currentSearch = search;
             ComplaintReportDailyVisitPlanList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, fromdate, todate, search);
         }
         else if (fromdate == "" && todate == "" && search == "") {
@@ -207,11 +325,17 @@ $("#SearchBtn").on('click', function () {
     if (fromdate == "" && todate == "" && search != "") {
         $("#Fdatevalidate").text('');
         $("#Tdatevalidate").text('');
+        currentFromDate = fromdate;
+        currentToDate = todate;
+        currentSearch = search;
         ComplaintReportDailyVisitPlanList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, fromdate, todate, search);
     }
     if (fromdate != "" && todate != "" && search != "") {
         $("#Fdatevalidate").text('');
         $("#Tdatevalidate").text('');
+        currentFromDate = fromdate;
+        currentToDate = todate;
+        currentSearch = search;
         ComplaintReportDailyVisitPlanList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, fromdate, todate, search);
     }
 });
@@ -362,7 +486,7 @@ function pageMe() {
 
         pager.data("curr", page);
 
-        ComplaintReportDailyVisitPlanList(skip2, top2, 0, orderBy, orderDir,null,null,null);
+        ComplaintReportDailyVisitPlanList(skip2, top2, 0, orderBy, orderDir, currentFromDate, currentToDate, currentSearch);
     }
 
 };

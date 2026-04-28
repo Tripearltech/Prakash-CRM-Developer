@@ -46,19 +46,19 @@ namespace PrakashCRM.Service.Controllers
 
             if (isExport)
             {
-                result = ac.GetData<SPCompanyList>("ContactDotNetAPI", filter);
-                result2 = ac.GetData<SPCompanyList>("ContactDotNetAPI", filter2);
+                result = ac.GetData<SPCompanyList>("pcplcontacts", filter,true);
+                result2 = ac.GetData<SPCompanyList>("pcplcontacts", filter2, true);
             }
             else
             {
-                result = ac.GetData1<SPCompanyList>("ContactDotNetAPI", filter, skip, top, orderby);
-                result2 = ac.GetData1<SPCompanyList>("ContactDotNetAPI", filter2, skip, top, orderby);
+                result = ac.GetData1<SPCompanyList>("pcplcontacts", filter, skip, top, orderby, true);
+                result2 = ac.GetData1<SPCompanyList>("pcplcontacts", filter2, skip, top, orderby,true);
             }
 
-            if (result.Result.Item1.value.Count > 0)
+            if (result.Result.Item1?.value?.Count > 0)
                 Companies = result.Result.Item1.value;
 
-            if (result2 != null && result2.Result.Item1.value.Count > 0)
+            if (result2 != null && result2.Result?.Item1?.value?.Count > 0)
             {
                 company2 = result2.Result.Item1.value;
                 Companies.AddRange(company2);
@@ -71,9 +71,7 @@ namespace PrakashCRM.Service.Controllers
                 {
                     // Updated filter as per your requirement
                     var contactResult = ac.GetData<SPContact>(
-                        "ContactDotNetAPI",
-                        $"(Type eq 'Person' or Type eq 'Company') and Company_No eq '{company.No}' and Is_Primary eq true"
-                    );
+                        "pcplcontacts",$"(Type eq 'Person' or Type eq 'Company') and Company_No eq '{company.No}' and Is_Primary eq true", true);
 
                     if (contactResult?.Result.Item1?.value?.Count > 0)
                     {
@@ -94,8 +92,15 @@ namespace PrakashCRM.Service.Controllers
             }
 
             return Companies;
+
+           
         }
 
+        // Helper for reflection property access
+        private static object GetPropValue(object src, string propName)
+        {
+            return src?.GetType().GetProperty(propName)?.GetValue(src, null);
+        }
 
         [Route("GetAllContacts")]
         public List<SPContactList> GetAllContacts(string SPCode, int skip, int top, string orderby, string filter, bool isExport = false)
@@ -111,12 +116,68 @@ namespace PrakashCRM.Service.Controllers
             var result = (dynamic)null;
 
             if (isExport)
-                result = ac.GetData<SPContactList>("ContactDotNetAPI", filter); // and Contact_Business_Relation eq 'Customer'
+                result = ac.GetData<SPContactList>("pcplcontacts", filter, true); // and Contact_Business_Relation eq 'Customer'
             else
-                result = ac.GetData1<SPContactList>("ContactDotNetAPI", filter, skip, top, orderby); // and Contact_Business_Relation eq 'Customer'
+                result = ac.GetData1<SPContactList>("pcplcontacts", filter, skip, top, orderby, true); // and Contact_Business_Relation eq 'Customer'
 
             if (result.Result.Item1.value.Count > 0)
                 contacts = result.Result.Item1.value;
+
+            // Case-insensitive filtering (in-memory, after API call)
+            if (!string.IsNullOrEmpty(filter) && !filter.Contains("Type eq 'Person'"))
+            {
+                string field = null, value = null;
+                if (filter.Contains("contains("))
+                {
+                    int start = filter.IndexOf("contains(") + 9;
+                    int end = filter.IndexOf(") eq true");
+                    string inner = filter.Substring(start, end - start);
+                    var parts = inner.Split(',');
+                    field = parts[0].Trim();
+                    value = parts[1].Trim().Trim('"', '\'', ' ');
+                    contacts = contacts.Where(x => GetPropValue(x, field)?.ToString().ToLower().Contains(value.ToLower()) ?? false).ToList();
+                }
+                else if (filter.Contains("startswith("))
+                {
+                    int start = filter.IndexOf("startswith(") + 11;
+                    int end = filter.IndexOf(") eq true");
+                    string inner = filter.Substring(start, end - start);
+                    var parts = inner.Split(',');
+                    field = parts[0].Trim();
+                    value = parts[1].Trim().Trim('"', '\'', ' ');
+                    contacts = contacts.Where(x => GetPropValue(x, field)?.ToString().ToLower().StartsWith(value.ToLower()) ?? false).ToList();
+                }
+                else if (filter.Contains("endswith("))
+                {
+                    int start = filter.IndexOf("endswith(") + 9;
+                    int end = filter.IndexOf(") eq true");
+                    string inner = filter.Substring(start, end - start);
+                    var parts = inner.Split(',');
+                    field = parts[0].Trim();
+                    value = parts[1].Trim().Trim('"', '\'', ' ');
+                    contacts = contacts.Where(x => GetPropValue(x, field)?.ToString().ToLower().EndsWith(value.ToLower()) ?? false).ToList();
+                }
+                else if (filter.Contains(" eq "))
+                {
+                    var parts = filter.Split(new[] { " eq " }, StringSplitOptions.None);
+                    if (parts.Length >= 2)
+                    {
+                        field = parts[0].Split(' ').Last().Trim();
+                        value = parts[1].Split(' ').First().Trim('"', '\'', ' ');
+                        contacts = contacts.Where(x => GetPropValue(x, field)?.ToString().ToLower() == value.ToLower()).ToList();
+                    }
+                }
+                else if (filter.Contains(" ne "))
+                {
+                    var parts = filter.Split(new[] { " ne " }, StringSplitOptions.None);
+                    if (parts.Length >= 2)
+                    {
+                        field = parts[0].Split(' ').Last().Trim();
+                        value = parts[1].Split(' ').First().Trim('"', '\'', ' ');
+                        contacts = contacts.Where(x => GetPropValue(x, field)?.ToString().ToLower() != value.ToLower()).ToList();
+                    }
+                }
+            }
 
             return contacts;
         }
@@ -142,7 +203,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             SPContact contact = new SPContact();
 
-            var result = ac.GetData<SPContact>("ContactDotNetAPI", "Company_No eq '" + No + "' and Type eq 'Person'");
+            var result = ac.GetData<SPContact>("pcplcontacts", "Company_No eq '" + No + "' and Type eq 'Person'", true);
 
             if (result.Result.Item1.value.Count > 0)
                 contact = result.Result.Item1.value[0];
@@ -156,8 +217,8 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<Company> company = new List<Company>();
 
-            var result = ac.GetData<Company>("ContactDotNetAPI", "Type eq 'Company' and (No eq 'C-00323' or No eq 'C-00135')");
-            //var result = ac.GetData<Company>("ContactDotNetAPI", "Type eq 'Company'");
+            var result = ac.GetData<Company>("pcplcontacts", "Type eq 'Company' and (No eq 'C-00323' or No eq 'C-00135')", true);
+            //var result = ac.GetData<Company>("pcplcontacts", "Type eq 'Company'");
 
             if (result != null && result.Result.Item1.value.Count > 0)
                 company = result.Result.Item1.value;
@@ -204,7 +265,7 @@ namespace PrakashCRM.Service.Controllers
 
             if (isEdit)
             {
-                var existingCompanyResult = ac.GetData<SPCompany>("ContactDotNetAPI", $"No eq '{CompanyNo}'");
+                var existingCompanyResult = ac.GetData<SPCompany>("pcplcontacts", $"No eq '{CompanyNo}'", true);
                 if (existingCompanyResult.Result.Item1.value.Count > 0)
                 {
                     var existingCompany = existingCompanyResult.Result.Item1.value[0];
@@ -216,7 +277,7 @@ namespace PrakashCRM.Service.Controllers
                         requestCompany.E_Mail = existingCompany.E_Mail;
                 }
                 //Call Patch API
-                result = PatchItemContact("ContactDotNetAPI", requestCompany, responseCompany, $"No='{CompanyNo}'");
+                result = PatchItemContact("pcplcontacts", requestCompany, responseCompany, $"No='{CompanyNo}'");
                 if (result.Result.Item1 != null)
                 {
                     responseCompany = result.Result.Item1;
@@ -226,7 +287,7 @@ namespace PrakashCRM.Service.Controllers
             }
             else
             {
-                result = PostItemContact("ContactDotNetAPI", requestCompany, responseCompany);
+                result = PostItemContact("pcplcontacts", requestCompany, responseCompany);
 
                 if (result.Result.Item1 != null)
                 {
@@ -250,7 +311,7 @@ namespace PrakashCRM.Service.Controllers
                             Is_Primary = companycontact.Is_Primary
                         };
 
-                        var result1 = ac.PostItem("ContactDotNetAPI", requestContact, responseContact);
+                        var result1 = ac.PostItem("pcplcontacts", requestContact, responseContact,true);
                         if (result1.Result.Item1 != null)
                         {
                             responseContact = result1.Result.Item1;
@@ -269,16 +330,16 @@ namespace PrakashCRM.Service.Controllers
 
         public async Task<(SPCompanyResponse, errorDetails)> PostItemContact<SPCompanyResponse>(string apiendpoint, SPCompany requestModel, SPCompanyResponse responseModel)
         {
-            string _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+            string _baseURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["BaseAPIURL"];
             string _tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
             string _environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
-            string _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+            string _companyURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["Company_Name"];
 
             API ac = new API();
             var accessToken = await ac.GetAccessToken();
 
             HttpClient _httpClient = new HttpClient();
-            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
             Uri baseuri = new Uri(encodeurl);
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken.Token);
 
@@ -330,16 +391,16 @@ namespace PrakashCRM.Service.Controllers
 
         public async Task<(SPCompanyResponse, errorDetails)> PatchItemContact<SPCompanyResponse>(string apiendpoint, SPCompany requestModel, SPCompanyResponse responseModel, string fieldWithValue)
         {
-            string _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+            string _baseURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["BaseAPIURL"];
             string _tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
             string _environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
-            string _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+            string _companyURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["Company_Name"];
 
             API ac = new API();
             var accessToken = await ac.GetAccessToken();
 
             HttpClient _httpClient = new HttpClient();
-            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
             Uri baseuri = new Uri(encodeurl);
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), baseuri + "(" + fieldWithValue + ")");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
@@ -400,7 +461,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             SPCompanyContact companycontact = new SPCompanyContact();
 
-            var result = ac.GetData<SPCompanyContact>("ContactDotNetAPI", "No eq '" + No + "'");
+            var result = ac.GetData<SPCompanyContact>("pcplcontacts", "No eq '" + No + "'",true);
 
             if (result.Result.Item1.value.Count > 0)
                 companycontact = result.Result.Item1.value[0];
@@ -414,7 +475,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPContactResponse> contacts = new List<SPContactResponse>();
 
-            var result = ac.GetData<SPContactResponse>("ContactDotNetAPI", "Salesperson_Code eq '" + SPCode + "' and Type eq 'Person' and Company_No eq '" + No + "'");
+            var result = ac.GetData<SPContactResponse>("pcplcontacts", "Salesperson_Code eq '" + SPCode + "' and Type eq 'Person' and Company_No eq '" + No + "'",true);
 
             if (result.Result.Item1.value.Count > 0)
                 contacts = result.Result.Item1.value;
@@ -460,7 +521,7 @@ namespace PrakashCRM.Service.Controllers
             var result = (dynamic)null;
 
             if (!isEdit)
-                result = ac.PostItem("ContactDotNetAPI", requestContact, responseContact);
+                result = ac.PostItem("pcplcontacts", requestContact, responseContact);
 
             if (result.Result.Item1 != null)
             {
@@ -498,7 +559,7 @@ namespace PrakashCRM.Service.Controllers
             SPContact responseContact = new SPContact();
             var result = (dynamic)null;
 
-            result = ac.PatchItem("ContactDotNetAPI", requestContact, responseContact, "No='" + No + "'");
+            result = ac.PatchItem("pcplcontacts", requestContact, responseContact, "No='" + No + "'",true);
 
             if (result.Result.Item1 != null)
             {
@@ -526,7 +587,7 @@ namespace PrakashCRM.Service.Controllers
             SPContact responseContact = new SPContact();
             var result = (dynamic)null;
 
-            result = ac.DeleteItem("ContactDotNetAPI", requestContact, responseContact, "No='" + No + "'");
+            result = ac.DeleteItem("pcplcontacts", requestContact, responseContact, "No='" + No + "'",true);
 
             if (result.Result.Item1 != null)
             {

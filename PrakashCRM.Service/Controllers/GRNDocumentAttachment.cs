@@ -364,29 +364,54 @@ namespace PrakashCRM.Service.Controllers
         {
             switch ((fileExtension ?? string.Empty).Trim().TrimStart('.').ToLowerInvariant())
             {
-                case "jpg":
                 case "jpeg":
                     return "image/jpeg";
+
                 case "png":
                     return "image/png";
+
                 case "gif":
                     return "image/gif";
+
                 case "bmp":
                     return "image/bmp";
+
                 case "webp":
                     return "image/webp";
+
                 case "svg":
                     return "image/svg+xml";
+
                 case "pdf":
                     return "application/pdf";
+
                 case "doc":
-                    return "application/msword";
+                    return "application/Word";
+
                 case "docx":
-                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    return "application/Word";
+
                 case "xls":
-                    return "application/vnd.ms-excel";
+                    return "application/Excel";
+
                 case "xlsx":
-                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    return "application/Excel";
+
+                case "ppt":
+                    return "application/PowerPoint";
+
+                case "pptx":
+                    return "application/PowerPoint";
+
+                case "xml":
+                    return "application/xml";
+
+                case "txt":
+                    return "text/plain";
+
+                case "csv":
+                    return "text/csv";
+
                 default:
                     return "application/octet-stream";
             }

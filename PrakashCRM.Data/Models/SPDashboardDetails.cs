@@ -136,7 +136,22 @@ namespace PrakashCRM.Data.Models
         public double Target_Qty { get; set; }
         public double Sales_Qty { get; set; }
         public bool IsSalesPerson { get; set; }
+        public string Product_Name { get; set; }
         public double Sales_Percentage_Qty { get; set; }
+    }
+    public class SPCustomerlist
+    {
+        public string Product_Name { get; set; }
+        public string Customer_Name { get; set; }
+        public double Product_Total_Target_Qty { get; set; }
+        public double Product_Total_Sales_Qty { get; set; }
+        public double Product_Sales_Percentage_Qty { get; set; }
+        public bool IsSalesPerson { get; set; }
+        public bool IsCustomer { get; set; }
+        public double Sales_Percentage_Qty { get; set; }
+        public bool IsIncludTop10Customer { get; set; }
+        public string SalesPerson_Name { get; set; }
+        public string SalesPerson { get; set; }
     }
     public class SPSupportSPlist
     {
@@ -164,6 +179,7 @@ namespace PrakashCRM.Data.Models
         public List<SPSelaspersonlist> SupportSPs { get; set; }
         public List<SPProductlist> Products { get; set; }
         public List<SPSelaspersonlist> ProductsTotalList { get; set; }
+        public List<SPCustomerlist> CustomerTotalList { get; set; }
     }
 
     public class SPTodayVisitlist
@@ -504,11 +520,11 @@ namespace PrakashCRM.Data.Models
         public string Packing_MRP_Price { get; set; }
         public string Expected_Receipt_Qty { get; set; }
         public string Expected_Shipment_Qty { get; set; }
-        public string Item_Location_Total { get; set; }
-        public string Location_Total { get; set; }
-        public string Total { get; set; }
-        public string Final_Total { get; set; }
-        public string Branch_Total { get; set; }
+        public bool Item_Location_Total { get; set; }
+        public bool Location_Total { get; set; }
+        public bool Total { get; set; }
+        public bool Final_Total { get; set; }
+        public bool Branch_Total { get; set; }
 
     }
     public class CombineStockManagement
@@ -535,6 +551,16 @@ namespace PrakashCRM.Data.Models
         public double Quantity { get; set; }
         public string Remarks { get; set; }
         public string Document_Type { get; set; }
+    }
+    public class SPCustOverdue
+    {
+        public string SalesPerson_Name { get; set; }
+        public string SalesPerson_No { get; set; }
+        public double SP_Total_Due_Amt { get; set; }
+        public double Total_Remaining_Amt { get; set; }
+        public bool Is_SP_Total_Due_Amt { get; set; }
+        public bool Is_Total_Remaining_Amt { get; set; }
+        public bool IS_SP_Due_Amt { get; set; }
     }
 
 }

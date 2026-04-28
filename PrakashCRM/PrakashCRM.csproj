@@ -288,6 +288,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\ChartsController.cs" />
+    <Compile Include="Controllers\DailyVisitAttachment.cs" />
     <Compile Include="Controllers\GRNDocumentAttacment.cs" />
     <Compile Include="Controllers\SPActivitiesController.cs" />
     <Compile Include="Controllers\SPAdminBusinessPlanController.cs" />
@@ -1167,6 +1168,7 @@
     <Content Include="Scripts\angular-route.min.js.map" />
     <Content Include="Scripts\appjs\AdminBusinessPlan.js" />
     <Content Include="Scripts\appjs\AssignBusinessPlan.js" />
+    <Content Include="Scripts\appjs\AutoScaleLayout.js" />
     <Content Include="Scripts\appjs\BusinessPlan.js" />
     <Content Include="Scripts\appjs\BusinessPlanContactList.js" />
     <Content Include="Scripts\appjs\BusinessPlanPendingAppr.js" />
@@ -1182,6 +1184,8 @@
     <Content Include="Scripts\appjs\DailyVisitList.js" />
     <Content Include="Scripts\appjs\Dashboard.js" />
     <Content Include="Scripts\appjs\AuthSession.js" />
+    <Content Include="Scripts\appjs\FormNavigationUtility.js" />
+    <Content Include="Scripts\appjs\InquiryButtonValidation.js" />
     <Content Include="Scripts\appjs\OutStandingDetails.js" />
     <Content Include="Scripts\appjs\Permissions.js" />
     <Content Include="Scripts\appjs\RoleRights.js" />
@@ -1290,6 +1294,7 @@
     <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\appjs\ChangePassword.js" />
+    <Content Include="Scripts\Common\global-date-validation.js" />
     <Content Include="Scripts\jquery-3.7.1.js" />
     <Content Include="Scripts\jquery-3.7.1.min.js" />
     <Content Include="Scripts\jquery-3.7.1.slim.js" />
@@ -1310,6 +1315,8 @@
     <Content Include="Scripts\reportjs\CustomerOutsatnding.js" />
     <Content Include="Scripts\appjs\FeedBackQuestion.js" />
     <Content Include="Scripts\reportjs\BusinessTypeSalesPerformance.js" />
+    <Content Include="Scripts\reportjs\CustOverDueOutstanding.js" />
+    <Content Include="Scripts\reportjs\CustOverDueOutstandingDetail.js" />
     <Content Include="Scripts\reportjs\DailyVisitMonthWise.js" />
     <Content Include="Scripts\reportjs\IndustryWiseSalesPerformance.js" />
     <Content Include="Scripts\reportjs\InquiryManagement.js" />
@@ -1426,6 +1433,8 @@
     <Content Include="Views\SPReports\StockManagement.cshtml" />
     <Content Include="Views\SPRoles\UserRoleRelationList.cshtml" />
     <Content Include="Views\SPRoles\UserRolesRelationalCard.cshtml" />
+    <Content Include="Views\SPReports\CustOverDueOutstandinglist.cshtml" />
+    <Content Include="Views\SPReports\CustOverDueOutstandingDetail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1434,6 +1443,7 @@
     <Folder Include="SalesQuotePrint\" />
     <Folder Include="temp\" />
     <Folder Include="Views\Base\" />
+    <Folder Include="Views\DailyVisitAttachment\" />
     <Folder Include="Views\GRNDocumentAttacment\" />
     <Folder Include="Views\Inquiry\" />
     <Folder Include="Views\SPBranches\" />

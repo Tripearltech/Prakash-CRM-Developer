@@ -1,6 +1,23 @@
-﻿$(document).ready(function () {
+﻿var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
+var attachmentUrls = {};
+var tempAttachments = [];
+var existingAttachments = [];
+var entryType = 'Plan';
+var dailyVisitNo = '';
+var isDailyVisitEdit = false;
 
-    var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
+$(document).ready(function () {
+
+    entryType = $('#hfEntryType').val() || 'Plan';
+    dailyVisitNo = $.trim($('#hfNo').val());
+    isDailyVisitEdit = ($.trim($('#hfDailyVisitEdit').val()).toLowerCase() === 'true') || (dailyVisitNo !== '');
+
+    var customerIdFromQuery = $.trim(GetQueryStringValue('customerId'));
+
+    if (customerIdFromQuery !== '') {
+        $('#hfddlCustomerName').val(customerIdFromQuery);
+        $('#hfContactCompanyNo').val(customerIdFromQuery);
+    }
 
     if ($('#hfDailyVisitAction').val() != "") {
 
@@ -32,8 +49,8 @@
     //$('#tblProdList').show();
     DailyvisitDetailsFill();
 
-    var isDailyVisitEdit = ($.trim($('#hfDailyVisitEdit').val()).toLowerCase() === 'true') || ($.trim($('#hfNo').val()) !== '');
-    var dailyVisitNo = $.trim($('#hfNo').val());
+    isDailyVisitEdit = ($.trim($('#hfDailyVisitEdit').val()).toLowerCase() === 'true') || ($.trim($('#hfNo').val()) !== '');
+    dailyVisitNo = $.trim($('#hfNo').val());
     var didLoadEditLines = false;
 
     let currentDate = new Date();
@@ -51,6 +68,44 @@
     // NOTE: BindVisitSubTypes is triggered after Type is selected in BindVisitTypes (edit mode safety).
     $('#ddlCompInvoice').append("<option value='-1'>---Select---</option>");
     $('#ddlCompInvoice').val('-1');
+
+    if (isDailyVisitEdit && dailyVisitNo !== '') {
+        LoadDailyVisitAttachments();
+    }
+
+    $('#AttachmentFile').change(function () {
+        var file = this.files && this.files[0];
+        if (file && !$.trim($('#txtDocName').val())) {
+            $('#txtDocName').val(file.name);
+        }
+    });
+
+    $('#btnAddAttachment').click(function () {
+        var fileInput = $('#AttachmentFile')[0];
+        var file = fileInput && fileInput.files ? fileInput.files[0] : null;
+        var docName = $.trim($('#txtDocName').val());
+
+        if (!file) {
+            ShowErrMsg('Please select a file.');
+            return;
+        }
+
+        if (!docName) {
+            docName = file.name;
+            $('#txtDocName').val(docName);
+        }
+        docName = BuildAttachmentDisplayName(docName, GetAttachmentFileExtension(file.name));
+        $('#txtDocName').val(docName);
+
+        tempAttachments.push({
+            docName: docName,
+            file: file,
+            fileName: file.name
+        });
+        UpdateAttachmentTable();
+        $('#txtDocName').val('');
+        $('#AttachmentFile').val('');
+    });
 
     $('#txtDate').blur(function () {
 
@@ -329,15 +384,39 @@
     });
     function CheckCPersonFieldValues() {
 
-        var errMsg = "";
+            var errMsg = "";
 
-        if ($('#txtCPersonName').val() == "" || $('#txtCPersonMobile').val() == "" || $('#txtCPersonEmail').val() == "" || $('#ddlDepartment').val() == "-1" ||
-            $('#txtJobResponsibility').val() == "") {
-            errMsg = "Please Fill Details";
+            if ($('#txtCPersonName').val() == "") {
+                errMsg += "Please enter Contact Person Name.\n";
+            }
+
+            var mobile = $('#txtCPersonMobile').val();
+            if (mobile == "") {
+                errMsg += "Please enter Mobile No.\n";
+            }
+            else if (!/^\d{10}$/.test(mobile)) {
+                errMsg += "Mobile No must be exactly 10 digits.\n";
+            }
+
+            var email = $('#txtCPersonEmail').val();
+            if (email == "") {
+                errMsg += "Please enter Email.\n";
+            }
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errMsg += "Please enter a valid Email address.\n";
+            }
+
+            if ($('#ddlDepartment').val() == "-1") {
+                errMsg += "Please select Department.\n";
+            }
+
+            if ($('#txtJobResponsibility').val() == "") {
+                errMsg += "Please enter Job Responsibility.\n";
+            }
+
+            return errMsg;
         }
 
-        return errMsg;
-    }
     $('#btnConfirmAddCPerson').click(function () {
         debugger;
 
@@ -400,6 +479,58 @@
 
 });
 
+function GetQueryStringValue(name) {
+
+    var query = window.location.search || '';
+    if (query.indexOf('?') === 0) {
+        query = query.substring(1);
+    }
+
+    if (query === '') {
+        return '';
+    }
+
+    var queryParts = query.split('&');
+    for (var index = 0; index < queryParts.length; index++) {
+        var part = queryParts[index].split('=');
+        var key = decodeURIComponent((part[0] || '').replace(/\+/g, ' '));
+        if (key === name) {
+            return decodeURIComponent(((part[1] || '')).replace(/\+/g, ' '));
+        }
+    }
+
+    return '';
+}
+
+function TrySelectCustomerOption(customerValue) {
+
+    var normalizedCustomerValue = $.trim(customerValue);
+    if (normalizedCustomerValue === '') {
+        return false;
+    }
+
+    if ($('#ddlCustomerName option[value="' + normalizedCustomerValue + '"]').length > 0) {
+        $('#ddlCustomerName').val(normalizedCustomerValue).trigger('change');
+        return true;
+    }
+
+    var matchedValue = '';
+    $('#ddlCustomerName option').each(function () {
+        var optionValue = $.trim($(this).val());
+        if (optionValue !== '' && optionValue.indexOf(normalizedCustomerValue + '__') === 0) {
+            matchedValue = optionValue;
+            return false;
+        }
+    });
+
+    if (matchedValue !== '') {
+        $('#ddlCustomerName').val(matchedValue).trigger('change');
+        return true;
+    }
+
+    return false;
+}
+
 function GetAndFillWeeklyPlanForDailyPlan() {
 
     $.ajax(
@@ -416,9 +547,10 @@ function GetAndFillWeeklyPlanForDailyPlan() {
 
                     $.each(data, function (index, item) {
 
+                        var isDailyVisitCreated = item.IsDailyVisitCreated === true || $.trim(String(item.IsDailyVisitCreated)).toLowerCase() === 'true';
                         var editLink = "<a class='week-plan-edit-link' href='javascript:void(0);' onclick='FillWeekPlanDetails(\"ProdTR_" + item.No + "\")'><i class='bx bx-edit'></i></a>";
 
-                        rowData += "<tr id=\"ProdTR_" + item.No + "\"><td>" + editLink + "</td><td>" + item.Financial_Year + "</td><td>" + item.Week_Plan_Date + "</td><td hidden>" +
+                        rowData += "<tr id=\"ProdTR_" + item.No + "\" data-is-dailyvisit-created=\"" + (isDailyVisitCreated ? "true" : "false") + "\"><td>" + editLink + "</td><td>" + item.Financial_Year + "</td><td>" + item.Week_Plan_Date + "</td><td hidden>" +
                             item.Contact_Company_No + "</td><td>" + item.ContactCompanyName + "</td><td hidden>" + item.Visit_Type + "</td><td>" + item.Visit_Name + "</td><td hidden>" +
                             item.Visit_Sub_Type + "</td><td>" + item.Visit_Sub_Type_Name + "</td><td>" + item.Mode_of_Visit + "</td><td>" + item.Pur_Visit + "</td><td hidden>" +
                             item.Contact_Person_No + "</td><td>" + item.Contact_Person_Name + "</td><td hidden>" + item.Event_No + "</td><td>" + item.Event_Name + "</td><td>" +
@@ -447,7 +579,29 @@ function GetAndFillWeeklyPlanForDailyPlan() {
 
 }
 
+function DisableWeekPlanRow($row, titleText) {
+
+    if (!$row || $row.length === 0) {
+        return;
+    }
+
+    $row.attr('data-is-dailyvisit-created', 'true');
+    $row.css('background-color', '#f8d7da');
+    $row.find('td').css('background-color', '#f8d7da');
+    $row.find('.week-plan-edit-link').addClass('disabled').css({
+        'pointer-events': 'none',
+        'opacity': '0.5',
+        'cursor': 'not-allowed'
+    }).removeAttr('onclick').attr('title', titleText || 'Already saved in Daily Visit');
+}
+
 function ApplyCompletedWeekPlanRowState() {
+
+    $('#tableBody tr').filter(function () {
+        return $(this).attr('data-is-dailyvisit-created') === 'true';
+    }).each(function () {
+        DisableWeekPlanRow($(this), 'Already used in Daily Visit');
+    });
 
     var completedRowIds = GetCompletedWeekPlanRowIds();
 
@@ -457,14 +611,7 @@ function ApplyCompletedWeekPlanRowState() {
             return;
         }
 
-        $row.attr('data-is-dailyvisit-created', 'true');
-        $row.css('background-color', '#f8d7da');
-        $row.find('td').css('background-color', '#f8d7da');
-        $row.find('.week-plan-edit-link').addClass('disabled').css({
-            'pointer-events': 'none',
-            'opacity': '0.5',
-            'cursor': 'not-allowed'
-        }).removeAttr('onclick').attr('title', 'Already saved in Daily Visit');
+        DisableWeekPlanRow($row, 'Already saved in Daily Visit');
     });
 }
 
@@ -820,10 +967,11 @@ function BindDepartment() {
 
 function BindProducts(callback) {
 
-    if ($('#ddlCustomerName').val() != null) {
-
-        const CCompanyDetails = $('#ddlCustomerName').val().split('__');
-        var CompnayNo = CCompanyDetails[0];
+    var CompnayNo = "";
+    var customerValue = $('#ddlCustomerName').val();
+    if (customerValue && customerValue !== '-1') {
+        var CCompanyDetails = customerValue.split('__');
+        CompnayNo = CCompanyDetails[0] || "";
     }
     if (typeof ($.fn.autocomplete) === 'undefined') { return; }
     console.log('init_autocomplete');
@@ -1095,31 +1243,11 @@ function BindContactCompany() {
                 var customer = $.trim($("#hfddlCustomerName").val());
                 var companyNo = $.trim($('#hfContactCompanyNo').val());
 
-                // 1) Exact match (composite value)
-                if (customer !== "" && $('#ddlCustomerName option[value="' + customer + '"]').length > 0) {
-                    $('#ddlCustomerName').val(customer);
-                    $('#ddlCustomerName').trigger('change');
+                if (TrySelectCustomerOption(customer)) {
                     return;
                 }
 
-                // 2) Prefix match when only Company No is available
-                var noToMatch = customer !== "" ? customer : companyNo;
-                if (noToMatch !== "") {
-                    var matchedVal = "";
-                    $('#ddlCustomerName option').each(function () {
-                        var val = $(this).val();
-                        if (val && val.indexOf(noToMatch + "__") === 0) {
-                            matchedVal = val;
-                            return false;
-                        }
-                    });
-
-                    if (matchedVal !== "") {
-                        $('#ddlCustomerName').val(matchedVal);
-                        $('#ddlCustomerName').trigger('change');
-                        return;
-                    }
-                }
+                TrySelectCustomerOption(companyNo);
 
             },
             error: function () {
@@ -1213,9 +1341,19 @@ function LoadDailyVisitProductsForEdit(dvpNo) {
 
 function BindContactPerson() {
 
-    const CCompanyDetails = $('#ddlCustomerName').val().split('__');
-    var CompanyNo = CCompanyDetails[0];
-    var PrimaryContactNo = CCompanyDetails[2];
+    var customerValue = $('#ddlCustomerName').val() || "";
+    var CCompanyDetails = customerValue.split('__');
+    var CompanyNo = CCompanyDetails[0] || "";
+    var PrimaryContactNo = CCompanyDetails.length > 2 ? CCompanyDetails[2] : "";
+
+    $('#ddlContactPerson option').remove();
+    var contactPlaceholder = "<option value='-1'>---Select---</option>";
+    $('#ddlContactPerson').append(contactPlaceholder);
+    $('#ddlContactPerson').val('-1');
+
+    if (!CompanyNo || CompanyNo === '-1') {
+        return;
+    }
 
     $.ajax(
         {
@@ -1519,9 +1657,7 @@ function BindWeekPlanLineDetails(WeekPlanNo) {
 
 function AddNewCompetitors(newCompetitors) {
 
-    var apiUrl = $('#getServiceApiUrl').val() + 'SPVisitEntry/';
-
-    $.post(apiUrl + 'AddNewCompetitors?NewCompetitors=' + newCompetitors, function (data) {
+    $.post('/SPVisitEntry/AddNewCompetitors', { NewCompetitors: newCompetitors }, function (data) {
 
         if (data.includes("Error:")) {
 
@@ -1641,5 +1777,255 @@ function EditDailyVisit(dvpNo) {
         }
     });
 
+}
+
+function NormalizeAttachmentBase64(base64Text) {
+    if (!base64Text) {
+        return '';
+    }
+
+    var normalized = base64Text.toString().trim();
+    var base64Marker = ';base64,';
+    var markerIndex = normalized.indexOf(base64Marker);
+    if (markerIndex >= 0) {
+        normalized = normalized.substring(markerIndex + base64Marker.length);
+    }
+
+    return normalized.replace(/\s/g, '');
+}
+
+function NormalizeAttachmentExtension(extension) {
+    var normalizedExtension = (extension || '').toString().trim().toLowerCase();
+    if (normalizedExtension === '') {
+        return '';
+    }
+
+    return normalizedExtension.indexOf('.') === 0 ? normalizedExtension : '.' + normalizedExtension;
+}
+
+function BuildAttachmentDisplayName(fileName, fileExtension) {
+    var normalizedFileName = (fileName || '').toString().trim();
+    var normalizedExtension = NormalizeAttachmentExtension(fileExtension);
+
+    if (normalizedFileName === '') {
+        return normalizedExtension ? ('attachment' + normalizedExtension) : 'attachment';
+    }
+
+    if (normalizedExtension && normalizedFileName.toLowerCase().slice(-normalizedExtension.length) !== normalizedExtension) {
+        return normalizedFileName + normalizedExtension;
+    }
+
+    return normalizedFileName;
+}
+
+function GetAttachmentFileExtension(fileName) {
+    var normalizedFileName = (fileName || '').toString().trim();
+    var lastDotIndex = normalizedFileName.lastIndexOf('.');
+
+    if (lastDotIndex <= 0 || lastDotIndex === normalizedFileName.length - 1) {
+        return '';
+    }
+
+    return normalizedFileName.substring(lastDotIndex);
+}
+
+function BuildAttachmentPreviewUrl(base64Text, contentType) {
+    var normalized = NormalizeAttachmentBase64(base64Text);
+    if (!normalized) {
+        return '';
+    }
+
+    try {
+        var binaryString = window.atob(normalized);
+        var bytes = new Uint8Array(binaryString.length);
+        for (var idx = 0; idx < binaryString.length; idx += 1) {
+            bytes[idx] = binaryString.charCodeAt(idx);
+        }
+
+        var blob = new Blob([bytes], { type: contentType || 'application/octet-stream' });
+        if (window.URL && window.URL.createObjectURL) {
+            return window.URL.createObjectURL(blob);
+        }
+    }
+    catch (error) {
+        // Fallback to data URI if blob construction fails.
+    }
+
+    return 'data:' + (contentType || 'application/octet-stream') + ';base64,' + normalized;
+}
+
+function GetAttachmentDisplayDate(attachedDate) {
+    if (!attachedDate) {
+        return '';
+    }
+
+    var trimmed = attachedDate.toString().trim();
+    if (trimmed === '' || trimmed === '0001-01-01T00:00:00Z') {
+        return '';
+    }
+
+    var parsed = new Date(trimmed);
+    if (isNaN(parsed.getTime()) || parsed.getFullYear() === 1) {
+        return '';
+    }
+
+    return ' <small class="text-muted">(' + trimmed + ')</small>';
+}
+
+function UpdateAttachmentTable() {
+    var tbody = $('#tblAttachmentsDetails');
+    tbody.empty();
+
+    existingAttachments.forEach(function (att) {
+        var viewButton = '';
+        var displayName = BuildAttachmentDisplayName(att.FileName, att.FileExtension);
+        if (att.Base64 && att.ContentType) {
+            var href = BuildAttachmentPreviewUrl(att.Base64, att.ContentType);
+            if (href) {
+                viewButton = '<a class="btn btn-sm btn-info me-1" target="_blank" href="' + href + '" title="' + displayName + '">View</a>';
+            }
+        }
+
+        var attachedDate = GetAttachmentDisplayDate(att.AttachedDate);
+        // Pass ID and LotNo dynamically, keep Table_ID, DocumentType, LineNo fixed, also pass FileName for completeness
+        var row = '<tr data-id="' + att.ID + '">' +
+            '<td>' + viewButton + '<button type="button" class="btn btn-sm btn-danger" onclick="DeleteAttachment(' + att.ID + ', \'' + att.LotNo + '\', \'' + (att.FileName || '') + '\')">Delete</button></td>' +
+            '<td>' + displayName + attachedDate + '</td>' +
+            '<td>' + NormalizeAttachmentExtension(att.FileExtension) + '</td>' +
+            '</tr>';
+        tbody.append(row);
+    });
+
+    tempAttachments.forEach(function (att, index) {
+        var tempFileExtension = GetAttachmentFileExtension(att.fileName);
+        var tempDisplayName = BuildAttachmentDisplayName(att.docName, tempFileExtension);
+        var row = '<tr data-temp-index="' + index + '">' +
+            '<td><button type="button" class="btn btn-sm btn-danger" onclick="RemoveTempAttachment(' + index + ')">Remove</button></td>' +
+            '<td>' + tempDisplayName + '</td>' +
+            '<td>' + NormalizeAttachmentExtension(tempFileExtension) + '</td>' +
+            '</tr>';
+        tbody.append(row);
+    });
+}
+
+function RemoveTempAttachment(index) {
+    tempAttachments.splice(index, 1);
+    UpdateAttachmentTable();
+}
+
+function LoadDailyVisitAttachments() {
+    if (!dailyVisitNo) {
+        existingAttachments = [];
+        UpdateAttachmentTable();
+        return;
+    }
+
+    var getUrl = attachmentUrls.get || (window.dailyVisitAttachmentUrls && window.dailyVisitAttachmentUrls.get) || '/DailyVisitAttachment/GetDocumentAttachments';
+    if (typeof getUrl === 'string' && getUrl !== '' && getUrl.indexOf('/') !== 0 && !getUrl.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//)) {
+        getUrl = '/' + getUrl;
+    }
+
+    $.ajax({
+        url: getUrl + '?tableId=50007&entryType=' + encodeURIComponent(entryType) + '&no=' + encodeURIComponent(dailyVisitNo),
+        type: 'GET',
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            existingAttachments = Array.isArray(data) ? data : [];
+            UpdateAttachmentTable();
+        },
+        error: function () {
+            existingAttachments = [];
+            UpdateAttachmentTable();
+            ShowErrMsg('Failed to load attachments.');
+        }
+    });
+}
+
+function DeleteAttachment(id, lotNo, fileName) {
+    if (confirm('Are you sure to delete this attachment?')) {
+        var request = {
+            Table_ID: 50007, // fixed
+            ID: id, // dynamic
+            LotNo: lotNo, // dynamic
+            DocumentType: 'Quote', // fixed
+            ItemNo: '',
+            LineNo: 0, // fixed
+            AttachmentId: '',
+            FileName: fileName || ''
+        };
+        var deleteUrl = attachmentUrls.delete || (window.dailyVisitAttachmentUrls && window.dailyVisitAttachmentUrls.delete) || '/DailyVisitAttachment/DeleteDocumentAttachment';
+        if (typeof deleteUrl === 'string' && deleteUrl !== '' && deleteUrl.indexOf('/') !== 0 && !deleteUrl.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//)) {
+            deleteUrl = '/' + deleteUrl;
+        }
+        $.ajax({
+            url: deleteUrl,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(request),
+            success: function () {
+                LoadDailyVisitAttachments();
+                ShowActionMsg('Attachment deleted successfully.');
+            },
+            error: function (xhr) {
+                var errorMsg = 'Failed to delete attachment.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg = xhr.responseJSON.error;
+                }
+                ShowErrMsg(errorMsg);
+            }
+        });
+    }
+}
+
+function UploadTempAttachmentsToAPI(no, callback) {
+    if (!no || tempAttachments.length === 0) {
+        if (typeof callback === 'function') {
+            callback(true);
+        }
+        return;
+    }
+
+    var uploadPromises = [];
+    tempAttachments.forEach(function (att) {
+        var deferred = $.Deferred();
+        var formData = new FormData();
+        formData.append('no', no);
+        formData.append('entryType', entryType);
+        formData.append('FileName', att.docName);
+        formData.append('files', att.file);
+
+        var uploadUrl = attachmentUrls.upload || (window.dailyVisitAttachmentUrls && window.dailyVisitAttachmentUrls.upload) || '/DailyVisitAttachment/UploadDocumentAttachment';
+        if (typeof uploadUrl === 'string' && uploadUrl !== '' && uploadUrl.indexOf('/') !== 0 && !uploadUrl.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//)) {
+            uploadUrl = '/' + uploadUrl;
+        }
+        $.ajax({
+            url: uploadUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function () {
+            deferred.resolve();
+        }).fail(function () {
+            deferred.reject();
+        });
+
+        uploadPromises.push(deferred.promise());
+    });
+
+    $.when.apply($, uploadPromises).done(function () {
+        tempAttachments = [];
+        UpdateAttachmentTable();
+        LoadDailyVisitAttachments();
+        if (typeof callback === 'function') {
+            callback(true);
+        }
+    }).fail(function () {
+        ShowErrMsg('Failed to upload one or more attachments.');
+        if (typeof callback === 'function') {
+            callback(false);
+        }
+    });
 }
 

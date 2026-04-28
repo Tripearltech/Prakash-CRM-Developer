@@ -1,0 +1,49 @@
+DateTime: 2026-04-28 07:24:28
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-28 07:25:26
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=aditya.d%40tripearltech.com&pass=Crm%401234
+RequestPayload: {"email":"aditya.d@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0071","Phone_No_2":"9238741237","PCPL_OTP":"","First_Name":"Chetan","Last_Name":"Solanki","Company_E_Mail":"aditya.d@tripearltech.com","Job_Title":"HOD","Mobile_Phone_No":"7084419723","Role":"HOD","Salespers_Purch_Code":"CS","Global_Dimension_1_Code":"BARODA","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-28 07:56:48
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-28 07:58:39
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=aditya.d%40tripearltech.com&pass=Crm%401234
+RequestPayload: {"email":"aditya.d@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0071","Phone_No_2":"9238741237","PCPL_OTP":"","First_Name":"Chetan","Last_Name":"Solanki","Company_E_Mail":"aditya.d@tripearltech.com","Job_Title":"HOD","Mobile_Phone_No":"7084419723","Role":"HOD","Salespers_Purch_Code":"CS","Global_Dimension_1_Code":"BARODA","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-28 13:15:09
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-28 14:38:20
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------
+DateTime: 2026-04-28 16:20:54
+Action: CheckLoginAndSendOTP
+RequestUrl: https://localhost:44366/api/Salesperson/CheckEmailPassForOTP?email=diya.p%40tripearltech.com&pass=Tptpl%402026%23
+RequestPayload: {"email":"diya.p@tripearltech.com","pass":"****","adminContactNo":""}
+StatusCode: 200
+ResponseBody: {"No":"E0028","Phone_No_2":"8160291929","PCPL_OTP":"3165","First_Name":"Diya","Last_Name":"Patel","Company_E_Mail":"diya.p@tripearltech.com","Job_Title":"Associate - Marketing","Mobile_Phone_No":"8160291929","Role":"Salesperson","Salespers_Purch_Code":"DIYA","Global_Dimension_1_Code":"AHMEDABAD","Status":"Active","PCPL_Enable_OTP_On_Login":false,"OTPEmailSent":false,"RequireOtpVerification":false,"TrustedDeviceRecognized":false,"ClearTrustedDeviceState":false,"TrustedDeviceToken":null,"TrustedDeviceExpiresUtc":null,"RedirectUrl":null}
+------------------------------------------------------------------------------------------------------------------------

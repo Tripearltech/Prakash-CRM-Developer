@@ -19,6 +19,38 @@
     }
 }
 <style>
+    .app-loader-card {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        min-width: 140px;
+        padding: 1rem 1.25rem;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 12px 32px rgba(33, 37, 41, 0.16);
+    }
+
+    .app-loader-spinner {
+        display: inline-block;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        border: 0.35rem solid rgba(152, 185, 219, 0.28);
+        border-top-color: #4f8fc9;
+        border-right-color: #8bc9c2;
+        box-sizing: border-box;
+        animation: appLoaderSpin 0.95s linear infinite;
+    }
+
+    .app-loader-text {
+        margin: 0;
+        color: #495057;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
     .notification-preview-empty,
     .notification-page-empty {
         color: #6c757d;
@@ -27,14 +59,17 @@
     }
 
     .global-page-data-loader {
-        position: absolute;
-        inset: 0;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         display: none;
         align-items: center;
         justify-content: center;
         background: rgba(255, 255, 255, 0.72);
         backdrop-filter: blur(2px);
-        z-index: 1000;
+        z-index: 3000;
     }
 
     .global-page-data-loader__content {
@@ -45,6 +80,12 @@
         width: 3.5rem;
         height: 3.5rem;
         border-width: 0.4rem;
+    }
+
+    @@keyframes appLoaderSpin {
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .notification-item-card.notification-is-unread {
@@ -139,7 +180,7 @@
         { "Sales Performance", "/SPReports/SalesPerformance" },
         { "Daily Visit Month Wise", "/SPReports/DailyVisitMonthWise" },
         { "Web Site Log", "/SPReports/WebsiteLog" },
-        { "Site Configuration", "#" },
+        { "CustOver Due Outstanding list", "/SPReports/CustOverDueOutstandinglist" },
 
         // Setup
         { "User Master", "/SalesPerson/SalesPersonList" },
@@ -603,8 +644,8 @@
                     <img src="~/Layout/assets/images/login-images/logo-2.jfif" alt="logo icon" width="120px" height="60px" />
                 </div>
                 @*<div>
-                    <h4 class="logo-text" style="color:darkgreen">PRAKASH</h4>
-                </div>*@
+                        <h4 class="logo-text" style="color:darkgreen">PRAKASH</h4>
+                    </div>*@
                 <div class="toggle-icon ms-auto">
                     <i class='bx bx-first-page'></i>
                 </div>
@@ -703,7 +744,7 @@
                             }
 
                             <div class="user-info ps-3">
-                                <p class="user-name mb-0">@Session["loggedInUserFName"].ToString() @Session["loggedInUserLName"].ToString()</p>
+                                <p class="user-name m0">@Session["loggedInUserFName"].ToString() @Session["loggedInUserLName"].ToString()</p>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -804,7 +845,7 @@
                             return;
                         }
 
-                        //window.showPageDataLoader();
+                        window.showPageDataLoader();
                     });
 
                     document.addEventListener('submit', function (event) {
@@ -840,6 +881,7 @@
             <div id="globalPageDataLoader" class="global-page-data-loader" aria-hidden="true">
                 <div class="global-page-data-loader__content app-loader-card">
                     <span class="app-loader-spinner global-page-data-loader__spinner" role="status" aria-label="Loading"></span>
+                    <p class="app-loader-text">Please wait...</p>
                 </div>
             </div>
             @RenderBody()
@@ -977,7 +1019,9 @@
     <script src="~/Scripts/appjs/Permissions.js"></script>
     <script src="~/Scripts/appjs/UserNotifications.js"></script>
     <script src="~/Scripts/appjs/AutoScaleLayout.js"></script>
-    <script src="~/Scripts/appjs/FormNavigationUtility.js"></script>
+    <script src="~/Scripts/Common/global-date-validation.js"></script>
+
+    @*<script src="~/Scripts/appjs/FormNavigationUtility.js"></script>*@
     @*<script>
             $(document).ready(function () {
                 var role = $('#hfUserRole').val().trim();
@@ -1045,467 +1089,467 @@
     </script>
 
     <script>
-    function readJsonScript(id, fallback) {
-        var el = document.getElementById(id);
-        if (!el) return fallback;
-        var txt = (el.textContent || el.innerText || '').trim();
-        if (!txt) return fallback;
-        try { return JSON.parse(txt); } catch (e) { return fallback; }
-    }
+        function readJsonScript(id, fallback) {
+            var el = document.getElementById(id);
+            if (!el) return fallback;
+            var txt = (el.textContent || el.innerText || '').trim();
+            if (!txt) return fallback;
+            try { return JSON.parse(txt); } catch (e) { return fallback; }
+        }
 
-    // expose as globals (used by menu rendering and other pages like SPMenu.js)
-    window.roleMenu = readJsonScript('roleMenuJson', null);
-    window.menuUrlMap = readJsonScript('menuUrlMapJson', {});
-    window.menuIconMap = readJsonScript('menuIconMapJson', {});
-    window.menuSectionMap = readJsonScript('menuSectionMapJson', {});
+        // expose as globals (used by menu rendering and other pages like SPMenu.js)
+        window.roleMenu = readJsonScript('roleMenuJson', null);
+        window.menuUrlMap = readJsonScript('menuUrlMapJson', {});
+        window.menuIconMap = readJsonScript('menuIconMapJson', {});
+        window.menuSectionMap = readJsonScript('menuSectionMapJson', {});
 
-    var roleMenu = window.roleMenu;
-    var menuUrlMap = window.menuUrlMap;
-    var menuIconMap = window.menuIconMap;
-    var menuSectionMap = window.menuSectionMap;
+        var roleMenu = window.roleMenu;
+        var menuUrlMap = window.menuUrlMap;
+        var menuIconMap = window.menuIconMap;
+        var menuSectionMap = window.menuSectionMap;
 
-    function hasAnyRights(p) {
-        if (!p) return true; // fail-open if payload doesn't carry permissions
-        return !!(p.read || p.create || p.update || p.delete || p.Read || p.Create || p.Update || p.Delete);
-    }
+        function hasAnyRights(p) {
+            if (!p) return true; // fail-open if payload doesn't carry permissions
+            return !!(p.read || p.create || p.update || p.delete || p.Read || p.Create || p.Update || p.Delete);
+        }
 
-    function getChildPerms(child) {
-        if (!child) return null;
-        var p = child.permissions || child.Permissions || null;
-        if (!p) return null;
-        // normalize in case payload uses PascalCase
-        return {
-            read: !!(p.read || p.Read || p.view || p.View || p.View_Rights || p.Read_Rights || p.Full_Rights),
-            create: !!(p.create || p.Create || p.add || p.Add || p.Add_Rights || p.Insert_Rights || p.Full_Rights),
-            update: !!(p.update || p.Update || p.edit || p.Edit || p.Edit_Rights || p.Modify_Rights || p.Full_Rights),
-            delete: !!(p.delete || p.Delete || p.Delete_Rights || p.Remove_Rights || p.Full_Rights)
-        };
-    }
+        function getChildPerms(child) {
+            if (!child) return null;
+            var p = child.permissions || child.Permissions || null;
+            if (!p) return null;
+            // normalize in case payload uses PascalCase
+            return {
+                read: !!(p.read || p.Read || p.view || p.View || p.View_Rights || p.Read_Rights || p.Full_Rights),
+                create: !!(p.create || p.Create || p.add || p.Add || p.Add_Rights || p.Insert_Rights || p.Full_Rights),
+                update: !!(p.update || p.Update || p.edit || p.Edit || p.Edit_Rights || p.Modify_Rights || p.Full_Rights),
+                delete: !!(p.delete || p.Delete || p.Delete_Rights || p.Remove_Rights || p.Full_Rights)
+            };
+        }
 
-    $(document).ready(function () {
+        $(document).ready(function () {
 
-        if (!roleMenu || !roleMenu.roles) return;
+            if (!roleMenu || !roleMenu.roles) return;
 
-        let menuHtml = '';
-        let renderedSections = {};
+            let menuHtml = '';
+            let renderedSections = {};
 
-        roleMenu.roles.forEach(role => {
+            roleMenu.roles.forEach(role => {
 
-            role.menus.forEach(menu => {
+                role.menus.forEach(menu => {
 
-                // normalize children: ignore blank/invalid child items
-                const children = (menu.children && Array.isArray(menu.children))
-                    ? menu.children.filter(c => c && c.menuName && c.menuName.toString().trim().length > 0)
-                    : [];
+                    // normalize children: ignore blank/invalid child items
+                    const children = (menu.children && Array.isArray(menu.children))
+                        ? menu.children.filter(c => c && c.menuName && c.menuName.toString().trim().length > 0)
+                        : [];
 
-                // Only render children that the user can at least VIEW (or has any rights for).
-                const visibleChildren = (children.length > 0)
-                    ? children.filter(c => hasAnyRights(getChildPerms(c)))
-                    : [];
+                    // Only render children that the user can at least VIEW (or has any rights for).
+                    const visibleChildren = (children.length > 0)
+                        ? children.filter(c => hasAnyRights(getChildPerms(c)))
+                        : [];
 
-                let section = null;
+                    let section = null;
 
-                if (visibleChildren.length > 0) {
-                    for (let i = 0; i < visibleChildren.length; i++) {
-                        let childName = visibleChildren[i].menuName;
-                        if (menuSectionMap[childName]) {
-                            section = menuSectionMap[childName];
-                            break;
+                    if (visibleChildren.length > 0) {
+                        for (let i = 0; i < visibleChildren.length; i++) {
+                            let childName = visibleChildren[i].menuName;
+                            if (menuSectionMap[childName]) {
+                                section = menuSectionMap[childName];
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (!section) {
-                    section = menuSectionMap[menu.menuName];
-                }
+                    if (!section) {
+                        section = menuSectionMap[menu.menuName];
+                    }
 
-                if (section && !renderedSections[section]) {
-                    menuHtml += `<li class="menu-label">${section}</li>`;
-                    renderedSections[section] = true;
-                }
+                    if (section && !renderedSections[section]) {
+                        menuHtml += `<li class="menu-label">${section}</li>`;
+                        renderedSections[section] = true;
+                    }
 
-                let icon = menuIconMap[menu.menuName] || 'bx bx-folder';
+                    let icon = menuIconMap[menu.menuName] || 'bx bx-folder';
 
-                // If this is a single/leaf menu (no children) -> render as direct link (no dropdown/arrow)
-                if (children.length === 0) {
+                    // If this is a single/leaf menu (no children) -> render as direct link (no dropdown/arrow)
+                    if (children.length === 0) {
 
-                    // Enforce view for leaf menus as well (e.g., Dashboard).
-                    try {
-                        if (window.PermissionService && typeof window.PermissionService.getForMenuName === 'function') {
-                            var lp = window.PermissionService.getForMenuName(menu.menuName);
-                            if (lp && lp.resolved === true) {
-                                var any = !!(lp.read || lp.create || lp.update || lp.delete);
-                                if (!any) return;
+                        // Enforce view for leaf menus as well (e.g., Dashboard).
+                        try {
+                            if (window.PermissionService && typeof window.PermissionService.getForMenuName === 'function') {
+                                var lp = window.PermissionService.getForMenuName(menu.menuName);
+                                if (lp && lp.resolved === true) {
+                                    var any = !!(lp.read || lp.create || lp.update || lp.delete);
+                                    if (!any) return;
+                                }
                             }
+                        } catch (e) { }
+
+                        let url = '#';
+
+                        // Prefer explicit mapping by name (covers Dashboard etc.)
+                        if (menuUrlMap && menuUrlMap[menu.menuName]) {
+                            url = menuUrlMap[menu.menuName];
+                        }
+                        else if (menu.action === 'Navigation') {
+                            // keep fallback behavior
+                            url = '#';
+                        }
+                        else if (menu.controller && menu.action) {
+                            url = '/' + menu.controller + '/' + menu.action;
+                        }
+
+                        if (!url || url === '#') url = 'javascript:;';
+
+                        menuHtml += `
+                            <li>
+                                <a href="${url}">
+                                    <div class="parent-icon">
+                                        <i class="${icon}"></i>
+                                    </div>
+                                    <div class="menu-title">${menu.menuName}</div>
+                                </a>
+                            </li>
+                        `;
+
+                        return;
+                    }
+
+                    // Parent menus with children: if user cannot see any child, skip the parent.
+                    if (visibleChildren.length === 0) {
+                        return;
+                    }
+
+                    // If parent has exactly one visible child and the child's name matches the parent,
+                    // render a single direct-link item (prevents showing Dashboard twice).
+                    const collapseSingleSameChild = (function () {
+                        if (visibleChildren.length !== 1) return false;
+                        const child = visibleChildren[0];
+                        const parentName = (menu && menu.menuName) ? menu.menuName.toString().trim().toLowerCase() : '';
+                        const childName = (child && child.menuName) ? child.menuName.toString().trim().toLowerCase() : '';
+                        if (!parentName || !childName) return false;
+                        return parentName === childName;
+                    })();
+
+                    if (collapseSingleSameChild) {
+                        const child = visibleChildren[0];
+                        let url = '#';
+
+                        // Prefer explicit mapping by name
+                        if (menuUrlMap && menuUrlMap[child.menuName]) {
+                            url = menuUrlMap[child.menuName];
+                        }
+                        else if (child.controller && child.action) {
+                            url = '/' + child.controller + '/' + child.action;
+                        }
+                        else if (menuUrlMap && menuUrlMap[menu.menuName]) {
+                            url = menuUrlMap[menu.menuName];
+                        }
+                        else if (menu.controller && menu.action) {
+                            url = '/' + menu.controller + '/' + menu.action;
+                        }
+
+                        if (!url || url === '#') url = 'javascript:;';
+
+                        menuHtml += `
+                            <li>
+                                <a href="${url}">
+                                    <div class="parent-icon">
+                                        <i class="${icon}"></i>
+                                    </div>
+                                    <div class="menu-title">${menu.menuName}</div>
+                                </a>
+                            </li>
+                        `;
+
+                        return;
+                    }
+
+                    // Parent menus with children -> keep dropdown
+                    menuHtml += `
+                        <li>
+                            <a href="javascript:;" class="has-arrow">
+                                <div class="parent-icon">
+                                    <i class="${icon}"></i>
+                                </div>
+                                <div class="menu-title">${menu.menuName}</div>
+                            </a>
+                            <ul>
+                    `;
+
+                    // 🔹 Child Menus
+                    if (visibleChildren.length > 0) {
+                        visibleChildren.forEach(child => {
+
+                            // READ/VIEW permission check (show if any rights exist)
+                            var perms = getChildPerms(child);
+                            if (!hasAnyRights(perms)) return;
+                            {
+
+                                let url = '#';
+
+                                // Prefer explicit mapping by name
+                                if (menuUrlMap && menuUrlMap[child.menuName]) {
+                                    url = menuUrlMap[child.menuName];
+                                }
+                                else if (child.action === 'Navigation') {
+                                    url = '#';
+                                }
+                                else {
+                                    // fallback (future-safe)
+                                    url = '/' + child.controller + '/' + child.action;
+                                }
+
+
+                                menuHtml += `
+                             <li>
+                                 <a href="${url}">
+                                     <i class="bx bx-right-arrow-alt"></i>
+                                     ${child.menuName}
+                                 </a>
+                             </li>
+                         `;
+                            }
+                        });
+                    }
+
+                    menuHtml += `
+                     </ul>
+                 </li>
+             `;
+                });
+            });
+            $('#dynamicMenu').html(menuHtml);
+            $('#dynamicMenu').metisMenu();
+
+            // ---- DEFAULT PAGE-LEVEL PERMISSIONS (create/update/delete/view) ----
+            try {
+                if (window.PermissionService && typeof window.PermissionService.getForCurrentPage === 'function') {
+                    var fallbackMenuName = null;
+                    try {
+                        fallbackMenuName = window.__permFallbackMenuName || null;
+                    } catch (e) { fallbackMenuName = null; }
+
+                    var perms = window.PermissionService.getForCurrentPage(fallbackMenuName);
+                    window.currentPagePerms = perms;
+
+                    // Install DOM guards (e.g., disable edit icons when no update rights)
+                    try {
+                        if (typeof window.PermissionService.installDomGuards === 'function') {
+                            window.PermissionService.installDomGuards(perms);
                         }
                     } catch (e) { }
 
-                    let url = '#';
-
-                    // Prefer explicit mapping by name (covers Dashboard etc.)
-                    if (menuUrlMap && menuUrlMap[menu.menuName]) {
-                        url = menuUrlMap[menu.menuName];
-                    }
-                    else if (menu.action === 'Navigation') {
-                        // keep fallback behavior
-                        url = '#';
-                    }
-                    else if (menu.controller && menu.action) {
-                        url = '/' + menu.controller + '/' + menu.action;
-                    }
-
-                    if (!url || url === '#') url = 'javascript:;';
-
-                    menuHtml += `
-                        <li>
-                            <a href="${url}">
-                                <div class="parent-icon">
-                                    <i class="${icon}"></i>
-                                </div>
-                                <div class="menu-title">${menu.menuName}</div>
-                            </a>
-                        </li>
-                    `;
-
-                    return;
-                }
-
-                // Parent menus with children: if user cannot see any child, skip the parent.
-                if (visibleChildren.length === 0) {
-                    return;
-                }
-
-                // If parent has exactly one visible child and the child's name matches the parent,
-                // render a single direct-link item (prevents showing Dashboard twice).
-                const collapseSingleSameChild = (function () {
-                    if (visibleChildren.length !== 1) return false;
-                    const child = visibleChildren[0];
-                    const parentName = (menu && menu.menuName) ? menu.menuName.toString().trim().toLowerCase() : '';
-                    const childName = (child && child.menuName) ? child.menuName.toString().trim().toLowerCase() : '';
-                    if (!parentName || !childName) return false;
-                    return parentName === childName;
-                })();
-
-                if (collapseSingleSameChild) {
-                    const child = visibleChildren[0];
-                    let url = '#';
-
-                    // Prefer explicit mapping by name
-                    if (menuUrlMap && menuUrlMap[child.menuName]) {
-                        url = menuUrlMap[child.menuName];
-                    }
-                    else if (child.controller && child.action) {
-                        url = '/' + child.controller + '/' + child.action;
-                    }
-                    else if (menuUrlMap && menuUrlMap[menu.menuName]) {
-                        url = menuUrlMap[menu.menuName];
-                    }
-                    else if (menu.controller && menu.action) {
-                        url = '/' + menu.controller + '/' + menu.action;
-                    }
-
-                    if (!url || url === '#') url = 'javascript:;';
-
-                    menuHtml += `
-                        <li>
-                            <a href="${url}">
-                                <div class="parent-icon">
-                                    <i class="${icon}"></i>
-                                </div>
-                                <div class="menu-title">${menu.menuName}</div>
-                            </a>
-                        </li>
-                    `;
-
-                    return;
-                }
-
-                // Parent menus with children -> keep dropdown
-                menuHtml += `
-                    <li>
-                        <a href="javascript:;" class="has-arrow">
-                            <div class="parent-icon">
-                                <i class="${icon}"></i>
-                            </div>
-                            <div class="menu-title">${menu.menuName}</div>
-                        </a>
-                        <ul>
-                `;
-
-                // 🔹 Child Menus
- if (visibleChildren.length > 0) {
-                 visibleChildren.forEach(child => {
-
-                     // READ/VIEW permission check (show if any rights exist)
-                     var perms = getChildPerms(child);
-                     if (!hasAnyRights(perms)) return;
-                     {
-
-                         let url = '#';
-
-                         // Prefer explicit mapping by name
-                         if (menuUrlMap && menuUrlMap[child.menuName]) {
-                             url = menuUrlMap[child.menuName];
-                         }
-                         else if (child.action === 'Navigation') {
-                             url = '#';
-                         }
-                         else {
-                             // fallback (future-safe)
-                             url = '/' + child.controller + '/' + child.action;
-                         }
-
-
-                         menuHtml += `
-                         <li>
-                             <a href="${url}">
-                                 <i class="bx bx-right-arrow-alt"></i>
-                                 ${child.menuName}
-                             </a>
-                         </li>
-                     `;
-                     }
-                 });
-             }
-
-             menuHtml += `
-                 </ul>
-             </li>
-         `;
-         });
-     });
-        $('#dynamicMenu').html(menuHtml);
-        $('#dynamicMenu').metisMenu();
-
-        // ---- DEFAULT PAGE-LEVEL PERMISSIONS (create/update/delete/view) ----
-        try {
-            if (window.PermissionService && typeof window.PermissionService.getForCurrentPage === 'function') {
-                var fallbackMenuName = null;
-                try {
-                    fallbackMenuName = window.__permFallbackMenuName || null;
-                } catch (e) { fallbackMenuName = null; }
-
-                var perms = window.PermissionService.getForCurrentPage(fallbackMenuName);
-                window.currentPagePerms = perms;
-
-                // Install DOM guards (e.g., disable edit icons when no update rights)
-                try {
-                    if (typeof window.PermissionService.installDomGuards === 'function') {
-                        window.PermissionService.installDomGuards(perms);
-                    }
-                } catch (e) { }
-
-                // ---- DASHBOARD-SPECIFIC (STRICT): enable only when permission exists ----
-                // If permissions are not resolved, default DISABLE these create actions.
-                try {
-                    function disableButton($btn) {
-                        if (!$btn || !$btn.length) return;
-                        $btn.prop('disabled', true).css({ 'pointer-events': 'none', 'opacity': 0.55 });
-                    }
-
-                    function enableButton($btn) {
-                        if (!$btn || !$btn.length) return;
-                        $btn.prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
-                    }
-
-                    // Market Update actions live on Dashboard => gate by current page create/update.
-                    var dashCanCreate = !!(perms && perms.resolved === true && perms.create);
-                    var dashCanSave = !!(perms && perms.resolved === true && (perms.create || perms.update));
-
-                    var $muAdd = $('#btnAddMUpdate');
-                    if ($muAdd.length && !dashCanCreate) disableButton($muAdd);
-                    var $muSave = $('#modalMarketUpdate #btnSave');
-                    if ($muSave.length && !dashCanSave) disableButton($muSave);
-
-                    // Daily Visit buttons navigate to another page => gate by that target page create right.
-                    var $dvCreate = $('#btnCreateDV');
-                    var $dvCreate1 = $('#btnCreateDV1');
-                    if ($dvCreate.length || $dvCreate1.length) {
-                        var dvCanCreate = false;
-                        function permBool(v) {
-                            if (v === true || v === false) return v;
-                            if (v === null || v === undefined) return false;
-                            if (typeof v === 'number') return v !== 0;
-                            if (typeof v === 'string') {
-                                var s = v.trim().toLowerCase();
-                                if (!s) return false;
-                                if (s === 'true' || s === '1' || s === 'yes' || s === 'y') return true;
-                                if (s === 'false' || s === '0' || s === 'no' || s === 'n') return false;
-                            }
-                            return !!v;
+                    // ---- DASHBOARD-SPECIFIC (STRICT): enable only when permission exists ----
+                    // If permissions are not resolved, default DISABLE these create actions.
+                    try {
+                        function disableButton($btn) {
+                            if (!$btn || !$btn.length) return;
+                            $btn.prop('disabled', true).css({ 'pointer-events': 'none', 'opacity': 0.55 });
                         }
-                        if (window.PermissionService) {
-                            // Prefer the actual create page
-                            if (typeof window.PermissionService.getForControllerAction === 'function') {
-                                var dvPerms = window.PermissionService.getForControllerAction('SPVisitEntry', 'DailyVisit');
-                                dvCanCreate = !!(dvPerms && dvPerms.resolved === true && dvPerms.create);
 
-                                // Fallback: some payloads only include the list route
-                                if (!dvCanCreate) {
-                                    var dvListPerms = window.PermissionService.getForControllerAction('SPVisitEntry', 'DailyVisitList');
-                                    dvCanCreate = !!(dvListPerms && dvListPerms.resolved === true && dvListPerms.create);
+                        function enableButton($btn) {
+                            if (!$btn || !$btn.length) return;
+                            $btn.prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
+                        }
+
+                        // Market Update actions live on Dashboard => gate by current page create/update.
+                        var dashCanCreate = !!(perms && perms.resolved === true && perms.create);
+                        var dashCanSave = !!(perms && perms.resolved === true && (perms.create || perms.update));
+
+                        var $muAdd = $('#btnAddMUpdate');
+                        if ($muAdd.length && !dashCanCreate) disableButton($muAdd);
+                        var $muSave = $('#modalMarketUpdate #btnSave');
+                        if ($muSave.length && !dashCanSave) disableButton($muSave);
+
+                        // Daily Visit buttons navigate to another page => gate by that target page create right.
+                        var $dvCreate = $('#btnCreateDV');
+                        var $dvCreate1 = $('#btnCreateDV1');
+                        if ($dvCreate.length || $dvCreate1.length) {
+                            var dvCanCreate = false;
+                            function permBool(v) {
+                                if (v === true || v === false) return v;
+                                if (v === null || v === undefined) return false;
+                                if (typeof v === 'number') return v !== 0;
+                                if (typeof v === 'string') {
+                                    var s = v.trim().toLowerCase();
+                                    if (!s) return false;
+                                    if (s === 'true' || s === '1' || s === 'yes' || s === 'y') return true;
+                                    if (s === 'false' || s === '0' || s === 'no' || s === 'n') return false;
+                                }
+                                return !!v;
+                            }
+                            if (window.PermissionService) {
+                                // Prefer the actual create page
+                                if (typeof window.PermissionService.getForControllerAction === 'function') {
+                                    var dvPerms = window.PermissionService.getForControllerAction('SPVisitEntry', 'DailyVisit');
+                                    dvCanCreate = !!(dvPerms && dvPerms.resolved === true && dvPerms.create);
+
+                                    // Fallback: some payloads only include the list route
+                                    if (!dvCanCreate) {
+                                        var dvListPerms = window.PermissionService.getForControllerAction('SPVisitEntry', 'DailyVisitList');
+                                        dvCanCreate = !!(dvListPerms && dvListPerms.resolved === true && dvListPerms.create);
+                                    }
+                                }
+
+                                // Fallback by menu name mapping (if controller/action isn't present)
+                                if (!dvCanCreate && typeof window.PermissionService.getForMenuName === 'function') {
+                                    var byName = window.PermissionService.getForMenuName('Daily Visit List');
+                                    dvCanCreate = !!(byName && byName.resolved === true && byName.create);
+                                }
+
+                                if (!dvCanCreate && typeof window.PermissionService.getForMenuName === 'function') {
+                                    var byName2 = window.PermissionService.getForMenuName('Daily Visit');
+                                    dvCanCreate = !!(byName2 && byName2.resolved === true && byName2.create);
+                                }
+
+                                // Last-resort fallback: menu name varies across environments.
+                                // If we still can't resolve, scan payload for any menu containing 'Daily Visit'.
+                                if (!dvCanCreate && window.roleMenu && Array.isArray(window.roleMenu.roles)) {
+                                    try {
+                                        window.roleMenu.roles.forEach(function (r) {
+                                            (r.menus || []).forEach(function (m) {
+                                                (m.children || []).forEach(function (c) {
+                                                    var name = (c && c.menuName) ? c.menuName.toString() : '';
+                                                    if (!name) return;
+                                                    if (name.toLowerCase().indexOf('daily visit') < 0) return;
+                                                    var p = c.permissions || c.Permissions || c || {};
+                                                    var hasFull = permBool(p.Full_Rights) || permBool(p.full) || permBool(p.Full) || permBool(p.fullRights);
+                                                    var canCreate = permBool(p.create) || permBool(p.Create) || permBool(p.add) || permBool(p.Add) || permBool(p.Add_Rights) || permBool(p.Insert_Rights) || hasFull;
+                                                    if (canCreate) dvCanCreate = true;
+                                                });
+                                            });
+                                        });
+                                    } catch (e) { }
                                 }
                             }
 
-                            // Fallback by menu name mapping (if controller/action isn't present)
-                            if (!dvCanCreate && typeof window.PermissionService.getForMenuName === 'function') {
-                                var byName = window.PermissionService.getForMenuName('Daily Visit List');
-                                dvCanCreate = !!(byName && byName.resolved === true && byName.create);
-                            }
+                            if ($dvCreate.length) (dvCanCreate ? enableButton($dvCreate) : disableButton($dvCreate));
+                            if ($dvCreate1.length) (dvCanCreate ? enableButton($dvCreate1) : disableButton($dvCreate1));
+                        }
+                    } catch (e) { }
 
-                            if (!dvCanCreate && typeof window.PermissionService.getForMenuName === 'function') {
-                                var byName2 = window.PermissionService.getForMenuName('Daily Visit');
-                                dvCanCreate = !!(byName2 && byName2.resolved === true && byName2.create);
-                            }
+                    var resolved = (perms && typeof perms.resolved === 'boolean') ? perms.resolved : true;
 
-                            // Last-resort fallback: menu name varies across environments.
-                            // If we still can't resolve, scan payload for any menu containing 'Daily Visit'.
-                            if (!dvCanCreate && window.roleMenu && Array.isArray(window.roleMenu.roles)) {
-                                try {
-                                    window.roleMenu.roles.forEach(function (r) {
-                                        (r.menus || []).forEach(function (m) {
-                                            (m.children || []).forEach(function (c) {
-                                                var name = (c && c.menuName) ? c.menuName.toString() : '';
-                                                if (!name) return;
-                                                if (name.toLowerCase().indexOf('daily visit') < 0) return;
-                                                var p = c.permissions || c.Permissions || c || {};
-                                                var hasFull = permBool(p.Full_Rights) || permBool(p.full) || permBool(p.Full) || permBool(p.fullRights);
-                                                var canCreate = permBool(p.create) || permBool(p.Create) || permBool(p.add) || permBool(p.Add) || permBool(p.Add_Rights) || permBool(p.Insert_Rights) || hasFull;
-                                                if (canCreate) dvCanCreate = true;
-                                            });
-                                        });
+                    // IMPORTANT:
+                    // - If we can resolve rights => enforce strictly.
+                    // - If we cannot resolve rights => do not force-disable controls (avoid false negatives).
+                    var allowCreate = !!(perms && resolved === true && perms.create);
+                    var allowUpdate = !!(perms && resolved === true && perms.update);
+                    var allowDelete = !!(perms && resolved === true && perms.delete);
+                    var allowSave = !!(perms && resolved === true && (perms.create || perms.update));
+
+                    if (resolved === true) {
+                        var hasAny = !!(perms && (perms.read || perms.create || perms.update || perms.delete));
+                        if (!hasAny) {
+                            // If the user has no rights at all for this page, redirect to dashboard.
+                            var dash = (window.menuUrlMap && window.menuUrlMap['Dashboard']) ? window.menuUrlMap['Dashboard'] : '/SPDashboard/Index';
+                            try {
+                                if (window.Lobibox && Lobibox.notify) {
+                                    Lobibox.notify('error', {
+                                        pauseDelayOnHover: true,
+                                        size: 'mini',
+                                        rounded: true,
+                                        delayIndicator: false,
+                                        icon: 'bx bx-x-circle',
+                                        continueDelayOnInactiveTab: false,
+                                        position: 'top right',
+                                        msg: 'You do not have View rights for this page'
                                     });
-                                } catch (e) { }
-                            }
+                                }
+                            } catch (e) { }
+                            window.location.href = dash;
+                            return;
                         }
-
-                        if ($dvCreate.length) (dvCanCreate ? enableButton($dvCreate) : disableButton($dvCreate));
-                        if ($dvCreate1.length) (dvCanCreate ? enableButton($dvCreate1) : disableButton($dvCreate1));
                     }
-                } catch (e) { }
 
-                var resolved = (perms && typeof perms.resolved === 'boolean') ? perms.resolved : true;
+                    function shouldSkipId(idLower) {
+                        // Avoid touching spinners or purely UI helpers.
+                        return idLower.endsWith('spinner') || idLower.indexOf('search') >= 0 || idLower.indexOf('export') >= 0 || idLower.indexOf('clear') >= 0;
+                    }
 
-                // IMPORTANT:
-                // - If we can resolve rights => enforce strictly.
-                // - If we cannot resolve rights => do not force-disable controls (avoid false negatives).
-                var allowCreate = !!(perms && resolved === true && perms.create);
-                var allowUpdate = !!(perms && resolved === true && perms.update);
-                var allowDelete = !!(perms && resolved === true && perms.delete);
-                var allowSave = !!(perms && resolved === true && (perms.create || perms.update));
+                    function applyToElements(matchFn, allowed, $scope) {
+                        var $targets = $scope && $scope.length
+                            ? $scope.find('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]')
+                                .addBack('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]')
+                            : $('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]');
 
-                if (resolved === true) {
-                    var hasAny = !!(perms && (perms.read || perms.create || perms.update || perms.delete));
-                    if (!hasAny) {
-                        // If the user has no rights at all for this page, redirect to dashboard.
-                        var dash = (window.menuUrlMap && window.menuUrlMap['Dashboard']) ? window.menuUrlMap['Dashboard'] : '/SPDashboard/Index';
-                        try {
-                            if (window.Lobibox && Lobibox.notify) {
-                                Lobibox.notify('error', {
-                                    pauseDelayOnHover: true,
-                                    size: 'mini',
-                                    rounded: true,
-                                    delayIndicator: false,
-                                    icon: 'bx bx-x-circle',
-                                    continueDelayOnInactiveTab: false,
-                                    position: 'top right',
-                                    msg: 'You do not have View rights for this page'
-                                });
+                        $targets.each(function () {
+                            var idLower = ((this.id || '') + '').toLowerCase();
+                            var onclickLower = '';
+                            try {
+                                onclickLower = ((this.getAttribute && (this.getAttribute('onclick') || '')) || '').toString().toLowerCase();
+                            } catch (e) { }
+
+                            if (idLower && shouldSkipId(idLower)) return;
+                            if (!matchFn(idLower, this, onclickLower)) return;
+
+                            if (window.ElementStateService && typeof window.ElementStateService.setEnabled === 'function') {
+                                window.ElementStateService.setEnabled(this, !!allowed, { disabledOpacity: 0.55 });
+                            } else if (!allowed) {
+                                // fallback
+                                $(this).css({ 'pointer-events': 'none', 'opacity': 0.55 });
+                                if ('disabled' in this) this.disabled = true;
                             }
-                        } catch (e) { }
-                        window.location.href = dash;
-                        return;
+                        });
                     }
-                }
 
-                function shouldSkipId(idLower) {
-                    // Avoid touching spinners or purely UI helpers.
-                    return idLower.endsWith('spinner') || idLower.indexOf('search') >= 0 || idLower.indexOf('export') >= 0 || idLower.indexOf('clear') >= 0;
-                }
+                    function applyCrudDisables($scope) {
+                        // CREATE
+                        applyToElements(function (idLower, el, onclickLower) {
+                            // These buttons are permissioned by their target page (Daily Visit), not the current page.
+                            if (idLower === 'btncreatedv' || idLower === 'btncreatedv1') return false;
+                            return (idLower.indexOf('add') >= 0 || idLower.indexOf('new') >= 0 || idLower.indexOf('create') >= 0 || idLower.indexOf('insert') >= 0) ||
+                                (onclickLower.indexOf('add') >= 0 || onclickLower.indexOf('new') >= 0 || onclickLower.indexOf('create') >= 0 || onclickLower.indexOf('insert') >= 0);
+                        }, allowCreate, $scope);
 
-                function applyToElements(matchFn, allowed, $scope) {
-                    var $targets = $scope && $scope.length
-                        ? $scope.find('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]')
-                            .addBack('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]')
-                        : $('button[id], button[onclick], a[id], a[onclick], input[type=button][id], input[type=button][onclick], input[type=submit][id], input[type=submit][onclick]');
-
-                    $targets.each(function () {
-                        var idLower = ((this.id || '') + '').toLowerCase();
-                        var onclickLower = '';
-                        try {
-                            onclickLower = ((this.getAttribute && (this.getAttribute('onclick') || '')) || '').toString().toLowerCase();
-                        } catch (e) { }
-
-                        if (idLower && shouldSkipId(idLower)) return;
-                        if (!matchFn(idLower, this, onclickLower)) return;
-
-                        if (window.ElementStateService && typeof window.ElementStateService.setEnabled === 'function') {
-                            window.ElementStateService.setEnabled(this, !!allowed, { disabledOpacity: 0.55 });
-                        } else if (!allowed) {
-                            // fallback
-                            $(this).css({ 'pointer-events': 'none', 'opacity': 0.55 });
-                            if ('disabled' in this) this.disabled = true;
-                        }
-                    });
-                }
-
-                function applyCrudDisables($scope) {
-                    // CREATE
-                    applyToElements(function (idLower, el, onclickLower) {
-                        // These buttons are permissioned by their target page (Daily Visit), not the current page.
-                        if (idLower === 'btncreatedv' || idLower === 'btncreatedv1') return false;
-                        return (idLower.indexOf('add') >= 0 || idLower.indexOf('new') >= 0 || idLower.indexOf('create') >= 0 || idLower.indexOf('insert') >= 0) ||
-                            (onclickLower.indexOf('add') >= 0 || onclickLower.indexOf('new') >= 0 || onclickLower.indexOf('create') >= 0 || onclickLower.indexOf('insert') >= 0);
-                    }, allowCreate, $scope);
-
-                    // UPDATE
-                    applyToElements(function (idLower, el, onclickLower) {
-                        // Avoid misclassifying CREATE buttons like 'btnAddMUpdate' (contains 'update').
-                        if (idLower.indexOf('add') >= 0 || idLower.indexOf('new') >= 0 || idLower.indexOf('create') >= 0 || idLower.indexOf('insert') >= 0) {
-                            return false;
-                        }
-                        return (idLower.indexOf('edit') >= 0 || idLower.indexOf('update') >= 0) ||
-                            (onclickLower.indexOf('edit') >= 0 || onclickLower.indexOf('update') >= 0);
-                    }, allowUpdate, $scope);
-
-                    // DELETE
-                    applyToElements(function (idLower, el, onclickLower) {
-                        if (idLower.indexOf('delete') >= 0 || idLower.indexOf('remove') >= 0) return true;
-                        return onclickLower.indexOf('delete') >= 0 || onclickLower.indexOf('remove') >= 0;
-                    }, allowDelete, $scope);
-
-                    // SAVE
-                    applyToElements(function (idLower, el, onclickLower) {
-                        return idLower.indexOf('save') >= 0 || onclickLower.indexOf('save') >= 0;
-                    }, allowSave, $scope);
-                }
-
-                // Apply once for current DOM (only when permission resolution succeeded)
-                if (resolved === true) {
-                    applyCrudDisables(null);
-                }
-
-                // Re-apply for dynamically injected controls (AJAX/partials/modals)
-                try {
-                    var _permDebounce = null;
-                    var observer = new MutationObserver(function (mutations) {
-                        if (_permDebounce) clearTimeout(_permDebounce);
-                        _permDebounce = setTimeout(function () {
-                            // Apply to whole document (safe), but still reasonably cheap due to ID filtering.
-                            if (resolved === true) {
-                                applyCrudDisables(null);
+                        // UPDATE
+                        applyToElements(function (idLower, el, onclickLower) {
+                            // Avoid misclassifying CREATE buttons like 'btnAddMUpdate' (contains 'update').
+                            if (idLower.indexOf('add') >= 0 || idLower.indexOf('new') >= 0 || idLower.indexOf('create') >= 0 || idLower.indexOf('insert') >= 0) {
+                                return false;
                             }
-                        }, 50);
-                    });
-                    if (document && document.body) {
-                        observer.observe(document.body, { childList: true, subtree: true });
+                            return (idLower.indexOf('edit') >= 0 || idLower.indexOf('update') >= 0) ||
+                                (onclickLower.indexOf('edit') >= 0 || onclickLower.indexOf('update') >= 0);
+                        }, allowUpdate, $scope);
+
+                        // DELETE
+                        applyToElements(function (idLower, el, onclickLower) {
+                            if (idLower.indexOf('delete') >= 0 || idLower.indexOf('remove') >= 0) return true;
+                            return onclickLower.indexOf('delete') >= 0 || onclickLower.indexOf('remove') >= 0;
+                        }, allowDelete, $scope);
+
+                        // SAVE
+                        applyToElements(function (idLower, el, onclickLower) {
+                            return idLower.indexOf('save') >= 0 || onclickLower.indexOf('save') >= 0;
+                        }, allowSave, $scope);
                     }
-                } catch (e) { }
+
+                    // Apply once for current DOM (only when permission resolution succeeded)
+                    if (resolved === true) {
+                        applyCrudDisables(null);
+                    }
+
+                    // Re-apply for dynamically injected controls (AJAX/partials/modals)
+                    try {
+                        var _permDebounce = null;
+                        var observer = new MutationObserver(function (mutations) {
+                            if (_permDebounce) clearTimeout(_permDebounce);
+                            _permDebounce = setTimeout(function () {
+                                // Apply to whole document (safe), but still reasonably cheap due to ID filtering.
+                                if (resolved === true) {
+                                    applyCrudDisables(null);
+                                }
+                            }, 50);
+                        });
+                        if (document && document.body) {
+                            observer.observe(document.body, { childList: true, subtree: true });
+                        }
+                    } catch (e) { }
+                }
+            } catch (e) {
+                // fail-open
             }
-        } catch (e) {
-            // fail-open
-        }
-    });
+        });
     </script>
 
     <script>

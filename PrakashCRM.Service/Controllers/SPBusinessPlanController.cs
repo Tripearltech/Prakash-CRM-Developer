@@ -35,14 +35,14 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPCompanyList> companies = new List<SPCompanyList>();
 
-            var result = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'");
+            var result = ac.GetData<SPCompanyList>("pcplcontacts", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'",true);
 
             if (result != null && result.Result.Item1.value.Count > 0)
                 companies = result.Result.Item1.value;
 
             List<SPCompanyList> company2 = new List<SPCompanyList>();
 
-            var result2 = ac.GetData<SPCompanyList>("ContactDotNetAPI", "PCPL_Secondary_SP_Code eq '" + SPCode + "' and Salesperson_Code ne '" + SPCode + "' and Type eq 'Company'");
+            var result2 = ac.GetData<SPCompanyList>("pcplcontacts", "PCPL_Secondary_SP_Code eq '" + SPCode + "' and Salesperson_Code ne '" + SPCode + "' and Type eq 'Company'",true);
 
             if (result2 != null && result2.Result.Item1.value.Count > 0)
             {
@@ -72,11 +72,11 @@ namespace PrakashCRM.Service.Controllers
             var result = (dynamic)null;
 
             if (isExport)
-                result = ac.GetData<SPBusinessPlanDetails>("Business_Plan_Customer_Wise", filter); // and Contact_Business_Relation eq 'Customer'
+                result = ac.GetData<SPBusinessPlanDetails>("businessplancustwises", filter, true); // and Contact_Business_Relation eq 'Customer'
             else
-                result = ac.GetData1<SPBusinessPlanDetails>("Business_Plan_Customer_Wise", filter, skip, top, orderby); // and Contact_Business_Relation eq 'Customer'
+                result = ac.GetData1<SPBusinessPlanDetails>("businessplancustwises", filter, skip, top, orderby, true); // and Contact_Business_Relation eq 'Customer'
 
-            if (result.Result.Item1.value.Count > 0)
+            if (result.Result.Item1?.value?.Count > 0)
                 businessPlanDetails = result.Result.Item1.value;
             return businessPlanDetails;
         }
@@ -160,23 +160,6 @@ namespace PrakashCRM.Service.Controllers
                 string lastYearEndDate = (DateTime.Now.Year).ToString() + "-03-31";
                 //string CustomerNo = "";
                 string CustomerNo = "";
-
-                //ContCustForBusRel contCustForBusRel = new ContCustForBusRel();
-                //ConBusinessRelation conBusinessRelation = new ConBusinessRelation();
-
-                //var resultCompanyNo = ac.GetData<ContCustForBusRel>("ContactDotNetAPI", "No eq '" + CCompanyNo + "'");
-
-                //if (resultCompanyNo.Result.Item1.value.Count > 0)
-                //    contCustForBusRel.Company_No = resultCompanyNo.Result.Item1.value[0].Company_No;
-
-                //var resultCustomerNo = ac.GetData<ConBusinessRelation>("ContactBusinessRelationsDotNetAPI", "Contact_No eq '" + contCustForBusRel.Company_No + "'");
-
-                //if (resultCustomerNo.Result.Item1.value.Count > 0)
-                //{
-                //    conBusinessRelation.No = resultCustomerNo.Result.Item1.value[0].No;
-                //    CustomerNo = conBusinessRelation.No;
-                //}
-
                 if (CustomerNo != "")
                 {
 
@@ -233,11 +216,11 @@ namespace PrakashCRM.Service.Controllers
             List<SPBusinessPlanSPList> salesperson = new List<SPBusinessPlanSPList>();
             List<SPBusinessPlanSPList> distinctSalesperson = new List<SPBusinessPlanSPList>();
 
-            filter += " and Approver eq '" + LoggedInUserNo + "' and Status eq 'Submitted'";
+            filter += " and Approver eq '" + LoggedInUserNo + "' and StatusFilter eq 'Submitted'";
 
-            var result = ac.GetData<SPBusinessPlanSPList>("Business_Plan_Customer_Wise", filter);
+            var result = ac.GetData<SPBusinessPlanSPList>("businessplancustwises", filter, true);
 
-            if (result != null && result?.Result.Item1?.value.Count > 0)
+            if (result != null && result.Result.Item1.value.Count > 0)
             {
                 salesperson = result.Result.Item1.value;
                 distinctSalesperson = salesperson.DistinctBy(x => x.Salesperson_Purchaser).ToList();
@@ -360,9 +343,9 @@ namespace PrakashCRM.Service.Controllers
                 SPBusinessPlanCustWisePost businessPlanCustWisePost = new SPBusinessPlanCustWisePost();
                 errorDetails ed1 = new errorDetails();
 
-                businessPlanCustWisePost.Status = "Filled";
+                businessPlanCustWisePost.StatusFilter = "Filled";
 
-                var result1 = PatchItemBusinessPlanStatus("Business_Plan_Customer_Wise", businessPlanCustWisePost, businessPlanDetails, "Customer_No='" + businessPlan.Customer_No +
+                var result1 = PatchItemBusinessPlanStatus("businessplancustwises", businessPlanCustWisePost, businessPlanDetails, "Customer_No='" + businessPlan.Customer_No +
                    "',Plan_Year='" + businessPlan.PCPL_Plan_Year + "',Salesperson_Purchaser='" + SPNo + "'");
 
                 if (result1.Result.Item1 != null)
@@ -465,7 +448,6 @@ namespace PrakashCRM.Service.Controllers
                 return 0;
 
         }
-
         [Route("SendBusinessPlanForApproval")]
         public string SendBusinessPlanForApproval(string SPCode, string PlanYear)
         {
@@ -483,8 +465,8 @@ namespace PrakashCRM.Service.Controllers
             List<SPBusinessPlanDetails> businessPlanDetails = new List<SPBusinessPlanDetails>();
             errorDetails ed = new errorDetails();
 
-            var result = ac.GetData<SPBusinessPlanDetails>("Business_Plan_Customer_Wise", "Salesperson_Purchaser eq '" + SPCode + "' and Plan_Year eq '" +
-                    PlanYear + "'");
+            var result = ac.GetData<SPBusinessPlanDetails>("businessplancustwises", "Salesperson_Purchaser eq '" + SPCode + "' and Plan_Year eq '" +
+                    PlanYear + "'", true);
 
             if (result.Result.Item1.value.Count > 0)
                 businessPlanDetails = result.Result.Item1.value;
@@ -492,18 +474,18 @@ namespace PrakashCRM.Service.Controllers
             for (int a = 0; a < businessPlanDetails.Count; a++)
             {
 
-                if (businessPlanDetails[a].Status == "Filled")
+                if (businessPlanDetails[a].StatusFilter == "Filled")
                 {
 
                     SPBusinessPlanCustWiseSendApproval businessPlanSendApproval = new SPBusinessPlanCustWiseSendApproval();
                     SPBusinessPlanDetails businessPlanSendApprovalRes = new SPBusinessPlanDetails();
                     errorDetails ed1 = new errorDetails();
 
-                    businessPlanSendApproval.Status = "Submitted";
+                    businessPlanSendApproval.StatusFilter = "Submitted";
                     businessPlanSendApproval.Submitted_On = DateTime.Now;
                     businessPlanSendApproval.Approver = reportingPersonDetails.Reporting_Person_No;
 
-                    var result1 = PatchItemBusinessPlanSendApproval("Business_Plan_Customer_Wise", businessPlanSendApproval, businessPlanSendApprovalRes, "Customer_No='" + businessPlanDetails[a].Customer_No +
+                    var result1 = PatchItemBusinessPlanSendApproval("businessplancustwises", businessPlanSendApproval, businessPlanSendApprovalRes, "Customer_No='" + businessPlanDetails[a].Customer_No +
                        "',Plan_Year='" + PlanYear + "',Salesperson_Purchaser='" + SPCode + "'");
 
                     //if (result1.Result.Item1 != null)
@@ -562,7 +544,7 @@ namespace PrakashCRM.Service.Controllers
                 //businessPlanCustWiseForApprove.Approved_By_Rejected_By = LoggedInUserNo;
                 //businessPlanCustWiseForApprove.Status = "Approved";
 
-                //result = PatchItemBusinessPlanApproveReject("Business_Plan_Customer_Wise", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
+                //result = PatchItemBusinessPlanApproveReject("businessplancustwises", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
                 //        businessPlanDetails, "Approve", "Plan_Year='" + PlanYear + "',Salesperson_Purchaser='" + SPCode + "',Status='Submitted'");
             }
             else if (Action == "Reject")
@@ -579,7 +561,7 @@ namespace PrakashCRM.Service.Controllers
                 //businessPlanCustWiseForReject.Status = "Rejected";
                 //businessPlanCustWiseForReject.Rejected_Reason = "";
 
-                //result = PatchItemBusinessPlanApproveReject("Business_Plan_Customer_Wise", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
+                //result = PatchItemBusinessPlanApproveReject("businessplancustwises", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
                 //        businessPlanDetails, "Reject", "Plan_Year='" + PlanYear + "',Salesperson_Purchaser='" + SPCode + "',Status='Submitted'");
             }
 
@@ -620,20 +602,20 @@ namespace PrakashCRM.Service.Controllers
             if (Action == "Approve")
             {
                 businessPlanCustWiseForApprove.Approved_By_Rejected_By = LoggedInUserNo;
-                businessPlanCustWiseForApprove.Status = "Approved";
+                businessPlanCustWiseForApprove.StatusFilter = "Approved";
                 businessPlanCustWiseForApprove.Approved_Rejected_On = DateTime.Now;
 
-                result = PatchItemBusinessPlanApproveReject("Business_Plan_Customer_Wise", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
+                result = PatchItemBusinessPlanApproveReject("businessplancustwises", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
                         businessPlanDetails, "Approve", "Customer_No='" + CustomerNo + "',Plan_Year='" + PlanYear + "',Salesperson_Purchaser='" + SPCode + "'");
             }
             else if (Action == "Reject")
             {
                 businessPlanCustWiseForReject.Approved_By_Rejected_By = LoggedInUserNo;
-                businessPlanCustWiseForReject.Status = "Rejected";
+                businessPlanCustWiseForReject.StatusFilter = "Rejected";
                 businessPlanCustWiseForReject.Rejected_Reason = RejectReason;
                 businessPlanCustWiseForReject.Approved_Rejected_On = DateTime.Now;
 
-                result = PatchItemBusinessPlanApproveReject("Business_Plan_Customer_Wise", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
+                result = PatchItemBusinessPlanApproveReject("businessplancustwises", businessPlanCustWiseForApprove, businessPlanCustWiseForReject,
                         businessPlanDetails, "Reject", "Customer_No='" + CustomerNo + "',Plan_Year='" + PlanYear + "',Salesperson_Purchaser='" + SPCode + "'");
             }
 
@@ -702,11 +684,11 @@ namespace PrakashCRM.Service.Controllers
 
             qtyDetails.totalDemandQty = qtyDetails.totalTargetQty = 0;
 
-            var result = ac.GetData<SPBusinessPlanDetails>("Business_Plan_Customer_Wise", filter);
+            var result = ac.GetData<SPBusinessPlanDetails>("businessplancustwises", filter, true);
 
-            if (result.Result.Item1.value.Count > 0)
+            if (result.Result.Item1?.value?.Count > 0)
             {
-                businessPlanDetails = result.Result.Item1.value;
+                businessPlanDetails = result.Result.Item1?.value;
 
                 for (int a = 0; a < businessPlanDetails.Count; a++)
                 {
@@ -786,16 +768,16 @@ namespace PrakashCRM.Service.Controllers
 
         public async Task<(SPBusinessPlanDetails, errorDetails)> PatchItemBusinessPlanStatus<SPBusinessPlanDetails>(string apiendpoint, SPBusinessPlanCustWisePost requestModel, SPBusinessPlanDetails responseModel, string fieldWithValue)
         {
-            string _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+            string _baseURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["BaseAPIURL"];
             string _tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
             string _environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
-            string _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+            string _companyURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["Company_Name"];
 
             API ac = new API();
             var accessToken = await ac.GetAccessToken();
 
             HttpClient _httpClient = new HttpClient();
-            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
             Uri baseuri = new Uri(encodeurl);
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), baseuri + "(" + fieldWithValue + ")");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
@@ -852,16 +834,16 @@ namespace PrakashCRM.Service.Controllers
 
         public async Task<(SPBusinessPlanDetails, errorDetails)> PatchItemBusinessPlanSendApproval<SPBusinessPlanDetails>(string apiendpoint, SPBusinessPlanCustWiseSendApproval requestModel, SPBusinessPlanDetails responseModel, string fieldWithValue)
         {
-            string _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+            string _baseURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["BaseAPIURL"];
             string _tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
             string _environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
-            string _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+            string _companyURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["Company_Name"];
 
             API ac = new API();
             var accessToken = await ac.GetAccessToken();
 
             HttpClient _httpClient = new HttpClient();
-            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
             Uri baseuri = new Uri(encodeurl);
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), baseuri + "(" + fieldWithValue + ")");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
@@ -918,16 +900,17 @@ namespace PrakashCRM.Service.Controllers
 
         public async Task<(SPBusinessPlanDetails, errorDetails)> PatchItemBusinessPlanApproveReject<SPBusinessPlanDetails>(string apiendpoint, SPBusinessPlanCustWiseForApprove requestModelApprove, SPBusinessPlanCustWiseForReject requestModelReject, SPBusinessPlanDetails responseModel, string Action, string fieldWithValue)
         {
-            string _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+
+            string _baseURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["BaseAPIURL"];
             string _tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
             string _environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
-            string _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+            string _companyURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["Company_Name"];
 
             API ac = new API();
             var accessToken = await ac.GetAccessToken();
 
             HttpClient _httpClient = new HttpClient();
-            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
             Uri baseuri = new Uri(encodeurl);
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), baseuri + "(" + fieldWithValue + ")");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
@@ -1120,7 +1103,6 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             CombineSPBusinessPlanReport combineSPBusinessPlan = new CombineSPBusinessPlanReport();
-            List<SPBusinessPlanReport> businessreport = new List<SPBusinessPlanReport>();
 
             string normalizedYear = null;
             string filter = "";
@@ -1138,58 +1120,47 @@ namespace PrakashCRM.Service.Controllers
             {
                 filter += " and SalesPerson_Name eq '" + SerachSP + "'";
             }
-            var BusinessReport = ac.GetData<SPBusinessPlanReport>("BusinessPlanReport", filter);
-            //login person Single BusinessPlan 
 
-            if (BusinessReport?.Result.Item1?.value != null && BusinessReport.Result.Item1.value.Count > 0)
-                businessreport = BusinessReport.Result.Item1.value;
-
-            //Primary SalesPrson under 
+            // Run BusinessReport and EmployeeList calls in parallel
             string businessplanFilter = "PCPL_Reporting_Person_No eq '" + No + "'";
+            var businessReportTask = ac.GetData<SPBusinessPlanReport>("BusinessPlanReport", filter);
+            var employeeListTask = ac.GetData<SPPCPLEmployeeList>("PcplEmployeeList", businessplanFilter);
+            Task.WhenAll(businessReportTask, employeeListTask).Wait();
+
+            List<SPBusinessPlanReport> businessreport = new List<SPBusinessPlanReport>();
+            if (businessReportTask.Result.Item1?.value != null && businessReportTask.Result.Item1.value.Count > 0)
+                businessreport = businessReportTask.Result.Item1.value;
 
             List<SPPCPLEmployeeList> allbusinessreport = new List<SPPCPLEmployeeList>();
-            var AllBusinessplanreport = ac.GetData<SPPCPLEmployeeList>("PcplEmployeeList", businessplanFilter);
-            if (AllBusinessplanreport.Result.Item1.value.Count > 0)
+            if (employeeListTask.Result.Item1?.value != null && employeeListTask.Result.Item1.value.Count > 0)
+                allbusinessreport = employeeListTask.Result.Item1.value;
+
+            // Filter employees first, then fetch all their reports in parallel
+            var employeesToFetch = allbusinessreport
+                .Where(e => string.IsNullOrEmpty(SerachSP) ||
+                            string.Equals(e.PCPL_Salespers_Purch_Name, SerachSP, StringComparison.OrdinalIgnoreCase))
+                .Select(e => !string.IsNullOrEmpty(SerachSP) ? SerachSP : e.PCPL_Salespers_Purch_Name)
+                .Where(spName => !string.IsNullOrEmpty(spName))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var employeeReportTasks = employeesToFetch.Select(spName =>
             {
-                allbusinessreport = AllBusinessplanreport.Result.Item1.value;
-            }
-            else
-            {
-                allbusinessreport = null;
-            }
+                string filterEmployeeList = !string.IsNullOrEmpty(normalizedYear)
+                    ? $"SalesPerson_Name eq '{spName}' and Year eq '{normalizedYear}'"
+                    : $"SalesPerson_Name eq '{spName}'";
+                return ac.GetData<SPBusinessPlanReport>("BusinessPlanReport", filterEmployeeList);
+            }).ToList();
+
+            Task.WhenAll(employeeReportTasks).Wait();
+
             var EmployeePlanReport = new List<SPBusinessPlanReport>();
-
-            foreach (var employeelist in allbusinessreport)
+            foreach (var task in employeeReportTasks)
             {
-                var PCPL_SP = employeelist.PCPL_Salespers_Purch_Name;
-
-                // If a specific salesperson is requested, only fetch for that person
-                if (!string.IsNullOrEmpty(SerachSP) && !string.Equals(PCPL_SP, SerachSP, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                string filterEmployeeList;
-                string spName = !string.IsNullOrEmpty(SerachSP) ? SerachSP : PCPL_SP;
-
-                if (!string.IsNullOrEmpty(normalizedYear))
-                {
-                    filterEmployeeList = $"SalesPerson_Name eq '{spName}' and Year eq '{normalizedYear}'";
-                }
-                else
-                {
-                    filterEmployeeList = $"SalesPerson_Name eq '{spName}'";
-                }
-
-                var report = ac.GetData<SPBusinessPlanReport>("BusinessPlanReport", filterEmployeeList);
-
-                if (report?.Result.Item1?.value != null && report.Result.Item1.value.Count > 0)
-                {
-
-                    EmployeePlanReport.AddRange(report.Result.Item1.value);
-                    //EmployeePlanReport.AddRange(report.Result.Item1.value.DistinctBy(c => c.SalesPerson_Name).ToList());
-                }
+                if (task.Result.Item1?.value != null && task.Result.Item1.value.Count > 0)
+                    EmployeePlanReport.AddRange(task.Result.Item1.value);
             }
+
             combineSPBusinessPlan.BusinessPlanReports = businessreport;
             combineSPBusinessPlan.EmployeePlanReports = EmployeePlanReport.Where(x => !businessreport.Any(y => y.SalesPerson_Name == x.SalesPerson_Name)).ToList();
 

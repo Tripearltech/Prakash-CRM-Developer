@@ -369,7 +369,7 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             List<SPCustomerReport> customerReports = new List<SPCustomerReport>();
-            var result = ac.GetData<SPCustomerReport>("CustomerCardDotNetAPI", "startswith(Name,'" + prefix + "') and Salesperson_Code eq '" + salesPerson + "'");
+            var result = ac.GetData<SPCustomerReport>("pcplcustomers", "startswith(Name,'" + prefix + "') and Salesperson_Code eq '" + salesPerson + "'",true);
 
             if (result != null && result.Result.Item1.value.Count > 0)
 
@@ -560,29 +560,14 @@ namespace PrakashCRM.Service.Controllers
         }
         [HttpGet]
         [Route("GetCustomerOutStanding")]
-        public PagedResult<SPCustomerOutstanding> GetCustomerOutStanding(int pageNumber = 1, int pageSize = 10, string orderby = "Location_Code asc")
+        public List<SPCustomerOutstanding> GetCustomerOutStanding(string orderby = "Location_Code asc")
         {
-            if (pageNumber < 1)
-                pageNumber = 1;
-
-            if (pageSize <= 0)
-                pageSize = 10;
-
             API ac = new API();
-            PagedResult<SPCustomerOutstanding> customerOutStanding = new PagedResult<SPCustomerOutstanding>
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-
-            var count = ac.CalculateCount("CollectionSummaryView", "");
-            customerOutStanding.TotalCount = Convert.ToInt32(count.Result);
-
-            var skip = (pageNumber - 1) * pageSize;
-            var result = ac.GetData1<SPCustomerOutstanding>("CollectionSummaryView", "", skip, pageSize, string.IsNullOrWhiteSpace(orderby) ? "Location_Code asc" : orderby);
+            List<SPCustomerOutstanding> customerOutStanding = new List<SPCustomerOutstanding>();
+            var result = ac.GetData1<SPCustomerOutstanding>("CollectionSummaryView", "", 0, 5000, string.IsNullOrWhiteSpace(orderby) ? "Location_Code asc" : orderby);
 
             if (result != null && result.Result.Item1 != null && result.Result.Item1.value != null && result.Result.Item1.value.Count > 0)
-                customerOutStanding.Items = result.Result.Item1.value;
+                customerOutStanding = result.Result.Item1.value;
 
             return customerOutStanding;
         }
@@ -610,8 +595,10 @@ namespace PrakashCRM.Service.Controllers
             List<SPCustomerOutstanding> Inv_ProductGroupsWise = new List<SPCustomerOutstanding>();
             var filter = "";
             filter += "LocationWise eq true and ISSalesPersonData eq true";
+            if (!string.IsNullOrWhiteSpace(branchCode))
+                filter += " and Location_Code eq '" + branchCode + "'";
 
-            var ProductGroupsWiseResult = ac.GetData<SPCustomerOutstanding>("CollectionSummaryView", filter);
+            var ProductGroupsWiseResult = ac.GetData1<SPCustomerOutstanding>("CollectionSummaryView", filter, 0, 5000, "Salesperson_Code asc");
 
             if (ProductGroupsWiseResult != null && ProductGroupsWiseResult.Result.Item1.value.Count > 0)
                 Inv_ProductGroupsWise = ProductGroupsWiseResult.Result.Item1.value;
@@ -626,7 +613,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPCustomerOutstanding> Inv_ItemWise = new List<SPCustomerOutstanding>();
 
-            var ItemWiseResult = ac.GetData<SPCustomerOutstanding>("CollectionSummaryView", "Salesperson_Code eq '" + spCode + "'");
+            var ItemWiseResult = ac.GetData1<SPCustomerOutstanding>("CollectionSummaryView", "Salesperson_Code eq '" + spCode + "'", 0, 5000, "Customer_Name asc");
             if (ItemWiseResult != null && ItemWiseResult.Result.Item1.value.Count > 0)
                 Inv_ItemWise = ItemWiseResult.Result.Item1.value;
 
@@ -1093,7 +1080,7 @@ namespace PrakashCRM.Service.Controllers
 
             string filter1 = "Branch eq '" + BranchName + "' and Branch_Total eq true";
             var Result1 = ac.GetData<StockManagement>("StockManagement", filter1);
-            if (Result1.Result.Item1.value.Count > 0)
+            if (Result1.Result.Item1?.value?.Count > 0)
                 branchWiseTotal = Result1.Result.Item1.value;
 
             List<StockManagement> locationname = new List<StockManagement>();
@@ -1119,18 +1106,32 @@ namespace PrakashCRM.Service.Controllers
         [Route("GetProductPackingStyle")]
         public List<StockManagement> GetProductPackingStyle(string BranchName, string Product)
         {
-            string filter = "Location_Code eq '" + BranchName + "' and Description eq '" + Product + "' and  Item_Location_Total eq false";
-            API ac = new API();
+            string filter = "Location_Code eq '" + BranchName + "' and Description eq '" + Product + "' and Location_Total eq false and Item_Location_Total eq false and Total eq false and Final_Total eq false and Branch_Total eq false"; API ac = new API();
             List<StockManagement> stockManagements = new List<StockManagement>();
 
             var Result = ac.GetData<StockManagement>("StockManagement", filter);
-            if (Result.Result.Item1.value.Count > 0)
+            if (Result.Result.Item1?.value?.Count > 0)
                 stockManagements = Result.Result.Item1.value;
 
 
             return stockManagements;
         }
 
+        [HttpGet]
+        [Route("GetCSOutstandingDuelist")]
+            public List<CSOutstandingDuelist> GetCSOutstandingDuelist(string spCode)
+        {
+            API ac = new API();
+            List<CSOutstandingDuelist> csutstandingDuelist = new List<CSOutstandingDuelist>();
+            var result = ac.GetData1<CSOutstandingDuelist>("CustomerOverDueDotNetAPI", "SalesPerson_No eq '" + spCode + "'", 0, 5000, "Customer_Name asc");
+
+            if (result?.Result.Item1?.value != null && result.Result.Item1.value.Count > 0)
+            {
+                csutstandingDuelist = result.Result.Item1.value;
+            }
+
+            return csutstandingDuelist;
+        }
     }
 
 }

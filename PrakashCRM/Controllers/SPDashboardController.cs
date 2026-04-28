@@ -486,5 +486,29 @@ namespace PrakashCRM.Controllers
             }
             return Json(pendingwarehousepurchase, JsonRequestBehavior.AllowGet);
         }
+
+        [HttpGet]
+        public async Task<JsonResult> GetCSOutstandingDue()
+        {
+            string SalesPersonCode = Session["loggedInUserSPCode"]?.ToString();
+            if (string.IsNullOrEmpty(SalesPersonCode))
+            {
+                return Json(new List<SPCustOverdue>(), JsonRequestBehavior.AllowGet);
+            }
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()+ "SPDashboard/GetCSOutstandingDue?SalesPerson_No="+ HttpUtility.UrlEncode(SalesPersonCode);
+
+            HttpClient Client = new HttpClient();
+            List<SPCustOverdue> csutstandingDuelist = new List<SPCustOverdue>();
+
+            HttpResponseMessage response = await Client.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadAsStringAsync();
+                csutstandingDuelist = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SPCustOverdue>>(data);
+            }
+
+            return Json(csutstandingDuelist, JsonRequestBehavior.AllowGet);
+        }
     }
 }

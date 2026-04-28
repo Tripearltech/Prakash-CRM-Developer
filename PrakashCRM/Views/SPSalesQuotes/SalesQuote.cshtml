@@ -751,6 +751,60 @@
                                 <!--</div>
                                     </div>
                                 </div>-->
+
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+
+                                        <label class="col-sm-3 col-form-label">Margin</label>
+                                        <div class="col-sm-7">
+                                            <input type="text" id="txtMargin" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Margin, new { @id = "txtMargin", @class = "form-control" })*@
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <span id="spnMarginPercent" runat="server">0%</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+
+                                        <label class="col-sm-3 col-form-label">Delivery Date<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input id="txtDeliveryDate" type="date" class="form-control" />
+                                            @*@Html.TextBoxFor(x => x.Delivery_Date, new { Value = Model.Delivery_Date, @class = "form-control datepicker", autocomplete = "off", @alt = "Delivery Date" })*@
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Sales Price<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtSalesPrice" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Sales_Price, new { @id = "txtSalesPrice", @class = "form-control" })*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--<div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Credit Days</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" id="txtCreditDays" class="form-control" />-->
+                                @* @Html.TextBoxFor(model => model.Credit_Days, new { @id = "txtCreditDays", @class = "form-control" })*@
+                                <!--</div>
+                                    </div>
+                                </div>-->
                           
                             <div class="col-md-6">
                                 <div class="row mb-3">
@@ -1034,10 +1088,42 @@
                         <div class="accordion-item">
 
 
-                            <h6 class="mb-0 font-weight-bold accordion-header">
-                                <button class="accordion-button collapsed" id="lblJustificationTitle" type="button" style="font-weight:bold" width="30%" data-bs-toggle="collapse" data-bs-target="#flush-collapsejustification" aria-expanded="false" aria-controls="flush-collapsejustification">
-                                </button>
-                            </h6>
+                    <!-- -->
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-sm-8">
+                                    <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                                    <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                    <input type="hidden" id="hdnSalespersonEmail" value="" />
+                                    <input id="hdnLoggedInUserRole" value="@Session["loggedInUserRole"]" style="display:none" />
+                                    <input id="hdnLoggedInUserEmail" value="@Session["loggedInUserEmail"]" style="display:none" />
+                                    <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
+                                    <input id="hdnApprovalFor" value="" style="display:none" />
+                                    <input id="hdnCustBalanceLCY" value="" style="display:none" />
+                                    <input type="hidden" id="hdnSalesQuoteAction" value="@Session["SalesQuoteAction"]" />
+                                    <input type="hidden" id="hdnSalesQuoteActionErr" value="@Session["SalesQuoteActionErr"]" />
+                                </div>
+                                <div class="col-sm-4" align="right">
+                                    <table>
+                                        <tr>
+                                            @*<td id="tdReopenSQ" style="display:none">
+                                                    <button id="btnReopenSQ" class="btn btn-success" type="button">Price Updated Quotes</button>
+                                                </td>*@
+                                            @*<td></td>*@
+                                            <td id="btnFinancehide">
+                                                <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
+                                            </td>
+                                            <td></td>
+                                            <td id="btnFinancehide1">
+                                                <a href="@salesQuoteBackUrl" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                             <div id="flush-collapsejustification" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
                                 <div class="accordion-body">
@@ -1510,102 +1596,30 @@
                                             <input type="text" id="txtCPersonName" class="form-control" />
                                         </div>
                                     </div>
+                                    @*<div class="col-md-6">
+                                            <div class="row mb-3">
+                                                <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" id="txtNewShiptoAddCode" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>*@
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtCPersonMobile" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        @*<label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>*@
-                                        <label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtCPersonEmail" class="form-control" />
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Department<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            @*<input type="hidden" id="hfDepartmentCode" value="@ViewBag.PCPL_Department_Code" />*@
-                                            <select id="ddlDepartment" class="form-select"></select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtJobResponsibility" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Allow Login</label>
-                                        <div class="col-sm-9">
-                                            <input type="checkbox" id="chkAllowLogin" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
-                                        <div class="col-sm-9">
-                                            <input type="checkbox" id="chkEnableOTPOnLogin" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Is Primary</label>
-                                        <div class="col-sm-9">
-                                            <input type="checkbox" id="chkIsPrimary" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="dvAddNewShiptoAddress" style="display:none">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewShiptoAddName" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                @*<div class="col-md-6">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
                                             <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddCode" class="form-control" />
+                                                <textarea id="txtNewShiptoAddress" class="form-control" maxlength="100"></textarea>
                                             </div>
                                         </div>
-                                    </div>*@
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <textarea id="txtNewShiptoAddress" class="form-control" maxlength="100"></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address2</label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtNewShiptoAddress2" class="form-control" maxlength="50"></textarea>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1626,83 +1640,99 @@
                                             <input type="text" id="txtNewShiptoAddPostCode" class="form-control" />
                                         </div>
                                     </div>
+                                    @*<div class="col-md-6">
+                                            <div class="row mb-3">
+                                                <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" id="txtNewJobtoAddCode" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>*@
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Country/Region</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewShiptoAddCountryCode" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">State</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewShiptoAddState" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">District</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewShiptoAddDistrict" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">City</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewShiptoAddCity" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <select id="ddlNewShiptoAddArea" class="form-select"></select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewShiptoAddGSTNo" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                </div>
-                            </div>
-                        </div>
-                        <div id="dvAddNewJobtoAddress" style="display:none">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input type="text" id="txtNewJobtoAddName" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                                @*<div class="col-md-6">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
                                         <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
                                             <div class="col-sm-9">
-                                                <input type="text" id="txtNewJobtoAddCode" class="form-control" />
+                                                <textarea id="txtNewJobtoAddress" class="form-control" maxlength="100"></textarea>
                                             </div>
                                         </div>
-                                    </div>*@
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Address2</label>
+                                            <div class="col-sm-9">
+                                                <textarea id="txtNewJobtoAddress2" class="form-control" maxlength="50"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddPostCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Country/Region</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddCountryCode" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">State</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddState" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">District</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddDistrict" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">City</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddCity" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <select id="ddlNewJobtoAddArea" class="form-select"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="row mb-3">
+                                            <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="txtNewJobtoAddGSTNo" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                    </div>
+                                </div>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -1895,7 +1925,6 @@
     </div>
 </div>
 </div>
-
 
 @Scripts.Render("~/bundles/jquery")
 <script src="~/Scripts/appjs/SalesQuote.js"></script>
@@ -2433,7 +2462,9 @@
             // Requirement: while saving, always send New Price/New Margin as 0 (default).
             productDetails.New_Price = 0;
             productDetails.New_Margin = 0;
-            var dropShipHtml = $("#" + prodNo + "_DropShipment").html();
+            var dropShipHtml = (typeof getSQRowLabelText === 'function')
+                ? getSQRowLabelText($(this), 'DropShipment')
+                : $(this).find("label[id$='_DropShipment']").first().text();
             if (dropShipHtml === "Yes") {
                 productDetails.Drop_Shipment = true;
                 productDetails.PCPL_Vendor_No = $(this).find("TD").eq(35).html();
@@ -2445,16 +2476,20 @@
 
 
             // Preserve Inquiry Line No (if present)
-            var inqProdLineNo = (($("#" + prodNo + "_InqProdLineNo").text() || "").toString().trim());
+            var inqProdLineNo = (typeof getSQRowInquiryLineNo === 'function')
+                ? getSQRowInquiryLineNo($(this))
+                : (($(this).find("label[id$='_InqProdLineNo']").first().text() || "").toString().trim());
             if (inqProdLineNo !== "") {
                 productDetails.InqProdLineNo = inqProdLineNo;
             }
 
             // Critical for update: Sales Quote Line_No must be sent.
             // Read from row attribute first (kept in SalesQuote.js), fallback to hidden label.
-            var rowLineNo = parseInt((($(this).attr('data-lineno') || "").toString().trim())) || 0;
+            var rowLineNo = (typeof getSQRowLineNo === 'function')
+                ? getSQRowLineNo($(this))
+                : (parseInt((($(this).attr('data-lineno') || "").toString().trim())) || 0);
             if (!rowLineNo || rowLineNo <= 0) {
-                rowLineNo = parseInt(((("#" + prodNo + "_SQLineNo") && $("#" + prodNo + "_SQLineNo").text()) || "0").toString().trim()) || 0;
+                rowLineNo = parseInt((($(this).find("label[id$='_SQLineNo']").first().text() || "0").toString().trim())) || 0;
             }
 
             if ($('#hfSQEdit').val() === "true") {
@@ -2464,7 +2499,9 @@
                 productDetails.Line_No = parseInt(inqProdLineNo || '0') || 0;
             }
 
-            var marginPercent = $("#" + prodNo + "_MarginPercent").html() || "0%";
+            var marginPercent = (typeof getSQRowLabelText === 'function')
+                ? getSQRowLabelText($(this), 'MarginPercent')
+                : ($(this).find("label[id$='_MarginPercent']").first().text() || "0%");
             marginPercent = marginPercent.replace('%', '');
             productDetails.PCPL_Margin_Percent = parseFloat(marginPercent) || 0;
 

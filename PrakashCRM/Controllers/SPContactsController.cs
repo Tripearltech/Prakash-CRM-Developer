@@ -112,6 +112,24 @@ namespace PrakashCRM.Controllers
             return View();
         }
 
+        private static string BuildReturnUrlWithCustomerId(string returnUrl, string customerId)
+        {
+            string normalizedReturnUrl = LoginRedirectHelper.NormalizeReturnUrl(returnUrl);
+            if (string.IsNullOrWhiteSpace(normalizedReturnUrl))
+                return string.Empty;
+
+            string[] urlParts = normalizedReturnUrl.Split(new[] { '?' }, 2);
+            var query = HttpUtility.ParseQueryString(urlParts.Length > 1 ? urlParts[1] : string.Empty);
+
+            if (!string.IsNullOrWhiteSpace(customerId))
+                query["customerId"] = customerId;
+
+            string queryString = query.ToString();
+            return string.IsNullOrWhiteSpace(queryString)
+                ? urlParts[0]
+                : urlParts[0] + "?" + queryString;
+        }
+
         public async Task<JsonResult> GetContactPersonListData(int orderBy, string orderDir, string filter, int skip, int top)
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPContacts/";
@@ -163,8 +181,10 @@ namespace PrakashCRM.Controllers
             return Json(contacts, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult CompanyContactCard(string No = "")
+        public ActionResult CompanyContactCard(string No = "", string returnUrl = "")
         {
+            string normalizedReturnUrl = LoginRedirectHelper.NormalizeReturnUrl(returnUrl);
+
             if (No == "inquiry")
             {
                 ViewData["No"] = "inquiry";
@@ -173,6 +193,7 @@ namespace PrakashCRM.Controllers
             SPCompanyContact companycontact = new SPCompanyContact();
             List<SPContactResponse> contacts = new List<SPContactResponse>();
             List<SPContactProducts> contactProducts = new List<SPContactProducts>();
+            ViewBag.Contactscount = 0;
 
             if (No != "" || (Session["CompanyNo"] != null && Session["CompanyNo"].ToString() != ""))
             {
@@ -199,6 +220,7 @@ namespace PrakashCRM.Controllers
             }
 
             ViewBag.Salesperson_Code = Session["loggedInUserSPCode"].ToString();
+            ViewBag.ReturnUrl = normalizedReturnUrl;
             if (companycontact.Company_Name != null)
             {
                 companycontact.PCPL_Allow_Login = false;
@@ -217,9 +239,10 @@ namespace PrakashCRM.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CompanyContactCard(SPCompanyContact companycontact)
+        public async Task<ActionResult> CompanyContactCard(SPCompanyContact companycontact, string returnUrl = "")
         {
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPContacts/";
+            string normalizedReturnUrl = LoginRedirectHelper.NormalizeReturnUrl(returnUrl);
 
             string CompanyNo = "";
             if (Convert.ToBoolean(Session["isCompanyContactEdit"]) == true)
@@ -283,7 +306,17 @@ namespace PrakashCRM.Controllers
             {
                 return RedirectToAction("Inquiry", "SPInquiry");
             }
-            return RedirectToAction("CompanyContactCard", "SPContacts", new { No = responseCompany.No });
+
+            if (responseCompany != null
+                && responseCompany.errorDetails != null
+                && responseCompany.errorDetails.isSuccess
+                && !string.IsNullOrWhiteSpace(normalizedReturnUrl)
+                && !string.IsNullOrWhiteSpace(responseCompany.No))
+            {
+                return Redirect(BuildReturnUrlWithCustomerId(normalizedReturnUrl, responseCompany.No));
+            }
+
+            return RedirectToAction("CompanyContactCard", "SPContacts", new { No = responseCompany.No, returnUrl = normalizedReturnUrl });
         }
 
         public bool NullContactSession()
