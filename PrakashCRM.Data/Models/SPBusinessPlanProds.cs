@@ -11,6 +11,7 @@ namespace PrakashCRM.Data.Models
     public class SPBusinessPlanCustWisePost
     {
         public string Status { get; set; }
+        public string StatusFilter { get; set; }
     }
 
     public class SPBusinessPlanCustWiseSendApproval
@@ -20,6 +21,7 @@ namespace PrakashCRM.Data.Models
         public DateTime Submitted_On { get; set; }
 
         public string Approver { get; set; }
+        public string StatusFilter { get; set; }
     }
 
     public class SPBusinessPlanSPWiseForApproveReject
@@ -48,6 +50,7 @@ namespace PrakashCRM.Data.Models
         public string Status { get; set; }
 
         public DateTime Approved_Rejected_On { get; set; }
+        public string StatusFilter { get; set; }
     }
 
     public class SPBusinessPlanCustWiseForReject
@@ -59,6 +62,7 @@ namespace PrakashCRM.Data.Models
         public DateTime Approved_Rejected_On { get; set; }
 
         public string Rejected_Reason { get; set; }
+        public string StatusFilter { get; set; }
     }
 
     public class SPBusinessPlanDetails
@@ -81,6 +85,7 @@ namespace PrakashCRM.Data.Models
         public double Targeted_Qty { get; set; }
 
         public string Status { get; set; }
+        public string StatusFilter { get; set; }
 
         public string Salesperson_Purchaser { get; set; }
 
@@ -180,6 +185,7 @@ namespace PrakashCRM.Data.Models
         public string Salesperson_Purchaser { get; set; }
 
         public string Salesperson_Purchaser_Name { get; set; }
+        public string StatusFilter { get; set; }
     }
 
     public class SPBusinessPlanAssignCustDetails

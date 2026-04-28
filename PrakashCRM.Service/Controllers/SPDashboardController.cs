@@ -31,7 +31,7 @@ namespace PrakashCRM.Service.Controllers
             sdbDetails.InquiryCount = 0;
             sdbDetails.ContactCompanyList = 0;
 
-            var resultOrders = ac.GetData<SPSalesOrdersList>("SalesOrdersListDotNetAPI", "Salesperson_Code eq '" + SPCode + "'");
+            var resultOrders = ac.GetData<SPSalesOrdersList>("salesorders", "Salesperson_Code eq '" + SPCode + "'",true);
 
             if (resultOrders.Result.Item1.value != null)
             {
@@ -49,27 +49,27 @@ namespace PrakashCRM.Service.Controllers
                     sdbDetails.InvoicesCount = resultInvoices.Result.Item1.value.Count;
             }
 
-            var resultContacts = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'");
+            var resultContacts = ac.GetData<SPCompanyList>("pcplcontacts", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'", true);
 
             if (resultContacts.Result.Item1.value != null)
             {
                 if (resultContacts.Result.Item1.value.Count > 0)
                     sdbDetails.ContactsCount = resultContacts.Result.Item1.value.Count;
             }
-            var resultManufactors = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Salesperson_Code eq '" + SPCode + "' and Business_Type_No eq '" + "MANUFACTURER'");
+            var resultManufactors = ac.GetData<SPCompanyList>("pcplcontacts", "Salesperson_Code eq '" + SPCode + "' and Business_Type_No eq '" + "MANUFACTURER'", true);
             if (resultManufactors.Result.Item1.value != null)
             {
                 if (resultManufactors.Result.Item1.value.Count > 0)
                     sdbDetails.ContactManufactorCount = resultManufactors.Result.Item1.value.Count;
             }
-            var resultTraders = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Salesperson_Code eq '" + SPCode + "' and Business_Type_No eq '" + "TRADER'");
+            var resultTraders = ac.GetData<SPCompanyList>("pcplcontacts", "Salesperson_Code eq '" + SPCode + "' and Business_Type_No eq '" + "TRADER'", true);
             if (resultTraders.Result.Item1.value != null)
             {
                 if (resultTraders.Result.Item1.value.Count > 0)
                     sdbDetails.ContactTraderCount = resultTraders.Result.Item1.value.Count;
             }
 
-            var resultCustomers = ac.GetData<SPCustomersList>("CustomerCardDotNetAPI", "Salesperson_Code eq '" + SPCode + "'");
+            var resultCustomers = ac.GetData<SPCustomersList>("pcplcustomers", "Salesperson_Code eq '" + SPCode + "'",true);
 
             if (resultCustomers.Result.Item1.value != null)
             {
@@ -342,8 +342,7 @@ namespace PrakashCRM.Service.Controllers
             CombinedSalesData combinedData = new CombinedSalesData();
 
             // Salespersons
-            string filter = $"SalesPerson eq '{Salesperson_Code}' and IsSalesPerson eq true and IsProduct eq true and IsIncludTop10Product eq true and " + " Plan_Year eq '" + Year + "'";
-            if (fromdate != null && enddate != null)
+            string filter = $"SalesPerson eq '{Salesperson_Code}' and IsSalesPerson eq true and IsProduct eq false and IsIncludTop10Product eq false and " + " Plan_Year eq '" + Year + "'"; if (fromdate != null && enddate != null)
             {
                 filter += " and Busiess_Plan_Date ge " + fromdate + " and Busiess_Plan_Date le " + enddate;
             }
@@ -395,19 +394,18 @@ namespace PrakashCRM.Service.Controllers
             }).ToList();
 
             // Products
-            string productFilter = "IsSalesPerson eq true and IsProduct eq true and IsIncludTop10Product eq true and SalesPerson eq '" + Salesperson_Code + "' and " + " Plan_Year eq '" + Year + "'";
-            if (fromdate != null && enddate != null)
+            string productFilter = "IsSalesPerson eq true and IsProduct eq true and IsIncludTop10Product eq true and SalesPerson eq '" + Salesperson_Code + "' and " + " Plan_Year eq '" + Year + "'"; if (fromdate != null && enddate != null)
             {
                 productFilter += " and Busiess_Plan_Date ge " + fromdate + " and Busiess_Plan_Date le " + enddate;
             }
             var productResult = ac.GetData<SPProductlist>("TargetvsSalesReport", productFilter);
             List<SPProductlist> products = new List<SPProductlist>();
 
-            if (productResult.Result.Item1.value.Count > 0)
+            if (productResult.Result.Item1?.value?.Count > 0)
                 products = productResult.Result.Item1.value;
 
             // Product totals
-            string producttotalfilter = "IsSalesPerson eq true and IsProduct eq false and IsIncludTop10Product eq false and SalesPerson eq '" + Salesperson_Code + "' and " + " Plan_Year eq '" + Year + "'";
+            string producttotalfilter = "IsSalesPerson eq true and IsProduct eq false and IsIncludTop10Product eq true and SalesPerson eq '" + Salesperson_Code + "' and " + " Plan_Year eq '" + Year + "'";
             if (fromdate != null && enddate != null)
             {
                 producttotalfilter += " and Busiess_Plan_Date ge " + fromdate + " and Busiess_Plan_Date le " + enddate;
@@ -418,10 +416,24 @@ namespace PrakashCRM.Service.Controllers
             if (producttotalResult.Result.Item1.value.Count > 0)
                 producttotal = producttotalResult.Result.Item1.value;
 
+            // Customer totals
+            string customerfilter = "IsSalesPerson eq true and IsProduct eq false and IsIncludTop10Customer eq true and IsCustomer eq true and SalesPerson eq '" + Salesperson_Code + "' and Plan_Year eq '" + Year + "'";
+
+            if (fromdate != null && enddate != null)
+            {
+                customerfilter += " and Busiess_Plan_Date ge " + fromdate + " and Busiess_Plan_Date le " + enddate;
+            }
+            List<SPCustomerlist> customertotal = new List<SPCustomerlist>();
+            var customerResult = ac.GetData<SPCustomerlist>("TargetvsSalesReport", customerfilter);
+
+            if (customerResult?.Result.Item1?.value?.Count > 0)
+                customertotal = customerResult.Result.Item1.value;
+
             combinedData.Salespersons = salespersons;
             combinedData.SupportSPs = reportingSalesData;
             combinedData.Products = products;
             combinedData.ProductsTotalList = producttotal;
+            combinedData.CustomerTotalList = customertotal;
 
             return combinedData;
         }
@@ -562,6 +574,39 @@ namespace PrakashCRM.Service.Controllers
                 pendingwarehousepurches = result.Result.Item1.value;
 
             return pendingwarehousepurches;
+        }
+        [HttpGet]
+        [Route("GetCSOutstandingDue")]
+        public List<SPCustOverdue> GetCSOutstandingDue(string SalesPerson_No, string Salesperson_Code = null)
+        {
+            API ac = new API();
+            List<SPCustOverdue> csutstandingDuelist = new List<SPCustOverdue>();
+
+            string salesPersonCode = string.IsNullOrWhiteSpace(SalesPerson_No) ? Salesperson_Code : SalesPerson_No;
+            if (string.IsNullOrWhiteSpace(salesPersonCode))
+            {
+                return csutstandingDuelist;
+            }
+
+            var result = ac.GetData1<CSOutstandingDuelist>("CustomerOverDueDotNetAPI", "SalesPerson_No eq '" + salesPersonCode + "'", 0, 5000, "Customer_Name asc");
+
+            if (result?.Result.Item1?.value != null && result.Result.Item1.value.Count > 0)
+            {
+                var overdueRows = result.Result.Item1.value;
+                var salesPersonName = overdueRows.Select(x => x.SalesPerson_Name).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+
+                csutstandingDuelist.Add(new SPCustOverdue
+                {
+                    SalesPerson_No = salesPersonCode,
+                    SalesPerson_Name = salesPersonName,
+                    Total_Remaining_Amt = overdueRows.Sum(x => x.Remain_Amount),
+                    SP_Total_Due_Amt = overdueRows.Where(x => x.Overdue_Days > 0).Sum(x => x.Remain_Amount),
+                    Is_Total_Remaining_Amt = true,
+                    Is_SP_Total_Due_Amt = true
+                });
+            }
+
+            return csutstandingDuelist;
         }
     }
 }

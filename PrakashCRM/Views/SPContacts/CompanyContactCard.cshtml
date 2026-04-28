@@ -2,6 +2,8 @@
 @{
     ViewBag.Title = "CompanyContactCard";
     Layout = "~/Views/Shared/_SalespersonMasterLayout.cshtml";
+    var contactCount = (ViewBag.Contactscount != null) ? Convert.ToInt32(ViewBag.Contactscount) : 0;
+    var isCompanyContactEdit = (Session["isCompanyContactEdit"] != null) && Convert.ToBoolean(Session["isCompanyContactEdit"]);
 }
 
 <style>
@@ -89,6 +91,7 @@
                     <form action="@actionUrl" method="post"></form>*@
 
                 @Html.ValidationSummary(true)
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
                 <div class="row">
                     <div>
                         <h6 class="mb-0 font-weight-bold">General</h6>
@@ -328,7 +331,7 @@
                             <div class="col-md-6"></div>
                         </div>
                         @*// Add the button*@
-                        @if (ViewBag.Contactscount > 0)
+                        @if (contactCount > 0)
                         {
                             <div class="d-flex justify-content-end mt-3">
                                 <button id="btnSave" class="btn btn-success me-2" tabindex="34" onclick="return CheckContactValues()" type="submit">
@@ -358,7 +361,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Is Primary</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.Is_Primary, new { @id = "chkIsPrimary", tabindex = "26" })
+                                        @Html.CheckBoxFor(model => model.Is_Primary, new { @id = "chkIsPrimary", tabindex = "27" })
                                     </div>
                                 </div>
                             </div>
@@ -401,7 +404,7 @@
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
                                     <div class="col-sm-9">
-                                        @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin", @checked = "checked", tabindex = "28" })
+                                        @Html.CheckBoxFor(model => model.PCPL_Enable_OTP_On_Login, new { @id = "chkEnableOTPOnLogin", @checked = "checked", tabindex = "29" })
                                     </div>
                                 </div>
                             </div>
@@ -417,12 +420,13 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="row mb-3">
                                     <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
                                     <div class="col-sm-9">
-                                        @Html.TextBoxFor(model => model.PCPL_Job_Responsibility, new { @class = "form-control", @id = "txtJobResponsibility", @Name = "txtJobResponsibility", tabindex = "29" })
-                                        @Html.ValidationMessageFor(model => model.PCPL_Job_Responsibility, null, new { style = "color:red" })
+                                        @Html.TextBoxFor(model => model.PCPL_Job_Responsibility, new { @class = "form-control", @id = "txtJobResponsibility", @Name = "txtJobResponsibility", tabindex = "26" })@Html.ValidationMessageFor(model => model.PCPL_Job_Responsibility, null, new { style = "color:red" })
                                         <label id="lblJobResponsibilityMsg" style="color:red;display:none"></label>
                                     </div>
                                 </div>
@@ -430,12 +434,23 @@
 
                         </div>
 
+                        @if (!isCompanyContactEdit || contactCount == 0)
+                        {
+                            <div class="d-flex justify-content-end mt-3">
+                                <button id="btnSave" class="btn btn-success me-2" tabindex="34" onclick="return CheckContactValues()" type="submit">
+                                    <i class="bx bxs-save"></i> Save
+                                </button>
+
+                                <a href="/SPContacts/ContactCompanyList" tabindex="35" class="btn btn-danger">
+                                    <i class="lni lni-close"></i> Cancel
+                                </a>
+                            </div>
+                        }
+
                         <input type="hidden" id="hdfCompanyNo" value="@Session["CompanyNo"].ToString()" />
 
-                        @if (ViewBag.Contactscount > 0)
+                        @if (contactCount > 0)
                         {
-                            <!-- -->
-
                             <div class="row g-3">
                                 <div class="col-md-12" align="right">
                                     <div class="row mb-3">
@@ -597,7 +612,6 @@
                                     </div>
                                 </div>
                             }
-
                         }
 
                     </div>
@@ -613,24 +627,12 @@
                         <input type="hidden" id="hdnCompanyContactActionErr" value="@Session["CompanyContactActionErr"]" />
                         <input type="hidden" id="hfProdNo" name="hfProdNo" value="" style="display:none" />
                         <input type="hidden" id="hfIsCompanyContactEdit" value="@Session["isCompanyContactEdit"].ToString()" />
-                        <button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                        @*<button id="btnSaveSpinner" class="btn btn-primary" type="button" disabled style="display:none">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="visually-hidden">Loading...</span>
-                        </button>
+                        </button>*@
                         <!--&nbsp;-->
                         @*ShowProcessImg()*@
-                        @if (ViewBag.Contactscount == 0)
-                        {
-                            <div class="d-flex justify-content-end mt-3">
-                                <button id="btnSave" class="btn btn-success me-2" tabindex="34" onclick="return CheckContactValues()" type="submit">
-                                    <i class="bx bxs-save"></i> Save
-                                </button>
-
-                                <a href="/SPContacts/ContactCompanyList" tabindex="35" class="btn btn-danger">
-                                    <i class="lni lni-close"></i> Cancel
-                                </a>
-                            </div>
-                        }
                         <div class="left-actions">
                             <button id="btnCreateSQ" type="button" , tabindex="32" class="btn btn-purple" style="display:none">
                                 Create SalesQuote

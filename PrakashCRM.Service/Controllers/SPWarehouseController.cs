@@ -833,7 +833,7 @@ namespace PrakashCRM.Service.Controllers
             List<WarehouseCardDrivers> warehouseCardDrivers = new List<WarehouseCardDrivers>();
 
 
-            var result = ac.GetData<WarehouseCardDrivers>("ContactDotNetAPI", "Company_No eq '" + No + "' and Type eq 'Person'");
+            var result = ac.GetData<WarehouseCardDrivers>("pcplcontacts", "Company_No eq '" + No + "' and Type eq 'Person'", true);
             if (result.Result.Item1.value.Count > 0)
                 warehouseCardDrivers = result.Result.Item1.value;
 
@@ -973,7 +973,7 @@ namespace PrakashCRM.Service.Controllers
             SPDriver responseDriver = new SPDriver();
             var result = (dynamic)null;
 
-            result = ac.PostItem("ContactDotNetAPI", requestDriver, responseDriver);
+            result = ac.PostItem("pcplcontacts", requestDriver, responseDriver, true);
 
             if (result.Result.Item1 != null)
             {
@@ -1359,7 +1359,7 @@ namespace PrakashCRM.Service.Controllers
 
             PostWarehouseCardDrivers contactData = new PostWarehouseCardDrivers();
 
-            var result1 = ac.GetData<PostWarehouseCardDrivers>("ContactDotNetAPI", "No eq '" + Company_No + "'");
+            var result1 = ac.GetData<PostWarehouseCardDrivers>("pcplcontacts", "No eq '" + Company_No + "'", true);
 
             if (result1 != null && result1.Result.Item1.value.Count > 0)
                 contactData = result1.Result.Item1.value.FirstOrDefault();
@@ -1371,7 +1371,7 @@ namespace PrakashCRM.Service.Controllers
             contactData.Company_No = Company_No;
             contactData.Type = Type;
             contactData.Job_Title = JobTitle;
-            var result = ac.PostItem("ContactDotNetAPI", contactData, reswarehose);
+            var result = ac.PostItem("pcplcontacts", contactData, reswarehose, true);
 
             if (result.Result.Item1 != null)
                 reswarehose = result.Result.Item1;

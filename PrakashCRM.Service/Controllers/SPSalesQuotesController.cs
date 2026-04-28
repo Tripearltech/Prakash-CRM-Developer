@@ -64,6 +64,60 @@ namespace PrakashCRM.Service.Controllers
             return "";
         }
 
+        private static string GetApprovalLogoSource()
+        {
+            string[] candidatePaths =
+            {
+                System.Web.Hosting.HostingEnvironment.MapPath("~/Files/logo-3.jfif"),
+                System.Web.Hosting.HostingEnvironment.MapPath("~/Files/logo-2.jfif")
+            };
+
+            try
+            {
+                var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                if (!string.IsNullOrWhiteSpace(baseDir))
+                {
+                    candidatePaths = candidatePaths
+                        .Concat(new[]
+                        {
+                            Path.GetFullPath(Path.Combine(baseDir, "..", "PrakashCRM", "Files", "logo-3.jfif")),
+                            Path.GetFullPath(Path.Combine(baseDir, "..", "PrakashCRM", "Files", "logo-2.jfif"))
+                        })
+                        .ToArray();
+                }
+            }
+            catch
+            {
+            }
+
+            foreach (var path in candidatePaths)
+            {
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+                    {
+                        var ext = Path.GetExtension(path).ToLowerInvariant();
+                        var mime = ext == ".png" ? "image/png" : ext == ".jpg" || ext == ".jpeg" || ext == ".jfif" ? "image/jpeg" : "image/png";
+                        return "data:" + mime + ";base64," + Convert.ToBase64String(File.ReadAllBytes(path));
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            var portalBase = (ConfigurationManager.AppSettings["SPPortalUrl"] ?? "").Trim();
+            if (!string.IsNullOrWhiteSpace(portalBase) && !portalBase.EndsWith("/"))
+                portalBase += "/";
+
+            return !string.IsNullOrWhiteSpace(portalBase) ? (portalBase + "Files/logo-3.jfif") : "";
+        }
+
+        private static string ApplyApprovalLogo(string template)
+        {
+            return (template ?? "").Replace("{ApprovalFileFormatURL}", GetApprovalLogoSource());
+        }
+
         private static string RemoveApprovalLinkSection(string template)
         {
             if (string.IsNullOrWhiteSpace(template))
@@ -73,6 +127,18 @@ namespace PrakashCRM.Service.Controllers
                 template,
                 "(?is)<tr[^>]*>\\s*<td[^>]*colspan=\"4\"[^>]*>\\s*<b>\\s*<a[^>]*>\\s*Send\\s+Quote\\s+Confirmation\\s*</a>\\s*</b>\\s*</td>\\s*</tr>",
                 "");
+        }
+
+        private static string ApplyApprovalStatusHeader(string template, string statusTitle)
+        {
+            if (string.IsNullOrWhiteSpace(template))
+                return template;
+
+            var statusHeader = "Sales Quote " + ((statusTitle ?? "").Trim().ToUpperInvariant());
+            return System.Text.RegularExpressions.Regex.Replace(
+                template,
+                "(?is)(<h3[^>]*>)\\s*Approval\\s+For\\s+Quote(?:\\s*-\\s*##ApprovalForText##)?\\s*(</h3>)",
+                "$1" + statusHeader + "$2");
         }
 
         private static (string Name, string Email, string Phone) TryGetSalespersonContact(API ac, string salesPersonCode)
@@ -815,7 +881,7 @@ namespace PrakashCRM.Service.Controllers
                     DateTime quoteValidUntilDate = Convert.ToDateTime(salesQuoteDetails.ValidUntillDate);
                     QuoteValidityDays = (quoteValidUntilDate - quoteDate).Days;
 
-                    string myString = ApprovalFormatFile;
+                    string myString = ApplyApprovalLogo(ApprovalFormatFile);
 
                     // AprDetailsJustificationReason (shown in UI) maps to Sales Quote WorkDescription.
                     // For the initial approval mail, take it from the request payload.
@@ -1055,6 +1121,118 @@ namespace PrakashCRM.Service.Controllers
                 {
                     var product = salesQuoteDetails.Products[a];
                     var result1 = (dynamic)null;
+                    int SQLineNo = Convert.ToInt32(product.Line_No);
+
+                    if (SQLineNo <= 0)
+                    {
+                        SPSQLinesPost reqSQLineCreate = new SPSQLinesPost();
+                        SPSQLiquidLinesPost reqSQLiquidLineCreate = new SPSQLiquidLinesPost();
+
+                        if (!Convert.ToBoolean(product.IsLiquidProd))
+                        {
+                            reqSQLineCreate.Document_No = responseSQHeader.No;
+                            reqSQLineCreate.No = product.No;
+                            reqSQLineCreate.Type = "Item";
+                            reqSQLineCreate.PCPL_MRP = product.PCPL_MRP;
+                            reqSQLineCreate.Location_Code = LocationCode;
+                            reqSQLineCreate.Quantity = product.Quantity;
+                            reqSQLineCreate.Unit_Price = product.Unit_Price;
+                            reqSQLineCreate.PCPL_Packing_Style_Code = product.PCPL_Packing_Style_Code;
+                            reqSQLineCreate.PCPL_Transport_Method = product.PCPL_Transport_Method;
+                            reqSQLineCreate.PCPL_Transport_Cost = product.PCPL_Transport_Cost;
+                            reqSQLineCreate.PCPL_Commission_Payable = product.PCPL_Commission_Payable ?? "";
+                            reqSQLineCreate.PCPL_Commission_Type = product.PCPL_Commission_Type ?? "";
+                            reqSQLineCreate.PCPL_Commission = product.PCPL_Commission;
+                            reqSQLineCreate.PCPL_Commission_Amount = product.PCPL_Commission_Amount;
+                            reqSQLineCreate.PCPL_Sales_Discount = product.PCPL_Sales_Discount;
+                            reqSQLineCreate.PCPL_Credit_Days = product.PCPL_Credit_Days;
+                            reqSQLineCreate.PCPL_Margin = product.PCPL_Margin;
+                            reqSQLineCreate.PCPL_Margin_Percent = product.PCPL_Margin_Percent;
+                            reqSQLineCreate.PCPL_Interest = product.PCPL_Interest;
+                            reqSQLineCreate.PCPL_Interest_Rate = product.PCPL_Interest_Rate;
+                            reqSQLineCreate.PCPL_Purchase_Cost = product.PCPL_Purchase_Cost;
+                            reqSQLineCreate.PCPL_Total_Cost = product.PCPL_Total_Cost;
+                            reqSQLineCreate.Delivery_Date = product.Delivery_Date;
+                            reqSQLineCreate.Drop_Shipment = product.Drop_Shipment;
+                            reqSQLineCreate.Net_Weight = product.Net_Weight;
+                            reqSQLineCreate.PCPL_Vendor_No = product.PCPL_Vendor_No ?? "";
+                            reqSQLineCreate.GST_Place_Of_Supply = salesQuoteDetails.ShiptoCode == "-1" && salesQuoteDetails.JobtoCode == "-1" ? "Bill-to Address" : "Ship-to Address";
+                            reqSQLineCreate.PCPL_Inquiry_No = string.IsNullOrEmpty(salesQuoteDetails.InquiryNo) ? "" : salesQuoteDetails.InquiryNo;
+                            reqSQLineCreate.PCPL_Inquiry_Line_No = string.IsNullOrEmpty(product.InqProdLineNo) ? 0 : Convert.ToInt32(product.InqProdLineNo);
+                            reqSQLineCreate.Line_No = 0;
+                            reqSQLineCreate.New_Margin = product.New_Margin;
+                            reqSQLineCreate.New_Price = product.New_Price;
+                            reqSQLineCreate.Price_Updated = product.Price_Updated;
+
+                            result1 = PostItemSQLines("SalesQuoteSubFormDotNetAPI", "SQLine", reqSQLineCreate, reqSQLiquidLineCreate, resSQLine);
+                        }
+                        else
+                        {
+                            reqSQLiquidLineCreate.Document_No = responseSQHeader.No;
+                            reqSQLiquidLineCreate.No = product.No;
+                            reqSQLiquidLineCreate.Type = "Item";
+                            reqSQLiquidLineCreate.PCPL_MRP = product.PCPL_MRP;
+                            reqSQLiquidLineCreate.Location_Code = LocationCode;
+                            reqSQLiquidLineCreate.PCPL_Concentration_Rate_Percent = product.PCPL_Concentration_Rate_Percent;
+                            reqSQLiquidLineCreate.Net_Weight = product.Net_Weight;
+                            reqSQLiquidLineCreate.PCPL_Liquid_Rate = product.PCPL_Liquid_Rate;
+                            reqSQLiquidLineCreate.PCPL_Liquid = product.IsLiquidProd;
+                            reqSQLiquidLineCreate.PCPL_Packing_Style_Code = product.PCPL_Packing_Style_Code;
+                            reqSQLiquidLineCreate.PCPL_Transport_Method = product.PCPL_Transport_Method;
+                            reqSQLiquidLineCreate.PCPL_Transport_Cost = product.PCPL_Transport_Cost;
+                            reqSQLiquidLineCreate.PCPL_Commission_Payable = product.PCPL_Commission_Payable ?? "";
+                            reqSQLiquidLineCreate.PCPL_Commission_Type = product.PCPL_Commission_Type ?? "";
+                            reqSQLiquidLineCreate.PCPL_Commission = product.PCPL_Commission;
+                            reqSQLiquidLineCreate.PCPL_Commission_Amount = product.PCPL_Commission_Amount;
+                            reqSQLiquidLineCreate.PCPL_Sales_Discount = product.PCPL_Sales_Discount;
+                            reqSQLiquidLineCreate.PCPL_Credit_Days = product.PCPL_Credit_Days;
+                            reqSQLiquidLineCreate.PCPL_Margin = product.PCPL_Margin;
+                            reqSQLiquidLineCreate.PCPL_Margin_Percent = product.PCPL_Margin_Percent;
+                            reqSQLiquidLineCreate.PCPL_Interest = product.PCPL_Interest;
+                            reqSQLiquidLineCreate.PCPL_Interest_Rate = product.PCPL_Interest_Rate;
+                            reqSQLiquidLineCreate.PCPL_Purchase_Cost = product.PCPL_Purchase_Cost;
+                            reqSQLiquidLineCreate.PCPL_Total_Cost = product.PCPL_Total_Cost;
+                            reqSQLiquidLineCreate.Delivery_Date = product.Delivery_Date;
+                            reqSQLiquidLineCreate.Drop_Shipment = product.Drop_Shipment;
+                            reqSQLiquidLineCreate.PCPL_Vendor_No = product.PCPL_Vendor_No ?? "";
+                            reqSQLiquidLineCreate.GST_Place_Of_Supply = salesQuoteDetails.ShiptoCode == "-1" && salesQuoteDetails.JobtoCode == "-1" ? "Bill-to Address" : "Ship-to Address";
+                            reqSQLiquidLineCreate.PCPL_Inquiry_No = string.IsNullOrEmpty(salesQuoteDetails.InquiryNo) ? "" : salesQuoteDetails.InquiryNo;
+                            reqSQLiquidLineCreate.PCPL_Inquiry_Line_No = string.IsNullOrEmpty(product.InqProdLineNo) ? 0 : Convert.ToInt32(product.InqProdLineNo);
+                            reqSQLiquidLineCreate.Line_No = 0;
+                            reqSQLiquidLineCreate.New_Margin = product.New_Margin;
+                            reqSQLiquidLineCreate.New_Price = product.New_Price;
+                            reqSQLiquidLineCreate.Price_Updated = product.Price_Updated;
+
+                            result1 = PostItemSQLines("SalesQuoteSubFormDotNetAPI", "SQLiquidLine", reqSQLineCreate, reqSQLiquidLineCreate, resSQLine);
+                        }
+
+                        if (result1?.Result.Item1 == null || !result1.Result.Item2.isSuccess)
+                        {
+                            responseSQHeader.errorDetails = result1?.Result.Item2 ?? new errorDetails { isSuccess = false, message = "Failed to create sales quote line item." };
+                            return responseSQHeader;
+                        }
+
+                        resSQLine = result1.Result.Item1;
+                        ed1 = result1.Result.Item2;
+                        responseSQHeader.errorDetails = ed1;
+                        responseSQHeader.ItemLineNo += $"{resSQLine.No}_{resSQLine.Line_No},";
+
+                        if (!string.IsNullOrWhiteSpace(salesQuoteDetails.InquiryNo) && !string.IsNullOrWhiteSpace(product.InqProdLineNo))
+                        {
+                            SPSQUpdateInqToQuote inqToQuoteReq = new SPSQUpdateInqToQuote();
+                            SPInqLines inqToQuoteRes = new SPInqLines();
+                            inqToQuoteReq.PCPL_Convert_Quote = true;
+
+                            var resultInqToQuote = PatchItemInqToQuote("InquiryProductsDotNetAPI", inqToQuoteReq, inqToQuoteRes, $"Document_Type='Quote',Document_No='{salesQuoteDetails.InquiryNo}',Line_No={Convert.ToInt32(product.InqProdLineNo)}");
+                            if (resultInqToQuote?.Result.Item1 == null || !resultInqToQuote.Result.Item2.isSuccess)
+                            {
+                                responseSQHeader.errorDetails = resultInqToQuote?.Result.Item2 ?? new errorDetails { isSuccess = false, message = "Failed to update inquiry to quote." };
+                                return responseSQHeader;
+                            }
+                        }
+
+                        continue;
+                    }
 
                     if (!Convert.ToBoolean(product.IsLiquidProd))
                     {
@@ -1085,7 +1263,6 @@ namespace PrakashCRM.Service.Controllers
                         reqSQLineUpdate.New_Price = product.New_Price;
                         reqSQLineUpdate.Price_Updated = product.Price_Updated;
 
-                        int SQLineNo = Convert.ToInt32(product.Line_No);
                         result1 = PatchItemSQLines("SalesQuoteSubFormDotNetAPI", "SQLine", reqSQLineUpdate, reqSQLiquidLineUpdate, resSQLine, $"Document_Type='Quote',Document_No='{responseSQHeader.No}',Line_No={SQLineNo}");
                     }
                     else
@@ -1119,8 +1296,6 @@ namespace PrakashCRM.Service.Controllers
                         reqSQLiquidLineUpdate.New_Price = product.New_Price;
                         reqSQLiquidLineUpdate.Price_Updated = product.Price_Updated;
 
-
-                        int SQLineNo = Convert.ToInt32(product.Line_No);
                         result1 = PatchItemSQLines("SalesQuoteSubFormDotNetAPI", "SQLiquidLine", reqSQLineUpdate, reqSQLiquidLineUpdate, resSQLine, $"Document_Type='Quote',Document_No='{responseSQHeader.No}',Line_No={SQLineNo}");
                     }
 
@@ -1163,7 +1338,7 @@ namespace PrakashCRM.Service.Controllers
                     DateTime quoteValidUntilDate = Convert.ToDateTime(salesQuoteDetails.ValidUntillDate);
                     QuoteValidityDays = (quoteValidUntilDate - quoteDate).Days;
 
-                    string myString = ApprovalFormatFile;
+                    string myString = ApplyApprovalLogo(ApprovalFormatFile);
 
                     // AprDetailsJustificationReason (shown in UI) maps to Sales Quote WorkDescription.
                     // For the approval mail, take it from the request payload.
@@ -1470,14 +1645,20 @@ namespace PrakashCRM.Service.Controllers
                 if (!sqHeader.errorDetails.isSuccess)
                     resMsg = "Error:" + sqHeader.errorDetails.message;
 
-                if (!string.IsNullOrWhiteSpace(SPEmail))
+                var statusMailToEmail = FirstEmailOrEmpty(SPEmail);
+                if (string.IsNullOrWhiteSpace(statusMailToEmail))
+                    statusMailToEmail = FirstEmailOrEmpty(sqHeader?.PCPL_SalesPerson_Email ?? "");
+                if (string.IsNullOrWhiteSpace(statusMailToEmail))
+                    statusMailToEmail = TryGetSalespersonContact(ac, sqHeader?.Salesperson_Code ?? "").Email;
+                var statusMailCcEmail = FirstEmailOrEmpty(LoggedInUserEmail ?? "");
+
+                if (!string.IsNullOrWhiteSpace(statusMailToEmail))
                 {
                     var template = LoadApprovalEmailTemplate();
                     var portalBase = (System.Configuration.ConfigurationManager.AppSettings["SPPortalUrl"]?.ToString() ?? "").Trim();
                     if (!string.IsNullOrWhiteSpace(portalBase))
                         portalBase = portalBase.TrimEnd('/') + "/";
 
-                    var logoUrl = !string.IsNullOrWhiteSpace(portalBase) ? (portalBase + "Files/logo-3.jfif") : "";
                     var statusLink = !string.IsNullOrWhiteSpace(portalBase) ? (portalBase + "SPSalesQuotes/SalesQuote") : "";
 
                     var approvalForText = ApprovalFor == "Both" ? "Negative Credit Limit And Margin" : (ApprovalFor ?? "");
@@ -1625,15 +1806,7 @@ namespace PrakashCRM.Service.Controllers
                     if (!string.IsNullOrWhiteSpace(template))
                     {
                         mailBody = RemoveApprovalLinkSection(template);
-
-                        // For reject status mails, remove the "Approval For Quote - ..." header row from the template.
-                        if (string.Equals((Action ?? "").Trim(), "Reject", StringComparison.OrdinalIgnoreCase))
-                        {
-                            mailBody = System.Text.RegularExpressions.Regex.Replace(
-                                mailBody,
-                                "(?is)<tr[^>]*>\\s*<td[^>]*colspan=\"4\"[^>]*>\\s*<h3[^>]*>\\s*Approval\\s+For\\s+Quote\\s*-\\s*##ApprovalForText##\\s*</h3>\\s*</td>\\s*</tr>",
-                                "");
-                        }
+                        mailBody = ApplyApprovalStatusHeader(mailBody, statusTitle);
 
                         mailBody = mailBody.Replace("##pageheading##", $" SALES QUOTE {statusTitle} ");
                         mailBody = mailBody.Replace("##heading##", headingText);
@@ -1641,7 +1814,7 @@ namespace PrakashCRM.Service.Controllers
                         mailBody = mailBody.Replace("##SalesQuoteNo##", SQNo ?? "");
                         mailBody = mailBody.Replace("##SalesQuoteDate##", sqHeader?.Order_Date ?? "");
                         mailBody = mailBody.Replace("##SalesQuoteApprovalFormURL##", statusLink);
-                        mailBody = mailBody.Replace("{ApprovalFileFormatURL}", logoUrl);
+                        mailBody = ApplyApprovalLogo(mailBody);
 
                         mailBody = mailBody.Replace("##CustomerDetail##", customerDetailHtml);
                         mailBody = mailBody.Replace("##ContactName##", contactName);
@@ -1663,8 +1836,8 @@ namespace PrakashCRM.Service.Controllers
 
                         // Footer block (contact + warehouse).
                         var (spContactName, spContactEmail, spContactPhone) = TryGetSalespersonContact(ac, sqHeader?.Salesperson_Code ?? "");
-                        if (string.IsNullOrWhiteSpace(spContactEmail)) spContactEmail = FirstEmailOrEmpty(SPEmail ?? "");
-                        if (string.IsNullOrWhiteSpace(spContactEmail)) spContactEmail = FirstEmailOrEmpty(LoggedInUserEmail ?? "");
+                        if (string.IsNullOrWhiteSpace(spContactEmail)) spContactEmail = statusMailToEmail;
+                        if (string.IsNullOrWhiteSpace(spContactEmail)) spContactEmail = statusMailCcEmail;
                         var locationCodeForFooter = (sqHeader?.Location_Code ?? "").Trim();
                         var loc = TryGetLocation(ac, locationCodeForFooter);
                         var warehouseManagerPhone = (loc?.Phone_No ?? "").Trim();
@@ -1695,7 +1868,18 @@ namespace PrakashCRM.Service.Controllers
 
                     var subject = $"Sales Quote {SQNo} {statusTitle} - {approvalForText}";
                     var emailService = new EmailService();
-                    emailService.SendEmailWithHTMLBody(SPEmail, LoggedInUserEmail, "", subject, mailBody);
+                    try
+                    {
+                        emailService.SendEmailWithHTMLBody(statusMailToEmail, statusMailCcEmail, "", subject, mailBody);
+                    }
+                    catch (Exception ex)
+                    {
+                        resMsg = "Error:Sales quote status updated, but rejected/approved mail failed: " + ex.Message;
+                    }
+                }
+                else if (string.Equals((Action ?? "").Trim(), "Reject", StringComparison.OrdinalIgnoreCase))
+                {
+                    resMsg = "Error:Sales quote rejected, but salesperson email was not found for rejected mail.";
                 }
 
                 // If finance approved a "Both" case, trigger the next approval email to HOD.
@@ -1749,8 +1933,6 @@ namespace PrakashCRM.Service.Controllers
                                     {
                                         portalFileBase = portalFileBase.TrimEnd('/') + "/";
                                     }
-
-                                    var logoUrl = !string.IsNullOrWhiteSpace(portalFileBase) ? (portalFileBase + "Files/logo-3.jfif") : "";
 
                                     var customerName = (sqHeader?.Sell_to_Customer_Name ?? "").Trim();
                                     var customerAddress = (sqHeader?.Sell_to_Address ?? "").Trim();
@@ -1899,7 +2081,7 @@ namespace PrakashCRM.Service.Controllers
                                     htmlBody = htmlBody.Replace("##SalesQuoteDate##", sqHeader?.Order_Date ?? "");
                                     htmlBody = htmlBody.Replace("##ApprovalForText##", "Negative Margin");
                                     htmlBody = htmlBody.Replace("##SalesQuoteApprovalFormURL##", approvalUrl);
-                                    htmlBody = htmlBody.Replace("{ApprovalFileFormatURL}", logoUrl);
+                                    htmlBody = ApplyApprovalLogo(htmlBody);
 
                                     // Populate the same template fields as the initial approval email.
                                     htmlBody = htmlBody.Replace("##CustomerDetail##", customerDetailHtml);
@@ -2048,14 +2230,14 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPCompanyList> companies = new List<SPCompanyList>();
 
-            var result = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'");
+            var result = ac.GetData<SPCompanyList>("pcplcontacts", "Type eq 'Company' and Salesperson_Code eq '" + SPCode + "'", true);
 
             if (result != null && result.Result.Item1?.value != null && result.Result.Item1.value.Count > 0)
                 companies = result.Result.Item1.value;
 
             List<SPCompanyList> company2 = new List<SPCompanyList>();
 
-            var result2 = ac.GetData<SPCompanyList>("ContactDotNetAPI", "PCPL_Secondary_SP_Code eq '" + SPCode + "' and Salesperson_Code ne '" + SPCode + "' and Type eq 'Company'");
+            var result2 = ac.GetData<SPCompanyList>("pcplcontacts", "PCPL_Secondary_SP_Code eq '" + SPCode + "' and Salesperson_Code ne '" + SPCode + "' and Type eq 'Company'", true);
 
             if (result2 != null && result2.Result.Item1?.value != null && result2.Result.Item1.value.Count > 0)
             {
@@ -2115,7 +2297,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<SPSQContacts> contacts = new List<SPSQContacts>();
 
-            var result = ac.GetData<SPSQContacts>("ContactDotNetAPI", "Type eq 'Person' and Company_Name eq '" + companyName + "'");
+            var result = ac.GetData<SPSQContacts>("pcplcontacts", "Type eq 'Person' and Company_Name eq '" + companyName + "'", true);
 
             if (result.Result.Item1.value.Count > 0)
                 contacts = result.Result.Item1.value;
@@ -2308,7 +2490,7 @@ namespace PrakashCRM.Service.Controllers
             SPConBusinessRelation conBusinessRelation = new SPConBusinessRelation();
             SPSQCreditLimitAndCustDetails creditlimitcustdetails = new SPSQCreditLimitAndCustDetails();
 
-            var resultCompanyNo = ac.GetData<ContCustForBusRel>("ContactDotNetAPI", "Type eq 'Company' and Name eq '" + companyName + "'");
+            var resultCompanyNo = ac.GetData<ContCustForBusRel>("pcplcontacts", "Type eq 'Company' and Name eq '" + companyName + "'", true);
 
             if (resultCompanyNo.Result.Item1.value.Count > 0)
                 contCustForBusRel.Company_No = resultCompanyNo.Result.Item1.value[0].Company_No;
@@ -2320,7 +2502,7 @@ namespace PrakashCRM.Service.Controllers
             {
                 conBusinessRelation.No = resultCustomerNo.Result.Item1.value[0].No;
 
-                var resultCustomer = ac.GetData<SPCustomer>("CustomerCardDotNetAPI", "No eq '" + conBusinessRelation.No + "'");
+                var resultCustomer = ac.GetData<SPCustomer>("pcplcustomers", "No eq '" + conBusinessRelation.No + "'", true);
 
                 if (resultCustomer.Result.Item1.value.Count > 0)
                 {
@@ -2379,7 +2561,7 @@ namespace PrakashCRM.Service.Controllers
                 creditlimitcustdetails.OutstandingDue = "0.00";
 
                 SPCompanyList companyList = new SPCompanyList();
-                var resultCompanyDetails = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Type eq 'Company' and No eq '" + contCustForBusRel.Company_No + "'");
+                var resultCompanyDetails = ac.GetData<SPCompanyList>("pcplcontacts", "Type eq 'Company' and No eq '" + contCustForBusRel.Company_No + "'", true);
 
                 if (resultCompanyDetails.Result.Item1.value.Count > 0)
                 {
@@ -3098,7 +3280,7 @@ namespace PrakashCRM.Service.Controllers
             SPContact resCPerson = new SPContact();
             errorDetails ed = new errorDetails();
 
-            var result = ac.PostItem("ContactDotNetAPI", reqCPerson, resCPerson);
+            var result = ac.PostItem("pcplcontacts", reqCPerson, resCPerson, true);
 
             if (result.Result.Item1 != null)
                 resCPerson = result.Result.Item1;
@@ -3218,7 +3400,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             SPSQCompanyIndustry companyIndustry = new SPSQCompanyIndustry();
 
-            var result = ac.GetData<SPSQCompanyIndustry>("ContactDotNetAPI", "No eq '" + CCompanyNo + "'"); // and Contact_Business_Relation eq 'Customer'
+            var result = ac.GetData<SPSQCompanyIndustry>("pcplcontacts", "No eq '" + CCompanyNo + "'", true); // and Contact_Business_Relation eq 'Customer'
 
             if (result.Result.Item1.value.Count > 0)
                 companyIndustry = result.Result.Item1.value[0];

@@ -3,8 +3,7 @@
 let InquiryLineForUpdate = {};
 
 $(document).ready(function () {
-
-    // Always start with main action buttons enabled on Inquiry page
+       // Always start with main action buttons enabled on Inquiry page
     try {
         $('#btnSaveProd, #btnSave').prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
     } catch (e) { }
@@ -109,7 +108,7 @@ $(document).ready(function () {
 
     $('#ddlPaymentTerms').change(function () {
 
-        $('#txtProDetailsPaymentTerms, #hfSavedPaymentTerms').val($('#ddlPaymentTerms option:selected').text());
+        $('#txtProDetailsPaymentTerms, #hfSavedPaymentTerms').val(GetInquiryPaymentTermsText());
         $('#txtProDetailsPaymentTerms').attr('readonly', true);
     });
 
@@ -138,11 +137,17 @@ $(document).ready(function () {
         $("#txtUOM").val($('#ddlProduct').val().split('-')[1]);
     });
 
+    bindPackingStyleQuantityValidation();
+    refreshPackingStyleQuantityValidation();
+
     $('#btnSaveProd').click(function () {
         /*$('#txtProductName').val() == ""*/
+        $('#txtProdQty').removeClass('is-invalid');
         var ErrMsg = "";
-        var numbers = /^[0-9]+$/;
         var prodQty = $('#txtProdQty').val();
+        if ($('#txtProDetailsPaymentTerms').val() == "") {
+            $('#txtProDetailsPaymentTerms').val(GetInquiryPaymentTermsText());
+        }
 
         if ($('#txtProductName').val() == "-1" || $('#txtProdQty').val() == "" || $('#txtUOM').val() == "" ||
             $('#ddlPackingStyle').val() == "-1" || $('#txtProDetailsPaymentTerms').val() == "") {
@@ -151,9 +156,10 @@ $(document).ready(function () {
             ShowErrMsg(ErrMsg);
 
         }
-        else if (!prodQty.match(numbers)) {
+        else if (getQuantityValidationMessage(prodQty) != "") {
 
-            ErrMsg = "Product qty should be in numeric";
+            ErrMsg = getQuantityValidationMessage(prodQty);
+            $('#txtProdQty').addClass('is-invalid');
             ShowErrMsg(ErrMsg);
 
         }
@@ -189,7 +195,7 @@ $(document).ready(function () {
             prodOpts = "<td><a class='InqLineCls' onclick='EditInqProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-edit'></i></a>&nbsp;" +
                 "<a class='InqLineCls' onclick='DeleteInqProd(\"ProdTR_" + $('#hfProdNo').val() + "\")'><i class='bx bxs-trash'></i></a></td><td hidden>" + $('#hfProdNo').val() +
                 "</td><td>" + $('#txtProductName').val() + "</td><td>" + $('#txtProdQty').val() + "</td><td>" + $('#ddlPackingStyle').val() + "</td><td>" +
-                $('#txtUOM').val() + "</td><td>" + $('#txtDeliveryDate').val() + "</td><td>" + $('#txtProDetailsPaymentTerms').val() + "</td>";
+                $('#txtUOM').val() + "</td><td>" + $('#txtDeliveryDate').val() + "</td><td>" + ($('#txtProDetailsPaymentTerms').val() || GetInquiryPaymentTermsText()) + "</td>";
 
             if ($('#hfProdLineNo').val() != "") {
                 prodOpts += "<td hidden>" + $('#hfProdLineNo').val() + "</td>";
@@ -424,7 +430,7 @@ $(document).ready(function () {
                 var NewDeliveryToAddress = {};
 
                 NewDeliveryToAddress.Customer_No = $('#hfCustomerNo').val();
-               // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
+                // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
                 NewDeliveryToAddress.Address = $('#txtNewJobtoAddress').val();
                 NewDeliveryToAddress.Address_2 = $('#txtNewJobtoAddress2').val();
                 NewDeliveryToAddress.Post_Code = $('#txtNewJobtoAddPostCode').val();
@@ -786,6 +792,18 @@ function BindDepartment() {
     );
 }
 
+function GetInquiryPaymentTermsText() {
+    var selectedValue = ($('#ddlPaymentTerms').val() || '').toString();
+    if (selectedValue && selectedValue !== '-1') {
+        var selectedText = ($('#ddlPaymentTerms option:selected').text() || '').toString().trim();
+        if (selectedText !== '' && selectedText !== '---Select---') {
+            return selectedText;
+        }
+    }
+
+    return ($('#hfSavedPaymentTerms').val() || $('#hfSavedPaymentTermsCode').val() || '').toString().trim();
+}
+
 function EditInqProd(ProdTR) {
 
     ResetProdDetails();
@@ -796,12 +814,12 @@ function EditInqProd(ProdTR) {
     $('#txtProductName').val($("#" + ProdTR).find("TD").eq(2).html());
     GetProductDetails($('#txtProductName').val());
     $('#txtProductName').blur();
-    $('#txtProductName').prop('disabled', true);
-    $('#txtProdQty').val(parseInt($("#" + ProdTR).find("TD").eq(3).html()));
+    $('#txtProductName').prop('disabled', false);
+    $('#txtProdQty').val($.trim($("#" + ProdTR).find("TD").eq(3).html()));
     $('#hfEditPackingStyle').val($("#" + ProdTR).find("TD").eq(4).html());
     $('#txtDeliveryDate').val($("#" + ProdTR).find("TD").eq(6).html());
-    $('#txtProDetailsPaymentTerms').val($("#" + ProdTR).find("TD").eq(7).html());
-    $('#txtProDetailsPaymentTerms').val($('#ddlPaymentTerms').val());
+    $('#txtProDetailsPaymentTerms').val($("#" + ProdTR).find("TD").eq(7).html() || GetInquiryPaymentTermsText());
+    $('#txtProDetailsPaymentTerms').attr('readonly', true);
     $('#hfProdLineNo').val($("#" + ProdTR).find("TD").eq(8).html());
 
 }
@@ -1049,17 +1067,18 @@ function BindPaymentTerms() {
 
                     $('#ddlPaymentTerms').append($('<option value="-1">---Select---</option>'));
                     $.each(data, function (i, data) {
+                        var paymentTermsText = data.Description || data.Name || data.Code;
                         $('<option>',
                             {
                                 value: data.Code,
-                                text: data.Description
+                                text: paymentTermsText
                             }
-                        ).html(data.Name).appendTo("#ddlPaymentTerms");
+                        ).html(paymentTermsText).appendTo("#ddlPaymentTerms");
                     });
 
                     if ($('#hfSavedPaymentTermsCode').val() != "" && $('#hfSavedPaymentTermsCode').val() != null) {
                         $('#ddlPaymentTerms').val($('#hfSavedPaymentTermsCode').val());
-                        $('#txtLineDetailsPaymentTerms').val($('#ddlPaymentTerms option:selected').text());
+                        $('#txtProDetailsPaymentTerms, #hfSavedPaymentTerms').val(GetInquiryPaymentTermsText());
                     }
 
                 }
@@ -1087,6 +1106,7 @@ function GetAndFillInquiryDetails(InqNo) {
     var apiUrl = $('#getServiceApiUrl').val() + 'SPInquiry/';
 
     $.get(apiUrl + 'GetInquiryFromInquiryNo?Inquiry_No=' + InqNo, function (data) {
+        toggleSalesQuoteButtons(data.PCPL_Convert_Quote);
         $('#hfInqEdit').val("true");
         $('#hfInqNo').val(data.Inquiry_No);
         $('#txtInquiryDate').val(data.Inquiry_Date.substring(0, 10));
@@ -1393,6 +1413,8 @@ function GetProductDetails(productName) {
                         $('#ddlPackingStyle').val('-1');
                     }
 
+                    refreshPackingStyleQuantityValidation();
+
                 }
             },
             error: function () {
@@ -1413,16 +1435,24 @@ function BindInquiryLineDetails(InqNo) {
 
             $('#tblProdList').css('display', 'block');
             var ProdTR = "";
+            var hasOpenInquiryLine = false;
 
             $.each(data, function (index, item) {
+                if (!parseBool(item.PCPL_Convert_Quote)) {
+                    hasOpenInquiryLine = true;
+                }
 
+                var paymentTermsText = item.PCPL_Payment_Terms || GetInquiryPaymentTermsText();
                 ProdTR += "<tr id=\"ProdTR_" + item.Product_No + "\"><td><a class='EditInqLineCls' onclick='EditInqProd(\"ProdTR_" + item.Product_No + "\")'><i class='bx bxs-edit'></i></a></td><td hidden>" +
                     item.Product_No + "</td><td>" + item.Product_Name + "</td><td>" + item.Quantity + "</td><td>" + item.PCPL_Packing_Style_Code + "</td><td>" + item.Unit_of_Measure + "</td><td>" + item.Delivery_Date +
-                    "</td><td>" + $('#hfSavedPaymentTermsCode').val() + "</td><td hidden>" + item.Line_No + "</td></tr>";
+                    "</td><td>" + paymentTermsText + "</td><td hidden>" + item.Line_No + "</td></tr>";
 
             });
 
             $('#tblProducts').append(ProdTR);
+            if (data.length > 0) {
+                toggleSalesQuoteButtons(!hasOpenInquiryLine);
+            }
         }
 
     });
@@ -1522,11 +1552,14 @@ function ResetProdDetails() {
     $('#txtProductName').val("");
     //$('#ddlProductName').val("-1");
     $('#txtProdQty').val("");
+    $('#txtProdQty').removeClass('is-invalid');
     $('#txtUOM').val("");
     $('#txtDeliveryDate').val("");
     $('#txtProDetailsPaymentTerms').val($('#ddlPaymentTerms option:selected').text());
     $('#ddlPackingStyle').empty();
     $('#ddlPackingStyle').append("<option value='-1'>---Select---</option>");
+    $('#hfEditPackingStyle').val("");
+    applyQuantityValidationMode(true, null);
 }
 
 function BindInqLineDetails() {
@@ -1563,9 +1596,11 @@ function ResetInqLineDetails() {
     $('#txtProductName').val("");
     //$('#ddlProductName').val("-1");
     $('#txtProdQty').val("");
+    $('#txtProdQty').removeClass('is-invalid');
     $('#txtUOM').val("");
     $('#txtDeliveryDate').val("");
     $('#txtProDetailsPaymentTerms').val("");
+    applyQuantityValidationMode(true, null);
 
 }
 
@@ -1626,7 +1661,7 @@ function ResetNewBillToAddressDetails() {
 
 function ResetNewDeliveryToAddressDetails() {
 
-   // $('#txtNewJobtoAddCode').val("");
+    // $('#txtNewJobtoAddCode').val("");
     $('#txtNewJobtoAddress').val("");
     $('#txtNewJobtoAddress2').val("");
     $('#txtNewJobtoAddPostCode').val("");
@@ -1773,4 +1808,213 @@ function ShowErrMsg(errMsg) {
         msg: errMsg
     });
 
+}
+function parseBool(value) {
+    if (value === true) return true;
+    if (value === false || value === null || value === undefined) return false;
+    value = value.toString().trim().toLowerCase();
+    return value === 'true' || value === '1' || value === 'yes';
+}
+
+function toggleSalesQuoteButtons(isConverted) {
+
+    if (parseBool(isConverted)) {
+
+        $('#btnSaveProd, #btnSave, #btnFinancehide #btnSave')
+            .prop('disabled', true)
+            .css({ 'pointer-events': 'none', 'opacity': '0.5' });
+        $('#btnFinancehide').css({ 'pointer-events': 'none', 'opacity': '0.5' });
+
+    } else {
+
+        $('#btnSaveProd, #btnSave, #btnFinancehide #btnSave')
+            .prop('disabled', false)
+            .css({ 'pointer-events': '', 'opacity': '' });
+        $('#btnFinancehide').css({ 'pointer-events': '', 'opacity': '' });
+    }
+}
+
+var packingStyleConversionFactorCache = {};
+var packingStyleValidationRequestId = 0;
+
+function normalizePackingStyleLookupValue(value) {
+    return $.trim((value || '').toString()).replace(/\s+/g, ' ').toUpperCase();
+}
+
+function getSelectedPackingStyleText() {
+    return $.trim($('#ddlPackingStyle option:selected').text() || '');
+}
+
+function bindPackingStyleQuantityValidation() {
+    $('#ddlPackingStyle')
+        .off('.packingStyleQtyValidation')
+        .on('change.packingStyleQtyValidation', function () {
+            refreshPackingStyleQuantityValidation();
+        });
+
+    $('#txtUOM')
+        .off('.packingStyleQtyValidation')
+        .on('change.packingStyleQtyValidation input.packingStyleQtyValidation blur.packingStyleQtyValidation', function () {
+            refreshPackingStyleQuantityValidation();
+        });
+}
+
+function getPackingStyleConversionFactor(packingStyleCode, baseUOM, packingStyleText) {
+    var cacheKey = [
+        normalizePackingStyleLookupValue(packingStyleCode),
+        normalizePackingStyleLookupValue(packingStyleText),
+        normalizePackingStyleLookupValue(baseUOM)
+    ].join('|');
+
+    if (Object.prototype.hasOwnProperty.call(packingStyleConversionFactorCache, cacheKey)) {
+        return $.Deferred().resolve(packingStyleConversionFactorCache[cacheKey]).promise();
+    }
+
+    return $.ajax({
+        url: apiUrl + 'GetPackingStyleConversionFactor',
+        type: 'GET',
+        data: {
+            packingStyleCode: packingStyleCode,
+            packingStyleText: packingStyleText,
+            baseUOM: baseUOM
+        },
+        dataType: 'json'
+    }).then(function (data) {
+        packingStyleConversionFactorCache[cacheKey] = data || {};
+        return packingStyleConversionFactorCache[cacheKey];
+    });
+}
+
+function sanitizeQuantityValue(value, allowDecimal) {
+    var sourceValue = (value || '').toString();
+    var sanitizedValue = '';
+    var hasDecimalPoint = false;
+
+    for (var i = 0; i < sourceValue.length; i++) {
+        var currentChar = sourceValue.charAt(i);
+
+        if (/\d/.test(currentChar)) {
+            sanitizedValue += currentChar;
+        }
+        else if ((currentChar === '.' || currentChar === ',') && !hasDecimalPoint) {
+            sanitizedValue += '.';
+            hasDecimalPoint = true;
+        }
+    }
+
+    return sanitizedValue;
+}
+
+function getQuantityValidationMessage(prodQty) {
+    var qtyValue = $.trim(prodQty || '');
+
+    if (qtyValue === '') {
+        return '';
+    }
+
+    var quantity = Number(qtyValue);
+    if (Number.isNaN(quantity)) {
+        return 'Product qty should be numeric.';
+    }
+
+    var conversionFactor = Number($('#txtProdQty').data('conversionFactor'));
+    var quantityMode = $('#txtProdQty').data('quantityMode');
+
+    // 👉 NEW: Base UOM & Packing UOM
+    var baseUOM = $('#txtProdQty').data('baseuom');
+    var packingUOM = $('#txtProdQty').data('packinguom');
+
+    // Quantity format validation
+    if (quantityMode === 'integer') {
+        if (!/^\d+$/.test(qtyValue)) {
+            return 'Packing Quantity cannot be decimal.';
+        }
+    } else {
+        if (!/^\d+(\.\d+)?$/.test(qtyValue)) {
+            return 'Product qty should be numeric.';
+        }
+    }
+
+    // 👉 CORRECT BUSINESS LOGIC
+    if (!Number.isNaN(conversionFactor) && conversionFactor > 0) {
+        var baseQty = quantity / conversionFactor;
+            baseQty = Math.round(baseQty)
+
+        // 🔴 Apply ONLY when Base UOM ≠ Packing UOM
+        if (baseUOM !== packingUOM) {
+            if (!Number.isInteger(baseQty)) {
+                return 'Qty / Conversion Factor should not be in decimal when Base UOM and Packing UOM are different.';
+            }
+        }
+        // ✅ If Base UOM == Packing UOM → allow both
+    }
+
+    return '';
+}
+
+function applyQuantityValidationMode(allowDecimal, conversionFactor) {
+    var $txtProdQty = $('#txtProdQty');
+    var quantityMode = allowDecimal ? 'decimal' : 'integer';
+
+    $txtProdQty
+        .data('quantityMode', quantityMode)
+        .data('conversionFactor', conversionFactor)
+        .attr('inputmode', 'decimal')
+        .attr('title', 'Enter quantity as number');
+
+    $txtProdQty.off('.quantityValidation');
+
+    $txtProdQty.on('input.quantityValidation blur.quantityValidation', function () {
+        var $currentQty = $(this);
+        var sanitizedValue = sanitizeQuantityValue($currentQty.val(), true); // allow typing decimal
+
+        if ($currentQty.val() !== sanitizedValue) {
+            $currentQty.val(sanitizedValue);
+        }
+    });
+
+    var sanitizedCurrentValue = sanitizeQuantityValue($txtProdQty.val(), true);
+    if ($txtProdQty.val() !== sanitizedCurrentValue) {
+        $txtProdQty.val(sanitizedCurrentValue);
+    }
+}
+
+function refreshPackingStyleQuantityValidation() {
+    var packingStyleCode = $.trim($('#ddlPackingStyle').val() || '');
+    var packingStyleText = getSelectedPackingStyleText();
+    var baseUOM = $.trim($('#txtUOM').val() || '');
+    var requestId = ++packingStyleValidationRequestId;
+
+    if (packingStyleCode === '' || packingStyleCode === '-1' || baseUOM === '') {
+        applyQuantityValidationMode(true, null);
+        return;
+    }
+
+    getPackingStyleConversionFactor(packingStyleCode, baseUOM, packingStyleText)
+        .done(function (data) {
+            if (requestId !== packingStyleValidationRequestId) {
+                return;
+            }
+
+            var conversionFactor = data && data.IsMatched ? Number(data.Conversion_Factor) : NaN;
+
+            // 👉 NEW: store Base & Packing UOM
+            var packingUOM = data && data.Packing_UOM ? data.Packing_UOM : '';
+
+            $('#txtProdQty')
+                .data('baseuom', baseUOM)
+                .data('packinguom', packingUOM);
+
+            // 👉 allowDecimal only for UI (not business rule)
+            var allowDecimal = true;
+
+            applyQuantityValidationMode(allowDecimal, isNaN(conversionFactor) ? null : conversionFactor);
+        })
+        .fail(function () {
+            if (requestId !== packingStyleValidationRequestId) {
+                return;
+            }
+
+            applyQuantityValidationMode(true, null);
+        });
 }

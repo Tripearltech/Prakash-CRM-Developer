@@ -123,7 +123,7 @@
 
         $('#headerNotificationsList').html('<div class="notification-preview-empty">Loading notifications...</div>');
 
-        $.get('/SPNotification/GetAllUserNotifications', { top: previewSize, includeRead: true, skip: 0 })
+        $.get('/SPNotification/GetAllUserNotifications', { top: previewSize, includeRead: true, skip: 0, excludeCategory: 'Item' })
             .done(function (feed) {
                 feed = feed || {};
                 var notifications = feed.Notifications || [];
@@ -175,7 +175,7 @@
             return;
         }
 
-        $.get('/SPNotification/GetUserNotifications', { top: 1, includeRead: false, skip: 0 })
+        $.get('/SPNotification/GetUserNotifications', { top: 1, includeRead: false, skip: 0, excludeCategory: 'Item' })
             .done(function (feed) {
                 feed = feed || {};
                 updateUnreadBadge(feed.UnreadCount || 0);
@@ -273,7 +273,8 @@
             top: notificationPageSize,
             includeRead: true,
             skip: (notificationPage - 1) * notificationPageSize,
-            category: currentFilter === 'All' ? '' : currentFilter
+            category: currentFilter === 'All' ? '' : currentFilter,
+            excludeCategory: 'Item'
         })
             .done(function (feed) {
                 feed = feed || {};

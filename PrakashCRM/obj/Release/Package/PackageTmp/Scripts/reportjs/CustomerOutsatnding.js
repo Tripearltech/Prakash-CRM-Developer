@@ -1,8 +1,4 @@
 ﻿var customerOutstandingState = {
-    pageNumber: 1,
-    pageSize: parseInt($('#ddlRecPerPage').val(), 10) || 10,
-    totalCount: 0,
-    totalPages: 0,
     branches: [],
     salespersonCache: {}
 };
@@ -13,13 +9,6 @@ $(document).ready(function () {
 });
 
 function bindCustomerOutstandingEvents() {
-    $('#ddlRecPerPage').off('change.customerOutstanding').on('change.customerOutstanding', function () {
-        customerOutstandingState.pageSize = parseInt($(this).val(), 10) || 10;
-        customerOutstandingState.pageNumber = 1;
-        customerOutstandingState.salespersonCache = {};
-        BindOutstandingDetails(1);
-    });
-
     $('#tblOutstanding').off('click.customerOutstanding', '.branch-toggle').on('click.customerOutstanding', '.branch-toggle', function (e) {
         e.preventDefault();
 
@@ -51,22 +40,9 @@ function bindCustomerOutstandingEvents() {
 
         loadSalespersonDetails(branchIndex, branch.Location_Code);
     });
-
-    $('#myPager').off('click.customerOutstanding', '.page-link').on('click.customerOutstanding', '.page-link', function (e) {
-        e.preventDefault();
-
-        var targetPage = parseInt($(this).data('page'), 10);
-        if (!targetPage || $(this).parent().hasClass('active') || $(this).parent().hasClass('disabled')) {
-            return;
-        }
-
-        BindOutstandingDetails(targetPage);
-    });
 }
 
-function BindOutstandingDetails(pageNumber) {
-    customerOutstandingState.pageNumber = pageNumber || 1;
-    customerOutstandingState.pageSize = parseInt($('#ddlRecPerPage').val(), 10) || 10;
+function BindOutstandingDetails() {
     toggleCustomerOutstandingLoader(true);
 
     $.ajax({
@@ -74,24 +50,18 @@ function BindOutstandingDetails(pageNumber) {
         type: 'GET',
         contentType: 'application/json',
         data: {
-            pageNumber: customerOutstandingState.pageNumber,
-            pageSize: customerOutstandingState.pageSize,
             orderby: 'Location_Code asc'
         },
         success: function (response) {
-            var items = response && response.Items ? response.Items : [];
+            var items = $.isArray(response) ? response : [];
 
             customerOutstandingState.branches = items;
-            customerOutstandingState.totalCount = response && response.TotalCount ? response.TotalCount : 0;
-            customerOutstandingState.totalPages = response && response.TotalPages ? response.TotalPages : 0;
 
             renderOutstandingTable(items);
-            renderOutstandingPager();
             toggleCustomerOutstandingLoader(false);
         },
         error: function () {
             $('#tblOutstanding').html("<tr><td colspan='11' style='text-align:center;'>Error loading records</td></tr>");
-            $('#myPager').empty();
             toggleCustomerOutstandingLoader(false);
         }
     });
@@ -197,82 +167,6 @@ function renderSalespersonDetails(branchIndex, salespersons) {
             </table>
         </div>
     `);
-}
-
-function renderOutstandingPager() {
-    var $pager = $('#myPager');
-    var totalPages = customerOutstandingState.totalPages || Math.ceil(customerOutstandingState.totalCount / customerOutstandingState.pageSize);
-    var currentPage = customerOutstandingState.pageNumber;
-
-    $pager.empty();
-
-    if (!totalPages || totalPages <= 1) {
-        return;
-    }
-
-    $pager.append(buildPagerItem('«', currentPage - 1, currentPage === 1, false));
-
-    $.each(getVisiblePages(currentPage, totalPages), function (_, pageToken) {
-        if (pageToken === 'ellipsis') {
-            $pager.append("<li class='page-item disabled'><span class='page-link'>...</span></li>");
-            return;
-        }
-
-        $pager.append(buildPagerItem(pageToken, pageToken, false, pageToken === currentPage));
-    });
-
-    $pager.append(buildPagerItem('»', currentPage + 1, currentPage === totalPages, false));
-}
-
-function buildPagerItem(label, pageNumber, isDisabled, isActive) {
-    var disabledClass = isDisabled ? ' disabled' : '';
-    var activeClass = isActive ? ' active' : '';
-    return `<li class="page-item${disabledClass}${activeClass}"><a href="#" class="page-link" data-page="${pageNumber}">${label}</a></li>`;
-}
-
-function getVisiblePages(currentPage, totalPages) {
-    var pages = [];
-    var startPage;
-    var endPage;
-    var page;
-
-    if (totalPages <= 5) {
-        for (page = 1; page <= totalPages; page++) {
-            pages.push(page);
-        }
-
-        return pages;
-    }
-
-    pages.push(1);
-
-    if (currentPage <= 3) {
-        startPage = 2;
-        endPage = 4;
-    } else if (currentPage >= totalPages - 2) {
-        startPage = totalPages - 3;
-        endPage = totalPages - 1;
-    } else {
-        startPage = currentPage - 1;
-        endPage = currentPage + 1;
-    }
-
-    if (startPage > 2) {
-        pages.push('ellipsis');
-    }
-
-    for (page = startPage; page <= endPage; page++) {
-        if (page > 1 && page < totalPages) {
-            pages.push(page);
-        }
-    }
-
-    if (endPage < totalPages - 1) {
-        pages.push('ellipsis');
-    }
-
-    pages.push(totalPages);
-    return pages;
 }
 
 function escapeJsValue(value) {

@@ -420,7 +420,7 @@ namespace PrakashCRM.Service.Controllers
         {
             API ac = new API();
             List<CustomerDropdown> customerReports = new List<CustomerDropdown>();
-            var result = ac.GetData<CustomerDropdown>("ContactDotNetAPI", "startswith(Company_Name,'" + prefix + "')");
+            var result = ac.GetData<CustomerDropdown>("pcplcontacts", "startswith(Company_Name,'" + prefix + "')", true);
 
             if (result != null && result.Result.Item1.value.Count > 0)
 

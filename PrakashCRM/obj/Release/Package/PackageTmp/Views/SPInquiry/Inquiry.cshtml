@@ -654,176 +654,114 @@
 <script src="~/Layout/vendors/raphael/raphael.min.js"></script>
 <script src="~/Layout/vendors/morris.js/morris.min.js"></script>
 <script>
-    $(document).ready(function () {
+   $(document).ready(function () {
 
-        $('#btnAddNewContactCompany').click(function () {
-            window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")?No=salesquote');
-        });
-
-        $(document).ready(function () {
-
-        @*$('#btnSave').click(function () {
-
-            var errMsg = CheckFieldValues();
-
-            if (errMsg != "") {
-
-                ShowErrMsg(errMsg);
-            }
-            else {
-
-                $('#divImage').show();
-                var inquiryheader = {};
-                var productDetails_ = new Array();
-
-                inquiryheader.IsInqEdit = $('#hfInqEdit').val();
-                inquiryheader.InquiryNo = $('#hfInqNo').val();
-                inquiryheader.InquiryDate = $('#txtInquiryDate').val();
-                inquiryheader.ConsigneeAddress = $('#ddlConsigneeAddress option:selected').text();
-                inquiryheader.ContactCompanyNo = $('#hfContactCompanyNo').val();
-                inquiryheader.CustomerName = $('#txtCustomerName').val();
-                inquiryheader.ContactPersonNo = $('#hfContactPersonNo').val();
-                inquiryheader.CustomerNo = $('#hfCustomerNo').val();
-                inquiryheader.JobtoCode = $('#ddlShipTo').val();
-                inquiryheader.ShiptoCode = $('#ddlBillTo').val();
-                inquiryheader.PaymentTerms = $('#ddlPaymentTerms').val();
-                inquiryheader.Inquiry_Status_Remarks = $('#txtRemarks').val();
-                inquiryheader.CustomerTemplateCode = $('#hfCustomerTemplateCode').val();
-                inquiryheader.SPCode = $('#hfSPNo').val();
-
-                $("#tblProducts TR").each(function () {
-                    var productDetails = {};
-                    productDetails.Product_No = $(this).find("TD").eq(1).html();
-                    productDetails.Quantity = $(this).find("TD").eq(3).html();
-                    productDetails.PCPL_Packing_Style_Code = $(this).find("TD").eq(4).html();
-                    productDetails.Delivery_Date = $(this).find("TD").eq(6).html();
-
-                    if ($('#hfInqEdit').val() == "true") {
-                        productDetails.Line_No = $(this).find("TD").eq(8).html();
-                    }
-                    else {
-                        productDetails.Line_No = "";
-                    }
-
-                    productDetails_.push(productDetails);
-                });
-
-                inquiryheader.Products = productDetails_;
-
-                (async () => {
-                    const rawResponse = await fetch('/SPInquiry/PostInquiry', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(inquiryheader)
-                    });
-                    const res = await rawResponse.ok;
-                    //if (res) {
-                        $('#divImage').hide();
-                        window.location.replace('@Url.Action("Inquiry", "SPInquiry")');
-                        $('#hfInqEdit').val("false");
-                    //}
-
-                })();
-
-            }
-
-
-        });*@
-
+    $('#btnAddNewContactCompany').click(function () {
+        window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")?No=salesquote');
     });
-    let isSalesQuote = false;
 
+    let isSalesQuote = false;
 
     $('#btnSave').click(function () {
         isSalesQuote = false;
-        SaveInquiry();   // normal save
-
+        SaveInquiry();
     });
 
     $('#btnCreateSQ').click(function () {
         isSalesQuote = true;
-        SaveInquiry();    // save & sales
-
+        SaveInquiry();
     });
+
     function SaveInquiry() {
 
-    var errMsg = CheckFieldValues();
+        var errMsg = CheckFieldValues();
 
-    if (errMsg != "") {
+        if (errMsg != "") {
+            ShowErrMsg(errMsg);
+            return;
+        }
 
-        ShowErrMsg(errMsg);
-        return;
+        $('#divImage').show();
+
+        var inquiryheader = {};
+        var productDetails_ = [];
+
+        inquiryheader.IsInqEdit = $('#hfInqEdit').val();
+        inquiryheader.InquiryNo = $('#hfInqNo').val();
+        inquiryheader.InquiryDate = $('#txtInquiryDate').val();
+
+        // ✅ FIX: dropdown missing → label use
+        inquiryheader.ConsigneeAddress = $('#lblConsigneeAddress').text();
+
+        inquiryheader.ContactCompanyNo = $('#hfContactCompanyNo').val();
+        inquiryheader.CustomerName = $('#txtCustomerName').val();
+        inquiryheader.ContactPersonNo = $('#hfContactPersonNo').val();
+        inquiryheader.CustomerNo = $('#hfCustomerNo').val();
+        inquiryheader.JobtoCode = $('#ddlShipTo').val();
+        inquiryheader.ShiptoCode = $('#ddlBillTo').val();
+        inquiryheader.PaymentTerms = $('#ddlPaymentTerms').val();
+        inquiryheader.Inquiry_Status_Remarks = $('#txtRemarks').val();
+        inquiryheader.CustomerTemplateCode = $('#hfCustomerTemplateCode').val();
+        inquiryheader.SPCode = $('#hfSPNo').val();
+
+        // ✅ Table loop
+        $("#tblProducts tr").each(function () {
+
+            var productDetails = {};
+
+            productDetails.Product_No = $(this).find("td").eq(1).html();
+            productDetails.Quantity = $(this).find("td").eq(3).html();
+            productDetails.PCPL_Packing_Style_Code = $(this).find("td").eq(4).html();
+            productDetails.Delivery_Date = $(this).find("td").eq(6).html();
+
+            if ($('#hfInqEdit').val() === "true") {
+                productDetails.Line_No = $(this).find("td").eq(8).html();
+            } else {
+                productDetails.Line_No = "";
+            }
+
+            productDetails_.push(productDetails);
+        });
+
+        inquiryheader.Products = productDetails_;
+
+        // ✅ API Call with error handling
+        (async () => {
+            try {
+
+                const rawResponse = await fetch('/SPInquiry/PostInquiry', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(inquiryheader)
+                });
+
+                const res = rawResponse.ok; // ✅ FIX
+
+                let inqNo = rawResponse.headers.get("InquiryNo");
+
+                if (!res) {
+                    ShowErrMsg("API Error: Unable to save inquiry");
+                    return;
+                }
+
+                if (!isSalesQuote) {
+                    window.location.replace('@Url.Action("Inquiry", "SPInquiry")');
+                }
+                else {
+                    window.location.replace('/SPSalesQuotes/SalesQuote?InquiryNo=' + inqNo);
+                }
+
+            } catch (err) {
+                console.error(err);
+                ShowErrMsg("Network Error");
+            } finally {
+                $('#divImage').hide(); // ✅ always hide loader
+            }
+        })();
     }
 
-    $('#divImage').show();
-
-    var inquiryheader = {};
-    var productDetails_ = new Array();
-    inquiryheader.IsInqEdit = $('#hfInqEdit').val();
-    inquiryheader.InquiryNo = $('#hfInqNo').val();
-    inquiryheader.InquiryDate = $('#txtInquiryDate').val();
-    inquiryheader.ConsigneeAddress = $('#ddlConsigneeAddress option:selected').text();
-    inquiryheader.ContactCompanyNo = $('#hfContactCompanyNo').val();
-    inquiryheader.CustomerName = $('#txtCustomerName').val();
-    inquiryheader.ContactPersonNo = $('#hfContactPersonNo').val();
-    inquiryheader.CustomerNo = $('#hfCustomerNo').val();
-    inquiryheader.JobtoCode = $('#ddlShipTo').val();
-    inquiryheader.ShiptoCode = $('#ddlBillTo').val();
-    inquiryheader.PaymentTerms = $('#ddlPaymentTerms').val();
-    inquiryheader.Inquiry_Status_Remarks = $('#txtRemarks').val();
-    inquiryheader.CustomerTemplateCode = $('#hfCustomerTemplateCode').val();
-    inquiryheader.SPCode = $('#hfSPNo').val();
-
-    $("#tblProducts TR").each(function () {
-
-        var productDetails = {};
-
-        productDetails.Product_No = $(this).find("TD").eq(1).html();
-        productDetails.Quantity = $(this).find("TD").eq(3).html();
-        productDetails.PCPL_Packing_Style_Code = $(this).find("TD").eq(4).html();
-        productDetails.Delivery_Date = $(this).find("TD").eq(6).html();
-
-        if ($('#hfInqEdit').val() == "true") {
-            productDetails.Line_No = $(this).find("TD").eq(8).html();
-        }
-        else {
-            productDetails.Line_No = "";
-        }
-
-        productDetails_.push(productDetails);
-
-    });
-
-    inquiryheader.Products = productDetails_;
-
-    (async () => {
-
-        const rawResponse = await fetch('/SPInquiry/PostInquiry', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(inquiryheader)
-        });
-const res = await rawResponse.ok;
-        let inqNo = rawResponse.headers.get("InquiryNo");
-        $('#divImage').hide();
-
-        if (res && !isSalesQuote) {
-
-            window.location.replace('@Url.Action("Inquiry", "SPInquiry")');
-
-        }
-        else if (res && isSalesQuote) {
-
-            window.location.replace('/SPSalesQuotes/SalesQuote?InquiryNo=' + inqNo);
-
-        }
-
-    })();
-}
+}); // ✅ IMPORTANT (missing tha → error ka root cause)
 </script>

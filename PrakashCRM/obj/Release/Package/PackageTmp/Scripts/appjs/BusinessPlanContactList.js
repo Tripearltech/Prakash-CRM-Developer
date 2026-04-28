@@ -43,10 +43,10 @@ $(document).ready(function () {
             $('ul.pager li').remove();
 
             if ($('#ddlStatus').val() != "-1" && filter != "") {
-                filter += " and Status eq '" + $('#ddlStatus').val() + "'";
+                filter += " and StatusFilter eq '" + $('#ddlStatus').val() + "'";
             }
             else if ($('#ddlStatus').val() != "-1" && filter == "") {
-                filter = "Status eq '" + $('#ddlStatus').val() + "'";
+                filter = "StatusFilter eq '" + $('#ddlStatus').val() + "'";
             }
 
             filter += " and Plan_Year eq '" + $('#ddlFinancialYear').val() + "'";
@@ -68,7 +68,7 @@ $(document).ready(function () {
         $('ul.pager li').remove();
         orderBy = 1;
         orderDir = "asc";
-        filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "' and Status eq '" + $('#ddlStatus').val() + "'";
+        filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "' and StatusFilter eq '" + $('#ddlStatus').val() + "'";
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
     });
 
@@ -127,7 +127,7 @@ $(document).ready(function () {
         filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "'";
 
         if ($('#ddlStatus').val() != "-1") {
-            filter += " and Status eq '" + $('#ddlStatus').val() + "'";
+            filter += " and StatusFilter eq '" + $('#ddlStatus').val() + "'";
         }
 
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
@@ -139,7 +139,7 @@ $(document).ready(function () {
         filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "'";
 
         if ($('#ddlStatus').val() != "-1") {
-            filter += " and Status eq '" + $('#ddlStatus').val() + "'";
+            filter += " and StatusFilter eq '" + $('#ddlStatus').val() + "'";
         }
 
         bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
@@ -298,7 +298,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
                         "<img src='../Layout/assets/images/appImages/Plus-Icon.png' width='30' height='30' /></a></td>";
 
 
-                    if (item.Status == "Rejected") {
+                    if (item.StatusFilter == "Rejected") {
                         rowData += "<td>" + item.Rejected_Reason + "</td>";
                     }
                     else {
@@ -561,7 +561,7 @@ function BindFinancialYear() {
 
     $('#lblPrevFinancialYear').text(prevFinancialYear);
     $('#lblFinancialYear').text(currFinancialYear);
-    filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "' and Status eq '" + $('#ddlStatus').val() + "'";
+    filter = "Plan_Year eq '" + $('#ddlFinancialYear').val() + "' and StatusFilter eq '" + $('#ddlStatus').val() + "'";
     bindGridData(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, filter);
 }
 

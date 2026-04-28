@@ -159,14 +159,14 @@ namespace PrakashCRM.Service.Controllers
 
             }
 
-            var result = ac.GetData<Company>("ContactDotNetAPI", filterSP1);
+            var result = ac.GetData<Company>("pcplcontacts", filterSP1,true);
 
             if (result != null && result.Result.Item1.value.Count > 0)
                 company = result.Result.Item1.value;
 
             List<Company> company2 = new List<Company>();
 
-            var result2 = ac.GetData<Company>("ContactDotNetAPI", filterSSP1);
+            var result2 = ac.GetData<Company>("pcplcontacts", filterSSP1,true);
 
             if (result2 != null && result2?.Result.Item1?.value.Count > 0)
             {
@@ -184,7 +184,7 @@ namespace PrakashCRM.Service.Controllers
             API ac = new API();
             List<Contact> contact = new List<Contact>();
 
-            var result = ac.GetData<Contact>("ContactDotNetAPI", "Type eq 'Person' and Company_No eq '" + Company_No + "'");
+            var result = ac.GetData<Contact>("pcplcontacts", "Type eq 'Person' and Company_No eq '" + Company_No + "'", true);
 
             if (result != null && result.Result.Item1.value.Count > 0)
                 contact = result.Result.Item1.value;
@@ -238,7 +238,7 @@ namespace PrakashCRM.Service.Controllers
                 string[] companyDetails_ = companyDetails.Split('_');
                 string companyNo = companyDetails_[0];
 
-                var resultCompanyNo = ac.GetData<ContCustForBusRel>("ContactDotNetAPI", "Type eq 'Company' and No eq '" + companyNo + "'");
+                var resultCompanyNo = ac.GetData<ContCustForBusRel>("pcplcontacts", "Type eq 'Company' and No eq '" + companyNo + "'", true);
 
                 if (resultCompanyNo.Result.Item1.value.Count > 0)
                     contCustForBusRel.Company_No = resultCompanyNo.Result.Item1.value[0].Company_No;
@@ -249,7 +249,7 @@ namespace PrakashCRM.Service.Controllers
                 {
                     conBusinessRelation.No = resultCustomerNo.Result.Item1.value[0].No;
 
-                    var resultCustomer = ac.GetData<SPCustomer>("CustomerCardDotNetAPI", "No eq '" + conBusinessRelation.No + "'");
+                    var resultCustomer = ac.GetData<SPCustomer>("pcplcustomers", "No eq '" + conBusinessRelation.No + "'",true);
 
                     if (resultCustomer.Result.Item1.value.Count > 0)
                     {
@@ -296,7 +296,7 @@ namespace PrakashCRM.Service.Controllers
                 else
                 {
                     SPCompanyList companyList = new SPCompanyList();
-                    var resultCompanyDetails = ac.GetData<SPCompanyList>("ContactDotNetAPI", "Type eq 'Company' and No eq '" + contCustForBusRel.Company_No + "'");
+                    var resultCompanyDetails = ac.GetData<SPCompanyList>("pcplcontacts", "Type eq 'Company' and No eq '" + contCustForBusRel.Company_No + "'", true);
 
                     if (resultCompanyDetails.Result.Item1.value.Count > 0)
                     {
@@ -730,7 +730,7 @@ namespace PrakashCRM.Service.Controllers
             SPContact resCPerson = new SPContact();
             errorDetails ed = new errorDetails();
 
-            var result = ac.PostItem("ContactDotNetAPI", reqCPerson, resCPerson);
+            var result = ac.PostItem("pcplcontacts", reqCPerson, resCPerson,true);
 
             if (result.Result.Item1 != null)
                 resCPerson = result.Result.Item1;
@@ -1829,6 +1829,113 @@ namespace PrakashCRM.Service.Controllers
                 }
             }
             return (responseModel, errordetail);
+        }
+        //inquiry ConversionFactor Implemetion
+        private static string NormalizePackingStyleLookupValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            return string.Join(" ", value.Trim().Split((char[])null, StringSplitOptions.RemoveEmptyEntries))
+                .ToUpperInvariant();
+        }
+
+        [Route("GetPackingStyleConversionFactor")]
+        [HttpGet]
+        public async Task<IHttpActionResult> GetPackingStyleConversionFactor(string packingStyleCode, string baseUOM, string packingStyleText = "")
+        {
+            packingStyleCode = (packingStyleCode ?? string.Empty).Trim();
+            baseUOM = (baseUOM ?? string.Empty).Trim();
+            packingStyleText = (packingStyleText ?? string.Empty).Trim();
+
+            var packingStyleCandidates = new List<string> { packingStyleCode, packingStyleText }
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var normalizedPackingStyleCandidates = packingStyleCandidates
+                .Select(NormalizePackingStyleLookupValue)
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var normalizedBaseUOM = NormalizePackingStyleLookupValue(baseUOM);
+
+            var responseModel = new SPPackingStyleConversionFactorResponse
+            {
+                IsMatched = false,
+                Code = packingStyleCode,
+                Base_UOM = baseUOM
+            };
+
+            if (normalizedPackingStyleCandidates.Count == 0 || string.IsNullOrWhiteSpace(normalizedBaseUOM))
+            {
+                return Ok(responseModel);
+            }
+
+            try
+            {
+                string baseUrl = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
+                string tenantId = System.Configuration.ConfigurationManager.AppSettings["TenantID"];
+                string environment = System.Configuration.ConfigurationManager.AppSettings["Environment"];
+                string companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
+
+                API ac = new API();
+                var accessToken = await ac.GetAccessToken().ConfigureAwait(false);
+
+                if (accessToken == null || string.IsNullOrWhiteSpace(accessToken.Token))
+                {
+                    return Ok(responseModel);
+                }
+
+                string requestUrl = Uri.EscapeUriString(
+                    baseUrl
+                        .Replace("{TenantID}", tenantId)
+                        .Replace("{Environment}", environment)
+                        .Replace("{CompanyName}", companyName) + "PackingStyleMaster");
+
+                string codeFilter = string.Join(" or ", packingStyleCandidates
+                    .Select(value => "Code eq '" + value.Replace("'", "''") + "'"));
+                string filter = "(" + codeFilter + ") and Base_UOM eq '" + baseUOM.Replace("'", "''") + "'";
+                string requestUri = requestUrl + "?$filter=" + Uri.EscapeDataString(filter);
+
+                using (var httpClient = new HttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return Ok(responseModel);
+                    }
+
+                    string jsonData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var result = JsonConvert.DeserializeObject<OData<SPPackingStyleMaster>>(jsonData);
+                    var matchedRecord = result?.value?.FirstOrDefault(item =>
+                        normalizedPackingStyleCandidates.Any(candidate =>
+                            string.Equals(NormalizePackingStyleLookupValue(item.Code), candidate, StringComparison.OrdinalIgnoreCase)) &&
+                        string.Equals(NormalizePackingStyleLookupValue(item.Base_UOM), normalizedBaseUOM, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedRecord != null)
+                    {
+                        responseModel.IsMatched = true;
+                        responseModel.Code = matchedRecord.Code;
+                        responseModel.Base_UOM = matchedRecord.Base_UOM;
+                        responseModel.Conversion_Factor = (double?)matchedRecord.Conversion_Factor;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return Ok(responseModel);
         }
 
     }

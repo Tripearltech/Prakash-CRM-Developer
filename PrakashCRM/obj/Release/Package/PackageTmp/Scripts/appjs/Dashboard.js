@@ -14,7 +14,8 @@ var dashboardTableLoaderColumns = {
     '#tblMonthlist': 4,
     '#tblNonPerforminglist': 3,
     '#tblDailyVisitsDetails': 4,
-    '#tableFeedbackBody': 2
+    '#tableFeedbackBody': 2,
+    '#tbloutstanding': 3
 };
 
 function getDashboardTableLoaderRow(colspan) {
@@ -138,13 +139,11 @@ $(document).ready(function () {
     SaleOrderList();
     SalesInvoiceList();
     SaleQuoteList();
-    //BindSalespersonData();
-    //BindSupportSP();
-    //BindGProductData();
     Binditemwisetotalqty();
     BindPendingWarehousePurchese();
     SetCurrentDate();
     BindFinancialYears();
+    BindCustomerOutstanding();
 
 
     $('.btn-close').click(function () {
@@ -656,27 +655,35 @@ function BindCombinedData(fDate, tDate, year) {
 
             // --- Customer Sales Table ---
             $('#tblCustomersalesqty').empty();
-            var productRows = "";
-            if (data.Products && data.Products.length > 0) {
-                $.each(data.Products, function (index, item) {
-                    productRows += "<tr><td>" + item.Customer_Name + `</td><td class='text-center'><a href="/SPBusinessPlan/BusinessPlanReport" class="cursor-pointer">` + item.Product_Total_Target_Qty +
+            var customerRows = "";
+            if (data.CustomerTotalList && data.CustomerTotalList.length > 0) {
+                $.each(data.CustomerTotalList, function (index, item) {
+                    var customerName = item.Customer_Name || item.Product_Name || "-";
+                    customerRows += "<tr><td>" + customerName + `</td><td class='text-center'><a href="/SPBusinessPlan/BusinessPlanReport" class="cursor-pointer">` + item.Product_Total_Target_Qty +
                         `</a></td><td class='text-center'><a href="/SPBusinessPlan/BusinessPlanReport" class="cursor-pointer">` + item.Product_Total_Sales_Qty + `</a></td><td class='text-center'><a href="/SPBusinessPlan/BusinessPlanReport" class="cursor-pointer">` +
                         item.Product_Sales_Percentage_Qty + `</a></td></tr>`;
                 });
             } else {
-                productRows = "<tr><td colspan='5' style='text-align:left;'>No Records Found</td></tr>";
+                customerRows = "<tr><td colspan='4' style='text-align:left;'>No Records Found</td></tr>";
             }
-            $('#tblCustomersalesqty').append(productRows);
+            $('#tblCustomersalesqty').append(customerRows);
             $("#tblfootbody").empty();
-            var producttotalRows = "";
-            if (data.ProductsTotalList && data.ProductsTotalList.length > 0) {
-                $.each(data.ProductsTotalList, function (index, item) {
-                    producttotalRows += "<tr><td style='font-weight: bold;'>Customer Total</td><td>" + item.Target_Qty +
-                        "</td><td>" + item.Sales_Qty + "</td><td>" +
-                        item.Sales_Percentage_Qty + "</td></tr>";
+            var customerTotalRows = "";
+            var customerTargetTotal = 0;
+            var customerSalesTotal = 0;
+            var customerPercentageTotal = 0;
+            if (data.CustomerTotalList && data.CustomerTotalList.length > 0) {
+                $.each(data.CustomerTotalList, function (index, item) {
+                    customerTargetTotal += parseFloat(item.Product_Total_Target_Qty) || 0;
+                    customerSalesTotal += parseFloat(item.Product_Total_Sales_Qty) || 0;
+                    customerPercentageTotal += parseFloat(item.Product_Sales_Percentage_Qty) || 0;
                 });
+
+                customerTotalRows = "<tr><td style='font-weight: bold;'>Customer Total</td><td>" + customerTargetTotal +
+                    "</td><td>" + customerSalesTotal + "</td><td>" +
+                    customerPercentageTotal + "</td></tr>";
             }
-            $('#tblfootbody').append(producttotalRows);
+            $('#tblfootbody').append(customerTotalRows);
 
             // --- Product Sales Table ---
             $('#tblProductsalesqty').empty();
@@ -693,12 +700,27 @@ function BindCombinedData(fDate, tDate, year) {
             $('#tblProductsalesqty').append(productRows);
             $("#tblfooterbody").empty();
             var producttotalRows = "";
+            var productTargetTotal = 0;
+            var productSalesTotal = 0;
+            var productPercentageTotal = 0;
             if (data.ProductsTotalList && data.ProductsTotalList.length > 0) {
                 $.each(data.ProductsTotalList, function (index, item) {
-                    producttotalRows += "<tr><td style='font-weight: bold;'>Product Total</td><td>" + item.Target_Qty +
-                        "</td><td>" + item.Sales_Qty + "</td><td>" +
-                        item.Sales_Percentage_Qty + "</td></tr>";
+                    productTargetTotal += parseFloat(item.Target_Qty) || 0;
+                    productSalesTotal += parseFloat(item.Sales_Qty) || 0;
+                    productPercentageTotal += parseFloat(item.Sales_Percentage_Qty) || 0;
                 });
+            } else if (data.Products && data.Products.length > 0) {
+                $.each(data.Products, function (index, item) {
+                    productTargetTotal += parseFloat(item.Product_Total_Target_Qty) || 0;
+                    productSalesTotal += parseFloat(item.Product_Total_Sales_Qty) || 0;
+                    productPercentageTotal += parseFloat(item.Product_Sales_Percentage_Qty) || 0;
+                });
+            }
+
+            if (productTargetTotal !== 0 || productSalesTotal !== 0 || productPercentageTotal !== 0) {
+                producttotalRows = "<tr><td style='font-weight: bold;'>Product Total</td><td>" + productTargetTotal +
+                    "</td><td>" + productSalesTotal + "</td><td>" +
+                    productPercentageTotal + "</td></tr>";
             }
             $('#tblfooterbody').append(producttotalRows);
 
@@ -1065,4 +1087,27 @@ function ClearDispatchFilter() {
     $("#Tdatevalidate").text("");
     BindFinancialYears();
     /* BindCombinedData(fDate, tDate, year);*/
+}
+
+function BindCustomerOutstanding() {
+    showDashboardTableLoader('#tbloutstanding');
+
+    $.ajax({
+        url: '/SPDashboard/GetCSOutstandingDue',
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
+            $("#tbloutstanding").empty();
+
+            var rowData = "";
+            if (data.length > 0) {
+                $.each(data, function (index, item) {
+                    rowData += "<tr><td>" + item.SalesPerson_Name + "</td><td><a href='/SPReports/CustOverDueOutstandinglist?isSpDueAmt=false'>" + item.Total_Remaining_Amt + "</a></td><td><a href='/SPReports/CustOverDueOutstandinglist?isSpDueAmt=true'>" + item.SP_Total_Due_Amt + "</a></td></tr>";
+                });
+            } else {
+                rowData = "<tr><td colspan='3' style='text-align:left;'>No Records Found</td></tr>";
+            }
+            $("#tbloutstanding").append(rowData);
+        }
+    });
 }

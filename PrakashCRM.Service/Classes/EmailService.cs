@@ -137,14 +137,28 @@ namespace PrakashCRM.Service.Classes
 
             message.Subject = subject;
             message.From = from;
-            message.To.Add(toEmail.Trim().TrimEnd(','));
-            message.CC.Add(ccEmail.Trim());
+            AddMailAddresses(message.To, toEmail);
+            AddMailAddresses(message.CC, ccEmail);
+            AddMailAddresses(message.Bcc, bccEmail);
             message.IsBodyHtml = true;
             message.Body = emailBody;
             cmt.EnableSsl = true;
             cmt.DeliveryMethod = SmtpDeliveryMethod.Network;
             cmt.Send(message);
 
+        }
+
+        private static void AddMailAddresses(MailAddressCollection collection, string emails)
+        {
+            if (collection == null || string.IsNullOrWhiteSpace(emails))
+                return;
+
+            foreach (var email in emails.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var trimmedEmail = (email ?? "").Trim();
+                if (!string.IsNullOrWhiteSpace(trimmedEmail))
+                    collection.Add(trimmedEmail);
+            }
         }
     }
 }

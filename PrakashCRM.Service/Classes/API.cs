@@ -61,6 +61,8 @@ namespace PrakashCRM.Service.Classes
         private readonly string _baseURL;
         private readonly string _companyName;
         private readonly string _codeUnitBaseUrl;
+        private readonly string _baseURLAPIPage;
+        private readonly string _companyURLAPIPage;
         static API()
         {
             AccessTokenSemaphore = new SemaphoreSlim(1, 1);
@@ -78,6 +80,8 @@ namespace PrakashCRM.Service.Classes
             _baseURL = System.Configuration.ConfigurationManager.AppSettings["BaseURL"];
             _companyName = System.Configuration.ConfigurationManager.AppSettings["CompanyName"];
             _codeUnitBaseUrl = ConfigurationManager.AppSettings["CodeUnitBaseURL"];
+            _baseURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["BaseAPIURL"];
+            _companyURLAPIPage = System.Configuration.ConfigurationManager.AppSettings["Company_Name"];
         }
 
         public async Task<AccessToken> GetAccessToken()
@@ -155,6 +159,81 @@ namespace PrakashCRM.Service.Classes
             }
         }
 
+        public async Task<(OData<U> items, errorDetails err)> GetData<U>(string apiendpoint, string filter, bool WithUpdateURl = true)
+        {
+            var items = new OData<U>();
+            var err = new errorDetails { isSuccess = false };
+
+            var accessToken = await GetAccessToken().ConfigureAwait(false);
+            if (accessToken == null || string.IsNullOrEmpty(accessToken.Token))
+            {
+                err.message = "Failed to obtain access token.";
+                return (items, err);
+            }
+
+            using (var httpClient = new HttpClient())
+            {
+                string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
+
+                var requestUri = string.IsNullOrEmpty(filter) ? encodeurl : encodeurl + "?$filter=" + Uri.EscapeDataString(filter);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+
+                HttpResponseMessage response;
+                try
+                {
+                    response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // Log ex (do not swallow)
+                    err.isSuccess = false;
+                    err.message = "HTTP request failed: " + ex.Message;
+                    return (items, err);
+                }
+
+                err.isSuccess = response.IsSuccessStatusCode;
+
+                string jsonData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        items = JsonConvert.DeserializeObject<OData<U>>(jsonData);
+                        err.code = response.StatusCode.ToString();
+                        err.message = response.ReasonPhrase;
+                    }
+                    catch (Exception ex)
+                    {
+                        err.isSuccess = false;
+                        err.message = "Deserialization failed: " + ex.Message;
+                    }
+                }
+                else
+                {
+                    // attempt to parse structured error, otherwise return status/reason
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(jsonData))
+                        {
+                            var emd = JObject.Parse(jsonData).ToObject<errorMaster<errorDetails>>();
+                            if (emd?.error != null) err = emd.error;
+                            else { err.code = response.StatusCode.ToString(); err.message = response.ReasonPhrase; }
+                        }
+                        else { err.code = response.StatusCode.ToString(); err.message = response.ReasonPhrase; }
+                    }
+                    catch (Exception ex)
+                    {
+                        // preserve HTTP info if error body parsing fails
+                        err.code = response.StatusCode.ToString();
+                        err.message = $"HTTP error and body parse failed: {ex.Message}";
+                    }
+                }
+            }
+
+            return (items, err);
+        }
         public async Task<(OData<U> items, errorDetails err)> GetData<U>(string apiendpoint, string filter)
         {
             var items = new OData<U>();
@@ -169,10 +248,7 @@ namespace PrakashCRM.Service.Classes
 
             using (var httpClient = new HttpClient())
             {
-                string encodeurl = Uri.EscapeUriString(_baseURL
-                    .Replace("{TenantID}", _tenantId)
-                    .Replace("{Environment}", _environment)
-                    .Replace("{CompanyName}", _companyName) + apiendpoint);
+                string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
 
                 var requestUri = string.IsNullOrEmpty(filter) ? encodeurl : encodeurl + "?$filter=" + Uri.EscapeDataString(filter);
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -234,12 +310,7 @@ namespace PrakashCRM.Service.Classes
             return (items, err);
         }
 
-        public async Task<(OData<U> items, errorDetails err)> GetDataWithODataQuery<U>(
-            string apiendpoint,
-            string filter,
-            int? top = null,
-            int? skip = null,
-            string orderBy = null)
+        public async Task<(OData<U> items, errorDetails err)> GetDataWithODataQuery<U>(string apiendpoint, string filter, int? top = null, int? skip = null, string orderBy = null)
         {
             var items = new OData<U>();
             var err = new errorDetails { isSuccess = false };
@@ -253,10 +324,7 @@ namespace PrakashCRM.Service.Classes
 
             using (var httpClient = new HttpClient())
             {
-                string encodeurl = Uri.EscapeUriString(_baseURL
-                    .Replace("{TenantID}", _tenantId)
-                    .Replace("{Environment}", _environment)
-                    .Replace("{CompanyName}", _companyName) + apiendpoint);
+                string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
 
                 var queryParts = new List<string>();
 
@@ -404,6 +472,110 @@ namespace PrakashCRM.Service.Classes
             return (items, errordetail);
         }
 
+        public async Task<(OData<U>, errorDetails)> GetData1<U>(string apiendpoint, string filter, int skip, int top, string orderby, bool WithUpdateURl = true)
+        {
+            OData<U> items = new OData<U>();
+            var accessToken = await GetAccessToken();
+
+            HttpClient _httpClient = new HttpClient();
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
+            Uri baseuri = new Uri(encodeurl);
+            var request = new HttpRequestMessage();
+
+            if (filter == "" || filter == null)
+            {
+                if (skip >= 0 && top > 0)
+                {
+                    if (orderby != "" && orderby != null) //Mihir
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$skip=" + skip + "&$top=" + top + "&$orderby=" + orderby);
+                    else
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$skip=" + skip + "&$top=" + top);
+                }
+                else
+                {
+                    if (orderby != "" && orderby != null) //Mihir
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$orderby=" + orderby);
+                    else
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri);
+                }
+            }
+
+            if (filter != "" && filter != null)
+            {
+                if (skip >= 0 && top > 0)
+                {
+                    if (orderby != "" && orderby != null) //Mihir
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$filter=" + filter + "&$skip=" + skip + "&$top=" + top + "&$orderby=" + orderby);
+                    else
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$filter=" + filter + "&$skip=" + skip + "&$top=" + top);
+                }
+                else
+                {
+                    if (orderby != "" && orderby != null) //Mihir
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$filter=" + filter + "&$orderby=" + orderby);
+                    else
+                        //request = new HttpRequestMessage(HttpMethod.Get, baseuri);
+                        request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$filter=" + filter);
+                }
+            }
+
+            //if (filter == "")
+            //    request = new HttpRequestMessage(HttpMethod.Get, baseuri);
+            //else
+            //    request = new HttpRequestMessage(HttpMethod.Get, baseuri + "?$filter=" + filter);
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+
+            HttpResponseMessage response = null;
+            try
+            {
+                response = _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            errorDetails errordetail = new errorDetails();
+            errordetail.isSuccess = response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+                try
+                {
+                    items = JsonConvert.DeserializeObject<OData<U>>(JsonData);
+
+                    errordetail.code = response.StatusCode.ToString();
+                    errordetail.message = response.ReasonPhrase;
+                }
+                catch (Exception ex1)
+                {
+                }
+            }
+            else
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+
+                try
+                {
+                    if (JsonData != "")
+                    {
+                        JObject res = JObject.Parse(JsonData);
+                        errorMaster<errorDetails> emd = res.ToObject<errorMaster<errorDetails>>();
+                        errordetail = emd.error;
+                    }
+                    else
+                    {
+                        errordetail.code = response.StatusCode.ToString();
+                        errordetail.message = response.ReasonPhrase;
+                    }
+                }
+                catch (Exception ex1)
+                {
+                }
+            }
+            return (items, errordetail);
+        }
         public async Task<(OData<U>, errorDetails)> GetData1<U>(string apiendpoint, string filter, int skip, int top, string orderby)
         {
             OData<U> items = new OData<U>();
@@ -509,6 +681,66 @@ namespace PrakashCRM.Service.Classes
             return (items, errordetail);
         }
 
+        public async Task<int> GetRecordsCount(string apiendpoint, string filter, bool WithUpdateURl = true)
+        {
+
+            var accessToken = await GetAccessToken();
+
+            HttpClient _httpClient = new HttpClient();
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
+            Uri baseuri = new Uri(encodeurl);
+            //var request = new HttpRequestMessage();
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+
+            //request = new HttpRequestMessage(HttpMethod.Get, baseuri + "/$count");
+
+            //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+
+            HttpResponseMessage response = null;
+            try
+            {
+                if (filter == "")
+                    response = _httpClient.GetAsync(baseuri + "/$count").Result;
+                else
+                    response = _httpClient.GetAsync(baseuri + "/$count?$filter=" + filter).Result;
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            if (response == null)
+                return 0;
+
+            var payload = await response.Content.ReadAsStringAsync();
+
+            // $count should return a plain number; if we get an error payload, don't crash callers.
+            if (!response.IsSuccessStatusCode || string.IsNullOrWhiteSpace(payload))
+                return 0;
+
+            payload = payload.Trim();
+            if (payload.Length >= 2 && payload[0] == '"' && payload[payload.Length - 1] == '"')
+                payload = payload.Substring(1, payload.Length - 2).Trim();
+
+            if (int.TryParse(payload, NumberStyles.Integer, CultureInfo.InvariantCulture, out var countInt))
+                return countInt;
+
+            if (long.TryParse(payload, NumberStyles.Integer, CultureInfo.InvariantCulture, out var countLong))
+                return (int)Math.Min(int.MaxValue, Math.Max(0, countLong));
+
+            if (decimal.TryParse(payload, NumberStyles.Number, CultureInfo.InvariantCulture, out var countDecimal))
+            {
+                if (countDecimal <= 0)
+                    return 0;
+                if (countDecimal >= int.MaxValue)
+                    return int.MaxValue;
+                return (int)countDecimal;
+            }
+
+            return 0;
+        }
         public async Task<int> GetRecordsCount(string apiendpoint, string filter)
         {
 
@@ -575,16 +807,22 @@ namespace PrakashCRM.Service.Classes
             int count = await GetRecordsCount(apiendpoint, filter);
             return count > 0 ? count : 0;
         }
+        public async Task<int> CalculateCount(string apiendpoint, string filter, bool WithUpdateURl = true)
+        {
+            int count = await GetRecordsCount(apiendpoint, filter, true);
+            return count > 0 ? count : 0;
+        }
 
-        public async Task<(U, errorDetails)> PatchItem<U>(string apiendpoint, U requestModel, U responseModel, string fieldWithValue)
+        public async Task<(U, errorDetails)> PatchItem<U>(string apiendpoint, U requestModel, U responseModel, string fieldWithValue, bool WithUpdateURl = true)
         {
             var accessToken = await GetAccessToken();
 
             HttpClient _httpClient = new HttpClient();
-            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
             Uri baseuri = new Uri(encodeurl);
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), baseuri + "(" + fieldWithValue + ")");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+            request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
             _httpClient.DefaultRequestHeaders.Add("If-Match", "*");
 
             string ItemCardObjString = JsonConvert.SerializeObject(requestModel);
@@ -617,17 +855,122 @@ namespace PrakashCRM.Service.Classes
             if (response.IsSuccessStatusCode)
             {
                 var JsonData = response.Content.ReadAsStringAsync().Result;
-                try
+
+                if (string.IsNullOrWhiteSpace(JsonData))
                 {
-                    JObject res = JObject.Parse(JsonData);
-                    responseModel = res.ToObject<U>();
-
-
+                    responseModel = requestModel;
                     errordetail.code = response.StatusCode.ToString();
                     errordetail.message = response.ReasonPhrase;
                 }
+                else
+                {
+                    try
+                    {
+                        responseModel = JsonConvert.DeserializeObject<U>(JsonData);
+                        if (responseModel == null)
+                            responseModel = requestModel;
+
+                        errordetail.code = response.StatusCode.ToString();
+                        errordetail.message = response.ReasonPhrase;
+                    }
+                    catch (Exception)
+                    {
+                        responseModel = requestModel;
+                        errordetail.code = response.StatusCode.ToString();
+                        errordetail.message = response.ReasonPhrase;
+                    }
+                }
+            }
+            else
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+
+                try
+                {
+                    JObject res = JObject.Parse(JsonData);
+                    errorMaster<errorDetails> emd = res.ToObject<errorMaster<errorDetails>>();
+                    errordetail = emd.error;
+
+                }
                 catch (Exception ex1)
                 {
+                }
+
+                if (!skipSiteErrorLogging)
+                {
+                    string message = string.IsNullOrWhiteSpace(errordetail.message) ? JsonData : errordetail.message;
+                    PostSiteErrorWithResponse(response.StatusCode.ToString(), message, (baseuri + "(" + fieldWithValue + ")"), "PATCH " + apiendpoint, "TraceId: " + Guid.NewGuid().ToString("N"));
+                }
+            }
+
+            return (responseModel, errordetail);
+        }
+        public async Task<(U, errorDetails)> PatchItem<U>(string apiendpoint, U requestModel, U responseModel, string fieldWithValue)
+        {
+            var accessToken = await GetAccessToken();
+
+            HttpClient _httpClient = new HttpClient();
+            string encodeurl = Uri.EscapeUriString(_baseURL.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{CompanyName}", _companyName) + apiendpoint);
+            Uri baseuri = new Uri(encodeurl);
+            var request = new HttpRequestMessage(new HttpMethod("PATCH"), baseuri + "(" + fieldWithValue + ")");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+            request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
+            _httpClient.DefaultRequestHeaders.Add("If-Match", "*");
+
+            string ItemCardObjString = JsonConvert.SerializeObject(requestModel);
+            request.Content = new StringContent(ItemCardObjString, Encoding.UTF8, "application/json");
+
+            bool skipSiteErrorLogging = string.Equals(apiendpoint, "SiteErrorsListDotNetAPI", StringComparison.OrdinalIgnoreCase);
+
+            HttpResponseMessage response = null;
+            try
+            {
+                //response = _httpClient.PutAsync(baseuri, content).Result;
+                response = _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            }
+            catch (Exception ex)
+            {
+                if (!skipSiteErrorLogging)
+                    PostSiteErrorWithResponse("PATCH_EXCEPTION", ex.Message, (baseuri + "(" + fieldWithValue + ")"), "PATCH " + apiendpoint, "TraceId: " + Guid.NewGuid().ToString("N"));
+            }
+
+            errorDetails errordetail = new errorDetails();
+            if (response == null)
+            {
+                errordetail.isSuccess = false;
+                errordetail.code = "NO_RESPONSE";
+                errordetail.message = "Patch request failed: no response received.";
+                return (responseModel, errordetail);
+            }
+
+            errordetail.isSuccess = response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+
+                if (string.IsNullOrWhiteSpace(JsonData))
+                {
+                    responseModel = requestModel;
+                    errordetail.code = response.StatusCode.ToString();
+                    errordetail.message = response.ReasonPhrase;
+                }
+                else
+                {
+                    try
+                    {
+                        responseModel = JsonConvert.DeserializeObject<U>(JsonData);
+                        if (responseModel == null)
+                            responseModel = requestModel;
+
+                        errordetail.code = response.StatusCode.ToString();
+                        errordetail.message = response.ReasonPhrase;
+                    }
+                    catch (Exception)
+                    {
+                        responseModel = requestModel;
+                        errordetail.code = response.StatusCode.ToString();
+                        errordetail.message = response.ReasonPhrase;
+                    }
                 }
             }
             else
@@ -655,6 +998,79 @@ namespace PrakashCRM.Service.Classes
             return (responseModel, errordetail);
         }
 
+        public async Task<(U, errorDetails)> PostItem<U>(string apiendpoint, U requestModel, U responseModel, bool WithUpdateURl = true)
+        {
+
+            var accessToken = await GetAccessToken();
+
+            HttpClient _httpClient = new HttpClient();
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
+            Uri baseuri = new Uri(encodeurl);
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken.Token);
+
+
+            string ItemCardObjString = JsonConvert.SerializeObject(requestModel);
+            var content = new StringContent(ItemCardObjString, Encoding.UTF8, "application/json");
+
+            bool skipSiteErrorLogging = string.Equals(apiendpoint, "SiteErrorsListDotNetAPI", StringComparison.OrdinalIgnoreCase);
+
+            HttpResponseMessage response = null;
+            try
+            {
+                response = _httpClient.PostAsync(baseuri, content).Result;
+            }
+            catch (Exception ex)
+            {
+                if (!skipSiteErrorLogging)
+                    PostSiteErrorWithResponse("POST_EXCEPTION", ex.Message, baseuri.ToString(), "POST " + apiendpoint, "TraceId: " + Guid.NewGuid().ToString("N"));
+            }
+            errorDetails errordetail = new errorDetails();
+            if (response == null)
+            {
+                errordetail.isSuccess = false;
+                errordetail.code = "NO_RESPONSE";
+                errordetail.message = "Post request failed: no response received.";
+                return (responseModel, errordetail);
+            }
+
+            errordetail.isSuccess = response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+                try
+                {
+                    JObject res = JObject.Parse(JsonData);
+                    responseModel = res.ToObject<U>();
+
+                    errordetail.code = response.StatusCode.ToString();
+                    errordetail.message = response.ReasonPhrase;
+                }
+                catch (Exception ex1)
+                {
+                }
+            }
+            else
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+
+                try
+                {
+                    JObject res = JObject.Parse(JsonData);
+                    errorMaster<errorDetails> emd = res.ToObject<errorMaster<errorDetails>>();
+                    errordetail = emd.error;
+                }
+                catch (Exception ex1)
+                {
+                }
+
+                if (!skipSiteErrorLogging)
+                {
+                    string message = string.IsNullOrWhiteSpace(errordetail.message) ? JsonData : errordetail.message;
+                    PostSiteErrorWithResponse(response.StatusCode.ToString(), message, baseuri.ToString(), "POST " + apiendpoint, "TraceId: " + Guid.NewGuid().ToString("N"));
+                }
+            }
+            return (responseModel, errordetail);
+        }
         public async Task<(U, errorDetails)> PostItem<U>(string apiendpoint, U requestModel, U responseModel)
         {
 
@@ -729,6 +1145,84 @@ namespace PrakashCRM.Service.Classes
             return (responseModel, errordetail);
         }
 
+        public async Task<(U, errorDetails)> DeleteItem<U>(string apiendpoint, U requestModel, U responseModel, string fieldWithValue, bool WithUpdateURl = true)
+        {
+            var accessToken = await GetAccessToken();
+
+            HttpClient _httpClient = new HttpClient();
+            string encodeurl = Uri.EscapeUriString(_baseURLAPIPage.Replace("{TenantID}", _tenantId).Replace("{Environment}", _environment).Replace("{Company_Name}", _companyURLAPIPage) + apiendpoint);
+            Uri baseuri = new Uri(encodeurl);
+            var request = new HttpRequestMessage(HttpMethod.Delete, baseuri + "(" + fieldWithValue + ")");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+            _httpClient.DefaultRequestHeaders.Add("If-Match", "*");
+
+            // For DELETE requests, do not send a body
+            // string ItemCardObjString = JsonConvert.SerializeObject(requestModel);
+            // request.Content = new StringContent(ItemCardObjString, Encoding.UTF8, "application/json");
+
+            bool skipSiteErrorLogging = string.Equals(apiendpoint, "SiteErrorsListDotNetAPI", StringComparison.OrdinalIgnoreCase);
+
+            HttpResponseMessage response = null;
+            try
+            {
+                response = _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            }
+            catch (Exception ex)
+            {
+                if (!skipSiteErrorLogging)
+                    PostSiteErrorWithResponse("DELETE_EXCEPTION", ex.Message, (baseuri + "(" + fieldWithValue + ")"), "DELETE " + apiendpoint, "TraceId: " + Guid.NewGuid().ToString("N"));
+            }
+
+            errorDetails errordetail = new errorDetails();
+            if (response == null)
+            {
+                errordetail.isSuccess = false;
+                errordetail.code = "NO_RESPONSE";
+                errordetail.message = "Delete request failed: no response received.";
+                return (responseModel, errordetail);
+            }
+
+            errordetail.isSuccess = response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+            {
+                //var JsonData = response.Content.ReadAsStringAsync().Result;
+                try
+                {
+                    //JObject res = JObject.Parse(JsonData);
+                    //responseModel = res.ToObject<U>();
+
+                    errordetail.code = response.StatusCode.ToString();
+                    errordetail.message = response.ReasonPhrase;
+                }
+                catch (Exception ex1)
+                {
+
+                }
+            }
+            else
+            {
+                var JsonData = response.Content.ReadAsStringAsync().Result;
+
+                try
+                {
+                    JObject res = JObject.Parse(JsonData);
+                    errorMaster<errorDetails> emd = res.ToObject<errorMaster<errorDetails>>();
+                    errordetail = emd.error;
+
+                }
+                catch (Exception ex1)
+                {
+                }
+
+                if (!skipSiteErrorLogging)
+                {
+                    string message = string.IsNullOrWhiteSpace(errordetail.message) ? JsonData : errordetail.message;
+                    PostSiteErrorWithResponse(response.StatusCode.ToString(), message, (baseuri + "(" + fieldWithValue + ")"), "DELETE " + apiendpoint, "TraceId: " + Guid.NewGuid().ToString("N"));
+                }
+            }
+
+            return (responseModel, errordetail);
+        }
         public async Task<(U, errorDetails)> DeleteItem<U>(string apiendpoint, U requestModel, U responseModel, string fieldWithValue)
         {
             var accessToken = await GetAccessToken();
@@ -740,8 +1234,9 @@ namespace PrakashCRM.Service.Classes
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
             _httpClient.DefaultRequestHeaders.Add("If-Match", "*");
 
-            string ItemCardObjString = JsonConvert.SerializeObject(requestModel);
-            request.Content = new StringContent(ItemCardObjString, Encoding.UTF8, "application/json");
+            // For DELETE requests, do not send a body
+            // string ItemCardObjString = JsonConvert.SerializeObject(requestModel);
+            // request.Content = new StringContent(ItemCardObjString, Encoding.UTF8, "application/json");
 
             bool skipSiteErrorLogging = string.Equals(apiendpoint, "SiteErrorsListDotNetAPI", StringComparison.OrdinalIgnoreCase);
 
@@ -817,8 +1312,8 @@ namespace PrakashCRM.Service.Classes
                 if (string.IsNullOrWhiteSpace(ipAddress))
                     //ipAddress = context.Request.ServerVariables["REMOTE_ADDR"];
 
-                if (string.IsNullOrWhiteSpace(ipAddress))
-                    ipAddress = context.Request.UserHostAddress;
+                    if (string.IsNullOrWhiteSpace(ipAddress))
+                        ipAddress = context.Request.UserHostAddress;
             }
 
             if (!string.IsNullOrWhiteSpace(ipAddress) && ipAddress.Contains(","))

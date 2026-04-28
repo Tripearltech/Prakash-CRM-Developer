@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PrakashCRM.Data.Models;
@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace PrakashCRM.Controllers
 {
@@ -30,6 +32,16 @@ namespace PrakashCRM.Controllers
         }
         public ActionResult CustomerOutsatnding()
         {
+            return View();
+        }
+        public ActionResult CustOverDueOutstandinglist()
+        {
+            return View();
+        }
+        public ActionResult CustOverDueOutstandingDetail(string customerName, string asOnDate)
+        {
+            ViewBag.CustomerName = customerName ?? string.Empty;
+            ViewBag.AsOnDate = string.IsNullOrWhiteSpace(asOnDate) ? DateTime.Now.ToString("yyyy-MM-dd") : asOnDate;
             return View();
         }
         //public ActionResult OutstandingDetails()
@@ -283,11 +295,12 @@ namespace PrakashCRM.Controllers
 
         // Customer Report DrowDown Api.
 
+        [HttpGet]
         [HttpPost]
         public async Task<JsonResult> GetCustomerReport(string prefix)
         {
-            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerReport?prefix=" + prefix;
-
+            string SalesPerson = Session["loggedInUserSPCode"].ToString();
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerReport?prefix=" + prefix + "&salesPerson=" + SalesPerson;
             HttpClient client = new HttpClient();
             List<SPCustomerReport> customerReports = new List<SPCustomerReport>();
 
@@ -436,22 +449,12 @@ namespace PrakashCRM.Controllers
             return Json(WebsiteLog, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task<JsonResult> GetCustomerOutStanding(int pageNumber = 1, int pageSize = 10, string orderby = "Location_Code asc")
+        public async Task<JsonResult> GetCustomerOutStanding(string orderby = "Location_Code asc")
         {
-            if (pageNumber < 1)
-                pageNumber = 1;
-
-            if (pageSize <= 0)
-                pageSize = 10;
-
-            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerOutStanding?pageNumber=" + pageNumber + "&pageSize=" + pageSize + "&orderby=" + HttpUtility.UrlEncode(string.IsNullOrWhiteSpace(orderby) ? "Location_Code asc" : orderby);
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCustomerOutStanding?orderby=" + HttpUtility.UrlEncode(string.IsNullOrWhiteSpace(orderby) ? "Location_Code asc" : orderby);
 
             HttpClient client = new HttpClient();
-            PagedResult<SPCustomerOutstanding> outStandingDtails = new PagedResult<SPCustomerOutstanding>
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
+            List<SPCustomerOutstanding> outStandingDtails = new List<SPCustomerOutstanding>();
 
             client.BaseAddress = new Uri(apiUrl);
             client.DefaultRequestHeaders.Accept.Clear();
@@ -461,7 +464,7 @@ namespace PrakashCRM.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var data = await response.Content.ReadAsStringAsync();
-                outStandingDtails = Newtonsoft.Json.JsonConvert.DeserializeObject<PagedResult<SPCustomerOutstanding>>(data);
+                outStandingDtails = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SPCustomerOutstanding>>(data);
             }
 
             return Json(outStandingDtails, JsonRequestBehavior.AllowGet);
@@ -839,7 +842,23 @@ namespace PrakashCRM.Controllers
             return Json(stockManagements, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        public async Task<JsonResult> GetCSOutstandingDuelist(string spCode)
+        {
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPReports/GetCSOutstandingDuelist?spCode=" + spCode;
+            HttpClient Client = new HttpClient();
+            List<CSOutstandingDuelist> csutstandingDuelist = new List<CSOutstandingDuelist>();
+            Client.BaseAddress = new Uri(apiUrl);
+            Client.DefaultRequestHeaders.Accept.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-
+            HttpResponseMessage response = await Client.GetAsync(apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content?.ReadAsStringAsync();
+                csutstandingDuelist = Newtonsoft.Json.JsonConvert.DeserializeObject<List<CSOutstandingDuelist>>(data);
+            }
+            return Json(csutstandingDuelist, JsonRequestBehavior.AllowGet);
+        }
     }
 }

@@ -2,25 +2,177 @@
 var orderBy = 2;
 var orderDir = "asc";
 var filter = "";
+var allCustomers = [];
+var selectedCustomer = "";
+var currentFromDate = "";
+var currentToDate = "";
 
 $(document).ready(function () {
+    // Load customer data on page load
+    LoadCustomerData();
+
     $('#ddlRecPerPage').change(function () {
-        ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir);
+        ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
     });
-    ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir);
+
+    // Show full customer list on focus
+    $('#TxtSearch').on('focus', function () {
+        var dropdown = $('#customerDropdown');
+        if (allCustomers.length > 0 && $('#TxtSearch').val() === '') {
+            dropdown.empty();
+            allCustomers.forEach(function (customer) {
+                dropdown.append('<div class="dropdown-item" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; background: #f9f9f9;">' + customer + '</div>');
+            });
+            dropdown.show();
+        }
+    });
+
+    // Autocomplete for customer search
+    $('#TxtSearch').on('input', function () {
+        var searchValue = $(this).val().toLowerCase();
+        var dropdown = $('#customerDropdown');
+
+        if (searchValue.length > 0) {
+            var filtered = allCustomers.filter(function (customer) {
+                return customer.toLowerCase().includes(searchValue);
+            });
+
+            if (filtered.length > 0) {
+                dropdown.empty();
+                filtered.forEach(function (customer) {
+                    dropdown.append('<div class="dropdown-item" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #ddd; background: #f9f9f9;">' + customer + '</div>');
+                });
+                dropdown.show();
+            } else {
+                dropdown.empty();
+                dropdown.hide();
+            }
+        } else {
+            // Show full list again when cleared
+            if (allCustomers.length > 0) {
+                dropdown.empty();
+                allCustomers.forEach(function (customer) {
+                    dropdown.append('<div class="dropdown-item" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #ddd; background: #f9f9f9;">' + customer + '</div>');
+                });
+                dropdown.show();
+            } else {
+                dropdown.empty();
+                dropdown.hide();
+            }
+            selectedCustomer = "";
+        }
+    });
+
+    // Handle dropdown item selection
+    $(document).on('click', '#customerDropdown .dropdown-item', function () {
+        selectedCustomer = $(this).text();
+        $('#TxtSearch').val(selectedCustomer);
+        $('#customerDropdown').hide();
+    });
+
+    // Hide dropdown when clicking outside
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#TxtSearch, #customerDropdown').length) {
+            $('#customerDropdown').hide();
+        }
+    });
+
+    ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
 });
 
-function ComplainList(skip, top, firsload, orderBy, orderDir) {
+// Search button handler
+$('#SearchBtn').on('click', function () {
+    var fromdate = $("#FromDate").val();
+    var todate = $("#ToDate").val();
+    var search = $("#TxtSearch").val().trim();
+
+    if (fromdate != "" && todate != "") {
+        currentFromDate = fromdate;
+        currentToDate = todate;
+        selectedCustomer = search;
+        $("#Fdatevalidate").text("");
+        $("#Tdatevalidate").text("");
+        ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, fromdate, todate, search);
+    } else if (fromdate != "" || todate != "") {
+        if (fromdate != "" && todate == "") {
+            $("#Tdatevalidate").text('please select to date');
+        } else if (fromdate == "" && todate != "") {
+            $("#Fdatevalidate").text('Please select first date');
+        }
+    } else if (search != "") {
+        currentFromDate = "";
+        currentToDate = "";
+        selectedCustomer = search;
+        $("#Fdatevalidate").text('');
+        $("#Tdatevalidate").text('');
+        ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, "", "", search);
+    } else {
+        $("#Fdatevalidate").text('Please select first date');
+        $("#Tdatevalidate").text('please select to date');
+    }
+});
+
+// Clear/Refresh button handler
+$('#btnClearFilter').on('click', function () {
+    $("#FromDate").val('');
+    $("#ToDate").val('');
+    $("#TxtSearch").val('');
+    $("#Fdatevalidate").text('');
+    $("#Tdatevalidate").text('');
+    selectedCustomer = "";
+    currentFromDate = "";
+    currentToDate = "";
+    ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, "", "", "");
+});
+
+function LoadCustomerData() {
+    // Try to load from API, but fallback to empty array if fails
+    $.ajax({
+        url: '/SPReports/GetCustomerReport?prefix=&salesPerson=' + $('#hdnLoggedInUserSPCode').val(),
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
+            if (data && data.length > 0) {
+                allCustomers = data.map(function (item) {
+                    return item.Customer_Name || item.CustomerName || '';
+                }).filter(function (name) {
+                    return name.length > 0;
+                });
+                allCustomers = [...new Set(allCustomers)]; // Remove duplicates
+            }
+        },
+        error: function () {
+            // If API fails, customer list will be populated from report data
+            console.log('LoadCustomerData API failed, will load from report data');
+        }
+    });
+}
+
+function ExtractCustomersFromReport(data) {
+    // Extract unique customer names from report data
+    if (data && data.length > 0) {
+        var customers = data.map(function (item) {
+            return item.Contact_Company_Name || item.Customer_Name || item.CustomerName || '';
+        }).filter(function (name) {
+            return name.length > 0;
+        });
+
+        // Merge with existing customers and remove duplicates
+        allCustomers = [...new Set([...allCustomers, ...customers])];
+    }
+}
+
+function ComplainList(skip, top, firsload, orderBy, orderDir, fromdate, todate, customerName) {
     debugger
     if (typeof showPageDataLoader === 'function') {
         showPageDataLoader();
     }
 
-    $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=DailyVisitsDotNetAPI&fdate=null&tdate=null&text=null', function (data) {
+    $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=DailyVisitsDotNetAPI&fdate=' + (fromdate || 'null') + '&tdate=' + (todate || 'null') + '&text=' + (customerName || 'null'), function (data) {
         $('#hdnSPSICount').val(data);
     });
     $.ajax({
-        url: '/SPReports/GetComplaintList?orderBy=' + orderBy + '&orderDir=' + orderDir + '&skip=' + skip + '&top=' + top,
+        url: '/SPReports/GetComplaintList?orderBy=' + orderBy + '&orderDir=' + orderDir + '&skip=' + skip + '&top=' + top + '&fromdate=' + (fromdate || '') + '&todate=' + (todate || '') + '&search=' + (customerName || ''),
         type: 'GET',
         contentType: 'application/json',
         success: function (data) {
@@ -29,18 +181,24 @@ function ComplainList(skip, top, firsload, orderBy, orderDir) {
             }
             $("#tblComplaint").empty();
 
+            // Extract customers from report data
+            ExtractCustomersFromReport(data);
+
             var rowData = "";
             if (data.length > 0) {
                 $.each(data, function (index, item) {
+                    // Filter by customer name if selected
+                    if (customerName && customerName !== "" && item.Contact_Company_Name && !item.Contact_Company_Name.toLowerCase().includes(customerName.toLowerCase())) {
+                        return; // Skip this record
+                    }
 
-                   
                     rowData += "<tr><td>" + item.Complain_Invoice + "</td><td>" + item.No + "</td><td>" + item.Contact_Company_Name + "</td><td>" + item.Complain_Subject + "</td><td>" +
                         item.Com_Date + "</td><td>" + item.Root_Analysis + "</td><td>" + item.Root_Analysis_date + "</td><td>"
                         + item.Corrective_Action + "</td><td>" + item.Corrective_Action_Date + "</td><td>" + item.Preventive_Action + "</td><td>" + item.Preventive_Date + "</td><td>" + item.Status + "</td></tr>";
-                    
+
 
                 });
-               
+
             }
             else {
                 rowData = "<tr><td colspan='9' style='text-align:left;'>No Records Found</td></tr>";
@@ -78,7 +236,7 @@ $('#dataList th').click(function () {
             orderDir = "desc";
         }
         $('ul.pager li').remove();
-        ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir);
+        ComplainList(0, $('#ddlRecPerPage').val(), 1, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
     }
 });
 
@@ -156,7 +314,7 @@ function pageMe() {
         var clickedPage = $(this).html().valueOf() - 1;
         var skip1 = $(this).attr("skip");
         var top1 = $(this).attr("top");
-        goTo(clickedPage, skip1, top1, orderBy, orderDir);
+        goTo(clickedPage, skip1, top1, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
         return false;
     });
     pager.find('li .prev_link').click(function () {
@@ -172,14 +330,14 @@ function pageMe() {
         var goToPage = parseInt(pager.data("curr")) - 1;
         var skip1 = $('#pg' + (goToPage + 1) + ' .page_link').attr("skip");
         var top1 = $('#pg' + (goToPage + 1) + ' .page_link').attr("top");
-        goTo(goToPage, skip1, top1, orderBy, orderDir);
+        goTo(goToPage, skip1, top1, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
     }
 
     function next() {
         goToPage = parseInt(pager.data("curr")) + 1;
         var skip1 = $('#pg' + (goToPage + 1) + ' .page_link').attr("skip");
         var top1 = $('#pg' + (goToPage + 1) + ' .page_link').attr("top");
-        goTo(goToPage, skip1, top1, orderBy, orderDir);
+        goTo(goToPage, skip1, top1, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
     }
 
     function goTo(page, skip2, top2) {
@@ -229,7 +387,7 @@ function pageMe() {
 
         pager.data("curr", page);
 
-        ComplainList(skip2, top2, 0, orderBy, orderDir);
+        ComplainList(skip2, top2, 0, orderBy, orderDir, currentFromDate, currentToDate, selectedCustomer);
     }
 
 };

@@ -126,6 +126,7 @@ namespace PrakashCRM.Data.Models
         public bool Is_PDC { get; set; }
         public string Pur_Visit { get; set; }
         public bool IsActive { get; set; }
+        public string DocAttachmentJson { get; set; }
         public errorDetails errorDetails { get; set; } = null;
     }
 
@@ -167,6 +168,8 @@ namespace PrakashCRM.Data.Models
         public string Entry_Type { get; set; }
         public bool Is_PDC { get; set; }
         public string Pur_Visit { get; set; }
+        public string DocAttachmentJson { get; set; }
+        public bool IsTrackingDocumentAttached { get; set; }
         public bool IsActive { get; set; }
     }
 

@@ -175,6 +175,8 @@ $(document).ready(function () {
         else {
             $('#ddlTransportMethod').prop('disabled', false);
         }
+        //inquiry Patial case on sales quote
+        applySalesQuoteLineFieldLocks();
         CalculateFormula();
 
     });
@@ -348,26 +350,30 @@ $(document).ready(function () {
     });
 
     $('#ddlPackingStyle').change(function () {
-            const packingStyleValue = ($('#ddlPackingStyle').val() || '').toString();
-            if (!packingStyleValue || packingStyleValue === '-1' || packingStyleValue.indexOf('_') < 0) {
-                $('#txtBasicPurchaseCost').val('');
-                $('#txtMRPPrice').val('');
-                $('#hfPurchaseDays').val('0');
+        const packingStyleValue = ($('#ddlPackingStyle').val() || '').toString();
+        if (!packingStyleValue || packingStyleValue === '-1' || packingStyleValue.indexOf('_') < 0) {
+            $('#txtBasicPurchaseCost').val('');
+            $('#txtMRPPrice').val('');
+            $('#hfPurchaseDays').val('0');
 
-                try { CalculateFormula(); } catch (e) { }
-                return;
-            }
+            try { CalculateFormula(); } catch (e) { }
+            //inquiry Patial case on sales quote
+            applySalesQuoteLineFieldLocks();
+            return;
+        }
 
-            const packingStyleDetails = packingStyleValue.split('_');
+        const packingStyleDetails = packingStyleValue.split('_');
         // Set Basic Purchase Cost to PCPL_MRP (use packing style Purchase Cost, not MRP Price)
         $('#txtBasicPurchaseCost').val(parseFloat(packingStyleDetails[0]).toFixed(2));
         $('#txtBasicPurchaseCost').prop('disabled', true);
         $('#txtMRPPrice').val(parseFloat(packingStyleDetails[3]).toFixed(4));
-        $('#txtMRPPrice').prop('disabled', true);
+        $('#txtMRPPrice').prop('disabled', false).prop('readonly', false);
         $('#hfPurchaseDays').val(parseInt(packingStyleDetails[2]));
 
         // Packing style drives Basic Purchase Cost; recalc totals/margin immediately.
         try { CalculateFormula(); } catch (e) { }
+        //inquiry Patial case on sales quote
+        applySalesQuoteLineFieldLocks();
     });
 
     $('#btnResetProdDetails').click(function () {
@@ -473,15 +479,17 @@ $(document).ready(function () {
 
         }
 
-        if ($('#txtSalesPrice').val() === "" || $('#txtSalesPrice').val() === null) {
+        var salesPriceValue = parseFloat($('#txtSalesPrice').val() || '0');
+        if ($('#txtSalesPrice').val() === "" || $('#txtSalesPrice').val() === null || salesPriceValue <= 0) {
 
-            ShowErrMsg("Please select a Sales Price before saving.");
+            ShowErrMsg("Sales Price must be greater than zero before saving.");
 
             $('#txtSalesPrice').focus();
 
             return;
 
         }
+
 
         if ($('#txtDeliveryDate').val() === "" || $('#txtDeliveryDate').val() === null) {
 
@@ -507,8 +515,8 @@ $(document).ready(function () {
         var sqLineNo = 0;
         if (prodOptsTR) {
             try {
-                var $existingRowForLine = $('#ProdTR_' + prodOptsTR);
-                sqLineNo = parseInt((($existingRowForLine.attr('data-lineno') || '')).toString().trim()) || 0;
+                var $existingRowForLine = $(getSQRowSelector(prodOptsTR));
+                sqLineNo = getSQRowLineNo($existingRowForLine);
             } catch (e) { sqLineNo = 0; }
         }
         if (!sqLineNo || sqLineNo <= 0) {
@@ -516,10 +524,14 @@ $(document).ready(function () {
         }
 
         var editLineNoForActions = (sqLineNo && sqLineNo > 0) ? sqLineNo : (parseInt(inqProdLineNo || '0') || 0);
+        var rowKey = (prodOptsTR || buildSQRowKey(prodOpts, inqProdLineNo, sqLineNo || editLineNoForActions));
+        if (rowKey === '') {
+            rowKey = buildSQRowKey(prodOpts, inqProdLineNo, editLineNoForActions);
+        }
 
-        var actionsHtml = `<a class='SQLineCls' onclick='EditSQProd(${editLineNoForActions},"ProdTR_${prodOpts}")'><i class='bx bxs-edit'></i></a>`;
-        actionsHtml += `&nbsp;<a class='SQLineCls' onclick='DeleteSQProd(${editLineNoForActions},"ProdTR_${prodOpts}")'><i class='bx bxs-trash'></i></a>`;
-        actionsHtml += `&nbsp;<span id='${prodOpts}_SQPriceBtns'></span>`;
+        var actionsHtml = `<a class='SQLineCls' onclick='EditSQProd(${editLineNoForActions}, this.closest("tr"))'><i class='bx bxs-edit'></i></a>`;
+        actionsHtml += `&nbsp;<a class='SQLineCls' onclick='DeleteSQProd(${editLineNoForActions}, this.closest("tr"))'><i class='bx bxs-trash'></i></a>`;
+        actionsHtml += `&nbsp;<span class='SQPriceBtns'></span>`;
 
         var commissionPerUnit = isCommission ? $('#ddlCommissionPerUnitPercent').val() : "";
 
@@ -541,7 +553,7 @@ $(document).ready(function () {
         var existingNewMargin = '0';
         var existingPriceUpdated = 'false';
         if (prodOptsTR) {
-            var $existingRow = $('#ProdTR_' + prodOptsTR);
+            var $existingRow = $(getSQRowSelector(prodOptsTR));
             if ($existingRow.length && SQ_PRICE_COLS.NEW_PRICE !== null && SQ_PRICE_COLS.NEW_PRICE >= 0) {
                 existingNewPrice = (sqGetRowCellText($existingRow, SQ_PRICE_COLS.NEW_PRICE) || '').trim() || '0';
             }
@@ -552,7 +564,7 @@ $(document).ready(function () {
                 existingPriceUpdated = (sqGetRowCellText($existingRow, SQ_PRICE_COLS.PRICE_UPDATED) || '').trim() || 'false';
             }
         }
-        var sqLineNoLabel = `<label id="${prodOpts}_SQLineNo" style='display:none'>${sqLineNo || 0}</label>`;
+        var sqLineNoLabel = `<label id="${rowKey}_SQLineNo" style='display:none'>${sqLineNo || 0}</label>`;
 
         var prodOptsArray = [
 
@@ -596,13 +608,13 @@ $(document).ready(function () {
 
             $('#txtInterest').val(),
 
-            `<label id="${prodOpts}_DropShipment">${dropShipmentOpt}</label>`,
+            `<label id="${rowKey}_DropShipment">${dropShipmentOpt}</label>`,
 
-            "", // 26 → hidden
-            "", // 27 → hidden
-            `<label id="${prodOpts}_MarginPercent">${$('#spnMarginPercent').text()}</label>`,
+            "", // 26 hidden
+            "", // 27 hidden
+            `<label id="${rowKey}_MarginPercent">${$('#spnMarginPercent').text()}</label>`,
             commissionPayable,
-            `<label id="${prodOpts}_InqProdLineNo" style="display:none;">${inqProdLineNo}</label>`,
+            `<label id="${rowKey}_InqProdLineNo" style="display:none;">${inqProdLineNo}</label>`,
             // `<label id="${prodOpts}_SQLineNo" style="display:none;">${inqProdLineNo}</label>`,
             //`<label id="${prodOpts}_SQLineNo" style='display:none'>${prodOpts}</label>`,
             isLiquidProd,
@@ -630,7 +642,7 @@ $(document).ready(function () {
 
         if (prodOptsTR) {
 
-            var rowIdSelector = '#ProdTR_' + prodOptsTR;
+            var rowIdSelector = getSQRowSelector(prodOptsTR);
 
             var rowApi = dtable.row(rowIdSelector);
 
@@ -638,8 +650,7 @@ $(document).ready(function () {
 
                 rowApi.data(prodOptsArray).draw(false);
 
-                $(rowApi.node()).attr('id', 'ProdTR_' + prodOpts);
-                $(rowApi.node()).attr('data-lineno', sqLineNo || 0);
+                applySQRowIdentity($(rowApi.node()), rowKey, prodOpts, inqProdLineNo, sqLineNo || 0);
 
                 $(rowApi.node()).find("td").eq(0).addClass("dtr-control");
 
@@ -647,8 +658,7 @@ $(document).ready(function () {
 
                 var newNode = dtable.row.add(prodOptsArray).draw(false).node();
 
-                $(newNode).attr('id', 'ProdTR_' + prodOpts);
-                $(newNode).attr('data-lineno', sqLineNo || 0);
+                applySQRowIdentity($(newNode), rowKey, prodOpts, inqProdLineNo, sqLineNo || 0);
 
                 $(newNode).find("td").eq(0).addClass("dtr-control");
 
@@ -660,7 +670,7 @@ $(document).ready(function () {
 
             var newNode = dtable.row.add(prodOptsArray).draw(false).node();
 
-            $(newNode).attr('id', 'ProdTR_' + prodOpts);
+            applySQRowIdentity($(newNode), rowKey, prodOpts, inqProdLineNo, sqLineNo || 0);
 
             $(newNode).find("td").eq(0).addClass("dtr-control");
 
@@ -670,18 +680,17 @@ $(document).ready(function () {
 
         // Store SQ line no (for edits) in hidden col 26 and original basic cost in hidden col 27
         var lineNo = $('#hfSQProdLineNo').val() || '';
-        var $row = $('#ProdTR_' + prodOpts);
+        var $row = $(getSQRowSelector(rowKey));
         if ($row.length) {
-            $row.attr('data-lineno', lineNo);
-            $row.find('TD').eq(26).html(`<label id="${prodOpts}_SQLineNo" style="display:none;">${lineNo}</label>`);
+            applySQRowIdentity($row, rowKey, prodOpts, inqProdLineNo, lineNo);
+            $row.find('TD').eq(26).html(`<label id="${rowKey}_SQLineNo" style="display:none;">${lineNo}</label>`);
             $row.find('TD').eq(27).text('');
-            applySQPriceRowState('ProdTR_' + prodOpts);
+            applySQPriceRowState($row);
         }
 
         dtable.responsive.recalc();
 
         // Update available credit limit
-
         $('#txtAvailableCreditLimit').prop('disabled', false);
 
         var availableCreditLimit = parseFloat($('#txtAvailableCreditLimit').val().replaceAll(",", "")) -
@@ -1109,7 +1118,7 @@ $(document).ready(function () {
                 var NewBillToAddress = {};
 
                 NewBillToAddress.Customer_No = $('#hfCustomerNo').val();
-               // NewBillToAddress.Code = $('#txtNewShiptoAddCode').val();
+                // NewBillToAddress.Code = $('#txtNewShiptoAddCode').val();
                 NewBillToAddress.Address = $('#txtNewShiptoAddress').val();
                 NewBillToAddress.Address_2 = $('#txtNewShiptoAddress2').val();
                 NewBillToAddress.Post_Code = $('#txtNewShiptoAddPostCode').val();
@@ -1162,7 +1171,7 @@ $(document).ready(function () {
                 var NewDeliveryToAddress = {};
 
                 NewDeliveryToAddress.Customer_No = $('#hfCustomerNo').val();
-               // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
+                // NewDeliveryToAddress.Code = $('#txtNewJobtoAddCode').val();
                 NewDeliveryToAddress.Address = $('#txtNewJobtoAddress').val();
                 NewDeliveryToAddress.Address_2 = $('#txtNewJobtoAddress2').val();
                 NewDeliveryToAddress.Post_Code = $('#txtNewJobtoAddPostCode').val();
@@ -1545,29 +1554,247 @@ function BindInquiryLineDetails(InqNo) {
 
     $.get(apiUrl + 'GetInquiryProdDetails?InqNo=' + InqNo, function (data) {
         var ProdTR = "";
+        var hasOpenInquiryLine = false;
+        $('#tblInqProdDetails').empty();
         $.each(data, function (index, item) {
+            var isConverted = parseBool(item.PCPL_Convert_Quote);
+            if (!isConverted) {
+                hasOpenInquiryLine = true;
+            }
+            var selectedPaymentTerms = ($('#ddlPaymentTerms').val() || '') === '-1' ? "" : ($('#ddlPaymentTerms option:selected').text() || "");
+            var paymentTerms = item.PCPL_Payment_Terms || selectedPaymentTerms || $('#hfPaymentTerms').val() || "";
+            var actionHtml = isConverted
+                ? "<span class='badge bg-secondary'>Converted</span>"
+                : "<a class='InqProdCls' onclick='FillInqProdDetails(\"" + item.Line_No + "\",\"" + item.Product_No + "\",\"" + item.Product_Name + "\"," +
+                item.Quantity + ",\"" + item.PCPL_Packing_Style_Code + "\",\"" + item.Delivery_Date + "\",\"" + paymentTerms + "\")'><i class='bx bx-edit'></i></a>";
+
             ProdTR += "<tr><td hidden>" + item.Line_No + "</td><td hidden>" + item.Product_No + "</td><td>" + item.Product_Name + "</td><td>" +
-                item.Quantity + "</td><td>" + item.PCPL_Packing_Style_Code + "</td><td>" + item.Unit_of_Measure + "</td><td>" + item.Delivery_Date + "</td><td>" + item.PCPL_Payment_Terms + "</td>" +
-                "<td><a class='InqProdCls' onclick='FillInqProdDetails(\"" + item.Line_No + "\",\"" + item.Product_No + "\",\"" + item.Product_Name + "\"," +
-                item.Quantity + ",\"" + item.PCPL_Packing_Style_Code + "\",\"" + item.Delivery_Date + "\")'><i class='bx bx-edit'></i></a></td>" +
+                item.Quantity + "</td><td>" + item.PCPL_Packing_Style_Code + "</td><td>" + item.Unit_of_Measure + "</td><td>" + item.Delivery_Date + "</td><td>" + paymentTerms + "</td>" +
+                "<td>" + actionHtml + "</td>" +
                 "<td hidden><label id='InqProdLineNo_" + item.Product_No + "'>" + item.Line_No + "</label></td></tr>";
         });
 
         $('#tblInqProdDetails').append(ProdTR);
+        toggleSalesQuoteButtons(!hasOpenInquiryLine);
     });
 }
 
-function FillInqProdDetails(ProdLineNo, ProductNo, ProductName, Quantity, PackingStyleCode, DeliveryDate) {
-    /* ResetQuoteLineDetails();*/
+function FillInqProdDetails(ProdLineNo, ProductNo, ProductName, Quantity, PackingStyleCode, DeliveryDate, PaymentTerms) {
+    var normalizedInqLineNo = (ProdLineNo || '').toString().trim();
+    var $existingRow = findSQRowByInquiryLine(normalizedInqLineNo);
+    if ($existingRow.length) {
+        EditSQProd(getSQRowLineNo($existingRow) || (parseInt(normalizedInqLineNo || '0') || 0), $existingRow.get(0));
+        return;
+    }
+
+    if (shouldStartPartialSalesQuoteDraft()) {
+        StartPartialSalesQuoteCreateFromInquiry();
+    }
+
+    ResetQuoteLineDetails();
+    ResetQuoteLineDetailsForInquirySelection();
     $('#hfProdLineNo').val(ProdLineNo); // Store InqProdLineNo
-    GetProductDetails(ProductName)
-    $('#hfProdNo').val(ProductNo);
     $('#hfInqProdPackingStyle').val(PackingStyleCode);
+    $('#hfProdNo').val(ProductNo);
+    GetProductDetails(ProductName)
     $('#txtProductName').val(ProductName);
     $('#txtProductName').blur();
     $('#txtProdQty').val(Quantity);
     $('#txtDeliveryDate').val(DeliveryDate);
-    $('#ddlPaymentTerms').change();
+    SetInquiryLinePaymentTerms(PaymentTerms);
+    setTimeout(function () {
+        ResetQuoteLineDetailsForInquirySelection(true);
+        $('#hfProdLineNo').val(ProdLineNo);
+        $('#hfInqProdPackingStyle').val(PackingStyleCode);
+        $('#hfProdNo').val(ProductNo);
+        $('#txtProductName').val(ProductName);
+        $('#txtProdQty').val(Quantity);
+        $('#txtDeliveryDate').val(DeliveryDate);
+        SetInquiryLinePaymentTerms(PaymentTerms);
+    }, 300);
+}
+
+function SetInquiryLinePaymentTerms(paymentTerms) {
+    var term = ((paymentTerms === null || paymentTerms === undefined) ? "" : paymentTerms).toString().trim();
+    var $ddl = $('#ddlPaymentTerms');
+
+    if (!$ddl.length) return;
+
+    if (term !== "") {
+        var matchedValue = "";
+        $ddl.find('option').each(function () {
+            var value = ($(this).val() || '').toString().trim();
+            var code = value.split('_')[0];
+            var text = ($(this).text() || '').toString().trim();
+
+            if (value === term || code === term || text === term) {
+                matchedValue = value;
+                return false;
+            }
+        });
+
+        if (matchedValue !== "") {
+            $ddl.val(matchedValue);
+        }
+    }
+
+    if (($ddl.val() || '') !== '-1') {
+        $ddl.change();
+        $('#txtLineDetailsPaymentTerms').val($ddl.find('option:selected').text()).attr('readonly', true);
+    }
+}
+//inquiry Patial case on sales quote
+
+function getSQProductRows() {
+    return $("#tblProducts TR[id^='ProdTR_']");
+}
+
+function sqSanitizeRowKeyPart(value) {
+    return ((value === null || value === undefined) ? '' : value.toString().trim()).replace(/[^A-Za-z0-9_-]/g, '_');
+}
+
+function buildSQRowKey(prodNo, inqProdLineNo, sqLineNo) {
+    var prodPart = sqSanitizeRowKeyPart(prodNo);
+    var inqPart = sqSanitizeRowKeyPart(inqProdLineNo);
+    var sqPart = sqSanitizeRowKeyPart(sqLineNo);
+
+    if (sqPart !== '' && sqPart !== '0') {
+        return 'SQ_' + sqPart + (prodPart !== '' ? '_' + prodPart : '');
+    }
+
+    if (inqPart !== '' && inqPart !== '0') {
+        return 'INQ_' + inqPart + (prodPart !== '' ? '_' + prodPart : '');
+    }
+
+    return prodPart !== '' ? 'PROD_' + prodPart : '';
+}
+
+function getSQRowId(rowKey) {
+    rowKey = (rowKey || '').toString().trim();
+    return rowKey !== '' ? ('ProdTR_' + rowKey) : '';
+}
+
+function getSQRowSelector(rowKey) {
+    var rowId = getSQRowId(rowKey);
+    return rowId !== '' ? ('#' + rowId) : '';
+}
+
+function getSQRowKey($row) {
+    if (!$row || !$row.length) return '';
+
+    var rowKey = (($row.attr('data-rowkey') || '').toString().trim());
+    if (rowKey !== '') {
+        return rowKey;
+    }
+
+    var rowId = (($row.attr('id') || '').toString().trim());
+    if (rowId.indexOf('ProdTR_') === 0) {
+        return rowId.substring('ProdTR_'.length);
+    }
+
+    return '';
+}
+
+function getSQRowLabelText($row, suffix) {
+    if (!$row || !$row.length) return '';
+    return (($row.find("label[id$='_" + suffix + "']").first().text() || '').toString().trim());
+}
+
+function getSQRowProdNo($row) {
+    if (!$row || !$row.length) return '';
+    return (($row.attr('data-prodno') || $row.find("TD").eq(2).text() || '').toString().trim());
+}
+
+function getSQRowLineNo($row) {
+    if (!$row || !$row.length) return 0;
+
+    var lineNo = parseInt((($row.attr('data-lineno') || '').toString().trim())) || 0;
+    if (!lineNo || lineNo <= 0) {
+        lineNo = parseInt(getSQRowLabelText($row, 'SQLineNo') || '0') || 0;
+    }
+
+    return lineNo;
+}
+
+function getSQRowInquiryLineNo($row) {
+    if (!$row || !$row.length) return '';
+    return (($row.attr('data-inqline') || getSQRowLabelText($row, 'InqProdLineNo') || '').toString().trim());
+}
+
+function findSQRowByInquiryLine(inqProdLineNo) {
+    var targetInqLineNo = (inqProdLineNo || '').toString().trim();
+    if (targetInqLineNo === '') {
+        return $();
+    }
+
+    return getSQProductRows().filter(function () {
+        return getSQRowInquiryLineNo($(this)) === targetInqLineNo;
+    }).first();
+}
+
+function shouldStartPartialSalesQuoteDraft() {
+    return getSQProductRows().length === 0 && (($('#hfSalesQuoteNo').val() || '').toString().trim() === '');
+}
+
+function applySQRowIdentity($row, rowKey, prodNo, inqProdLineNo, sqLineNo) {
+    if (!$row || !$row.length) return;
+
+    var normalizedRowKey = (rowKey || '').toString().trim();
+    var rowId = getSQRowId(normalizedRowKey);
+    if (rowId !== '') {
+        $row.attr('id', rowId);
+    }
+
+    $row.attr('data-rowkey', normalizedRowKey);
+    $row.attr('data-prodno', (prodNo || '').toString().trim());
+    $row.attr('data-inqline', (inqProdLineNo || '').toString().trim());
+    $row.attr('data-lineno', parseInt(sqLineNo || '0') || 0);
+}
+
+function isSQFirstLineContext() {
+    var $rows = getSQProductRows();
+    if ($rows.length === 0) {
+        return true;
+    }
+
+    var currentRowKey = ($('#hfProdNoEdit').val() || '').toString().trim();
+    var $currentRow = currentRowKey !== '' ? $(getSQRowSelector(currentRowKey)) : $();
+
+    if ($currentRow.length === 0) {
+        var currentInqLineNo = ($('#hfProdLineNo').val() || '').toString().trim();
+        if (currentInqLineNo !== '') {
+            $currentRow = findSQRowByInquiryLine(currentInqLineNo);
+            if ($currentRow.length === 0) {
+                return false;
+            }
+        }
+    }
+
+    if ($currentRow.length === 0) {
+        var currentProdNo = ($('#hfProdNo').val() || '').toString().trim();
+        if (currentProdNo === '') {
+            return false;
+        }
+
+        $currentRow = $rows.filter(function () {
+            return getSQRowProdNo($(this)) === currentProdNo;
+        }).first();
+    }
+
+    if ($currentRow.length === 0) {
+        return false;
+    }
+
+    return $rows.first().is($currentRow);
+}
+
+function applySalesQuoteLineFieldLocks() {
+    var isEditing = ($('#hfProdNoEdit').val() || '').toString().trim() !== '';
+    var allowIncoTermsEdit = !isEditing && isSQFirstLineContext();
+
+    $('#ddlIncoTerms').prop('disabled', !allowIncoTermsEdit);
+    $('#ddlTransportMethod').prop('disabled', true);
+    $('#txtMRPPrice').prop('disabled', true).prop('readonly', true);
 }
 
 function BindLocations() {
@@ -1755,7 +1982,7 @@ function BindPincodeMin2Char() {
             type: "POST"
         },
         onSelect: function (suggestion) {
-            // 👉 IsActive check — disable / enable dropdown
+            // IsActive check - disable / enable dropdown
             if (suggestion.isActive === false) {
                 $("#ddlNewShiptoAddArea").prop("disabled", true);
             } else {
@@ -2167,6 +2394,8 @@ function BindIncoTerms() {
                 if ($('#hfSavedIncoTerms').val() != "" && $('#hfSavedIncoTerms').val() != null) {
                     $('#ddlIncoTerms').val($('#hfSavedIncoTerms').val());
                 }
+                //inquiry Patial case on sales quote
+                applySalesQuoteLineFieldLocks();
 
             },
             error: function () {
@@ -2199,6 +2428,8 @@ function BindTransportMethod() {
                 if ($('#hfSavedTransportMethod').val() != "" && $('#hfSavedTransportMethod').val() != null) {
                     $('#ddlTransportMethod').val($('#hfSavedTransportMethod').val());
                 }
+                //inquiry Patial case on sales quote
+                applySalesQuoteLineFieldLocks();
 
             },
             error: function () {
@@ -2320,15 +2551,16 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
             });
 
             $.each(data.ProductsRes, function (index, item) {
+                var rowKey = buildSQRowKey(item.No, item.PCPL_Inquiry_Line_No, item.Line_No);
                 var actionsHtml = "";
                 if (item.TPTPL_Short_Closed) {
                     actionsHtml = "<span class='badge bg-secondary'>Shortclosed</span>";
                 } else {
-                    actionsHtml = `<a class='SQLineCls' onclick='EditSQProd(${item.Line_No},"ProdTR_${item.No}")'><i class='bx bxs-edit'></i></a>`;
+                    actionsHtml = `<a class='SQLineCls' onclick='EditSQProd(${item.Line_No}, this.closest("tr"))'><i class='bx bxs-edit'></i></a>`;
                     if (!(ScheduleStatus === "Completed" || data.ShortcloseStatus === true)) {
                         actionsHtml += `&nbsp;<a class='SQLineCls' title='Click to shortclose' onclick='ShortcloseSQProd("${item.Line_No}")'><i class='bx bx-message-rounded-x'></i></a>`;
                     }
-                    actionsHtml += `&nbsp;<span id='${item.No}_SQPriceBtns'></span>`;
+                    actionsHtml += `&nbsp;<span class='SQPriceBtns'></span>`;
                 }
                 initSQPriceColumnIndexes();
 
@@ -2370,21 +2602,21 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
                     item.PCPL_Commission_Amount,
                     item.PCPL_Credit_Days,
                     item.PCPL_Interest,
-                    `<label id="${item.No}_DropShipment">${item.Drop_Shipment}</label>`,
+                    `<label id="${rowKey}_DropShipment">${item.Drop_Shipment}</label>`,
                     "",
                     "",
-                    `<label id="${item.No}_MarginPercent">${item.PCPL_Margin_Percent} %</label>`,
+                    `<label id="${rowKey}_MarginPercent">${item.PCPL_Margin_Percent} %</label>`,
 
                     item.PCPL_Commission_Payable,
                     //item.PCPL_Commission_Payable_Name,
-                    "",
+                    `<label id="${rowKey}_InqProdLineNo" style='display:none'>${item.PCPL_Inquiry_Line_No || ''}</label>`,
                     item.PCPL_Liquid,
                     item.PCPL_Concentration_Rate_Percent,
                     item.Net_Weight,
                     item.PCPL_Liquid_Rate,
                     item.PCPL_Vendor_No,
                     item.PCPL_Packing_MRP_Price,
-                    `<label id="${item.No}_SQLineNo" style='display:none'>${item.Line_No}</label>`,
+                    `<label id="${rowKey}_SQLineNo" style='display:none'>${item.Line_No}</label>`,
                 ];
 
                 var colCount = $('#dataList thead th').length;
@@ -2392,16 +2624,17 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
                 if (rowArray.length > colCount) rowArray = rowArray.slice(0, colCount);
 
                 var newNode = dtable.row.add(rowArray).draw(false).node();
-                $(newNode).attr('id', 'ProdTR_' + item.No);
-                $(newNode).attr('data-lineno', item.Line_No);
+                applySQRowIdentity($(newNode), rowKey, item.No, item.PCPL_Inquiry_Line_No, item.Line_No);
                 $(newNode).find("td").eq(0).addClass("dtr-control");
 
-                applySQPriceRowState('ProdTR_' + item.No);
+                applySQPriceRowState(newNode);
             });
 
             dtable.responsive.recalc();
             itemLineNo = data.QuoteNo + "," + itemLineNo;
             $('#hfSalesQuoteResDetails').val(itemLineNo);
+            //inquiry Patial case on sales quote
+            applySalesQuoteLineFieldLocks();
 
             if (SQFor == "ApproveReject") {
 
@@ -2459,6 +2692,10 @@ function GetSalesQuoteDetailsAndFill(SalesQuoteNo, ScheduleStatus, SQStatus, SQF
                 $('#dvSQJustificationDetails').css('display', 'none');
                 $('#lblJustificationTitle').text("");
 
+            }
+
+            if (typeof window.SQInquiryLinesConverted === 'boolean') {
+                toggleSalesQuoteButtons(window.SQInquiryLinesConverted);
             }
 
         }
@@ -2582,6 +2819,8 @@ function GetProductDetails(productName) {
 
                     // Apply one-shot overrides after packing style changes are done.
                     applySQEditOverridesIfAny();
+                    //inquiry Patial case on sales quote
+                    applySalesQuoteLineFieldLocks();
 
                 }
             },
@@ -2598,36 +2837,59 @@ function EditSQProd(Line_No, ProdTR) {
     ResetQuoteLineDetails();
     initSQPriceColumnIndexes();
 
-    var prodNo = ($("#" + ProdTR).find("TD").eq(2).text() || '').toString().trim();
+    var $row = null;
+    if (ProdTR && ProdTR.nodeType === 1 && ProdTR.tagName.toUpperCase() === 'TR') {
+        $row = $(ProdTR);
+    } else if (ProdTR && ProdTR.jquery) {
+        $row = ProdTR;
+    } else {
+        $row = $("#" + ProdTR);
+    }
+    if (!$row || $row.length === 0) {
+        ShowErrMsg('Quote line not found.');
+        return;
+    }
+
+    var rowKey = getSQRowKey($row);
+    var prodNo = getSQRowProdNo($row);
+    var productName = $.trim($row.find("TD").eq(3).text() || '');
+    var packingStyleCode = $.trim($row.find("TD").eq(6).text() || '');
+    var lineUOM = $.trim($row.find("TD").eq(5).text() || '');
+    var lineMRP = $.trim($row.find("TD").eq(7).text() || '');
+    var lineBasicCost = $.trim($row.find("TD").eq(8).text() || '');
+
     $('#hfProdNo').val(prodNo);
-    $('#hfProdNoEdit').val(prodNo);
-    var product = $("#" + ProdTR).find("TD").eq(6).html();
-    var packingStyle = ($("#" + ProdTR).find("TD").eq(3).html());
-    GetProductDetails(packingStyle);
-    $('#ddlPackingStyle').val(product);
-    $('#hfSavedPackingStyle').val(product);
-    $('#txtProductName').val($("#" + ProdTR).find("TD").eq(3).html());
+    $('#hfProdNoEdit').val(rowKey);
+    $('#hfSavedPackingStyle').val(packingStyleCode);
+    $('#hfInqProdPackingStyle').val(packingStyleCode);
+    $('#txtProductName').val(productName).prop('disabled', false);
+    $('#txtUOM').val(lineUOM);
+    GetProductDetails(productName);
+    setTimeout(function () {
+        if (($('#hfProdNoEdit').val() || '').toString().trim() === rowKey) {
+            $('#txtBasicPurchaseCost').val(lineBasicCost);
+            $('#txtMRPPrice').val(lineMRP);
+        }
+    }, 250);
 
     try {
-        var ln = parseInt(((($("#" + ProdTR).attr('data-lineno') || '')).toString().trim())) || 0;
-        if (!ln || ln <= 0) {
-            ln = parseInt(((($("#" + prodNo + "_SQLineNo").text() || '')).toString().trim())) || 0;
-        }
+        var ln = getSQRowLineNo($row);
         $('#hfSQProdLineNo').val(ln || '');
     } catch (e) {
-        $('#hfSQProdLineNo').val($("#" + prodNo + "_SQLineNo").text());
+        $('#hfSQProdLineNo').val(getSQRowLineNo($row));
     }
-    $('#txtProdQty').val($("#" + ProdTR).find("TD").eq(4).html());
-    $('#txtProdMRP').val($("#" + ProdTR).find("TD").eq(7).html());
-    SetSQTransportMethodSelection($("#" + ProdTR).find("TD").eq(17).text());
-    $('#txtSalesPrice').val($("#" + ProdTR).find("TD").eq(8).html());
-    $('#txtTransportCost').val($("#" + ProdTR).find("TD").eq(18).html());
-    $('#txtSalesDiscount').val($("#" + ProdTR).find("TD").eq(19).html());
-    $('#txtDeliveryDate').val($("#" + ProdTR).find("TD").eq(12).html());
-    var isLiquidProd = $("#" + ProdTR).find("TD").eq(31).html();
-    var isChkCommissionChecked = $("#" + ProdTR).find("TD").eq(20).html();
-    var dropShipHtml = $("#" + ProdTR).find("TD").eq(25).text().trim();
-    var VendorDrop = $("#" + ProdTR).find("TD").eq(35).html();
+    $('#txtProdQty').val($row.find("TD").eq(4).html());
+    $('#txtProdMRP').val($row.find("TD").eq(7).html());
+    SetSQTransportMethodSelection($row.find("TD").eq(17).text());
+    var salesPriceIdx = (SQ_PRICE_COLS.SALES_PRICE !== null && SQ_PRICE_COLS.SALES_PRICE >= 0) ? SQ_PRICE_COLS.SALES_PRICE : 8;
+    $('#txtSalesPrice').val($row.find("TD").eq(salesPriceIdx).html());
+    $('#txtTransportCost').val($row.find("TD").eq(18).html());
+    $('#txtSalesDiscount').val($row.find("TD").eq(19).html());
+    $('#txtDeliveryDate').val($row.find("TD").eq(12).html());
+    var isLiquidProd = $row.find("TD").eq(31).html();
+    var isChkCommissionChecked = $row.find("TD").eq(20).html();
+    var dropShipHtml = $row.find("TD").eq(25).text().trim();
+    var VendorDrop = $row.find("TD").eq(35).html();
     if (dropShipHtml == 'Yes' || dropShipHtml == 'true') {
         $("#chkDropShipment").prop('checked', true);
         $('#chkDropShipment').change();
@@ -2640,48 +2902,45 @@ function EditSQProd(Line_No, ProdTR) {
         $('#chkIsCommission').prop('checked', false);
         $('#chkIsCommission').change();
         $('#txtSalesPrice').prop('readonly', false);
-        $('#txtCommissionAmt').val($("#" + ProdTR).find("TD").eq(22).html());
+        $('#txtCommissionAmt').val($row.find("TD").eq(22).html());
         $('#txtCommissionAmt').prop('disabled', false);
         $('#ddlCommissionPayable').prop('disabled', false);
     } else {
         $('#txtSalesPrice').prop('readonly', false);
         $('#chkIsCommission').prop('checked', true);
         $('#chkIsCommission').change();
-        $('#ddlCommissionPerUnitPercent').val($("#" + ProdTR).find("TD").eq(20).html());
-        $('#txtCommissionPercent').val($("#" + ProdTR).find("TD").eq(21).html());
-        $('#txtCommissionAmt').val($("#" + ProdTR).find("TD").eq(22).html());
+        $('#ddlCommissionPerUnitPercent').val($row.find("TD").eq(20).html());
+        $('#txtCommissionPercent').val($row.find("TD").eq(21).html());
+        $('#txtCommissionAmt').val($row.find("TD").eq(22).html());
 
     }
     if (isLiquidProd == "true") {
         $('#dvLiquidProdFields').css('display', 'block');
         $('#chkIsLiquidProd').prop('checked', true);
-        $('#hfIsLiquidProd').val($("#" + ProdTR).find("TD").eq(31).html());
-        $('#txtConcentratePercent').val($("#" + ProdTR).find("TD").eq(32).html());
-        $('#txtNetWeight').val($("#" + ProdTR).find("TD").eq(33).html());
-        $('#txtLiquidRate').val($("#" + ProdTR).find("TD").eq(34).html());
+        $('#hfIsLiquidProd').val($row.find("TD").eq(31).html());
+        $('#txtConcentratePercent').val($row.find("TD").eq(32).html());
+        $('#txtNetWeight').val($row.find("TD").eq(33).html());
+        $('#txtLiquidRate').val($row.find("TD").eq(34).html());
     }
     else {
         $('#chkIsLiquidProd').prop('checked', false);
     }
-    var commissionPayable = $("#" + ProdTR).find("TD").eq(29).html();
+    var commissionPayable = $row.find("TD").eq(29).html();
     if (commissionPayable != "") {
         $('#ddlCommissionPayable').val(commissionPayable);
     }
     else {
         $('#ddlCommissionPayable').val('-1');
     }
-    $('#txtCreditDays').val($("#" + ProdTR).find("TD").eq(23).html());
-    $('#txtMargin').val($("#" + ProdTR).find("TD").eq(14).html());
-    $('#spnMarginPercent').val($("#" + ProdTR).find("TD").eq(33).html());
-    $('#txtInterest').val($("#" + ProdTR).find("TD").eq(24).html());
+    $('#txtCreditDays').val($row.find("TD").eq(23).html());
+    $('#txtMargin').val($row.find("TD").eq(14).html());
+    $('#spnMarginPercent').val($row.find("TD").eq(33).html());
+    $('#txtInterest').val($row.find("TD").eq(24).html());
     // Set InqProdLineNo from DataTable
-    var inqProdLineNo = $("#" + prodNo + "_InqProdLineNo").text();
+    var inqProdLineNo = getSQRowInquiryLineNo($row);
     $('#hfProdLineNo').val(inqProdLineNo || Line_No);
-    $('#txtTotalCost').val($("#" + ProdTR).find("TD").eq(13).html());
-    if ($("#" + prodNo + "_InqProdLineNo").val() != "") {
-        $('#hfProdLineNo').val($("#" + prodNo + "_InqProdLineNo").val());
-    }
-    $('#txtMRPPrice').val($("#" + ProdTR).find("TD").eq(36).html());
+    $('#txtTotalCost').val($row.find("TD").eq(13).html());
+    $('#txtMRPPrice').val($row.find("TD").eq(36).html());
 
     // If this Edit was opened from Price Update action, force the required values now.
     // This runs after ResetQuoteLineDetails() and after the default field population.
@@ -2690,11 +2949,10 @@ function EditSQProd(Line_No, ProdTR) {
             var pendingLineNo = parseInt(SQ_PENDING_PRICEUPDATE.lineNo || 0);
             var currentLineNo = parseInt($('#hfSQProdLineNo').val() || Line_No || 0);
             if (!pendingLineNo || pendingLineNo === currentLineNo) {
-                // Per requirements, New Price maps to Sales Price (not Basic Purchase Cost).
-                $('#txtSalesPrice').val(parseFloat(SQ_PENDING_PRICEUPDATE.newPrice || 0).toFixed(2));
+                // Per requirements, New Price maps to Basic Purchase Cost.
+                $('#txtBasicPurchaseCost').val(parseFloat(SQ_PENDING_PRICEUPDATE.newPrice || 0).toFixed(2));
 
-                // If commission amount is percentage-based, refresh it based on the new Sales Price
-                // before calculating totals/margin.
+                // If commission amount is percentage-based, the sales price is unchanged; only recalc totals/margin.
                 try { sqRecalcCommissionAmountFromSalesPriceIfPercentMode(); } catch (e) { }
 
                 if (SQ_PENDING_PRICEUPDATE.lockMargin === true) {
@@ -2714,7 +2972,7 @@ function EditSQProd(Line_No, ProdTR) {
                 try {
                     initSQPriceColumnIndexes();
                     var marginIdx = (SQ_PRICE_COLS.MARGIN !== null && SQ_PRICE_COLS.MARGIN >= 0) ? SQ_PRICE_COLS.MARGIN : 14;
-                    var $row = $("#" + ProdTR);
+                    var $row = prodTR && prodTR.nodeType === 1 && prodTR.tagName.toUpperCase() === 'TR' ? $(prodTR) : $("#" + ProdTR);
                     if ($row && $row.length) {
                         var m = parseFloatSafe($('#txtMargin').val());
                         sqSetRowCellText($row, marginIdx, m.toFixed(2));
@@ -2760,6 +3018,8 @@ function EditSQProd(Line_No, ProdTR) {
     } catch (e) {
         // no-op
     }
+    //inquiry Patial case on sales quote
+    applySalesQuoteLineFieldLocks();
 }
 
 function SetSQTransportMethodSelection(rawTransportMethod) {
@@ -2800,7 +3060,14 @@ function SetSQTransportMethodSelection(rawTransportMethod) {
 }
 
 function DeleteSQProd(LineNo, ProdTR) {
-    var $row = $("#" + ProdTR);
+    var $row = null;
+    if (ProdTR && ProdTR.nodeType === 1 && ProdTR.tagName.toUpperCase() === 'TR') {
+        $row = $(ProdTR);
+    } else if (ProdTR && ProdTR.jquery) {
+        $row = ProdTR;
+    } else {
+        $row = $("#" + ProdTR);
+    }
 
     try {
         if ($.fn.dataTable && $.fn.dataTable.isDataTable && $.fn.dataTable.isDataTable('#dataList')) {
@@ -2820,13 +3087,14 @@ function DeleteSQProd(LineNo, ProdTR) {
         $row.remove();
     }
 
-    var deletedProdNo = (ProdTR || '').toString().replace(/^ProdTR_/, '').trim();
+    var deletedRowKey = getSQRowKey($row);
+    var deletedProdNo = getSQRowProdNo($row);
     sqClearPendingLineSaveOverride(deletedProdNo);
     var currentProdNo = ($('#hfProdNo').val() || '').toString().trim();
-    var currentEditProdNo = ($('#hfProdNoEdit').val() || '').toString().trim();
+    var currentEditRowKey = ($('#hfProdNoEdit').val() || '').toString().trim();
 
     // Clear stale edit state so add flow does not accidentally target a deleted row.
-    if (currentEditProdNo === deletedProdNo || currentProdNo === deletedProdNo) {
+    if (currentEditRowKey === deletedRowKey || currentProdNo === deletedProdNo) {
         ResetQuoteLineDetails();
     }
 
@@ -2862,7 +3130,7 @@ function CalculateFormula() {
                     var derivedMrp = parseFloatSafe(parts[3]);
                     if (derivedMrp > 0) {
                         $('#txtMRPPrice').val(derivedMrp.toFixed(4));
-                        $('#txtMRPPrice').prop('disabled', true);
+                        $('#txtMRPPrice').prop('disabled', false).prop('readonly', false);
                     }
                 }
                 if (parts.length >= 3) {
@@ -2913,11 +3181,15 @@ function CalculateFormula() {
 
         }
         else {
-            var TempCreditDays = 10;
 
-            var creditDays = GetCreditDaysForNotInInventory();
-            $('#txtCreditDays').val(creditDays);
-            $('#txtCreditDays').prop('disabled', true);
+            var creditDays;
+            if ($('#txtCreditDays').val() == "" || $('#txtCreditDays').val() == "0") {
+                creditDays = GetCreditDaysForNotInInventory();
+                $('#txtCreditDays').val(creditDays);
+                $('#txtCreditDays').prop('disabled', true);
+            } else {
+                creditDays = parseInt($('#txtCreditDays').val());
+            }
             var InterestRate = parseFloat($('#hfInterestRate').val()) / 100;
             Interest = (BasicPurchaseCost * InterestRate) * (parseInt(creditDays) / 365);
             $('#txtInterest').val(parseFloat(Interest).toFixed(2));
@@ -2958,7 +3230,8 @@ function CalculateFormula() {
         else {
             $('#spnMarginPercent').text("0 %");
         }
-
+        //inquiry Patial case on sales quote
+        applySalesQuoteLineFieldLocks();
     }
 }
 
@@ -3233,6 +3506,9 @@ function PaymentTermsChange() {
         else {
             $('#hfPaymentTermsDays').val('0');
         }
+        if ($('#hfiteminvstatus').val() == "NotInInventory") {
+            $('#txtCreditDays').val('');
+        }
         CalculateFormula();
         ////UpdateValueForTotalCost();
 
@@ -3421,10 +3697,13 @@ function ResetQuoteLineDetails() {
     $('#ddlItemVendors').append("<option value=''>---Select---</option>");
     $('#ddlItemVendors').val('');
     $('#txtMRPPrice').val("");
-    $('#txtMRPPrice').prop('disabled', true);
+    $('#txtMRPPrice').prop('disabled', false).prop('readonly', false);
 
 
     $('#hfProdNoEdit').val("");
+    $('#hfSQProdLineNo').val("");
+    $('#hfProdLineNo').val("");
+    $('#hfInqProdPackingStyle').val("");
     $('#hfUnitPriceEdit').val("");
     $('#hfSavedPackingStyle').val("");
     $('#hfSavedTotalUnitPrice').val("");
@@ -3433,6 +3712,9 @@ function ResetQuoteLineDetails() {
     // Clear any Price Update locks when resetting the form.
     SQ_FORM_LOCKS.Margin = false;
     SQ_FORM_LOCKS.MarginValue = null;
+
+    //inquiry Patial case on sales quote
+    applySalesQuoteLineFieldLocks();
 
 }
 
@@ -3718,7 +4000,7 @@ function ResetCPersonDetails() {
 
 function ResetNewBillToAddressDetails() {
 
-   // $('#txtNewShiptoAddCode').val("");
+    // $('#txtNewShiptoAddCode').val("");
     $('#txtNewShiptoAddress').val("");
     $('#txtNewShiptoAddress2').val("");
     $('#txtNewShiptoAddPostCode').val("");
@@ -3733,7 +4015,7 @@ function ResetNewBillToAddressDetails() {
 
 function ResetNewDeliveryToAddressDetails() {
 
-   // $('#txtNewJobtoAddCode').val("");
+    // $('#txtNewJobtoAddCode').val("");
     $('#txtNewJobtoAddress').val("");
     $('#txtNewJobtoAddress2').val("");
     $('#txtNewJobtoAddPostCode').val("");
@@ -4235,6 +4517,7 @@ function isSQStatusApprovedOrRejected() {
 
 function enableSaveButtonsForPriceUpdateIfNeeded() {
     if (!isSQStatusApprovedOrRejected()) return;
+    if (window.SQInquiryLinesConverted === true) return;
     $('#btnSaveProd').prop('disabled', false);
     $('#btnSave').prop('disabled', false);
 }
@@ -4251,8 +4534,8 @@ function forceApplyPriceUpdateValuesToForm(prodNo, newPrice, newMargin, lockMarg
             return;
         }
 
-        // Per requirements, New Price maps to Sales Price (not Basic Purchase Cost).
-        $('#txtSalesPrice').val(parseFloat(newPrice || 0).toFixed(2));
+        // Per requirements, New Price maps to Basic Purchase Cost.
+        $('#txtBasicPurchaseCost').val(parseFloat(newPrice || 0).toFixed(2));
         if (lockMargin) {
             $('#txtMargin').val(parseFloat(newMargin || 0).toFixed(2));
             $('#txtMargin').prop('disabled', true);
@@ -4269,19 +4552,27 @@ function forceApplyPriceUpdateValuesToForm(prodNo, newPrice, newMargin, lockMarg
     setTimeout(tryApply, 0);
 }
 
-function buildSQPriceActionsHtml(prodNo, lineNo, enabled) {
+function buildSQPriceActionsHtml(prodNo, lineNo, enableUpdate, enableNoUpdate) {
     var roleBlocked = isSQPriceActionRoleBlocked();
-    var canClick = !!enabled && !roleBlocked;
+    var updateClickAllowed = !!enableUpdate && !roleBlocked;
+    var noUpdateClickAllowed = !!enableNoUpdate && !roleBlocked;
 
-    var dis = canClick ? "" : "disabled";
-    var title1 = "";
-    if (!canClick) {
-        if (roleBlocked) title1 = " title='Disabled for Finance/HOD approval role'";
-        else title1 = " title='New Price must be non-zero'";
+    var updateDisabled = updateClickAllowed ? "" : "disabled";
+    var noUpdateDisabled = noUpdateClickAllowed ? "" : "disabled";
+
+    var updateTitle = "";
+    var noUpdateTitle = "";
+    if (!updateClickAllowed) {
+        if (roleBlocked) updateTitle = " title='Disabled for Finance/HOD approval role'";
+        else updateTitle = " title='New Price must be non-zero'";
+    }
+    if (!noUpdateClickAllowed) {
+        if (roleBlocked) noUpdateTitle = " title='Disabled for Finance/HOD approval role'";
+        else noUpdateTitle = " title='No pending price update'";
     }
 
-    return `<button type='button' class='btn btn-primary' ${dis}${title1} onclick='SQLinePriceAction("Update","${prodNo}",${lineNo},"ProdTR_${prodNo}")'>Update Price</button>`
-        + `&nbsp;<button type='button'class='btn btn-secondary' ${dis}${title1} onclick='SQLinePriceAction("NoUpdate","${prodNo}",${lineNo},"ProdTR_${prodNo}")'>Not Update Price</button>`;
+    return `<button type='button' class='btn btn-primary' ${updateDisabled}${updateTitle} onclick='SQLinePriceAction("Update","${prodNo}",${lineNo}, this.closest("tr"))'>Update Price</button>`
+        + `&nbsp;<button type='button' class='btn btn-secondary' ${noUpdateDisabled}${noUpdateTitle} onclick='SQLinePriceAction("NoUpdate","${prodNo}",${lineNo}, this.closest("tr"))'>Not Update Price</button>`;
 }
 
 function isSQPriceActionRoleBlocked() {
@@ -4300,8 +4591,15 @@ function applySQPriceRowState(prodTR) {
     if (!prodTR) return;
     initSQPriceColumnIndexes();
 
-    var $tr = $("#" + prodTR);
-    if ($tr.length === 0) return;
+    var $tr = null;
+    if (prodTR && prodTR.nodeType === 1 && prodTR.tagName.toUpperCase() === 'TR') {
+        $tr = $(prodTR);
+    } else if (prodTR && prodTR.jquery) {
+        $tr = prodTR;
+    } else {
+        $tr = $("#" + prodTR);
+    }
+    if (!$tr || $tr.length === 0) return;
 
     var newPrice = parseFloatSafe($tr.find("TD").eq(SQ_PRICE_COLS.NEW_PRICE).text());
     var priceUpdated = parseBool($tr.find("TD").eq(SQ_PRICE_COLS.PRICE_UPDATED).text());
@@ -4315,40 +4613,148 @@ function applySQPriceRowState(prodTR) {
 
     // Enable actions only when New Price != 0
     // NOTE: Do not rely on fixed TD indexes for product no; DataTables Responsive can reorder/hide cells.
-    var prodNo = (prodTR || '').toString();
-    if (prodNo.indexOf('ProdTR_') === 0) prodNo = prodNo.substring('ProdTR_'.length);
+    var prodNo = '';
+    if (typeof prodTR === 'string') {
+        prodNo = (prodTR || '').toString().trim();
+        if (prodNo.indexOf('ProdTR_') === 0) prodNo = prodNo.substring('ProdTR_'.length);
+    }
     prodNo = (prodNo || '').toString().trim();
     if (!prodNo) {
-        prodNo = ($tr.find("TD").eq(2).text() || '').toString().trim();
+        prodNo = getSQRowProdNo($tr);
     }
 
     var lineNo = parseInt($tr.attr('data-lineno') || '0');
-    var enabled = (newPrice !== 0);
+    var updateEnabled = (newPrice !== 0);
+    var noUpdateEnabled = (newPrice !== 0) || priceUpdated;
 
     // Buttons are rendered in the existing left-side Actions column (before Product No)
-    var $host = $tr.find("span[id$='_SQPriceBtns']").first();
-    if ($host.length === 0 && prodNo) {
-        $host = $("#" + prodNo + "_SQPriceBtns");
-    }
+    var $host = $tr.find("span.SQPriceBtns").first();
     if ($host.length === 0) {
         var $actionsTd = $tr.find("TD").eq(1);
-        if ($actionsTd.length && prodNo) {
-            $actionsTd.append(`&nbsp;<span id='${prodNo}_SQPriceBtns'></span>`);
-            $host = $("#" + prodNo + "_SQPriceBtns");
+        if ($actionsTd.length) {
+            $actionsTd.append(`&nbsp;<span class='SQPriceBtns'></span>`);
+            $host = $tr.find("span.SQPriceBtns").first();
         }
     }
-    if ($host.length && prodNo) {
-        // Ensure host has the expected id for future lookups.
-        if (($host.attr('id') || '') !== (prodNo + "_SQPriceBtns")) {
-            $host.attr('id', prodNo + "_SQPriceBtns");
-        }
-        $host.html(buildSQPriceActionsHtml(prodNo, lineNo, enabled));
+    if ($host.length) {
+        $host.html(buildSQPriceActionsHtml(prodNo, lineNo, updateEnabled, noUpdateEnabled));
     }
 }
 
 function setSQEditable(isEditable) {
-    $('#btnSaveProd').prop('disabled', !isEditable);
-    $('#btnSave').prop('disabled', !isEditable);
+    var editable = !!isEditable && window.SQInquiryLinesConverted !== true;
+    $('#btnSaveProd').prop('disabled', !editable);
+    $('#btnSave').prop('disabled', !editable);
+}
+
+function StartPartialSalesQuoteCreateFromInquiry() {
+    $('#hfSQEdit').val('false');
+    $('#hfSalesQuoteNo').val('');
+    $('#hfSalesQuoteResDetails').val('');
+    $('#hfProdNoEdit').val('');
+    $('#hfSQProdLineNo').val('');
+
+    window.SQStatus = '';
+    window.ScheduleStatus = '';
+    SQ_PENDING_PRICEUPDATE = null;
+    SQ_PENDING_LINE_SAVE_OVERRIDES = {};
+
+    try {
+        if ($.fn.dataTable && $.fn.dataTable.isDataTable && $.fn.dataTable.isDataTable('#dataList')) {
+            var dt = $('#dataList').DataTable();
+            dt.clear().draw(false);
+            try { dt.responsive.recalc(); } catch (e) { }
+        } else {
+            $('#tblProducts').empty();
+        }
+    } catch (e) {
+        $('#tblProducts').empty();
+    }
+
+    $('#dataList').hide();
+    $('#tdReopenSQ').hide();
+    $('#btnSaveProd').prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
+    $('#btnSave').prop('disabled', false).css({ 'pointer-events': '', 'opacity': '' });
+    $('#btnFinancehide').css({ 'pointer-events': '', 'opacity': '' });
+}
+
+function ResetQuoteLineDetailsForInquirySelection(keepSelectedProduct) {
+    $('#hfProdNoEdit').val('');
+    $('#hfSQProdLineNo').val('');
+    $('#hfUnitPriceEdit').val('');
+    $('#hfSavedPackingStyle').val('');
+    $('#hfSavedTotalUnitPrice').val('');
+    $('#hfSavedMargin').val('');
+
+    if (!keepSelectedProduct) {
+        $('#hfProdNo').val('');
+        $('#hfProdLineNo').val('');
+        $('#hfInqProdPackingStyle').val('');
+        $('#txtProductName').val('');
+        $('#txtProdQty').val('');
+        $('#txtDeliveryDate').val('');
+        $('#ddlPackingStyle').val('-1');
+    }
+
+    $('#txtSalesPrice').val('').prop('disabled', false).prop('readonly', false);
+    $('#txtSalesDiscount').val('');
+    $('#txtTransportCost').val('');
+    $('#txtTotalCost').val('').prop('disabled', false);
+    $('#txtMargin').val('').prop('disabled', false);
+    $('#spnMarginPercent').text('');
+    $('#txtInterest').val('').prop('disabled', false);
+    $('#txtCreditDays').val('0').prop('disabled', false);
+
+    $('#chkIsCommission').prop('checked', false);
+    $('#ddlCommissionPerUnitPercent').val('-1').prop('disabled', true);
+    $('#txtCommissionPercent').val('').prop('disabled', true).prop('readonly', false);
+    $('#txtCommissionAmt').val('').prop('disabled', true).prop('readonly', false);
+    $('#ddlCommissionPayable').val('-1').prop('disabled', true);
+
+    $('#chkDropShipment').prop('checked', false);
+    $('#dvVendors').hide();
+    $('#ddlItemVendors').val('');
+
+    $('#chkIsLiquidProd').prop('checked', false);
+    $('#dvLiquidProdFields').hide();
+    $('#txtConcentratePercent').val('');
+    $('#txtNetWeight').val('');
+    $('#txtLiquidRate').val('');
+    $('#hfIsLiquidProd').val('false');
+
+    $('#ddlIncoTerms, #ddlPaymentTerms, #ddlTransportMethod, #ddlPackingStyle, #txtBasicPurchaseCost, #txtMRPPrice')
+        .prop('disabled', false)
+        .prop('readonly', false)
+        .removeAttr('disabled')
+        .removeAttr('readonly');
+
+    SQ_FORM_LOCKS.Margin = false;
+    SQ_FORM_LOCKS.MarginValue = null;
+
+    //inquiry Patial case on sales quote
+    applySalesQuoteLineFieldLocks();
+}
+
+function toggleSalesQuoteButtons(isConverted) {
+    var disabled = parseBool(isConverted);
+    window.SQInquiryLinesConverted = disabled;
+
+    var $buttons = $('#btnSaveProd, #btnSave, #btnFinancehide #btnSave');
+
+    $buttons
+        .prop('disabled', disabled)
+        .css({
+            'pointer-events': disabled ? 'none' : '',
+            'opacity': disabled ? '0.5' : ''
+        });
+    if (!disabled) {
+        $buttons.removeAttr('disabled');
+    }
+
+    $('#btnFinancehide').css({
+        'pointer-events': disabled ? 'none' : '',
+        'opacity': disabled ? '0.5' : ''
+    });
 }
 
 function callReopenSalesQuote(quoteNo, onDone) {
@@ -4361,6 +4767,20 @@ function callReopenSalesQuote(quoteNo, onDone) {
 function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
     initSQPriceColumnIndexes();
     var quoteNo = $('#hfSalesQuoteNo').val();
+
+    var $tr = null;
+    if (prodTR && prodTR.nodeType === 1 && prodTR.tagName.toUpperCase() === 'TR') {
+        $tr = $(prodTR);
+    } else if (prodTR && prodTR.jquery) {
+        $tr = prodTR;
+    } else {
+        $tr = $("#" + prodTR);
+    }
+
+    if ($tr.length === 0) {
+        ShowErrMsg('Quote line not found.');
+        return;
+    }
     if (!quoteNo) {
         ShowErrMsg('Sales Quote No not found.');
         return;
@@ -4379,12 +4799,6 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
         return;
     }
 
-    var $tr = $("#" + prodTR);
-    if ($tr.length === 0) {
-        ShowErrMsg('Quote line not found.');
-        return;
-    }
-
     var newPrice = parseFloatSafe($tr.find('TD').eq(SQ_PRICE_COLS.NEW_PRICE).text());
     var newMargin = parseFloatSafe($tr.find('TD').eq(SQ_PRICE_COLS.NEW_MARGIN).text());
 
@@ -4399,7 +4813,7 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_PRICE, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_MARGIN, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.PRICE_UPDATED, 'false');
-        applySQPriceRowState(prodTR);
+        applySQPriceRowState($tr);
         sqClearPendingLineSaveOverride(prodNo);
 
         // If user is currently editing this same product, release any margin lock.
@@ -4422,12 +4836,9 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_PRICE, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.NEW_MARGIN, '0');
         sqSetRowCellText($tr, SQ_PRICE_COLS.PRICE_UPDATED, 'true');
-        applySQPriceRowState(prodTR);
+        applySQPriceRowState($tr);
 
         // Open line in edit mode and auto-save changes.
-        //SQ_EDIT_OVERRIDES.SalesPrice = null;
-        //SQ_EDIT_OVERRIDES.Margin = null;
-
         SQ_FORM_LOCKS.Margin = false;
         SQ_FORM_LOCKS.MarginValue = null;
 
@@ -4468,7 +4879,7 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
                 return;
             }
 
-            $('#txtSalesPrice').val(newPrice.toFixed(2));
+            $('#txtBasicPurchaseCost').val(newPrice.toFixed(2));
             SQ_FORM_LOCKS.Margin = false;
             SQ_FORM_LOCKS.MarginValue = null;
             try { sqRecalcCommissionAmountFromSalesPriceIfPercentMode(); } catch (e) { }
@@ -4484,3 +4895,4 @@ function SQLinePriceAction(action, prodNo, lineNo, prodTR) {
     };
     applyUpdateClientSide();
 }
+

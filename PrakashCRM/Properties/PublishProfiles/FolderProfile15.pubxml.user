@@ -3,6 +3,8 @@
 <Project>
   <PropertyGroup>
     <_PublishTargetUrl>C:\Project\PublishFile\LocalPublish\LocalPublishCRM</_PublishTargetUrl>
+    <History>True|2026-04-24T06:58:51.9874289Z||;True|2026-04-24T11:59:03.2221334+05:30||;True|2026-04-21T22:18:51.5391475+05:30||;True|2026-04-19T00:52:05.0734664+05:30||;True|2026-04-17T15:16:35.1856229+05:30||;True|2026-04-17T10:28:50.4269843+05:30||;True|2026-04-15T16:17:24.9697392+05:30||;</History>
+    <LastFailureDetails />
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/Antlr3.Runtime.dll">
@@ -54,25 +56,25 @@
       <publishTime>10/10/2025 18:20:37</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Data.dll">
-      <publishTime>04/14/2026 21:06:28</publishTime>
+      <publishTime>04/28/2026 08:10:38</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Data.pdb">
-      <publishTime>04/14/2026 21:06:28</publishTime>
+      <publishTime>04/28/2026 08:10:38</publishTime>
     </File>
     <File Include="bin/PrakashCRM.dll">
-      <publishTime>04/14/2026 21:06:34</publishTime>
+      <publishTime>04/28/2026 08:10:45</publishTime>
     </File>
     <File Include="bin/PrakashCRM.pdb">
-      <publishTime>04/14/2026 21:06:34</publishTime>
+      <publishTime>04/28/2026 08:10:45</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Service.dll">
-      <publishTime>04/14/2026 21:06:31</publishTime>
+      <publishTime>04/28/2026 08:10:41</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Service.dll.config">
-      <publishTime>04/14/2026 16:37:13</publishTime>
+      <publishTime>04/25/2026 15:27:15</publishTime>
     </File>
     <File Include="bin/PrakashCRM.Service.pdb">
-      <publishTime>04/14/2026 21:06:31</publishTime>
+      <publishTime>04/28/2026 08:10:41</publishTime>
     </File>
     <File Include="bin/RBush.dll">
       <publishTime>10/10/2025 18:20:37</publishTime>
@@ -309,10 +311,10 @@
       <publishTime>10/10/2025 18:20:29</publishTime>
     </File>
     <File Include="Content/appcss/paginationFilterCss.css">
-      <publishTime>04/13/2026 15:00:36</publishTime>
+      <publishTime>04/17/2026 00:57:20</publishTime>
     </File>
     <File Include="Content/appcss/ProcessPopup.css">
-      <publishTime>04/13/2026 15:10:47</publishTime>
+      <publishTime>04/14/2026 22:43:28</publishTime>
     </File>
     <File Include="Content/appcss/VerticalScrollInDiv.css">
       <publishTime>03/09/2026 12:31:04</publishTime>
@@ -426,7 +428,7 @@
       <publishTime>10/10/2025 18:20:29</publishTime>
     </File>
     <File Include="Content/Site.css">
-      <publishTime>10/10/2025 18:20:29</publishTime>
+      <publishTime>04/23/2026 17:50:24</publishTime>
     </File>
     <File Include="CustomerLedgerEntryPrint/CUST00002.pdf">
       <publishTime>10/10/2025 18:20:29</publishTime>
@@ -2939,17 +2941,20 @@
     <File Include="Scripts/appjs/AuthSession.js">
       <publishTime>03/18/2026 10:55:39</publishTime>
     </File>
+    <File Include="Scripts/appjs/AutoScaleLayout.js">
+      <publishTime>04/14/2026 18:26:33</publishTime>
+    </File>
     <File Include="Scripts/appjs/BusinessPlan.js">
       <publishTime>02/26/2026 11:40:55</publishTime>
     </File>
     <File Include="Scripts/appjs/BusinessPlanContactList.js">
-      <publishTime>04/08/2026 16:08:13</publishTime>
+      <publishTime>04/27/2026 19:29:56</publishTime>
     </File>
     <File Include="Scripts/appjs/BusinessPlanPendingAppr.js">
       <publishTime>10/10/2025 18:20:30</publishTime>
     </File>
     <File Include="Scripts/appjs/BusinessPlanReport.js">
-      <publishTime>04/08/2026 17:18:02</publishTime>
+      <publishTime>04/16/2026 23:30:37</publishTime>
     </File>
     <File Include="Scripts/appjs/BusinessPlanStatusSPWise.js">
       <publishTime>04/07/2026 15:45:19</publishTime>
@@ -2964,25 +2969,25 @@
       <publishTime>04/03/2026 16:27:47</publishTime>
     </File>
     <File Include="Scripts/appjs/ContactCompanyList.js">
-      <publishTime>04/08/2026 16:08:13</publishTime>
+      <publishTime>04/27/2026 17:04:15</publishTime>
     </File>
     <File Include="Scripts/appjs/ContactPersonList.js">
-      <publishTime>02/03/2026 17:54:43</publishTime>
+      <publishTime>04/27/2026 13:26:03</publishTime>
     </File>
     <File Include="Scripts/appjs/CustomerList.js">
-      <publishTime>04/08/2026 17:08:16</publishTime>
+      <publishTime>04/22/2026 16:57:25</publishTime>
     </File>
     <File Include="Scripts/appjs/DailyVisit.js">
-      <publishTime>03/10/2026 18:57:57</publishTime>
+      <publishTime>04/24/2026 10:42:19</publishTime>
     </File>
     <File Include="Scripts/appjs/DailyVisitExpenseReport.js">
       <publishTime>04/08/2026 18:01:47</publishTime>
     </File>
     <File Include="Scripts/appjs/DailyVisitList.js">
-      <publishTime>04/08/2026 17:18:02</publishTime>
+      <publishTime>04/22/2026 10:59:15</publishTime>
     </File>
     <File Include="Scripts/appjs/Dashboard.js">
-      <publishTime>04/13/2026 15:00:37</publishTime>
+      <publishTime>04/17/2026 12:51:39</publishTime>
     </File>
     <File Include="Scripts/appjs/FeedBackQuestion.js">
       <publishTime>03/18/2026 10:55:39</publishTime>
@@ -2990,14 +2995,20 @@
     <File Include="Scripts/appjs/ForgotPassword.js">
       <publishTime>03/23/2026 15:15:44</publishTime>
     </File>
+    <File Include="Scripts/appjs/FormNavigationUtility.js">
+      <publishTime>04/14/2026 17:53:33</publishTime>
+    </File>
     <File Include="Scripts/appjs/globalize.culture.js">
       <publishTime>10/10/2025 18:20:30</publishTime>
     </File>
     <File Include="Scripts/appjs/Inquiry.js">
-      <publishTime>04/01/2026 12:37:37</publishTime>
+      <publishTime>04/27/2026 11:56:13</publishTime>
+    </File>
+    <File Include="Scripts/appjs/InquiryButtonValidation.js">
+      <publishTime>04/23/2026 21:44:20</publishTime>
     </File>
     <File Include="Scripts/appjs/InquiryList.js">
-      <publishTime>04/08/2026 17:05:52</publishTime>
+      <publishTime>04/18/2026 23:19:58</publishTime>
     </File>
     <File Include="Scripts/appjs/ItemPriceChange.js">
       <publishTime>04/03/2026 18:13:31</publishTime>
@@ -3024,7 +3035,7 @@
       <publishTime>04/08/2026 17:27:38</publishTime>
     </File>
     <File Include="Scripts/appjs/PendingBusinessPlanApproval.js">
-      <publishTime>04/08/2026 17:19:55</publishTime>
+      <publishTime>04/28/2026 07:54:08</publishTime>
     </File>
     <File Include="Scripts/appjs/Permissions.js">
       <publishTime>03/18/2026 13:00:14</publishTime>
@@ -3051,10 +3062,10 @@
       <publishTime>04/08/2026 16:08:13</publishTime>
     </File>
     <File Include="Scripts/appjs/SalesQuote.js">
-      <publishTime>04/06/2026 19:18:41</publishTime>
+      <publishTime>04/26/2026 16:27:17</publishTime>
     </File>
     <File Include="Scripts/appjs/SalesQuoteList.js">
-      <publishTime>04/08/2026 16:08:13</publishTime>
+      <publishTime>04/27/2026 11:00:06</publishTime>
     </File>
     <File Include="Scripts/appjs/SiteActivityList.js">
       <publishTime>04/08/2026 18:40:33</publishTime>
@@ -3081,7 +3092,7 @@
       <publishTime>04/03/2026 01:20:49</publishTime>
     </File>
     <File Include="Scripts/appjs/SPMenuList.js">
-      <publishTime>02/26/2026 12:06:23</publishTime>
+      <publishTime>04/15/2026 15:56:20</publishTime>
     </File>
     <File Include="Scripts/appjs/SPProfile.js">
       <publishTime>10/16/2025 12:31:34</publishTime>
@@ -3105,7 +3116,7 @@
       <publishTime>04/08/2026 17:23:49</publishTime>
     </File>
     <File Include="Scripts/appjs/SQListForApproveReject.js">
-      <publishTime>04/08/2026 16:08:13</publishTime>
+      <publishTime>04/26/2026 19:19:39</publishTime>
     </File>
     <File Include="Scripts/appjs/TransferAcceptedTaskList.js">
       <publishTime>10/10/2025 18:20:30</publishTime>
@@ -3117,7 +3128,7 @@
       <publishTime>10/10/2025 18:20:30</publishTime>
     </File>
     <File Include="Scripts/appjs/UserNotifications.js">
-      <publishTime>04/08/2026 18:40:33</publishTime>
+      <publishTime>04/15/2026 16:14:02</publishTime>
     </File>
     <File Include="Scripts/appjs/UserRoleRelationCard.js">
       <publishTime>02/10/2026 12:19:15</publishTime>
@@ -3126,7 +3137,7 @@
       <publishTime>02/04/2026 12:50:42</publishTime>
     </File>
     <File Include="Scripts/appjs/WeekPlan.js">
-      <publishTime>03/09/2026 17:02:05</publishTime>
+      <publishTime>04/18/2026 23:46:32</publishTime>
     </File>
     <File Include="Scripts/appjs/WeekPlanList.js">
       <publishTime>04/08/2026 16:42:52</publishTime>
@@ -3175,6 +3186,9 @@
     </File>
     <File Include="Scripts/bootstrap.min.js.map">
       <publishTime>12/18/2025 21:43:00</publishTime>
+    </File>
+    <File Include="Scripts/Common/global-date-validation.js">
+      <publishTime>04/23/2026 21:15:04</publishTime>
     </File>
     <File Include="Scripts/jquery-3.7.1.js">
       <publishTime>10/10/2025 18:20:30</publishTime>
@@ -3225,16 +3239,22 @@
       <publishTime>04/08/2026 18:01:47</publishTime>
     </File>
     <File Include="Scripts/reportjs/Complaint.js">
-      <publishTime>04/08/2026 18:01:47</publishTime>
+      <publishTime>04/22/2026 10:39:52</publishTime>
     </File>
     <File Include="Scripts/reportjs/ComplaintReportDailyVisitPlan.js">
-      <publishTime>12/19/2025 11:46:24</publishTime>
+      <publishTime>04/21/2026 22:17:51</publishTime>
     </File>
     <File Include="Scripts/reportjs/CustomerLedgerEntry.js">
       <publishTime>04/08/2026 18:01:47</publishTime>
     </File>
     <File Include="Scripts/reportjs/CustomerOutsatnding.js">
-      <publishTime>04/08/2026 16:24:57</publishTime>
+      <publishTime>04/17/2026 14:32:29</publishTime>
+    </File>
+    <File Include="Scripts/reportjs/CustOverDueOutstanding.js">
+      <publishTime>04/17/2026 14:19:06</publishTime>
+    </File>
+    <File Include="Scripts/reportjs/CustOverDueOutstandingDetail.js">
+      <publishTime>04/17/2026 14:19:06</publishTime>
     </File>
     <File Include="Scripts/reportjs/DailyVisitMonthWise.js">
       <publishTime>04/08/2026 18:01:47</publishTime>
@@ -3246,13 +3266,13 @@
       <publishTime>04/08/2026 18:01:47</publishTime>
     </File>
     <File Include="Scripts/reportjs/InventoryView.js">
-      <publishTime>04/08/2026 18:01:47</publishTime>
+      <publishTime>04/15/2026 14:30:17</publishTime>
     </File>
     <File Include="Scripts/reportjs/SalesPerformance.js">
       <publishTime>12/15/2025 19:44:30</publishTime>
     </File>
     <File Include="Scripts/reportjs/StockManagement.js">
-      <publishTime>04/08/2026 18:01:47</publishTime>
+      <publishTime>04/18/2026 23:06:03</publishTime>
     </File>
     <File Include="Scripts/reportjs/SupportSaleData.js">
       <publishTime>12/29/2025 14:28:08</publishTime>
@@ -3279,7 +3299,7 @@
       <publishTime>04/13/2026 15:14:02</publishTime>
     </File>
     <File Include="Views/Account/Login.cshtml">
-      <publishTime>04/13/2026 15:00:36</publishTime>
+      <publishTime>04/15/2026 14:17:59</publishTime>
     </File>
     <File Include="Views/Account/ResetForgotPassword.cshtml">
       <publishTime>04/13/2026 15:14:02</publishTime>
@@ -3312,7 +3332,7 @@
       <publishTime>04/13/2026 15:14:02</publishTime>
     </File>
     <File Include="Views/SalesPerson/SalesPersonList.cshtml">
-      <publishTime>03/25/2026 14:42:43</publishTime>
+      <publishTime>04/24/2026 12:21:25</publishTime>
     </File>
     <File Include="Views/Shared/Error.cshtml">
       <publishTime>03/19/2026 23:06:03</publishTime>
@@ -3321,7 +3341,7 @@
       <publishTime>04/14/2026 17:32:33</publishTime>
     </File>
     <File Include="Views/Shared/_SalespersonMasterLayout.cshtml">
-      <publishTime>04/14/2026 17:53:33</publishTime>
+      <publishTime>04/23/2026 21:17:51</publishTime>
     </File>
     <File Include="Views/SPActivities/Activities.cshtml">
       <publishTime>10/10/2025 18:20:30</publishTime>
@@ -3345,28 +3365,28 @@
       <publishTime>04/13/2026 15:14:02</publishTime>
     </File>
     <File Include="Views/SPBusinessPlan/BusinessPlanContactList.cshtml">
-      <publishTime>04/14/2026 12:10:44</publishTime>
+      <publishTime>04/27/2026 16:57:32</publishTime>
     </File>
     <File Include="Views/SPBusinessPlan/BusinessPlanReport.cshtml">
       <publishTime>04/13/2026 15:00:37</publishTime>
     </File>
     <File Include="Views/SPBusinessPlan/BusinessPlanStatus.cshtml">
-      <publishTime>10/29/2025 21:20:35</publishTime>
+      <publishTime>04/28/2026 08:04:45</publishTime>
     </File>
     <File Include="Views/SPBusinessPlan/BusinessPlanStatusSPWise.cshtml">
-      <publishTime>10/10/2025 18:20:30</publishTime>
+      <publishTime>04/24/2026 12:22:24</publishTime>
     </File>
     <File Include="Views/SPContacts/CompanyContactCard.cshtml">
-      <publishTime>04/14/2026 17:56:09</publishTime>
+      <publishTime>04/18/2026 23:59:08</publishTime>
     </File>
     <File Include="Views/SPContacts/ContactCompanyList.cshtml">
-      <publishTime>04/14/2026 17:56:09</publishTime>
+      <publishTime>04/24/2026 12:12:46</publishTime>
     </File>
     <File Include="Views/SPContacts/ContactPersonList.cshtml">
-      <publishTime>10/10/2025 18:20:30</publishTime>
+      <publishTime>04/24/2026 12:19:27</publishTime>
     </File>
     <File Include="Views/SPCustomers/CustomerList.cshtml">
-      <publishTime>04/08/2026 16:16:56</publishTime>
+      <publishTime>04/24/2026 12:20:10</publishTime>
     </File>
     <File Include="Views/SPDashboard/DBInquiry.cshtml">
       <publishTime>04/09/2026 22:15:05</publishTime>
@@ -3381,7 +3401,7 @@
       <publishTime>04/09/2026 22:15:05</publishTime>
     </File>
     <File Include="Views/SPDashboard/Index.cshtml">
-      <publishTime>04/13/2026 15:00:36</publishTime>
+      <publishTime>04/22/2026 17:05:13</publishTime>
     </File>
     <File Include="Views/SPFeedback/CustomerSatisfaction.cshtml">
       <publishTime>10/10/2025 18:20:30</publishTime>
@@ -3399,13 +3419,13 @@
       <publishTime>04/14/2026 17:57:51</publishTime>
     </File>
     <File Include="Views/SPGRN/GRNList.cshtml">
-      <publishTime>04/14/2026 17:56:20</publishTime>
+      <publishTime>04/24/2026 12:20:39</publishTime>
     </File>
     <File Include="Views/SPInquiry/Inquiry.cshtml">
-      <publishTime>04/14/2026 17:23:53</publishTime>
+      <publishTime>04/22/2026 17:29:23</publishTime>
     </File>
     <File Include="Views/SPInquiry/InquiryList.cshtml">
-      <publishTime>04/14/2026 17:54:12</publishTime>
+      <publishTime>04/27/2026 12:13:36</publishTime>
     </File>
     <File Include="Views/SPItems/ItemPriceChange.cshtml">
       <publishTime>04/02/2026 18:13:29</publishTime>
@@ -3417,7 +3437,7 @@
       <publishTime>04/03/2026 01:20:49</publishTime>
     </File>
     <File Include="Views/SPMenus/MenuList.cshtml">
-      <publishTime>02/26/2026 12:06:23</publishTime>
+      <publishTime>04/24/2026 12:23:30</publishTime>
     </File>
     <File Include="Views/SPNotification/Notification.cshtml">
       <publishTime>03/30/2026 11:56:56</publishTime>
@@ -3432,25 +3452,31 @@
       <publishTime>04/13/2026 15:00:37</publishTime>
     </File>
     <File Include="Views/SPOutstandingPayment/OutstandingPaymentList.cshtml">
-      <publishTime>04/07/2026 16:06:33</publishTime>
+      <publishTime>04/24/2026 12:23:58</publishTime>
     </File>
     <File Include="Views/SPPostedSalesInvoice/PostedSalesInvoiceList.cshtml">
-      <publishTime>04/07/2026 15:39:34</publishTime>
+      <publishTime>04/24/2026 12:24:23</publishTime>
     </File>
     <File Include="Views/SPReports/BusinessTypeSalesPerformance.cshtml">
       <publishTime>11/11/2025 17:45:21</publishTime>
     </File>
     <File Include="Views/SPReports/Complaint.cshtml">
-      <publishTime>04/07/2026 17:35:39</publishTime>
+      <publishTime>04/21/2026 21:11:05</publishTime>
     </File>
     <File Include="Views/SPReports/ComplaintReportDailyVisitPlan.cshtml">
-      <publishTime>12/16/2025 17:10:57</publishTime>
+      <publishTime>04/21/2026 21:11:05</publishTime>
     </File>
     <File Include="Views/SPReports/CustomerLedgerEntry.cshtml">
       <publishTime>11/28/2025 14:43:23</publishTime>
     </File>
     <File Include="Views/SPReports/CustomerOutsatnding.cshtml">
-      <publishTime>04/13/2026 15:00:36</publishTime>
+      <publishTime>04/17/2026 14:32:29</publishTime>
+    </File>
+    <File Include="Views/SPReports/CustOverDueOutstandingDetail.cshtml">
+      <publishTime>04/17/2026 14:29:18</publishTime>
+    </File>
+    <File Include="Views/SPReports/CustOverDueOutstandinglist.cshtml">
+      <publishTime>04/17/2026 14:28:53</publishTime>
     </File>
     <File Include="Views/SPReports/DailyVisitMonthWise.cshtml">
       <publishTime>12/18/2025 15:43:10</publishTime>
@@ -3468,7 +3494,7 @@
       <publishTime>12/15/2025 19:44:30</publishTime>
     </File>
     <File Include="Views/SPReports/StockManagement.cshtml">
-      <publishTime>12/29/2025 14:28:08</publishTime>
+      <publishTime>04/18/2026 23:05:10</publishTime>
     </File>
     <File Include="Views/SPReports/SupportSaleData.cshtml">
       <publishTime>12/29/2025 14:28:08</publishTime>
@@ -3489,7 +3515,7 @@
       <publishTime>03/18/2026 10:55:39</publishTime>
     </File>
     <File Include="Views/SPRoles/RoleList.cshtml">
-      <publishTime>01/28/2026 11:52:17</publishTime>
+      <publishTime>04/24/2026 12:25:07</publishTime>
     </File>
     <File Include="Views/SPRoles/UserRoleRelationList.cshtml">
       <publishTime>01/22/2026 22:53:44</publishTime>
@@ -3498,16 +3524,16 @@
       <publishTime>02/12/2026 17:33:18</publishTime>
     </File>
     <File Include="Views/SPSalesOrders/SalesOrdersList.cshtml">
-      <publishTime>04/07/2026 15:39:06</publishTime>
+      <publishTime>04/24/2026 12:25:54</publishTime>
     </File>
     <File Include="Views/SPSalesQuotes/DispatchDetails.cshtml">
       <publishTime>04/07/2026 15:36:12</publishTime>
     </File>
     <File Include="Views/SPSalesQuotes/SalesQuote.cshtml">
-      <publishTime>04/14/2026 17:54:12</publishTime>
+      <publishTime>04/26/2026 16:23:49</publishTime>
     </File>
     <File Include="Views/SPSalesQuotes/SalesQuoteList.cshtml">
-      <publishTime>04/14/2026 17:54:12</publishTime>
+      <publishTime>04/26/2026 14:17:48</publishTime>
     </File>
     <File Include="Views/SPSalesQuotes/SalesQuoteStatus.cshtml">
       <publishTime>04/07/2026 15:03:38</publishTime>
@@ -3519,16 +3545,16 @@
       <publishTime>04/07/2026 17:40:30</publishTime>
     </File>
     <File Include="Views/SPVisitEntry/DailyVisit.cshtml">
-      <publishTime>04/08/2026 11:41:38</publishTime>
+      <publishTime>04/23/2026 17:03:55</publishTime>
     </File>
     <File Include="Views/SPVisitEntry/DailyVisitExpenseReport.cshtml">
       <publishTime>04/07/2026 17:50:01</publishTime>
     </File>
     <File Include="Views/SPVisitEntry/DailyVisitList.cshtml">
-      <publishTime>04/06/2026 16:46:59</publishTime>
+      <publishTime>04/18/2026 23:25:55</publishTime>
     </File>
     <File Include="Views/SPVisitEntry/WeekPlan.cshtml">
-      <publishTime>04/08/2026 16:44:41</publishTime>
+      <publishTime>04/22/2026 18:13:17</publishTime>
     </File>
     <File Include="Views/SPVisitEntry/WeekPlanList.cshtml">
       <publishTime>04/08/2026 17:03:14</publishTime>
@@ -3546,10 +3572,10 @@
       <publishTime>10/10/2025 18:20:30</publishTime>
     </File>
     <File Include="Views/SPWarehouse/WarehouseClosedList.cshtml">
-      <publishTime>04/07/2026 15:59:10</publishTime>
+      <publishTime>04/24/2026 12:26:32</publishTime>
     </File>
     <File Include="Views/SPWarehouse/WarehouseList.cshtml">
-      <publishTime>04/07/2026 15:57:38</publishTime>
+      <publishTime>04/24/2026 12:26:52</publishTime>
     </File>
     <File Include="Views/Web.config">
       <publishTime>04/07/2026 18:02:54</publishTime>
@@ -3558,7 +3584,7 @@
       <publishTime>10/10/2025 18:20:30</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>04/14/2026 21:06:38</publishTime>
+      <publishTime>04/22/2026 16:49:04</publishTime>
     </File>
   </ItemGroup>
 </Project>

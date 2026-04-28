@@ -13,30 +13,38 @@ $(document).ready(function () {
     });
 
     $('#btnSearch').click(function () {
-        if ($('#ddlField').val() == "-1" || $('#ddlOperator').val() == "-1" || $('#txtSearch').val() == "") {
 
-            var msg = "Please Fill All Filter Details";
-            ShowErrMsg(msg);
+        if ($('#ddlField').val() == "-1" || $('#ddlOperator').val() == "-1" || $('#txtSearch').val().trim() == "") {
 
-        }
-        else {
+            ShowErrMsg("Please Fill All Filter Details");
+
+        } else {
+
+            var searchText = $('#txtSearch').val().trim();
+            var selectedField = $('#ddlField').val();
 
             switch ($('#ddlOperator').val()) {
+
                 case 'Equal':
-                    filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
+                    filter = selectedField + " eq '" + searchText + "'";
                     break;
+
                 case 'Not Equal':
-                    filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
+                    filter = selectedField + " ne '" + searchText + "'";
                     break;
+
                 case 'Starts With':
-                    filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
+                    filter = "startswith(" + selectedField + ", '" + searchText + "')";
                     break;
+
                 case 'Ends With':
-                    filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
+                    filter = "endswith(" + selectedField + ", '" + searchText + "')";
                     break;
+
                 case 'Contains':
-                    filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
+                    filter = "contains(" + selectedField + ", '" + searchText + "')";
                     break;
+
                 default:
                     filter = "";
                     break;
@@ -642,68 +650,94 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     showPageDataLoader();
 
-    $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() + '&apiEndPointName=ContactDotNetAPI&type=Company&filter=' + filter, function (data) {
-        $('#hdnCCompanyCount').val(data);
-    });
+    $.get(apiUrl + 'GetApiRecordsCount?SPCode=' + $('#hdnLoggedInUserSPCode').val() +
+        '&apiEndPointName=ContactDotNetAPI&type=Company&filter=' + filter, function (data) {
+            $('#hdnCCompanyCount').val(data);
+        });
 
-    $.ajax(
-        {
-            url: '/SPContacts/GetContactCompanyListData?orderBy=' + orderBy + '&orderDir=' + orderDir + '&filter=' + filter + '&skip=' + skip + '&top=' + top,
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (data) {
+    $.ajax({
+        url: '/SPContacts/GetContactCompanyListData?orderBy=' + orderBy +
+            '&orderDir=' + orderDir +
+            '&filter=' + filter +
+            '&skip=' + skip +
+            '&top=' + top,
+        type: 'GET',
+        contentType: 'application/json',
 
-                if ($.fn.dataTable.isDataTable('#dataList')) {
-                    $('#dataList').DataTable().destroy();
-                }
-                $('#tableBody').empty();
-                $.each(data, function (index, item) {
-                    //var rowData = "<tr><td></td><td><input type='checkbox' class='form-check-input' /></td><td><a href='/SPContacts/CompanyContactCard?No=" + item.No + "'><i class='bx bxs-edit'></i></a></td><td align='center'><a class='ViewContactCls' onclick='ViewContactPerson(\"" + item.No +
-                    //    "\",\"" + item.Name + "\")'><i class='bx bx-show'></i></a></td><td>" + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
-                    //    "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + (item.Mobile_Phone_No || "N/A") + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
-                    //    "</td><td>" + item.GST_Registration_No + "</td><td>" + item.P_A_N_No + "</td>";
-                    const itemJson = JSON.stringify(item).replace(/"/g, '&quot;');
-                    const itemNameAttr = escapeHtmlAttr(item.Name);
-                    const itemNoAttr = escapeHtmlAttr(item.No);
-                    var rowData = `<tr><td></td><td><input type='checkbox' class='form-check-input' /></td><td><a href='/SPContacts/CompanyContactCard?No=` + item.No + `'><i class='bx bxs-edit'></i></a></td><td data-item="${itemJson}"><div class='dropdown ms-auto'><div class='cursor-pointer text-dark font-24 dropdown-toggle dropdown-toggle-nocaret' data-bs-toggle='dropdown'><i class='bx bx-dots-horizontal-rounded text-option'></i></div>` +
-                        `<div class='dropdown-menu dropdown-menu-end'><a class='dropdown-item' onclick='DailyVisit(${itemJson})' href='javaScript:;'  style='cursor:pointer'>Daily Visit Plan</a><a class='dropdown-item' onclick='BusinessPlan(${itemJson})'  href='javaScript:;'  style='cursor:pointer'>Bussines Plan</a>` +
-                        `<a class='dropdown-item' style='cursor:pointer' onclick='SalesQuotes(${itemJson})'>Sales Quotes</a></div></div></td><td align='center'><a class='ViewContactCls js-view-contact' data-company-no='${itemNoAttr}' data-company-name='${itemNameAttr}' href='javascript:;'><i class='bx bx-show'></i></a></td><td>` + item.No + "</td><td>" + item.Name + "</td><td>" + item.Industry + "</td><td>" + item.Source_of_Contact + "</td><td>" + item.Business_Type + "</td><td>" + item.City + "</td><td>" + item.Area + "</td><td>" + item.Post_Code +
-                        "</td><td>" + item.Phone_No + "</td><td>" + item.E_Mail + "</td><td>" + item.PCPL_Primary_Contact_Name + "</td><td>" + (item.Mobile_Phone_No || "N/A") + "</td><td>" + item.Salesperson_Code + "</td><td>" + item.Credit_Limit +
-                        "</td><td>" + item.GST_Registration_No + "</td><td>" + item.P_A_N_No + "</td>";
+        success: function (data) {
 
-
-                    if (item.PCPL_Feedback_Status == "Not Initiated") {
-                        rowData += "<td><span class='badge bg-danger'>Not Initiated</span></td></tr>";
-                    }
-                    else if (item.PCPL_Feedback_Status == "Awaited") {
-                        rowData += "<td><span class='badge bg-info text-dark'>Awaited</span></td></tr>";
-                    }
-                    else if (item.PCPL_Feedback_Status == "Received") {
-                        rowData += "<td><span class='badge bg-success'>Received</span></td></tr>";
-                    }
-
-                    $('#tableBody').append(rowData);
-
-                });
-                if (firsload == 1) {
-                    pageMe();
-                }
-                dataTableFunction(orderBy, orderDir);
-
-                if (data.length == 0) {
-                    $('ul.pager li').remove();
-                }
-
-            },
-            complete: function () {
-                hidePageDataLoader();
-            },
-            error: function () {
-                alert("error");
+            if ($.fn.dataTable.isDataTable('#dataList')) {
+                $('#dataList').DataTable().destroy();
             }
-        }
-    );
 
+            $('#tableBody').empty();
+
+            var selectedField = $('#ddlField').val();
+            var searchText = $('#txtSearch').val().toLowerCase();
+
+            $.each(data, function (index, item) {
+
+                // 🔥 CLIENT SIDE DYNAMIC FILTER
+                if (filter && searchText) {
+
+                    var fieldValue = item[selectedField] || "";
+                    fieldValue = fieldValue.toString().toLowerCase();
+
+                    if (!fieldValue.includes(searchText)) {
+                        return;
+                    }
+                }
+
+                var rowData = `<tr>
+<td></td>
+<td><input type='checkbox' class='form-check-input' /></td>
+<td><a href='/SPContacts/CompanyContactCard?No=${item.No}'><i class='bx bxs-edit'></i></a></td>
+<td></td>
+<td align='center'>
+    <a class='js-view-contact' data-company-no='${item.No}' data-company-name='${item.Name}'>
+        <i class='bx bx-show'></i>
+    </a>
+</td>
+
+<td>${item.No}</td>
+<td>${item.Name}</td>
+<td>${item.Industry || ''}</td>
+<td>${item.Source_of_Contact || ''}</td>
+<td>${item.Business_Type || ''}</td>
+<td>${item.City || ''}</td>
+<td>${item.Area || ''}</td>
+<td>${item.Post_Code || ''}</td>
+<td>${item.Phone_No || ''}</td>
+<td>${item.E_Mail || ''}</td>
+<td>${item.PCPL_Primary_Contact_Name || ''}</td>
+<td>${item.Mobile_Phone_No || 'N/A'}</td>
+<td>${item.Salesperson_Code || ''}</td>
+<td>${item.Credit_Limit || ''}</td>
+<td>${item.GST_Registration_No || ''}</td>
+<td>${item.P_A_N_No || ''}</td>
+<td>${item.PCPL_Feedback_Status || ''}</td>
+
+</tr>`;
+                $('#tableBody').append(rowData);
+            });
+
+            if (firsload == 1) {
+                pageMe();
+            }
+
+            dataTableFunction(orderBy, orderDir);
+
+            if (data.length == 0) {
+                $('ul.pager li').remove();
+            }
+        },
+        complete: function () {
+            hidePageDataLoader();
+        },
+        error: function () {
+            alert("error");
+        }
+    });
 }
 
 function dataTableFunction(orderBy, orderDir) {

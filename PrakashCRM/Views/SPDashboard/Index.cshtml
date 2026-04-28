@@ -190,14 +190,13 @@
                             <!-- Buttons -->
                             <div class="col-md-3">
                                 <br />
-
                                 <div class="d-flex gap-2">
                                     <button type="button" id="SearchBtn" class="btn btn-primary px-3">
                                         Search
                                     </button>
 
                                     <button id="btnClearFilter" class="btn btn-primary btn-sm px-3" type="button">
-                                       Refresh
+                                        Refresh
                                     </button>
                                 </div>
                             </div>
@@ -338,28 +337,58 @@
     </div>
     <br>
 
-    <div class="row">
-        <div class="col">
-            <div class="card radius-10 mb-0 verticalScroll">
+    <div class="row g-3">
+
+        <!-- LEFT SIDE -->
+        <div class="col-12 col-lg-6 d-flex">
+            <div class="card radius-10 mb-0 verticalScroll w-100 dashboard-target-vs-sales">
                 <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-1 logo-text" style="font-size:18px">CUSTOMER OUTSTANDING</h6>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 align-items-end mb-3">
+                    </div>
+                    <table class="table mb-0 table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Salesperson Name</th>
+                                <th scope="col">TOTAL OUTSTANDING</th>
+                                <th scope="col">DUE PAYMENTS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbloutstanding">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-12 col-lg-6 d-flex">
+            <div class="card radius-10 mb-0 verticalScroll w-100 dashboard-target-vs-sales">
+                <div class="card-body">
+
                     <div class="d-flex align-items-center">
                         <div>
                             <h6 class="mb-1 logo-text" style="font-size:18px">Non Performing Customers</h6>
                         </div>
                     </div>
-                    <div>
-                        <table class="table mb-0 table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Customer No</th>
-                                    <th scope="col">Customer Name</th>
-                                    <th scope="col">Salesperson</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tblNonPerforminglist">
-                            </tbody>
-                        </table>
+                    <div class="row g-3 align-items-end mb-3">
                     </div>
+                    <table class="table mb-0 table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer No</th>
+                                <th scope="col">Customer Name</th>
+                                <th scope="col">Salesperson</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblNonPerforminglist">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -949,8 +978,8 @@
             $('#CntCustomers').html("<a href='@Url.Action("CustomerList", "SPCustomers")?filter=All' class='text-white my-1'>" + data.CustomersCount + "</a>");
             $('#CntQuotes').html("<a href='@Url.Action("SalesQuoteList", "SPSalesQuotes")?filter=All' class='text-white my-1'>" + data.QuotesCount + "</a>");
             $('#CntInquiries').html("<a href='@Url.Action("InquiryList", "SPInquiry")' class='text-white my-1'>" + data.InquiryCount + "</a>");
-            $('#CntManufacturers').html(data.ContactManufactorCount);
-            $('#CntTraders').html(data.ContactTraderCount);
+            @*$('#CntManufacturers').html("<a href='@Url.Action("ContactCompanyList", "SPContacts")?filter=All' class='text-dark my-1'>" + data.ContactManufactorCount + "</a>");
+            $('#CntTraders').html("<a href='@Url.Action("ContactCompanyList", "SPContacts")?filter=All' class='text-white my-1'>" + data.ContactTraderCount + "</a>");*@
 
         }
 

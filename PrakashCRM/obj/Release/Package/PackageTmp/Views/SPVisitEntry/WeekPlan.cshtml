@@ -481,103 +481,119 @@
 @*@Scripts.Render("~/bundles/jquery")*@
 <script src="~/Layout/assets/js/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="~/Layout/assets/plugins/select2/js/select2-custom.js"></script>
 <script src="~/Scripts/appjs/WeekPlan.js"></script>
-@*<script src="~/Layout/assets/plugins/select2/js/select2-custom.js"></script>*@
-@*<script src="~/Layout/assets/plugins/select2/js/select2-custom.js"></script>*@
 <script>
 
+    //$('#ddlCompetitors').select2({
+    //    theme: "bootstrap-5",
+    //    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+    //    placeholder: $(this).data('placeholder'),
+    //    closeOnSelect: false,
+    //    tags: true
+    //});
+
+
+<input type="hidden" id="hdnRedirectContactCompanyList" value='@Url.Action("CompanyContactCard", "SPContacts")' />
+<input type="hidden" id="hdnRedirectWeekPlan" value='@Url.Action("WeekPlan", "SPVisitEntry")' />
+$(document).ready(function () {
+
+    // ✅ Select2 Init (ONLY ONCE)
     $('#ddlCompetitors').select2({
         theme: "bootstrap-5",
-        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-        placeholder: $(this).data('placeholder'),
+        width: '100%',
         closeOnSelect: false,
         tags: true
     });
 
-    $(document).ready(function () {
+    // ✅ Redirect
+    $('#btnCustAdd').click(function () {
+        var redirectUrl = $('#hdnRedirectContactCompanyList').val();
+        var returnUrl = $('#hdnRedirectWeekPlan').val();
+        window.location.href = redirectUrl + '?returnUrl=' + encodeURIComponent(returnUrl);
+    });
 
-        $('#btnCustAdd').click(function () {
+    // ✅ SAVE BUTTON
+    $('#btnSave').click(function () {
 
-            window.location.replace('@Url.Action("CompanyContactCard", "SPContacts")');
+        var flag = CheckWeekPlanValues();
+        if (!flag) return;
+
+        $('#divImage').show();
+
+        var weekplan = {};
+        var productDetails_ = [];
+
+        const weekPlanDetails = $('#ddlWeekNo').val().split('_');
+        const subTypeDetails = $('#ddlSubType').val().split('_');
+
+        weekplan.IsWeekPlanEdit = $('#hfWeekPlanEdit').val();
+        weekplan.No = $('#hfNo').val();
+        weekplan.Financial_Year = $('#lblFinancialYear').text();
+        weekplan.Week_No = weekPlanDetails[0];
+        weekplan.Week_Start_Date = weekPlanDetails[1];
+        weekplan.Week_End_Date = weekPlanDetails[2];
+        weekplan.Week_Plan_Date = $('#txtWeekDate').val();
+        weekplan.Visit_Type = $('#ddlType').val();
+        weekplan.Visit_Sub_Type = subTypeDetails[0];
+
+        if ($("#ddlCustomerName").val() != null) {
+            const CompanyDetails_ = $('#ddlCustomerName').val().split('_');
+            weekplan.Contact_Company_No = CompanyDetails_[0];
+        } else {
+            weekplan.Contact_Company_No = "";
+        }
+
+        weekplan.Contact_Person_No = $('#ddlContactPerson').val();
+        weekplan.Event_No = $('#ddlEventName').val();
+        weekplan.Topic_Name = $('#txtTopicName').val();
+        weekplan.Mode_Of_Visit = $('#ddlVisitMode').val();
+        weekplan.Pur_Visit = $('#txtVisitPurpose').val();
+        weekplan.Remarks = $('#txtRemarks').val();
+
+        $("#tblProducts tr").each(function () {
+            var productDetails = {};
+            productDetails.Product_No = $(this).find("td").eq(1).html();
+            productDetails.Quantity = $(this).find("td").eq(3).html();
+            productDetails.Competitor = $(this).find("td").eq(5).html();
+            productDetails.No = $(this).find("td").eq(6).html();
+            productDetails_.push(productDetails);
         });
 
-        $('#btnSave').click(function () {
+        weekplan.Products = productDetails_;
 
-            var flag = CheckWeekPlanValues();
-
-            if (flag) {
-
-                var weekplan = {};
-                var productDetails_ = new Array();
-
-                const weekPlanDetails = $('#ddlWeekNo').val().split('_');
-                const subTypeDetails = $('#ddlSubType').val().split('_');
-
-                weekplan.IsWeekPlanEdit = $('#hfWeekPlanEdit').val();
-                weekplan.No = $('#hfNo').val();
-                //weekplan.Financial_Year = $('#ddlFinancialYear').val();
-                weekplan.Financial_Year = $('#lblFinancialYear').text();
-                weekplan.Week_No = weekPlanDetails[0];
-                weekplan.Week_Start_Date = weekPlanDetails[1];
-                weekplan.Week_End_Date = weekPlanDetails[2];
-                weekplan.Week_Plan_Date = $('#txtWeekDate').val();
-                weekplan.Visit_Type = $('#ddlType').val();
-                weekplan.Visit_Sub_Type = subTypeDetails[0];
-                if ($("#ddlCustomerName").val() != null) {
-                    const CompanyDetails_ = $('#ddlCustomerName').val().split('_');
-                    var CompanyNo = CompanyDetails_[0];
-                    weekplan.Contact_Company_No = CompanyNo;
-                }
-                else {
-                    weekplan.Contact_Company_No = "";
-                }
-
-                weekplan.Contact_Person_No = $('#ddlContactPerson').val();
-                weekplan.Event_No = $('#ddlEventName').val();
-                weekplan.Topic_Name = $('#txtTopicName').val();
-                weekplan.Mode_Of_Visit = $('#ddlVisitMode').val();
-                weekplan.Pur_Visit = $('#txtVisitPurpose').val();
-                weekplan.Remarks = $('#txtRemarks').val();
-
-                $("#tblProducts TR").each(function () {
-                    var productDetails = {};
-                    productDetails.Product_No = $(this).find("TD").eq(1).html();
-                    productDetails.Quantity = $(this).find("TD").eq(3).html();
-                    productDetails.Competitor = $(this).find("TD").eq(5).html();
-                    productDetails.No = $(this).find("TD").eq(6).html();
-
-                    productDetails_.push(productDetails);
+        (async () => {
+            try {
+                const rawResponse = await fetch('/SPVisitEntry/PostWeekPlan', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(weekplan)
                 });
 
-                weekplan.Products = productDetails_;
+                if (!rawResponse.ok) {
+                    alert("❌ API Error");
+                    return;
+                }
 
-                (async () => {
-                    const rawResponse = await fetch('/SPVisitEntry/PostWeekPlan', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(weekplan)
-                    });
-                    const res = await rawResponse.ok;
-                    //if (res) {
-                        $('#divImage').hide();
-                        window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")');
-                        $('#hfWeekPlanEdit').val("false");
-                    //}
+                window.location.replace('@Url.Action("WeekPlan", "SPVisitEntry")');
+                $('#hfWeekPlanEdit').val("false");
 
-                })();
-
-
+            } catch (err) {
+                console.error(err);
+                alert("❌ Network Error");
+            } finally {
+                $('#divImage').hide();
             }
-
-        });
-
-        $('#btnCancel').click(function () {
-            window.location.replace('@Url.Action("WeekPlanList", "SPVisitEntry")');
-        });
+        })();
 
     });
 
+    $('#btnCancel').click(function () {
+        window.location.replace('@Url.Action("WeekPlanList", "SPVisitEntry")');
+    });
+
+});
 </script>

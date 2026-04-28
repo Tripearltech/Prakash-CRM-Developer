@@ -23,7 +23,7 @@ $(document).ready(function () {
                     filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                     break;
                 case 'Not Equal':
-                    filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
+                    filter = $('#ddlField').val() + ' ne ' + '\'' + $('#txtSearch').val() + '\'';
                     break;
                 case 'Starts With':
                     filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
@@ -32,7 +32,7 @@ $(document).ready(function () {
                     filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
                     break;
                 case 'Contains':
-                    filter = $('#ddlField').val() + ' eq ' + '\'@*' + $('#txtSearch').val() + '*\'';
+                    filter = "contains(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
                     break;
                 default:
                     filter = "";
@@ -64,13 +64,16 @@ $(document).ready(function () {
                 filter = $('#ddlField').val() + ' eq ' + '\'' + $('#txtSearch').val() + '\'';
                 break;
             case 'Not Equal':
-                filter = $('#ddlField').val() + ' ne \'' + $('#txtSearch').val() + '\'';
+                filter = $('#ddlField').val() + ' ne ' + '\'' + $('#txtSearch').val() + '\'';
                 break;
             case 'Starts With':
                 filter = "startswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
                 break;
             case 'Ends With':
                 filter = "endswith(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
+                break;
+            case 'Contains':
+                filter = "contains(" + $('#ddlField').val() + ",\'" + $('#txtSearch').val() + "\') eq true";
                 break;
             default:
                 filter = "";

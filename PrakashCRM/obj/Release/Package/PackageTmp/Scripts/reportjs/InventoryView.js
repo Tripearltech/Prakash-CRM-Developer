@@ -37,15 +37,20 @@ function GenerateInvData() {
             showPageDataLoader();
         }
 
-        $.post(apiUrl + 'GenerateInvData?FromDate=' + fromDate + '&ToDate=' + toDate,
-            function (data) {
+        $.post(apiUrl + 'GenerateInvData?FromDate=' + fromDate + '&ToDate=' + toDate)
+            .done(function (data) {
                 if (data) {
                     BindInvBranchWiseTotals();
                 } else if (typeof hidePageDataLoader === 'function') {
                     hidePageDataLoader();
                 }
-            }
-        );
+            })
+            .fail(function () {
+                if (typeof hidePageDataLoader === 'function') {
+                    hidePageDataLoader();
+                }
+                alert('Error generating inventory data.');
+            });
     } else {
         $('#divImage').hide();
         if (typeof hidePageDataLoader === 'function') {
@@ -57,10 +62,6 @@ function GenerateInvData() {
 
 const ProductGroupsCode = {};
 function BindInvBranchWiseTotals() {
-    if (typeof showPageDataLoader === 'function') {
-        showPageDataLoader();
-    }
-
     $.ajax({
         url: '/SPReports/GetBranchWiseTotal',
         type: 'GET',

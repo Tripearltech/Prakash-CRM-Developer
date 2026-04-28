@@ -776,16 +776,18 @@ namespace PrakashCRM.Controllers
             return isSessionNull;
         }
 
-        public ActionResult DailyVisit(string No = "")
+        public ActionResult DailyVisit(string No = "", string customerId = "")
         {
             if (!string.IsNullOrWhiteSpace(No))
                 return RedirectToAction("DailyVisitDetails", new { No = No });
+
+            ViewBag.Contact_Company_No = customerId;
 
             return View(new SPDailyVisitDetails());
         }
 
         [HttpPost]
-        public async Task<bool> PostDailyVisit(SPDailyVisitDetails dailyVisitDetails, string CustomerName, string CustEmail)
+        public async Task<JsonResult> PostDailyVisit(SPDailyVisitDetails dailyVisitDetails, string CustomerName, string CustEmail)
         {
             bool flag = false;
             string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPVisitEntry/";
@@ -881,7 +883,14 @@ namespace PrakashCRM.Controllers
                 Session["DailyVisitActionErr"] = ex.Message;
             }
 
-            return flag;
+            var responseObject = new
+            {
+                success = flag,
+                no = responseDailyVisit?.No ?? string.Empty,
+                message = flag ? string.Empty : (Session["DailyVisitActionErr"]?.ToString() ?? "Daily Visit save failed. Please try again.")
+            };
+
+            return Json(responseObject, JsonRequestBehavior.AllowGet);
         }
 
         public bool NullDailyVisitErrSession()
@@ -1325,6 +1334,24 @@ namespace PrakashCRM.Controllers
             }
 
             return flag;
+        }
+
+        [HttpPost]
+        public async Task<string> AddNewCompetitors(string NewCompetitors)
+        {
+            string apiUrl = ConfigurationManager.AppSettings["ServiceApiUrl"].ToString() + "SPVisitEntry/AddNewCompetitors?NewCompetitors=" + Uri.EscapeDataString(NewCompetitors ?? "");
+            string responseText = string.Empty;
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(apiUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            HttpResponseMessage response = await client.PostAsync(apiUrl, null);
+            if (response.IsSuccessStatusCode)
+                responseText = await response.Content.ReadAsStringAsync();
+
+            return responseText;
         }
 
         public async Task<JsonResult> GetContactPersonForDDL(string CompanyNo)

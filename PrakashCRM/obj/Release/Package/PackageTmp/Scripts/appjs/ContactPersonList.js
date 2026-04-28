@@ -100,7 +100,7 @@ function bindGridData(skip, top, firsload, orderBy, orderDir, filter) {
 
     var apiUrl = $('#getServiceApiUrl').val() + 'SPContacts/';
 
-    $.get(apiUrl + 'GetApiRecordsCount?SPNo=' + $('#hdnLoggedInUserNo').val() + '&apiEndPointName=ContactDotNetAPI&type=Person&filter=' + filter, function (data) {
+    $.get(apiUrl + 'GetApiRecordsCount?SPNo=' + $('#hdnLoggedInUserNo').val() + '&apiEndPointName=pcplcontacts&type=Person&filter=' + filter, function (data) {
         $('#hdnCPersonCount').val(data);
     });
 

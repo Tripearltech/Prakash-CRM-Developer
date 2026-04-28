@@ -52,8 +52,8 @@
   <ItemGroup>
     <Compile Include="Models\ConBusinessRelation.cs" />
     <Compile Include="Models\CustomerLedgerEntry.cs" />
+    <Compile Include="Models\DailyVisitAttachment.cs" />
     <Compile Include="Models\DropDownList.cs" />
-    <Compile Include="Models\GRN-DocumentAttachment.cs" />
     <Compile Include="Models\MarketUpdate.cs" />
     <Compile Include="Models\SPActivities.cs" />
     <Compile Include="Models\SPAdminBusinessPlan.cs" />
