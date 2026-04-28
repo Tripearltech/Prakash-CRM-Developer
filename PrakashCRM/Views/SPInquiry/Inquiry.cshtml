@@ -90,7 +90,7 @@
                                 <label class="col-sm-3 col-form-label">Customer Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-8">
                                     <input id="hfCompany" name="hfCompany" style="display:none" />
-                                    <input type="text" id="txtCustomerName" value="" class="form-control" />
+                                    <input type="text" id="txtCustomerName" value="" class="form-control" tabindex="1" />
                                     @*<select id="ddlCustomer" class="form-select"></select>*@
                                 </div>
                                 <div class="col-sm-1">
@@ -102,7 +102,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Contact Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-8">
-                                    <select id="ddlContact" class="form-select"></select>
+                                    <select id="ddlContact" class="form-select" tabindex="4"></select>
                                 </div>
                                 <div class="col-sm-1">
                                     <button id="btnAddNewContactPerson" type="button" class="btn btn-primary bx bx-plus" title="Add New Contact Person" disabled></button>
@@ -127,7 +127,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Bill-to Address</label>
                                 <div class="col-sm-8">
-                                    <select id="ddlBillTo" class="form-select"></select>
+                                    <select id="ddlBillTo" class="form-select" tabindex="2"></select>
                                 </div>
                                 <div class="col-sm-1">
                                     <button id="btnAddNewBillTo" type="button" class="btn btn-primary bx bx-plus" title="Add New Bill-to Address" disabled></button>
@@ -138,7 +138,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Delivery-to Address</label>
                                 <div class="col-sm-8">
-                                    <select id="ddlShipTo" class="form-select"></select>
+                                    <select id="ddlShipTo" class="form-select" tabindex="5"></select>
                                 </div>
                                 <div class="col-sm-1">
                                     <button id="btnAddNewJobTo" type="button" class="btn btn-primary bx bx-plus" title="Add New Delivery-to Address" disabled></button>
@@ -152,7 +152,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Payment Terms<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-9">
-                                    <select id="ddlPaymentTerms" class="form-select"></select>
+                                    <select id="ddlPaymentTerms" class="form-select" tabindex="3"></select>
                                 </div>
                             </div>
                         </div>
@@ -160,7 +160,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Remarks</label>
                                 <div class="col-sm-9">
-                                    <textarea id="txtRemarks" class="form-control"></textarea>
+                                    <textarea id="txtRemarks" class="form-control" tabindex="6"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -174,8 +174,8 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Product Name<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-9">
-                                    <input id="txtProductName" type="text" class="form-control" /><br />
-                                    <input type="checkbox" id="chkShowAllProducts" class="form-check-input" />&nbsp;Show All
+                                    <input id="txtProductName" type="text" class="form-control" tabindex="7" /><br />
+                                    <input type="checkbox" id="chkShowAllProducts" class="form-check-input" tabindex="8" />&nbsp;Show All
                                     @*<select id="ddlProductName" class="form-select"></select>*@
                                 </div>
                             </div>
@@ -184,7 +184,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Delivery Date@*<span class="required" style="color:red;margin-left:2px">*</span>*@</label>
                                 <div class="col-sm-9">
-                                    <input id="txtDeliveryDate" type="date" class="form-control" placeholder="yyyy-mm-dd" />
+                                    <input id="txtDeliveryDate" type="date" class="form-control" placeholder="yyyy-mm-dd" tabindex="11" />
                                 </div>
                             </div>
                         </div>
@@ -194,7 +194,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Packing Style<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-9">
-                                    <select id="ddlPackingStyle" class="form-select"></select>
+                                    <select id="ddlPackingStyle" class="form-select" tabindex="9"></select>
                                 </div>
                             </div>
                         </div>
@@ -212,7 +212,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Qty<span class="required" style="color:red;margin-left:2px">*</span></label>
                                 <div class="col-sm-9">
-                                    <input id="txtProdQty" type="text" class="form-control" />
+                                    <input id="txtProdQty" type="text" class="form-control" tabindex="10"/>
                                 </div>
                             </div>
                         </div>
@@ -220,7 +220,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">UOM</label>
                                 <div class="col-sm-9">
-                                    <input id="txtUOM" type="text" class="form-control" />
+                                    <input id="txtUOM" type="text" class="form-control" tabindex="12"/>
                                 </div>
                             </div>
                         </div>
@@ -233,7 +233,7 @@
                                     <table>
                                         <tr>
                                             <td>
-                                                <button id="btnSaveProd" type="button" class="btn btn-primary"><i class="bx bxs-save"></i> Save Product</button>
+                                                <button id="btnSaveProd" type="button" class="btn btn-primary" tabindex="13"><i class="bx bxs-save"></i> Save Product</button>
                                             </td>
                                             <td></td>
                                             <td>
@@ -653,6 +653,7 @@
 <script src="~/Scripts/appjs/json2.js"></script>
 <script src="~/Layout/vendors/raphael/raphael.min.js"></script>
 <script src="~/Layout/vendors/morris.js/morris.min.js"></script>
+
 <script>
    $(document).ready(function () {
 

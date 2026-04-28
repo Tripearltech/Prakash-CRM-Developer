@@ -774,118 +774,318 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Drop Shipment</label>
+
+                                        <label class="col-sm-3 col-form-label">Delivery Date<span class="required" style="color:red;margin-left:2px">*</span></label>
                                         <div class="col-sm-9">
-                                            <input type="checkbox" id="chkDropShipment" class="form-check-input" />
+                                            <input id="txtDeliveryDate" type="date" class="form-control" />
+                                            @*@Html.TextBoxFor(x => x.Delivery_Date, new { Value = Model.Delivery_Date, @class = "form-control datepicker", autocomplete = "off", @alt = "Delivery Date" })*@
                                         </div>
 
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="dvVendors" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Vendor</label>
-                                            <div class="col-sm-9">
-                                                <select id="ddlItemVendors" class="form-select"></select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                    </div>
-                                </div>
-                            </div>
-                            @*<div class="row g-3">
 
-                                </div>*@
-
-                            <div class="row g-3" style="display:none">
-                                <div class="col-md-6">
-                                    <label class="col-sm-3 col-form-label">GST Place of Supply</label>
-                                    <div class="col-sm-9">
-                                    </div>
-                                </div>
-                            </div>
                             <div class="row g-3">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <div class="row mb-3">
-                                        <div class="col-sm-8"></div>
-                                        <div class="col-sm-4" align="right">
-                                            <table>
-                                                <tr>
-                                                    <td>
-                                                        <button id="btnSaveProd" type="button" class="btn btn-primary"><i class="bx bxs-save"></i> Save Product</button>
-                                                    </td>
-                                                    <td></td>
-                                                    <td>
-                                                        <button id="btnResetProdDetails" type="button" class="btn btn-danger"><i class="lni lni-close"></i> Clear</button>
-                                                    </td>
-                                                </tr>
-                                            </table>
+                                        <label class="col-sm-3 col-form-label">Sales Price<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtSalesPrice" class="form-control" />
+                                            @*@Html.TextBoxFor(model => model.Sales_Price, new { @id = "txtSalesPrice", @class = "form-control" })*@
                                         </div>
                                     </div>
+                                </div>
+                                <!--<div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Credit Days</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" id="txtCreditDays" class="form-control" />-->
+                                @* @Html.TextBoxFor(model => model.Credit_Days, new { @id = "txtCreditDays", @class = "form-control" })*@
+                                <!--</div>
+                                    </div>
+                                </div>-->
+                          
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+
+                                    <label class="col-sm-3 col-form-label">Margin</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" id="txtMargin" class="form-control" />
+                                        @*@Html.TextBoxFor(model => model.Margin, new { @id = "txtMargin", @class = "form-control" })*@
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <span id="spnMarginPercent" runat="server">0%</span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                        </div>
+                     
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Drop Shipment</label>
+                                    <div class="col-sm-9">
+                                        <input type="checkbox" id="chkDropShipment" class="form-check-input" />
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="dvVendors" style="display:none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Vendor</label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlItemVendors" class="form-select"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
                                 </div>
                             </div>
                         </div>
-                        <h6 class="mb-0 font-weight-bold">SalesQuote Line Items</h6>
-                        <hr />
+                        @*<div class="row g-3">
 
+                            </div>*@
+
+                        <div class="row g-3" style="display:none">
+                            <div class="col-md-6">
+                                <label class="col-sm-3 col-form-label">GST Place of Supply</label>
+                                <div class="col-sm-9">
+                                </div>
+                            </div>
+                        </div>
                         <div class="row g-3">
-                            @*style="overflow-x:auto"*@
                             <div class="col-md-12">
-                                @*tblSalesQuoteTempLineItems*@
-                                <div class="table-responsive">
-                                    <table id="dataList" class="display responsive nowrap" style="width: 100%; display: none">
-                                        <thead>
+                                <div class="row mb-3">
+                                    <div class="col-sm-8"></div>
+                                    <div class="col-sm-4" align="right">
+                                        <table>
                                             <tr>
-                                                <th></th>
-                                                <th></th>
-                                                <th>Product No</th>
-                                                <th>Product Name</th>
-                                                <th>Qty</th>
-                                                <th>UOM</th>
-                                                <th>Packing Style</th>
-                                                <th>Basic Purchase Cost</th>
-                                                <th>Sales Price</th>
-                                                <th>New Price</th>
-                                                <th>New Margin</th>
-                                                <th>Price Updated</th>
-                                                <th>Delivery Date</th>
-                                                <th>Total Cost</th>
-                                                <th>Margin</th>
-                                                <th>Payment Terms</th>
-                                                <th>Inco Terms</th>
-                                                <th>Transport Method</th>
-                                                <th>Transport Cost</th>
-                                                <th>Sales Discount</th>
-                                                <th>Commission(%/Per Unit)</th>
-                                                <th>Commission Percent</th>
-                                                <th>Commission Amount</th>
-                                                <th>Credit Days</th>
-                                                <th>Interest</th>
-                                                <th>Drop Shipment</th>
-                                                <th hidden></th>
-                                                <th hidden></th>
-                                                <th>Margin Percent</th>
-                                                <th>Commission Payable</th>
-                                                <th hidden></th>
-                                                <th>IsLiquid Prod</th> @*30*@
-                                                <th>Concentrate%</th> @*31*@
-                                                <th>NetWeight</th> @*32*@
-                                                <th>LiquidRate</th> @*33*@
-                                                <th>Drop Shipment Vendor</th>
-                                                <th>MRP Price</th>
+                                                <td>
+                                                    <button id="btnSaveProd" type="button" class="btn btn-primary"><i class="bx bxs-save"></i> Save Product</button>
+                                                </td>
+                                                <td></td>
+                                                <td>
+                                                    <button id="btnResetProdDetails" type="button" class="btn btn-danger"><i class="lni lni-close"></i> Clear</button>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody id="tblProducts">
-                                        </tbody>
-                                    </table>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <h6 class="mb-0 font-weight-bold">SalesQuote Line Items</h6>
+                    <hr />
+
+                    <div class="row g-3">
+                        @*style="overflow-x:auto"*@
+                        <div class="col-md-12">
+                            @*tblSalesQuoteTempLineItems*@
+                            <div class="table-responsive">
+                                <table id="dataList" class="display responsive nowrap" style="width: 100%; display: none">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th>Product No</th>
+                                            <th>Product Name</th>
+                                            <th>Qty</th>
+                                            <th>UOM</th>
+                                            <th>Packing Style</th>
+                                            <th>Basic Purchase Cost</th>
+                                            <th>Sales Price</th>
+                                            <th>New Price</th>
+                                            <th>New Margin</th>
+                                            <th>Price Updated</th>
+                                            <th>Delivery Date</th>
+                                            <th>Total Cost</th>
+                                            <th>Margin</th>
+                                            <th>Payment Terms</th>
+                                            <th>Inco Terms</th>
+                                            <th>Transport Method</th>
+                                            <th>Transport Cost</th>
+                                            <th>Sales Discount</th>
+                                            <th>Commission(%/Per Unit)</th>
+                                            <th>Commission Percent</th>
+                                            <th>Commission Amount</th>
+                                            <th>Credit Days</th>
+                                            <th>Interest</th>
+                                            <th>Drop Shipment</th>
+                                            <th hidden></th>
+                                            <th hidden></th>
+                                            <th>Margin Percent</th>
+                                            <th>Commission Payable</th>
+                                            <th hidden></th>
+                                            <th>IsLiquid Prod</th> @*30*@
+                                            <th>Concentrate%</th> @*31*@
+                                            <th>NetWeight</th> @*32*@
+                                            <th>LiquidRate</th> @*33*@
+                                            <th>Drop Shipment Vendor</th>
+                                            <th>MRP Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblProducts">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- -->
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <div class="row mb-3">
+                            <div class="col-sm-8">
+                                <input id="hdnLoggedInUserSPCode" value="@Session["loggedInUserSPCode"].ToString()" style="display:none" />
+                                <input id="getServiceApiUrl" value="@System.Configuration.ConfigurationManager.AppSettings["ServiceApiUrl"].ToString()" style="display:none" />
+                                <input type="hidden" id="hdnSalespersonEmail" value="" />
+                                <input id="hdnLoggedInUserRole" value="@Session["loggedInUserRole"]" style="display:none" />
+                                <input id="hdnLoggedInUserEmail" value="@Session["loggedInUserEmail"]" style="display:none" />
+                                <input id="hdnLoggedInUserNo" value="@Session["loggedInUserNo"]" style="display:none" />
+                                <input id="hdnApprovalFor" value="" style="display:none" />
+                                <input id="hdnCustBalanceLCY" value="" style="display:none" />
+                                <input type="hidden" id="hdnSalesQuoteAction" value="@Session["SalesQuoteAction"]" />
+                                <input type="hidden" id="hdnSalesQuoteActionErr" value="@Session["SalesQuoteActionErr"]" />
+                            </div>
+                            <div class="col-sm-4" align="right">
+                                <table>
+                                    <tr>
+                                        @*<td id="tdReopenSQ" style="display:none">
+                                                <button id="btnReopenSQ" class="btn btn-success" type="button">Price Updated Quotes</button>
+                                            </td>*@
+                                        @*<td></td>*@
+                                        <td id="btnFinancehide">
+                                            <button id="btnSave" class="btn btn-success" type="button"><i class="bx bxs-save"></i> Save</button>
+                                        </td>
+                                        <td></td>
+                                        <td id="btnFinancehide1">
+                                            <a href="@salesQuoteBackUrl" class="btn btn-danger"><i class="lni lni-close"></i> Cancel</a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dvSQAprJustificationDetails" style="display:none">
+
+                    <h6 class="mb-0 font-weight-bold">SalesQuote Approval Details</h6>
+                    <hr />
+
+                    <div id="dvAprDetailsFinanceUser" style="display:none">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table class="table mb-0 table-striped">
+                                            <tr>
+                                                <td style="font-weight:bold" width="30%">Customer Name</td>
+                                                <td id="AprDetailsCustName" width="70%"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight:bold" width="30%">Justification For</td>
+                                                <td id="AprDetailsApprovalFor" width="70%"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-weight:bold" width="30%">Justification Reason</td>
+                                                <td id="AprDetailsJustificationReason" width="70%"></td>
+                                            </tr>
+                                        </table>
+                                        <br />
+                                        <table class="table mb-0 table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Trader/Mfg</th>
+                                                    <th>Total Expo</th>
+                                                    <th>Overdue</th>
+                                                    <th>Avg Delay Days</th>
+                                                    <th>Approve/Reject</th>
+                                                    <th>Location</th>
+                                                    <th>Class Customer</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td id="tdTraderMfg"></td>
+                                                    <td id="tdTotalExpo"></td>
+                                                    <td id="tdOverdue"></td>
+                                                    <td id="tdAvgDelayDays"></td>
+                                                    <td id="tdDetailsStatus"></td>
+                                                    <td id="tdDetailsLocationCode"></td>
+                                                    <td id="tdClassCustomer"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+
+                <div id="dvcustomerOutStanding" style="display:none">
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                        <div class="accordion-item">
+
+                            <h6 id="lblOutstandingValue" class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" style="font-weight:bold" width="30%" data-bs-toggle="collapse" data-bs-target="#flush-collapsecustomerOutstanding" aria-expanded="false" aria-controls="flush-collapsecustomerOutstanding">
+                                    Customer OutStanding/Over-Due Report
+                                </button>
+                            </h6>
+                        </div>
+
+                        <div id="flush-collapsecustomerOutstanding" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                                @*<div id="tblCSOutstandingDuelist" style="display:none">*@
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <div class="row mb-3">
+                                            <div class="col-sm-12">
+                                                <table class="table mb-0 table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Document Type</th>
+                                                            <th scope="col">Bill No</th>
+                                                            <th scope="col">Bill Date</th>
+                                                            <th scope="col">Product Name</th>
+                                                            <th scope="col">Payment Terms</th>
+                                                            <th scope="col">Due Date</th>
+                                                            <th scope="col">Invoice Amount</th>
+                                                            <th scope="col">Remain Amount</th>
+                                                            <th scope="col">Total Days</th>
+                                                            <th scope="col">Overdue Days</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tblCSOutstandingDuelist">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*</div>*@
+                    </div>
+                </div>
+                <div id="dvSQJustificationDetails" style="display:none">
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                        <br />
+                        <div class="accordion-item">
 
 
                     <!-- -->
@@ -925,78 +1125,8 @@
                         </div>
                     </div>
 
-                    <div id="dvSQAprJustificationDetails" style="display:none">
-
-                        <h6 class="mb-0 font-weight-bold">SalesQuote Approval Details</h6>
-                        <hr />
-
-                        <div id="dvAprDetailsFinanceUser" style="display:none">
-                            <div class="row g-3">
-                                <div class="col-md-12">
-                                    <div class="row mb-3">
-                                        <div class="col-sm-12">
-                                            <table class="table mb-0 table-striped">
-                                                <tr>
-                                                    <td style="font-weight:bold" width="30%">Customer Name</td>
-                                                    <td id="AprDetailsCustName" width="70%"></td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="font-weight:bold" width="30%">Justification For</td>
-                                                    <td id="AprDetailsApprovalFor" width="70%"></td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="font-weight:bold" width="30%">Justification Reason</td>
-                                                    <td id="AprDetailsJustificationReason" width="70%"></td>
-                                                </tr>
-                                            </table>
-                                            <br />
-                                            <table class="table mb-0 table-striped">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Trader/Mfg</th>
-                                                        <th>Total Expo</th>
-                                                        <th>Overdue</th>
-                                                        <th>Avg Delay Days</th>
-                                                        <th>Approve/Reject</th>
-                                                        <th>Location</th>
-                                                        <th>Class Customer</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td id="tdTraderMfg"></td>
-                                                        <td id="tdTotalExpo"></td>
-                                                        <td id="tdOverdue"></td>
-                                                        <td id="tdAvgDelayDays"></td>
-                                                        <td id="tdDetailsStatus"></td>
-                                                        <td id="tdDetailsLocationCode"></td>
-                                                        <td id="tdClassCustomer"></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <br />
-
-
-                    <div id="dvcustomerOutStanding" style="display:none">
-                        <div class="accordion accordion-flush" id="accordionFlushExample">
-                            <div class="accordion-item">
-
-                                <h6 id="lblOutstandingValue" class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" style="font-weight:bold" width="30%" data-bs-toggle="collapse" data-bs-target="#flush-collapsecustomerOutstanding" aria-expanded="false" aria-controls="flush-collapsecustomerOutstanding">
-                                        Customer OutStanding/Over-Due Report
-                                    </button>
-                                </h6>
-                            </div>
-
-                            <div id="flush-collapsecustomerOutstanding" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
+                            <div id="flush-collapsejustification" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
                                 <div class="accordion-body">
-                                    @*<div id="tblCSOutstandingDuelist" style="display:none">*@
                                     <div class="row g-3">
                                         <div class="col-md-12">
                                             <div class="row mb-3">
@@ -1004,19 +1134,12 @@
                                                     <table class="table mb-0 table-striped">
                                                         <thead>
                                                             <tr>
-                                                                <th scope="col">Document Type</th>
-                                                                <th scope="col">Bill No</th>
-                                                                <th scope="col">Bill Date</th>
-                                                                <th scope="col">Product Name</th>
-                                                                <th scope="col">Payment Terms</th>
-                                                                <th scope="col">Due Date</th>
-                                                                <th scope="col">Invoice Amount</th>
-                                                                <th scope="col">Remain Amount</th>
-                                                                <th scope="col">Total Days</th>
-                                                                <th scope="col">Overdue Days</th>
+                                                                <th scope="col">Target Date</th>
+                                                                <th scope="col">Sales Quote No</th>
+                                                                <th scope="col">Justification</th>
                                                             </tr>
                                                         </thead>
-                                                        <tbody id="tblCSOutstandingDuelist">
+                                                        <tbody id="tblSQJustificationDetails">
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -1025,324 +1148,29 @@
                                     </div>
                                 </div>
                             </div>
-                            @*</div>*@
-                        </div>
-                    </div>
-                    <div id="dvSQJustificationDetails" style="display:none">
-                        <div class="accordion accordion-flush" id="accordionFlushExample">
-                            <br />
-                            <div class="accordion-item">
-
-
-                                <h6 class="mb-0 font-weight-bold accordion-header">
-                                    <button class="accordion-button collapsed" id="lblJustificationTitle" type="button" style="font-weight:bold" width="30%" data-bs-toggle="collapse" data-bs-target="#flush-collapsejustification" aria-expanded="false" aria-controls="flush-collapsejustification">
-                                    </button>
-                                </h6>
-
-                                <div id="flush-collapsejustification" class="accordion-collapse collapse" aria-labelledby="lblOutstandingValue" data-bs-parent="#accordionFlushExample">
-                                    <div class="accordion-body">
-                                        <div class="row g-3">
-                                            <div class="col-md-12">
-                                                <div class="row mb-3">
-                                                    <div class="col-sm-12">
-                                                        <table class="table mb-0 table-striped">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th scope="col">Target Date</th>
-                                                                    <th scope="col">Sales Quote No</th>
-                                                                    <th scope="col">Justification</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="tblSQJustificationDetails">
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- -->
-            <div class='loader' id='divImage' style="display:none">
-                <!-- MODAL CONTENT -->
-                <div class='loader-content'>
-                    <span class="app-loader-spinner" role="status" aria-label="Loading"></span>
-                </div>
+        <!-- -->
+        <div class='loader' id='divImage' style="display:none">
+            <!-- MODAL CONTENT -->
+            <div class='loader-content'>
+                <span class="app-loader-spinner" role="status" aria-label="Loading"></span>
             </div>
-            <div class="modal" id="modalSQDetails" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-
-                            <div id="dvTransDetails" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="row mb-3">
-                                            <div class="col-sm-12">
-                                                <table class="table mb-0 table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col">Invoice No.</th>
-                                                            <th scope="col">Product Name</th>
-                                                            <th scope="col">Qty in MT</th>
-                                                            <th scope="col">Price in Rs/MT</th>
-                                                            <th scope="col">Margin in Rs/MT</th>
-                                                            <th scope="col">Freight in Rs/MT</th>
-                                                            <th scope="col">Invoice Amount in Rs</th>
-                                                            <th scope="col">Invoice Date</th>
-                                                            <th scope="col">Payment Terms</th>
-                                                            <th scope="col">Due Date</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="tblCustTrans">
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="dvLocationDet" style="display:none" class="SQverticalScroll" data-auto-scale-height="panel" data-auto-scale-offset="32">
-                                <div class="row g-3">
-
-                                    <div class="col-md-12">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Select Location</label>
-                                            <div class="col-sm-9">
-                                                <select id="ddlQtyPopupLocCode" class="form-select">
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="row mb-3">
-                                            <div class="col-sm-12">
-                                                <table class="table mb-0 table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th hidden scope="col"></th>
-                                                            <th scope="col">Manufacturer</th>
-                                                            <th scope="col">Lot No</th>
-                                                            <th scope="col">Available Qty</th>
-                                                            <th scope="col">Requested Qty</th>
-                                                            @*<th scope="col">Required Qty</th>*@
-                                                            <th scope="col">Unit Cost</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="tblInvDetails">
-                                                    </tbody>
-                                                </table>
-                                                <input id="txtMrpFromILE" style="display:none" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="dvTransportDet" style="display:none">
-
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="row mb-3">
-                                            <div class="col-sm-12">
-                                                <table class="table mb-0 table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col">Effective Date</th>
-                                                            <th scope="col">UOM</th>
-                                                            <th scope="col">Standard Weight</th>
-                                                            <th scope="col">Rate Weight</th>
-                                                            <th scope="col">Above Weight</th>
-                                                            <th scope="col">Vehicle Type</th>
-                                                            <th scope="col">Transporter Type</th>
-                                                            <th scope="col">Select</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="tbltansportermethod">
-                                                        <tr>
-                                                            <td colspan="8">
-                                                                <center>No Records Found</center>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="dvPurchaseDis" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="row mb-3">
-                                            <div class="col-sm-12">
-                                                <table class="table mb-0 table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col">Vendor Name</th>
-                                                            <th scope="col">Min Qty</th>
-                                                            <th scope="col">Max Qty</th>
-                                                            <th scope="col">Trade Discount</th>
-                                                            <th scope="col">Qty Discount</th>
-                                                            <th scope="col">Consignee Discount</th>
-                                                            <th scope="col">Distance Discount</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="tblPurDis">
-                                                        <tr>
-                                                            <td>Vendor 1</td>
-                                                            <td>0.00</td>
-                                                            <td>101.00</td>
-                                                            <td>0.00</td>
-                                                            <td>0.00</td>
-                                                            <td>450.00</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- -->
-                            <div id="dvAddIncoTerms" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">IncoTerm Code</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtIncoTermCode" class="form-control" maxlength="10" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Inco Term</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtIncoTerm" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-                        <div class="modal-footer">
-                            <label id="lblIncoTermAddMsg" style="display:none"></label>
-                            <label id="lblInvQtyAddMsg" style="display:none"></label>
-                            @*<button type="button" id="btnAddQty" class="btn btn-primary" style="display:none">Add</button>*@
-                            <button type="button" id="btnAddIncoTerm" class="btn btn-primary" style="display:none">Add</button>
-                            <button type="button" id="btnCancelIncoTerm" class="btn btn-danger" style="display:none">Cancel</button>
-                            <button id="btnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
+        </div>
+        <div class="modal" id="modalSQDetails" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                </div>
-            </div>
+                    <div class="modal-body">
 
-            <div class="modal" id="modalJustification" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 id="JustificationTitle" class="modal-title"></h5>
-                            <input id="hfJustificationType" style="display:none" />
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-
-                            <div class="row g-3" id="Justification1" style="display:none">
-                                <div class="col-md-12">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Negative Credit Limit Justification<span style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <textarea id="txtJustification1" class="form-control required"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row g-3" id="targetDate" style="display:none">
-                                <div class="col-md-12">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Target Date:<span style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <input id="txtTargetDate" type="date" class="form-control" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row g-3" id="Justification2" style="display:none">
-                                <div class="col-md-12">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Negative Margin Justification<span style="color:red;margin-left:2px">*</span></label>
-                                        <div class="col-sm-9">
-                                            <textarea id="txtJustification2" class="form-control"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <div id="lblSQJustificationValidation" class="text-danger" style="display:none"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="btnConfirmSaveSQSpinner" class="btn btn-primary" type="button" disabled style="display:none">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Loading...</span>
-                            </button>
-                            &nbsp;
-                            <button id="btnConfirmSaveSQ" type="button" class="btn btn-primary" disabled>Submit</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalCostSheet" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Cost Sheet</h5>
-                            <button type="button" id="btnCloseCostSheet" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-
-                            <div class="row g-3">
-                                <div class="col-md-12">
-                                    <div class="row mb-3">
-                                        <div class="col-sm-12">
-                                            <table>
-                                                <tr>
-                                                    <td><label class="form-label" style="font-weight:bold">Sales Quote No:  </label></td>
-                                                    <td><label class="form-label" id="lblCostSheetSQNo"></label></td>
-                                                    <td>&nbsp;</td>
-                                                    <td><label class="form-label" style="font-weight:bold">Item Line No:  </label></td>
-                                                    <td><label class="form-label" id="lblCostSheetItemLineNo"></label></td>
-                                                    <td>&nbsp;</td>
-                                                    <td><label class="form-label" style="font-weight:bold">Item Name:  </label></td>
-                                                    <td><label class="form-label" id="lblCostSheetItemName"></label></td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div id="dvTransDetails" style="display:none">
                             <div class="row g-3">
                                 <div class="col-md-12">
                                     <div class="row mb-3">
@@ -1350,245 +1178,422 @@
                                             <table class="table mb-0 table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <th hidden></th>
-                                                        <th scope="col">Charge Item</th>
-                                                        <th scope="col">Description</th>
-                                                        <th scope="col">Quantity</th>
-                                                        <th scope="col">Cost Per Unit</th>
-                                                        <th scope="col">Amount</th>
-                                                        <th hidden scope="col"></th>
-                                                        <th hidden scope="col">Post to G/L</th>
-                                                        <th hidden scope="col">Revenue</th>
+                                                        <th scope="col">Invoice No.</th>
+                                                        <th scope="col">Product Name</th>
+                                                        <th scope="col">Qty in MT</th>
+                                                        <th scope="col">Price in Rs/MT</th>
+                                                        <th scope="col">Margin in Rs/MT</th>
+                                                        <th scope="col">Freight in Rs/MT</th>
+                                                        <th scope="col">Invoice Amount in Rs</th>
+                                                        <th scope="col">Invoice Date</th>
+                                                        <th scope="col">Payment Terms</th>
+                                                        <th scope="col">Due Date</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody id="tblCostSheetDetails">
+                                                <tbody id="tblCustTrans">
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div id="dvLocationDet" style="display:none" class="SQverticalScroll" data-auto-scale-height="panel" data-auto-scale-offset="32">
+                            <div class="row g-3">
+
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Select Location</label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlQtyPopupLocCode" class="form-select">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
                             <div class="row g-3">
                                 <div class="col-md-12">
                                     <div class="row mb-3">
-                                        <div class="col-sm-12" align="right">
-                                            <table>
-                                                <tr>
-                                                    <td align="right"><label class="form-label" style="font-weight:bold">Sales Price: </label></td>
-                                                    <td>&nbsp;</td>
-                                                    <td><label class="form-label" id="lblCostSheetSalesPrice"></label></td>
-                                                </tr>
-                                                <tr>
-                                                    <td align="right"><label class="form-label" style="font-weight:bold">Total Unit Price: </label></td>
-                                                    <td>&nbsp;</td>
-                                                    <td><label class="form-label" id="lblCostSheetTotalUnitPrice"></label></td>
-                                                </tr>
-                                                <tr>
-                                                    <td align="right"><label class="form-label" style="font-weight:bold">Margin: </label></td>
-                                                    <td>&nbsp;</td>
-                                                    <td><label class="form-label" id="lblCostSheetMargin"></label></td>
-                                                </tr>
+                                        <div class="col-sm-12">
+                                            <table class="table mb-0 table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th hidden scope="col"></th>
+                                                        <th scope="col">Manufacturer</th>
+                                                        <th scope="col">Lot No</th>
+                                                        <th scope="col">Available Qty</th>
+                                                        <th scope="col">Requested Qty</th>
+                                                        @*<th scope="col">Required Qty</th>*@
+                                                        <th scope="col">Unit Cost</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tblInvDetails">
+                                                </tbody>
+                                            </table>
+                                            <input id="txtMrpFromILE" style="display:none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="dvTransportDet" style="display:none">
+
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <table class="table mb-0 table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Effective Date</th>
+                                                        <th scope="col">UOM</th>
+                                                        <th scope="col">Standard Weight</th>
+                                                        <th scope="col">Rate Weight</th>
+                                                        <th scope="col">Above Weight</th>
+                                                        <th scope="col">Vehicle Type</th>
+                                                        <th scope="col">Transporter Type</th>
+                                                        <th scope="col">Select</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbltansportermethod">
+                                                    <tr>
+                                                        <td colspan="8">
+                                                            <center>No Records Found</center>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
                                             </table>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <label id="lblCostSheetErrMsg" class="form-label" style="color: red; display: none"></label>
-                            <button id="btnSaveCostSheet" type="button" class="btn btn-primary">Save</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalCostSheetMsg" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Cost Sheet</h5>
-                            <button id="btnCloseCostSheetMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <center>
-                                <div id="dvCostSheetMsg" style="display:none">
-                                    <img id="resIcon" />
-                                    <br />
-                                    <label id="resMsg" class="form-label"></label>
-                                </div>
-                                <div id="dvUpdateCostSheetMsg" style="display:none">
-                                    <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
-                                    <br />
-                                    <label class="form-label">Cost Sheet Saved Successfully.</label>
-                                </div>
-                            </center>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalSQMsg" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Sales Quote</h5>
-                            <button id="btnCloseSQMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <center>
-                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
-                                <br />
-                                <label id="lblSQMsg" class="form-label"></label>
-                            </center>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalShortclose" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 id="ShortcloseTitle" class="modal-title"></h5>
-                            <button id="btnCloseModalShortclose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
+
+                        <div id="dvPurchaseDis" style="display:none">
                             <div class="row g-3">
                                 <div class="col-md-12">
                                     <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Shortclose Reason<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-12">
+                                            <table class="table mb-0 table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Vendor Name</th>
+                                                        <th scope="col">Min Qty</th>
+                                                        <th scope="col">Max Qty</th>
+                                                        <th scope="col">Trade Discount</th>
+                                                        <th scope="col">Qty Discount</th>
+                                                        <th scope="col">Consignee Discount</th>
+                                                        <th scope="col">Distance Discount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tblPurDis">
+                                                    <tr>
+                                                        <td>Vendor 1</td>
+                                                        <td>0.00</td>
+                                                        <td>101.00</td>
+                                                        <td>0.00</td>
+                                                        <td>0.00</td>
+                                                        <td>450.00</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- -->
+                        <div id="dvAddIncoTerms" style="display:none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">IncoTerm Code</label>
                                         <div class="col-sm-9">
-                                            <select id="ddlShortcloseReason" class="form-select">
-                                            </select>
+                                            <input type="text" id="txtIncoTermCode" class="form-control" maxlength="10" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Inco Term</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtIncoTerm" class="form-control" />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <br />
-                            <div id="dvShortcloseRemarks" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Shortclose Remarks<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <textarea id="txtShortcloseRemarks" class="form-control"></textarea>
-                                                <input id="hfSCRemarksSetupValue" value="" style="display:none" />
-                                                <input id="hfShortcloseWithRemarks" value="" style="display:none" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
-                        <div class="modal-footer">
-                            <input id="hfShortcloseType" style="display:none" />
-                            <label id="lblShortcloseErrMsg" class="form-label" style="color: red; display: none"></label>
-                            &nbsp;
-                            <button id="btnShortcloseSpinner" class="btn btn-primary" type="button" disabled style="display:none">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Loading...</span>
-                            </button>
-                            &nbsp;
-                            <button id="btnShortclose" type="button" class="btn btn-primary">Shortclose</button>
-                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <label id="lblIncoTermAddMsg" style="display:none"></label>
+                        <label id="lblInvQtyAddMsg" style="display:none"></label>
+                        @*<button type="button" id="btnAddQty" class="btn btn-primary" style="display:none">Add</button>*@
+                        <button type="button" id="btnAddIncoTerm" class="btn btn-primary" style="display:none">Add</button>
+                        <button type="button" id="btnCancelIncoTerm" class="btn btn-danger" style="display:none">Cancel</button>
+                        <button id="btnClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
-            <div class="modal" id="modalSQ" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <input id="hfAddNewDetails" style="display:none" />
-                            <p class="modal-title">Add New Contact Person In Selected Company</p>
-                            <button id="btnCloseModalSQ" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal" id="modalJustification" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="JustificationTitle" class="modal-title"></h5>
+                        <input id="hfJustificationType" style="display:none" />
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="row g-3" id="Justification1" style="display:none">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Negative Credit Limit Justification<span style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <textarea id="txtJustification1" class="form-control required"></textarea>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="modal-body">
-
-                            <div id="dvAddNewCPerson" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtCPersonName" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Mobile No<span class="required" style="color: red; margin-left: 2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtCPersonMobile" class="form-control" />
-                                            </div>
-                                        </div>
+                        <div class="row g-3" id="targetDate" style="display:none">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Target Date:<span style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input id="txtTargetDate" type="date" class="form-control" />
                                     </div>
                                 </div>
-
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            @*<label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>*@
-                                            <label class="col-sm-3 col-form-label">Email<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtCPersonEmail" class="form-control" />
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Department<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                @*<input type="hidden" id="hfDepartmentCode" value="@ViewBag.PCPL_Department_Code" />*@
-                                                <select id="ddlDepartment" class="form-select"></select>
-                                            </div>
-                                        </div>
+                            </div>
+                        </div>
+                        <div class="row g-3" id="Justification2" style="display:none">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Negative Margin Justification<span style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <textarea id="txtJustification2" class="form-control"></textarea>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div id="lblSQJustificationValidation" class="text-danger" style="display:none"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnConfirmSaveSQSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </button>
+                        &nbsp;
+                        <button id="btnConfirmSaveSQ" type="button" class="btn btn-primary" disabled>Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalCostSheet" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cost Sheet</h5>
+                        <button type="button" id="btnCloseCostSheet" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
 
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Job Responsibility<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtJobResponsibility" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Allow Login</label>
-                                            <div class="col-sm-9">
-                                                <input type="checkbox" id="chkAllowLogin" />
-                                            </div>
-                                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table>
+                                            <tr>
+                                                <td><label class="form-label" style="font-weight:bold">Sales Quote No:  </label></td>
+                                                <td><label class="form-label" id="lblCostSheetSQNo"></label></td>
+                                                <td>&nbsp;</td>
+                                                <td><label class="form-label" style="font-weight:bold">Item Line No:  </label></td>
+                                                <td><label class="form-label" id="lblCostSheetItemLineNo"></label></td>
+                                                <td>&nbsp;</td>
+                                                <td><label class="form-label" style="font-weight:bold">Item Name:  </label></td>
+                                                <td><label class="form-label" id="lblCostSheetItemName"></label></td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
-
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Enable OTP On Login</label>
-                                            <div class="col-sm-9">
-                                                <input type="checkbox" id="chkEnableOTPOnLogin" />
-                                            </div>
-                                        </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <table class="table mb-0 table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th hidden></th>
+                                                    <th scope="col">Charge Item</th>
+                                                    <th scope="col">Description</th>
+                                                    <th scope="col">Quantity</th>
+                                                    <th scope="col">Cost Per Unit</th>
+                                                    <th scope="col">Amount</th>
+                                                    <th hidden scope="col"></th>
+                                                    <th hidden scope="col">Post to G/L</th>
+                                                    <th hidden scope="col">Revenue</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblCostSheetDetails">
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Is Primary</label>
-                                            <div class="col-sm-9">
-                                                <input type="checkbox" id="chkIsPrimary" />
-                                            </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12" align="right">
+                                        <table>
+                                            <tr>
+                                                <td align="right"><label class="form-label" style="font-weight:bold">Sales Price: </label></td>
+                                                <td>&nbsp;</td>
+                                                <td><label class="form-label" id="lblCostSheetSalesPrice"></label></td>
+                                            </tr>
+                                            <tr>
+                                                <td align="right"><label class="form-label" style="font-weight:bold">Total Unit Price: </label></td>
+                                                <td>&nbsp;</td>
+                                                <td><label class="form-label" id="lblCostSheetTotalUnitPrice"></label></td>
+                                            </tr>
+                                            <tr>
+                                                <td align="right"><label class="form-label" style="font-weight:bold">Margin: </label></td>
+                                                <td>&nbsp;</td>
+                                                <td><label class="form-label" id="lblCostSheetMargin"></label></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <label id="lblCostSheetErrMsg" class="form-label" style="color: red; display: none"></label>
+                        <button id="btnSaveCostSheet" type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalCostSheetMsg" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cost Sheet</h5>
+                        <button id="btnCloseCostSheetMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <center>
+                            <div id="dvCostSheetMsg" style="display:none">
+                                <img id="resIcon" />
+                                <br />
+                                <label id="resMsg" class="form-label"></label>
+                            </div>
+                            <div id="dvUpdateCostSheetMsg" style="display:none">
+                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                                <br />
+                                <label class="form-label">Cost Sheet Saved Successfully.</label>
+                            </div>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalSQMsg" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Sales Quote</h5>
+                        <button id="btnCloseSQMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <center>
+                            <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                            <br />
+                            <label id="lblSQMsg" class="form-label"></label>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalShortclose" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="ShortcloseTitle" class="modal-title"></h5>
+                        <button id="btnCloseModalShortclose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Shortclose Reason<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                    <div class="col-sm-9">
+                                        <select id="ddlShortcloseReason" class="form-select">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div id="dvShortcloseRemarks" style="display:none">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Shortclose Remarks<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <textarea id="txtShortcloseRemarks" class="form-control"></textarea>
+                                            <input id="hfSCRemarksSetupValue" value="" style="display:none" />
+                                            <input id="hfShortcloseWithRemarks" value="" style="display:none" />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div id="dvAddNewShiptoAddress" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddName" class="form-control" />
-                                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input id="hfShortcloseType" style="display:none" />
+                        <label id="lblShortcloseErrMsg" class="form-label" style="color: red; display: none"></label>
+                        &nbsp;
+                        <button id="btnShortcloseSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </button>
+                        &nbsp;
+                        <button id="btnShortclose" type="button" class="btn btn-primary">Shortclose</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalSQ" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <input id="hfAddNewDetails" style="display:none" />
+                        <p class="modal-title">Add New Contact Person In Selected Company</p>
+                        <button id="btnCloseModalSQ" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div id="dvAddNewCPerson" style="display:none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtCPersonName" class="form-control" />
                                         </div>
                                     </div>
                                     @*<div class="col-md-6">
@@ -1618,81 +1623,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddPostCode" class="form-control" />
-                                            </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Address2</label>
+                                        <div class="col-sm-9">
+                                            <textarea id="txtNewShiptoAddress2" class="form-control" maxlength="50"></textarea>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Country/Region</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddCountryCode" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">State</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddState" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">District</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddDistrict" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">City</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddCity" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <select id="ddlNewShiptoAddArea" class="form-select"></select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewShiptoAddGSTNo" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
                                     </div>
                                 </div>
                             </div>
-                            <div id="dvAddNewJobtoAddress" style="display:none">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <label class="col-sm-3 col-form-label">Name<span class="required" style="color:red;margin-left:2px">*</span></label>
-                                            <div class="col-sm-9">
-                                                <input type="text" id="txtNewJobtoAddName" class="form-control" />
-                                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewShiptoAddPostCode" class="form-control" />
                                         </div>
                                     </div>
                                     @*<div class="col-md-6">
@@ -1789,111 +1734,196 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <label id="lblMsg" style="display:none" class="form-label"></label>
-                            &nbsp;
-                            <button id="btnAddSpinner" class="btn btn-primary" type="button" disabled style="display:none">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Loading...</span>
-                            </button>
-                            &nbsp;
-                            <button id="btnConfirmAdd" class="btn btn-primary" type="button">Add</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalShortcloseMsg" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Shortclose</h5>
-                            <button id="btnCloseShortcloseMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <center>
-                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
-                                <br />
-                                <label id="lblSQShortclose" class="form-label"></label>
-                            </center>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" style="color:red">Error</h5>
-                            <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body" style="color:red" align="center">
-                            <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
-                            <br /><br />
-                            <h6 id="modalErrDetails" style="color:red"></h6>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal" id="modalRejectRemarks" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Reject Remarks</h5>
-                            <button id="btnCloseModalRejectRemarks" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
                             <div class="row g-3">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <div class="row mb-3">
-                                        <label class="col-sm-3 col-form-label">Remarks</label>
+                                        <label class="col-sm-3 col-form-label">Address<span class="required" style="color:red;margin-left:2px">*</span></label>
                                         <div class="col-sm-9">
-                                            <textarea id="txtRejectRemarks" class="form-control"></textarea>
+                                            <textarea id="txtNewJobtoAddress" class="form-control" maxlength="100"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Address2</label>
+                                        <div class="col-sm-9">
+                                            <textarea id="txtNewJobtoAddress2" class="form-control" maxlength="50"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="modal-footer" style="padding-bottom:0px">
                             <div class="row g-3">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <div class="row mb-3">
-                                        <div class="col-sm-12" align="right">
-                                            <label id="lblRemarksMsg" class="col-form-label" style="color:red"></label>
-                                            &nbsp;
-                                            <button id="btnRejectSpinner" class="btn btn-primary" type="button" disabled style="display:none">
-                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                <span class="visually-hidden">Loading...</span>
-                                            </button>
-                                            &nbsp;
-                                            <button id="btnConfirmReject" type="button" class="btn btn-primary">Reject</button>
+                                        <label class="col-sm-3 col-form-label">Post Code<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewJobtoAddPostCode" class="form-control" />
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Country/Region</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewJobtoAddCountryCode" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">State</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewJobtoAddState" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">District</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewJobtoAddDistrict" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">City</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewJobtoAddCity" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">Area<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <select id="ddlNewJobtoAddArea" class="form-select"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-3 col-form-label">GST No<span class="required" style="color:red;margin-left:2px">*</span></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" id="txtNewJobtoAddGSTNo" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <label id="lblMsg" style="display:none" class="form-label"></label>
+                        &nbsp;
+                        <button id="btnAddSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually-hidden">Loading...</span>
+                        </button>
+                        &nbsp;
+                        <button id="btnConfirmAdd" class="btn btn-primary" type="button">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalShortcloseMsg" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Shortclose</h5>
+                        <button id="btnCloseShortcloseMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <center>
+                            <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                            <br />
+                            <label id="lblSQShortclose" class="form-label"></label>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalErrMsg" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" style="color:red">Error</h5>
+                        <button id="btnCloseModalErrMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="color:red" align="center">
+                        <img src="~/Layout/assets/images/appImages/CancelIcon.png" />
+                        <br /><br />
+                        <h6 id="modalErrDetails" style="color:red"></h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="modalRejectRemarks" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reject Remarks</h5>
+                        <button id="btnCloseModalRejectRemarks" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Remarks</label>
+                                    <div class="col-sm-9">
+                                        <textarea id="txtRejectRemarks" class="form-control"></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="modal" id="modalApproveRejectMsg" tabindex="-1" aria-hidden="true" style="display:none">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Sales Quote Approval</h5>
-                            <button id="btnCloseApproveRejectMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <center>
-                                <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
-                                <br />
-                                <label id="lblApproveRejectMsg" class="form-label"></label>
-                            </center>
+                    <div class="modal-footer" style="padding-bottom:0px">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12" align="right">
+                                        <label id="lblRemarksMsg" class="col-form-label" style="color:red"></label>
+                                        &nbsp;
+                                        <button id="btnRejectSpinner" class="btn btn-primary" type="button" disabled style="display:none">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Loading...</span>
+                                        </button>
+                                        &nbsp;
+                                        <button id="btnConfirmReject" type="button" class="btn btn-primary">Reject</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="modal" id="modalApproveRejectMsg" tabindex="-1" aria-hidden="true" style="display:none">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Sales Quote Approval</h5>
+                        <button id="btnCloseApproveRejectMsg" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <center>
+                            <img id="resIcon" src="~/Layout/assets/images/appImages/Icon-1.png" />
+                            <br />
+                            <label id="lblApproveRejectMsg" class="form-label"></label>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 </div>
 
 @Scripts.Render("~/bundles/jquery")
@@ -1918,7 +1948,7 @@
                             pendingLineOverride = sqGetPendingLineSaveOverride(prodNo);
                         }
                     } catch (e) { }
-            debugger
+
                     var rowMargin = pendingLineOverride
                         ? parseAmount(pendingLineOverride.PCPL_Margin)
                         : parseAmount($(this).find("TD").eq(marginColIdx).text());
@@ -1959,6 +1989,20 @@
                 }
             );
         });
+        // Initial load
+        setTabOrder($("#chkIsLiquidProd").is(":checked"));
+
+        // On checkbox change
+        $("#chkIsLiquidProd").change(function () {
+            setTabOrder($(this).is(":checked"));
+        });
+        $("#chkDropShipment").change(function () {
+            setTabOrder($("#chkIsLiquidProd").is(":checked"));
+        });
+        $("#chkIsCommission").change(function () {
+            setTabOrder($("#chkIsLiquidProd").is(":checked"));
+        });
+
 
         $('#btnShowProdTrans').click(function () {
             $('#modalSQDetails').css('display', 'block');
@@ -2144,7 +2188,7 @@
             $('#btnClose').css('display', 'none');
 
         });
-        debugger;
+
         $('#btnSave').click(function () {
             var errMsg = CheckFieldValues();
             if (errMsg != "") {
@@ -2233,7 +2277,7 @@
             }
 
         });
-        debugger;
+
 
         $('#txtJustification1, #txtTargetDate, #txtJustification2').on('input change', function () {
             updateSQJustificationSubmitState(true);
@@ -2249,7 +2293,7 @@
         });
 
     });
-    debugger;
+
     function parseAmount(value) {
         if (value === null || value === undefined) return 0;
         var s = value.toString().replace(/,/g, '').trim();
@@ -2551,6 +2595,86 @@
                 alert(err && err.responseText ? err.responseText : "Failed to save Sales Quote. Check console for details.");
             }
         });
+    }
+
+
+    function setTabOrder(isLiquid) {
+
+        let tabIndex = 11;
+
+        
+        if (isLiquid) {
+            $("#dvLiquidProdFields").show();
+
+            $("#txtNetWeight")
+                .prop("disabled", false)
+                .attr("tabindex", tabIndex++);
+
+            $("#txtConcentratePercent")
+                .prop("disabled", false)
+                .attr("tabindex", tabIndex++);
+
+            $("#txtLiquidRate")
+                .prop("disabled", false)
+                .attr("tabindex", tabIndex++);
+        }
+        else {
+            $("#dvLiquidProdFields").hide();
+
+            $("#txtNetWeight, #txtConcentratePercent, #txtLiquidRate")
+                .prop("disabled", true)
+                .attr("tabindex", -1);
+        }
+
+       
+        $("#ddlPackingStyle").attr("tabindex", tabIndex++);
+        $("#txtProdQty").attr("tabindex", tabIndex++);
+
+        $("#ddlIncoTerms").attr("tabindex", tabIndex++);
+        $("#txtTransportCost").attr("tabindex", tabIndex++);
+        $("#txtDeliveryDate").attr("tabindex", tabIndex++);
+        $("#txtSalesDiscount").attr("tabindex", tabIndex++);
+        $("#txtSalesPrice").attr("tabindex", tabIndex++);
+        $("#chkDropShipment").attr("tabindex", tabIndex++);
+
+      
+        if ($("#chkDropShipment").is(":checked")) {
+
+            $("#dvVendors").show();
+
+            $("#ddlItemVendors")
+                .prop("disabled", false)
+                .attr("tabindex", tabIndex++);
+
+        } else {
+
+            $("#dvVendors").hide();
+
+            $("#ddlItemVendors")
+                .prop("disabled", true)
+                .attr("tabindex", -1);
+        }
+      
+        $("#chkIsCommission").attr("tabindex", tabIndex++);
+
+        if ($("#chkIsCommission").is(":checked")) {
+
+            $("#ddlCommissionPerUnitPercent, #txtCommissionPercent, #txtCommissionAmt")
+                .prop("disabled", false);
+
+            $("#ddlCommissionPerUnitPercent").attr("tabindex", tabIndex++);
+            $("#txtCommissionPercent").attr("tabindex", tabIndex++);
+            $("#txtCommissionAmt").attr("tabindex", tabIndex++);
+            $("#ddlCommissionPayable").attr("tabindex", tabIndex++);
+
+        } else {
+
+            $("#ddlCommissionPerUnitPercent, #txtCommissionPercent, #txtCommissionAmt, #ddlCommissionPayable")
+                .prop("disabled", true)
+                .attr("tabindex", -1);
+        }
+
+        $("#btnSaveProd").attr("tabindex", tabIndex++);
     }
 
 

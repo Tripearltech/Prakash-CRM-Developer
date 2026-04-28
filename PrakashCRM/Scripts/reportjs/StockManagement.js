@@ -158,7 +158,7 @@ function BranchWiseProducts(branchName) {
                 });
                 $("#ftableBody").append(rowData1);
             }
-
+ 
             $("#tbleStockProductManagement").off('click.branch-toggle').on('click.branch-toggle', '.branch-toggle', function (e) {
                 e.preventDefault();
 
@@ -174,14 +174,12 @@ function BranchWiseProducts(branchName) {
 
                 if ($subRows.filter(':visible').length > 0) {
 
-
                     $branchRow.find('td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7)')
                         .css('font-weight', 'normal');
 
                     $subRows.slideUp(300);
                     $icon.removeClass('bx-minus-circle').addClass('bx-plus-circle');
                 } else {
-
 
                     $branchRow.find('td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7)')
                         .css('font-weight', 'bold');
